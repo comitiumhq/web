@@ -1,0 +1,39 @@
+{
+  "name": "@comitium/crypto",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./context": "./src/context.ts",
+    "./custom-field-hash": "./src/custom-field-hash.ts",
+    "./envelope-key": "./src/envelope-key.ts",
+    "./key-bundle": "./src/key-bundle.ts",
+    "./personal-key": "./src/personal-key.ts",
+    "./schemas": "./src/schemas.ts",
+    "./tag-hash": "./src/tag-hash.ts",
+    "./vault-key": "./src/vault-key.ts",
+    "./version": "./src/version.ts"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@noble/curves": "2.0.1",
+    "@noble/hashes": "2.0.1",
+    "@noble/post-quantum": "0.6.1",
+    "@scure/base": "2.0.0",
+    "comlink": "4.4.2",
+    "idb-keyval": "6.2.2",
+    "viem": "2.47.10",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.30",
+    "typescript": "5.8.3",
+    "vitest": "4.0.18"
+  }
+}

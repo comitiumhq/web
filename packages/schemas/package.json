@@ -1,0 +1,58 @@
+{
+  "name": "@comitium/schemas",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    "./api-errors": "./src/api-errors.ts",
+    "./api-query-policy": "./src/api-query-policy.ts",
+    "./applications": "./src/applications.ts",
+    "./archive-reason-type": "./src/archive-reason-type.ts",
+    "./auth": "./src/auth.ts",
+    "./candidates": "./src/candidates.ts",
+    "./cities": "./src/cities.ts",
+    "./common": "./src/common.ts",
+    "./forms": "./src/forms/field-types/index.ts",
+    "./forms/application-email": "./src/forms/application-email.ts",
+    "./forms/application-required-fields": "./src/forms/application-required-fields.ts",
+    "./forms/answer-values": "./src/forms/answer-values.ts",
+    "./forms/field-types": "./src/forms/field-types/index.ts",
+    "./forms/field-types/*": "./src/forms/field-types/*.ts",
+    "./forms/form-definitions": "./src/forms/form-definitions.ts",
+    "./forms/form-submission": "./src/forms/form-submission.ts",
+    "./forms/submission-field-values": "./src/forms/submission-field-values.ts",
+    "./forms/text-value": "./src/forms/text-value.ts",
+    "./forms/visibility": "./src/forms/visibility.ts",
+    "./error": "./src/error.ts",
+    "./guards": "./src/guards.ts",
+    "./interview-status": "./src/interview-status.ts",
+    "./ipfs": "./src/ipfs.ts",
+    "./job-enums": "./src/job-enums.ts",
+    "./jobs": "./src/jobs.ts",
+    "./onchain": "./src/onchain.ts",
+    "./onchain-operations": "./src/onchain-operations.ts",
+    "./patterns": "./src/patterns.ts",
+    "./product-errors": "./src/product-errors.ts",
+    "./public": "./src/public.ts",
+    "./public-jobs": "./src/public-jobs.ts",
+    "./transaction-errors": "./src/transaction-errors.ts",
+    "./vault": "./src/vault.ts"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@comitium/crypto": "workspace:*",
+    "@tiptap/core": "3.22.3",
+    "viem": "2.47.10",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@scure/base": "2.0.0",
+    "typescript": "5.8.3",
+    "vitest": "4.0.18"
+  }
+}

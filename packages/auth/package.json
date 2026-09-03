@@ -1,0 +1,67 @@
+{
+  "name": "@comitium/auth",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    "./account-api": "./src/account-api.ts",
+    "./account-settings": "./src/account-settings.tsx",
+    "./account-readiness-provider": "./src/account-readiness-provider.tsx",
+    "./account-stage": "./src/account-stage.ts",
+    "./encryption-setup-gate": "./src/encryption-setup-gate.tsx",
+    "./login-surface": "./src/login-surface.tsx",
+    "./linked-sign-in-methods": "./src/linked-sign-in-methods.ts",
+    "./navigation": "./src/navigation.ts",
+    "./privy-config": "./src/privy-config.ts",
+    "./privy-app-provider": "./src/privy-app-provider.tsx",
+    "./privy-account": "./src/privy-account.ts",
+    "./require-wallet-account": "./src/require-wallet-account.ts",
+    "./send-calls": "./src/send-calls.ts",
+    "./session-recovery": "./src/session-recovery.tsx",
+    "./storage": "./src/storage.ts",
+    "./use-account-readiness": "./src/use-account-readiness.ts",
+    "./use-encryption-setup": "./src/use-encryption-setup.ts",
+    "./use-crypto-unlock": "./src/use-crypto-unlock.ts",
+    "./use-crypto-reset-listener": "./src/use-crypto-reset-listener.ts",
+    "./use-is-authenticated": "./src/use-is-authenticated.ts",
+    "./use-is-crypto-active": "./src/use-is-crypto-active.ts",
+    "./use-session": "./src/use-session.ts",
+    "./use-wallet": "./src/use-wallet.ts",
+    "./user-wallet-operation": "./src/user-wallet-operation.ts",
+    "./wallet": "./src/wallet.ts",
+    "./wallet-transport": "./src/wallet-transport.ts"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@comitium/chain": "workspace:*",
+    "@comitium/crypto": "workspace:*",
+    "@comitium/schemas": "workspace:*",
+    "@comitium/ui": "workspace:*",
+    "@phosphor-icons/react": "2.1.10",
+    "@scure/base": "2.0.0",
+    "@privy-io/react-auth": "3.35.1",
+    "@tanstack/react-query": "5.90.21",
+    "next-themes": "0.4.6",
+    "viem": "2.47.10",
+    "zod": "4.4.3"
+  },
+  "peerDependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2",
+    "@vitejs/plugin-react": "5.1.2",
+    "@vitest/browser-playwright": "4.0.18",
+    "playwright": "1.57.0",
+    "typescript": "5.8.3",
+    "vitest": "4.0.18",
+    "vitest-browser-react": "2.0.5"
+  }
+}

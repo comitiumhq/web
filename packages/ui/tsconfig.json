@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "paths": {
+      "@comitium/ui": ["./src/components"],
+      "@comitium/ui/cn": ["./src/lib/cn.ts"],
+      "@comitium/ui/get-name-initials": ["./src/lib/get-name-initials.ts"],
+      "@comitium/ui/timezones": ["./src/lib/timezones.ts"],
+      "@comitium/ui/use-infinite-scroll-sentinel": ["./src/hooks/use-infinite-scroll-sentinel.ts"],
+      "@comitium/ui/*": ["./src/components/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

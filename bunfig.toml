@@ -1,0 +1,3 @@
+[install]
+# Disable lifecycle scripts (postinstall) — primary npm supply chain attack vector
+ignore-scripts = true

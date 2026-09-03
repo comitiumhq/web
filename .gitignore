@@ -1,0 +1,49 @@
+# dependencies
+node_modules/
+/.pnp
+.pnp.*
+
+# testing
+coverage/
+
+# vite / tanstack start
+.output/
+dist/
+.wrangler/
+
+# tanstack router cache
+.tanstack
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+!.env.example
+
+# typescript
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+scripts
+
+# design-sync (build tooling + regenerated artifacts; durable inputs stay tracked)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+.design-sync/assets/
+.design-sync

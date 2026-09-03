@@ -1,0 +1,52 @@
+@import "@comitium/ui/styles.css";
+@import "./styles/_variables.css";
+@import "./styles/_keyframe-animations.css";
+@import "./styles/_editor-content.css";
+
+@source "../src";
+@source "../../../node_modules/@ilamy/calendar/dist";
+
+.interviewer-calendar [data-testid="resource-columns-header"] > .min-w-20,
+.interviewer-calendar
+  [data-testid="vertical-grid-body"]
+  > [data-testid^="vertical-col-day-col-"][data-testid*="-resource-"] {
+  min-width: 10rem;
+}
+
+.interviewer-calendar [data-testid="vertical-grid-all-day"] {
+  display: none;
+}
+
+.interviewer-calendar [data-testid="calendar-body"] {
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.interviewer-calendar [data-testid^="vertical-events-day-col-"] > .absolute:has(.calendar-draft-event) {
+  left: 0 !important;
+  top: var(--calendar-draft-top) !important;
+  width: 100% !important;
+  height: var(--calendar-draft-height) !important;
+  z-index: 20 !important;
+  transition: top 160ms ease-out, height 160ms ease-out;
+}
+
+.interviewer-calendar[data-draft-visible="false"]
+  [data-testid^="vertical-events-day-col-"]
+  > .absolute:has(.calendar-draft-event) {
+  display: none;
+}
+
+.interviewer-calendar .calendar-draft-event {
+  cursor: grab;
+}
+
+.interviewer-calendar[data-draft-dragging="true"]
+  [data-testid^="vertical-events-day-col-"]
+  > .absolute:has(.calendar-draft-event) {
+  transition: none;
+}
+
+.interviewer-calendar[data-draft-dragging="true"] .calendar-draft-event {
+  cursor: grabbing;
+}

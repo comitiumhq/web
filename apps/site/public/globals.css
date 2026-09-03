@@ -1,0 +1,27 @@
+@import "@comitium/ui/styles.css";
+@import "./styles/_variables.css";
+@import "./styles/_keyframe-animations.css";
+@import "./styles/_editor-content.css";
+
+@source "../src";
+@source "../node_modules/@ilamy/calendar/dist";
+
+.public-site-shell {
+  color-scheme: light;
+}
+
+.landing-glass {
+  border: 1px solid rgb(255 255 255 / 65%);
+  background: rgb(255 255 255 / 35%);
+  box-shadow: 0 4px 24px rgb(0 0 0 / 10%);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
+
+.interviewer-calendar .min-w-20 {
+  min-width: 10rem;
+}
+
+.interviewer-calendar [data-testid="vertical-grid-all-day"] {
+  display: none;
+}

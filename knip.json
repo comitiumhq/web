@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["packages/chain/wagmi.config.ts", "packages/crypto/src/worker/crypto.worker.ts"],
+  "project": [
+    "apps/{site,my,app}/src/**/*.{ts,tsx,css}",
+    "packages/{auth,ui,crypto,schemas}/src/**/*.{ts,tsx,css}",
+    "packages/chain/src/**/*.ts",
+    "tooling/**/*.ts"
+  ],
+  "ignoreDependencies": [
+    "@fontsource-variable/geist",
+    "shadcn",
+    "tailwind-scrollbar-hide",
+    "tailwindcss",
+    "tw-animate-css"
+  ],
+  "ignoreIssues": {
+    "apps/{site,my,app}/src/components/tiptap-ui-primitive/**": ["exports", "types", "duplicates"],
+    "apps/{site,my,app}/src/components/tiptap-ui/**": ["exports", "types", "duplicates"],
+    "apps/app/src/lib/api/form-field-connectors.ts": ["exports"],
+    "apps/app/src/lib/schemas/form-field-connectors.ts": ["exports", "types"],
+    "apps/app/src/lib/tiptap/utils.ts": ["exports", "types", "duplicates"],
+    "packages/chain/src/generated/**": ["exports", "types", "duplicates"],
+    "packages/chain/wagmi.config.ts": ["files"]
+  }
+}

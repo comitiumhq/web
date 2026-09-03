@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible problem in a Comitium web application
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a problem.
+  - type: dropdown
+    id: application
+    attributes:
+      label: Application
+      options:
+        - Public site
+        - Hiring team app
+        - Candidate app
+        - Shared package
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can we reproduce it?
+      description: Include the smallest reliable sequence of steps.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and operating system
+      placeholder: Firefox 142 on macOS 26
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add screenshots or other non-sensitive details if they help explain the problem.

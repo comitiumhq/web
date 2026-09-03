@@ -1,0 +1,15 @@
+@import "@comitium/ui/styles.css";
+@import "./styles/_variables.css";
+@import "./styles/_keyframe-animations.css";
+@import "./styles/_editor-content.css";
+
+@source "../src";
+@source "../node_modules/@ilamy/calendar/dist";
+
+.interviewer-calendar .min-w-20 {
+  min-width: 10rem;
+}
+
+.interviewer-calendar [data-testid="vertical-grid-all-day"] {
+  display: none;
+}

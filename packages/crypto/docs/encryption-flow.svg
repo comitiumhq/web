@@ -1,0 +1,228 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1080" viewBox="0 40 2000 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Comitium encryption and key flow</title>
+  <desc id="desc">A top-down map of Comitium personal keys, organization vault access, and payload encryption. Wallet and device wrappers protect the personal key bundle. Personal public keys protect organization vault access. Organization vault public keys protect fresh payload data keys. Only public keys, encrypted key bundles, vault access wraps, and encrypted envelopes cross from the browser into Comitium storage.</desc>
+
+  <defs>
+    <marker id="data-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 10 5 0 10z" fill="#514946"/>
+    </marker>
+    <marker id="key-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 10 5 0 10z" fill="#9a604d"/>
+    </marker>
+    <marker id="aad-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 10 5 0 10z" fill="#9b8c86"/>
+    </marker>
+  </defs>
+
+  <style>
+    text { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .canvas { fill: #ffffff; }
+    .input { fill: #ffffff; stroke: #beb7b3; }
+    .secret { fill: #fcf8f6; stroke: #9a604d; }
+    .operation { fill: #f7f0ed; stroke: #ae887b; }
+    .artifact { fill: #ffffff; stroke: #c2bab6; }
+    .bundle { fill: #f1e5e0; stroke: #9a604d; }
+    .local-store { fill: #f8f3f0; stroke: #a88b80; }
+    .server-store { fill: #f8f3f0; stroke: #9f7769; }
+    .storage-rule { stroke: #ded2cd; }
+    .text { fill: #2c2928; }
+    .muted { fill: #706864; }
+    .data-flow { fill: none; stroke: #514946; marker-end: url(#data-arrow); }
+    .key-flow { fill: none; stroke: #9a604d; marker-end: url(#key-arrow); }
+    .aad-flow { fill: none; stroke: #9b8c86; stroke-dasharray: 5 5; marker-end: url(#aad-arrow); }
+    .boundary { stroke: #b7aaa5; }
+  </style>
+
+  <rect class="canvas" width="2000" height="1120"/>
+
+  <text class="muted" x="40" y="66" font-size="12" font-weight="700" letter-spacing="1.2">PERSONAL KEY PROTECTION</text>
+  <text class="muted" x="980" y="66" font-size="12" font-weight="700" letter-spacing="1.2">ORGANIZATION VAULT ACCESS</text>
+  <text class="muted" x="1280" y="66" font-size="12" font-weight="700" letter-spacing="1.2">PAYLOAD ENCRYPTION</text>
+
+  <!-- Personal-key inputs -->
+  <rect class="input" x="40" y="88" width="340" height="64" rx="3" stroke-width="1.5"/>
+  <text class="text" x="210" y="116" font-size="17" font-weight="600" text-anchor="middle">Wallet signature + server share</text>
+  <text class="muted" x="210" y="138" font-size="12.5" text-anchor="middle">bootstrap / fallback method</text>
+
+  <rect class="secret" x="400" y="88" width="160" height="64" rx="3" stroke-width="1.7"/>
+  <text class="text" x="480" y="116" font-size="17" font-weight="600" text-anchor="middle">Device key</text>
+  <text class="muted" x="480" y="138" font-size="12.5" text-anchor="middle">returning browser</text>
+
+  <rect class="secret" x="630" y="88" width="220" height="64" rx="3" stroke-width="1.7"/>
+  <text class="text" x="740" y="126" font-size="17" font-weight="600" text-anchor="middle">Personal key pair</text>
+
+  <!-- Organization and payload inputs -->
+  <rect class="secret" x="980" y="88" width="250" height="64" rx="3" stroke-width="1.7"/>
+  <text class="text" x="1105" y="126" font-size="17" font-weight="600" text-anchor="middle">Organization vault key pair</text>
+
+  <rect class="input" x="1280" y="88" width="200" height="64" rx="3" stroke-width="1.5"/>
+  <text class="text" x="1380" y="126" font-size="17" font-weight="600" text-anchor="middle">Protected content</text>
+
+  <rect class="secret" x="1510" y="88" width="170" height="64" rx="3" stroke-width="1.7"/>
+  <text class="text" x="1595" y="126" font-size="17" font-weight="600" text-anchor="middle">Fresh DEK</text>
+
+  <rect class="input" x="1790" y="88" width="180" height="64" rx="3" stroke-width="1.5"/>
+  <text class="text" x="1880" y="116" font-size="17" font-weight="600" text-anchor="middle">Purpose &amp;</text>
+  <text class="text" x="1880" y="137" font-size="17" font-weight="600" text-anchor="middle">context</text>
+
+  <!-- Personal-key material -->
+  <rect class="operation" x="80" y="205" width="220" height="68" rx="9" stroke-width="1.5"/>
+  <text class="text" x="190" y="233" font-size="17" font-weight="600" text-anchor="middle">Derive unlock key</text>
+  <text class="muted" x="190" y="257" font-size="13" text-anchor="middle">HKDF-SHA-256</text>
+
+  <rect class="secret" x="390" y="205" width="190" height="68" rx="3" stroke-width="1.7"/>
+  <text class="text" x="485" y="232" font-size="16.5" font-weight="600" text-anchor="middle">Personal wrapping</text>
+  <text class="text" x="485" y="253" font-size="16.5" font-weight="600" text-anchor="middle">key</text>
+
+  <rect class="artifact" x="600" y="205" width="170" height="62" rx="3" stroke-width="1.5"/>
+  <text class="text" x="685" y="242" font-size="16.5" font-weight="600" text-anchor="middle">Personal public key</text>
+
+  <rect class="secret" x="790" y="205" width="170" height="62" rx="3" stroke-width="1.7"/>
+  <text class="text" x="875" y="242" font-size="16.5" font-weight="600" text-anchor="middle">Personal private key</text>
+
+  <rect class="operation" x="80" y="330" width="220" height="68" rx="9" stroke-width="1.5"/>
+  <text class="text" x="190" y="358" font-size="17" font-weight="600" text-anchor="middle">Protect wrapping key</text>
+  <text class="muted" x="190" y="382" font-size="13" text-anchor="middle">AES-256-GCM</text>
+
+  <rect class="operation" x="350" y="330" width="200" height="68" rx="9" stroke-width="1.5"/>
+  <text class="text" x="450" y="358" font-size="17" font-weight="600" text-anchor="middle">Device wrapper</text>
+  <text class="muted" x="450" y="382" font-size="13" text-anchor="middle">AES-256-GCM</text>
+
+  <rect class="operation" x="755" y="330" width="220" height="68" rx="9" stroke-width="1.5"/>
+  <text class="text" x="865" y="358" font-size="17" font-weight="600" text-anchor="middle">Wrap personal key</text>
+  <text class="muted" x="865" y="382" font-size="13" text-anchor="middle">AES-256-GCM</text>
+
+  <rect class="artifact" x="80" y="460" width="220" height="62" rx="3" stroke-width="1.5"/>
+  <text class="text" x="190" y="497" font-size="16.5" font-weight="600" text-anchor="middle">Root wrapper</text>
+
+  <rect class="artifact" x="755" y="460" width="220" height="62" rx="3" stroke-width="1.5"/>
+  <text class="text" x="865" y="497" font-size="16.5" font-weight="600" text-anchor="middle">Wrapped personal key</text>
+
+  <text class="muted" x="350" y="508" font-size="11.5" font-weight="700" letter-spacing="1">LOCAL ONLY</text>
+  <rect class="local-store" x="350" y="520" width="250" height="64" rx="9" stroke-width="1.5"/>
+  <text class="text" x="475" y="558" font-size="16.5" font-weight="600" text-anchor="middle">Remembered-device record</text>
+
+  <rect class="bundle" x="60" y="650" width="900" height="72" rx="9" stroke-width="1.7"/>
+  <text class="text" x="510" y="680" font-size="18" font-weight="600" text-anchor="middle">Personal key bundle</text>
+  <text class="muted" x="510" y="705" font-size="13" text-anchor="middle">public key · wrapped private key · root wrapper</text>
+
+  <!-- Organization vault material -->
+  <rect class="secret" x="980" y="205" width="180" height="62" rx="3" stroke-width="1.7"/>
+  <text class="text" x="1070" y="242" font-size="16.5" font-weight="600" text-anchor="middle">Vault private key</text>
+
+  <rect class="artifact" x="1160" y="205" width="160" height="62" rx="3" stroke-width="1.5"/>
+  <text class="text" x="1240" y="242" font-size="16" font-weight="600" text-anchor="middle">Vault public key</text>
+
+  <rect class="operation" x="980" y="330" width="220" height="68" rx="9" stroke-width="1.5"/>
+  <text class="text" x="1090" y="358" font-size="17" font-weight="600" text-anchor="middle">Wrap vault key</text>
+  <text class="muted" x="1090" y="382" font-size="13" text-anchor="middle">X-Wing · HKDF · AES-GCM</text>
+
+  <rect class="artifact" x="980" y="460" width="220" height="62" rx="3" stroke-width="1.5"/>
+  <text class="text" x="1090" y="486" font-size="16.5" font-weight="600" text-anchor="middle">Member vault access</text>
+  <text class="muted" x="1090" y="508" font-size="13" text-anchor="middle">wrapped vault key</text>
+
+  <!-- Payload encryption -->
+  <rect class="operation" x="1330" y="205" width="200" height="68" rx="9" stroke-width="1.5"/>
+  <text class="text" x="1430" y="233" font-size="17" font-weight="600" text-anchor="middle">Prepare payload</text>
+  <text class="muted" x="1430" y="257" font-size="13" text-anchor="middle">JSON · optional gzip</text>
+
+  <rect class="operation" x="1790" y="205" width="180" height="68" rx="9" stroke-width="1.5"/>
+  <text class="text" x="1880" y="233" font-size="17" font-weight="600" text-anchor="middle">Bind context</text>
+  <text class="muted" x="1880" y="257" font-size="13" text-anchor="middle">AAD</text>
+
+  <rect class="operation" x="1330" y="330" width="220" height="78" rx="9" stroke-width="1.6"/>
+  <text class="text" x="1440" y="361" font-size="17" font-weight="600" text-anchor="middle">Encrypt payload</text>
+  <text class="muted" x="1440" y="386" font-size="13" text-anchor="middle">AES-256-GCM</text>
+
+  <rect class="operation" x="1640" y="300" width="220" height="68" rx="9" stroke-width="1.6"/>
+  <text class="text" x="1750" y="328" font-size="17" font-weight="600" text-anchor="middle">X-Wing</text>
+  <text class="muted" x="1750" y="352" font-size="13" text-anchor="middle">shared secret + KEM ciphertext</text>
+
+  <rect class="operation" x="1640" y="410" width="220" height="68" rx="9" stroke-width="1.6"/>
+  <text class="text" x="1750" y="438" font-size="17" font-weight="600" text-anchor="middle">Derive wrapping key</text>
+  <text class="muted" x="1750" y="462" font-size="13" text-anchor="middle">HKDF-SHA-256</text>
+
+  <rect class="operation" x="1640" y="520" width="220" height="68" rx="9" stroke-width="1.6"/>
+  <text class="text" x="1750" y="548" font-size="17" font-weight="600" text-anchor="middle">Wrap DEK</text>
+  <text class="muted" x="1750" y="572" font-size="13" text-anchor="middle">AES-256-GCM</text>
+
+  <rect class="artifact" x="1330" y="650" width="220" height="62" rx="3" stroke-width="1.5"/>
+  <text class="text" x="1440" y="676" font-size="16.5" font-weight="600" text-anchor="middle">Encrypted payload</text>
+  <text class="muted" x="1440" y="698" font-size="13" text-anchor="middle">ciphertext + IV</text>
+
+  <rect class="artifact" x="1640" y="650" width="220" height="62" rx="3" stroke-width="1.5"/>
+  <text class="text" x="1750" y="676" font-size="16.5" font-weight="600" text-anchor="middle">Wrapped DEK</text>
+  <text class="muted" x="1750" y="698" font-size="13" text-anchor="middle">recipient key material</text>
+
+  <rect class="bundle" x="1330" y="780" width="630" height="72" rx="9" stroke-width="1.7"/>
+  <text class="text" x="1645" y="810" font-size="18" font-weight="600" text-anchor="middle">Encrypted envelope</text>
+  <text class="muted" x="1645" y="835" font-size="13" text-anchor="middle">ciphertext · wrapped DEK · version · purpose</text>
+
+  <!-- Personal-key flows -->
+  <path class="data-flow" d="M210 152V180H190V205" stroke-width="1.7"/>
+  <path class="key-flow" d="M190 273V330" stroke-width="1.8"/>
+  <path class="key-flow" d="M485 273C430 286 300 292 260 330" stroke-width="1.8"/>
+  <path class="key-flow" d="M480 152V180H340V300H450V330" stroke-width="1.8"/>
+  <path class="key-flow" d="M485 273V300H450V330" stroke-width="1.8"/>
+  <path class="key-flow" d="M485 273V300H720V364H755" stroke-width="1.8"/>
+  <path class="key-flow" d="M740 152C720 174 700 180 685 205" stroke-width="1.8"/>
+  <path class="key-flow" d="M740 152C770 174 830 180 875 205" stroke-width="1.8"/>
+  <path class="key-flow" d="M875 267V330" stroke-width="1.8"/>
+  <path class="key-flow" d="M190 398V460" stroke-width="1.8"/>
+  <path class="key-flow" d="M450 398V520" stroke-width="1.8"/>
+  <path class="key-flow" d="M865 398V460" stroke-width="1.8"/>
+  <path class="key-flow" d="M190 522V620H260V650" stroke-width="1.8"/>
+  <path class="key-flow" d="M685 267V620H510V650" stroke-width="1.8"/>
+  <path class="key-flow" d="M865 522V620H760V650" stroke-width="1.8"/>
+
+  <!-- Organization vault flows -->
+  <path class="key-flow" d="M1105 152C1080 174 1070 180 1070 205" stroke-width="1.8"/>
+  <path class="key-flow" d="M1105 152C1140 174 1205 180 1240 205" stroke-width="1.8"/>
+  <path class="key-flow" d="M1070 267V330" stroke-width="1.8"/>
+  <path class="key-flow" d="M685 267V290H1030V330" stroke-width="1.8"/>
+  <path class="key-flow" d="M1090 398V460" stroke-width="1.8"/>
+
+  <!-- Payload flows -->
+  <path class="data-flow" d="M1380 152V180H1430V205" stroke-width="1.7"/>
+  <path class="data-flow" d="M1430 273V300H1440V330" stroke-width="1.7"/>
+  <path class="data-flow" d="M1440 408V650" stroke-width="1.7"/>
+
+  <path class="key-flow" d="M1595 152V285H1580V369H1550" stroke-width="1.8"/>
+  <path class="key-flow" d="M1595 152V554H1640" stroke-width="1.8"/>
+  <path class="key-flow" d="M1240 267V285H1750V300" stroke-width="1.8"/>
+  <path class="key-flow" d="M1750 368V410" stroke-width="1.8"/>
+  <path class="key-flow" d="M1750 478V520" stroke-width="1.8"/>
+  <path class="key-flow" d="M1750 588V650" stroke-width="1.8"/>
+  <path class="key-flow" d="M1860 334H1905V681H1860" stroke-width="1.6"/>
+
+  <path class="aad-flow" d="M1880 152V205" stroke-width="1.6"/>
+  <path class="aad-flow" d="M1790 239C1660 235 1590 286 1550 369" stroke-width="1.6"/>
+  <path class="aad-flow" d="M1880 273C1900 320 1875 402 1860 444" stroke-width="1.6"/>
+  <path class="aad-flow" d="M1880 273C1950 340 1940 525 1860 554" stroke-width="1.6"/>
+
+  <path class="data-flow" d="M1440 712V750H1480V780" stroke-width="1.7"/>
+  <path class="key-flow" d="M1750 712V750H1790V780" stroke-width="1.8"/>
+
+  <!-- Client-service boundary -->
+  <text class="muted" x="40" y="888" font-size="12" font-weight="700" letter-spacing="1">CLIENT</text>
+  <line class="boundary" x1="40" y1="902" x2="1960" y2="902" stroke-width="1.5" stroke-dasharray="6 7"/>
+  <text class="muted" x="40" y="930" font-size="12" font-weight="700" letter-spacing="1">SERVICE</text>
+
+  <!-- Stored artifacts -->
+  <path class="data-flow" d="M510 722V940H665V970" stroke-width="1.7"/>
+  <path class="data-flow" d="M1090 522V930H960V970" stroke-width="1.7"/>
+  <path class="data-flow" d="M1240 267V920H1040V970" stroke-width="1.7"/>
+  <path class="data-flow" d="M1645 852V940H1335V970" stroke-width="1.7"/>
+
+  <rect class="server-store" x="500" y="970" width="1000" height="120" rx="12" stroke-width="1.7"/>
+  <text class="text" x="1000" y="1005" font-size="19" font-weight="600" text-anchor="middle">Comitium storage</text>
+  <line class="storage-rule" x1="530" y1="1022" x2="1470" y2="1022" stroke-width="1"/>
+  <line class="storage-rule" x1="830" y1="1022" x2="830" y2="1072" stroke-width="1"/>
+  <line class="storage-rule" x1="1170" y1="1022" x2="1170" y2="1072" stroke-width="1"/>
+  <text class="text" x="665" y="1050" font-size="15.5" font-weight="600" text-anchor="middle">Personal identity</text>
+  <text class="muted" x="665" y="1072" font-size="12.5" text-anchor="middle">public and wrapped keys</text>
+  <text class="text" x="1000" y="1050" font-size="15.5" font-weight="600" text-anchor="middle">Organization vault</text>
+  <text class="muted" x="1000" y="1072" font-size="12.5" text-anchor="middle">public key and member wraps</text>
+  <text class="text" x="1335" y="1050" font-size="15.5" font-weight="600" text-anchor="middle">Encrypted content</text>
+  <text class="muted" x="1335" y="1072" font-size="12.5" text-anchor="middle">versioned envelopes</text>
+</svg>

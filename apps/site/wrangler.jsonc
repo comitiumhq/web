@@ -1,0 +1,20 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "comitium-web",
+	"main": "@tanstack/react-start/server-entry",
+	"compatibility_date": "2025-09-13",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": false,
+	"preview_urls": false,
+	"observability": { "enabled": true },
+	"env": {
+		"dev": {
+			"name": "comitium-web-dev",
+			"routes": [{ "pattern": "dev.comitium.co", "custom_domain": true }]
+		},
+		"prod": {
+			"name": "comitium-web",
+			"routes": [{ "pattern": "comitium.co", "custom_domain": true }]
+		}
+	}
+}

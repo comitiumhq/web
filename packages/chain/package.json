@@ -1,0 +1,43 @@
+{
+  "name": "@comitium/chain",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    "./address": "./src/address.ts",
+    "./chains": "./src/chains.ts",
+    "./contracts": "./src/contracts.ts",
+    "./deployment-catalog": "./src/deployment-catalog.ts",
+    "./generated/contracts": "./src/generated/contracts.ts",
+    "./instances": "./src/instances.ts",
+    "./network": "./src/network.ts",
+    "./job-config": "./src/job-config.ts",
+    "./job-economics": "./src/job-economics.ts",
+    "./onchain-operation-observer": "./src/onchain-operation-observer.ts",
+    "./job-commitment/bindings": "./src/job-commitment/bindings.ts",
+    "./usdc": "./src/usdc.ts",
+    "./use-onchain-settlement-observer": "./src/use-onchain-settlement-observer.ts"
+  },
+  "scripts": {
+    "contracts:generate": "wagmi generate && biome format --write src/generated/contracts.ts",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@comitium/schemas": "workspace:*",
+    "neverthrow": "8.2.0",
+    "viem": "2.47.10",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@wagmi/cli": "2.8.0",
+    "@types/react": "19.1.2",
+    "typescript": "5.8.3",
+    "vitest": "4.0.18"
+  },
+  "peerDependencies": {
+    "react": "19.1.0"
+  }
+}

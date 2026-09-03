@@ -1,0 +1,40 @@
+{
+  "name": "comitium-web-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "packageManager": "bun@1.2.19",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter @comitium/site dev",
+    "dev:site": "bun run --filter @comitium/site dev",
+    "dev:my": "bun run --filter @comitium/my dev",
+    "dev:app": "bun run --filter @comitium/app dev",
+    "build": "bun run --filter './apps/*' build",
+    "build:site": "bun run --filter @comitium/site build",
+    "build:my": "bun run --filter @comitium/my build",
+    "build:app": "bun run --filter @comitium/app build",
+    "start": "bun run --filter @comitium/site start",
+    "start:site": "bun run --filter @comitium/site start",
+    "start:my": "bun run --filter @comitium/my start",
+    "start:app": "bun run --filter @comitium/app start",
+    "test": "bun run --filter './apps/*' --filter @comitium/auth --filter @comitium/ui --filter @comitium/schemas --filter @comitium/chain --filter @comitium/crypto test",
+    "test:coverage": "bun run --filter './apps/*' --filter @comitium/auth --filter @comitium/ui --filter @comitium/schemas --filter @comitium/chain --filter @comitium/crypto test:coverage",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "typecheck": "bun run --filter '@comitium/*' typecheck",
+    "check": "biome ci .",
+    "knip": "knip --no-gitignore",
+    "contracts:generate": "bun run --filter @comitium/chain contracts:generate"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.0.6",
+    "knip": "6.31.0",
+    "vite": "7.3.1"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "_comment": "Frozen post-quantum vectors. KAT: decapsulate(ciphertext, secretKey) must equal sharedSecret (detects @noble drift). interop: decryptEnvelope(envelope, context, org_vault privateKey) must equal plaintext (guards web<->api wire format). Regenerate only intentionally.",
+  "kat": {
+    "secretKey": "62aa9e4717e9406e67a7d6c563fb29381ca2989933b02bea35974806df675b42",
+    "ciphertext": "e6cf45ad24f6c37765aa4755948a90e152303173501f71b741885a917f145b81a7d2ce8577b87fbe1c9a514db031779a3df04b267657771c4475ba8b5f92d45e29e4075d205d9e3682945e102f2e4020a9b4ff407e16fd9de3a069f2385b5ceb8b9d89f83f746d549c2a14f464b9680f8a359438c9494f417c9066381d8391905ef34cce87673a132dfa3f9c38478819d7b9598aca463cfbf74cc589e127e7ab4d28b67f8662a6171a290cd00db1a59b64317f5ea3a2ec9e73776ad50aa2f276d9a45c7fdbd86f79cf52e067d30578df5e7b20f7b417b0ba7436a7a62d0d17078cfb30cffcae4c6b7e1997e33a2c6115b416250ed49bc551626dd90ee788b803e4b57f3f7a52e9f7f9aacba0a68832a489f198a2210cc738806f956641d7ad6e074d56c73467e39df46913a5e3c2ce3a808feb4e162bdfa5fdb1a1d021cf14921cfcf3ae0de2c3579e43d70ac3ad30112ecaa3b8367138a8f324f4a4384a5f4678b9180df3e76ec46900598bff1a26f308b6693e569ffd2da8f9caed11e77e317840376af2aa34b0cc2b2f2fd329aa2a6cae9d3dc1851845b2227f236bff5045b64ccc5a47bd19e88fce5e1b7f0ff95c8029c40720a5773e4ca6462167bd2695135dc2e818512f14b09a8907bdaee92db73e287612c440cfd60cbc3d5e0d7114e14d11caa427ae54574e9780883abe10bbb7b4e10732515475618556d772a73377a712b938af0f267e975e5b12e27785fa698b0d3623b77df82fc31f39f6b6405206bcacea971f973ae6989f34dcee9d5ff2d1b5bddf1a00b4ba350ef918c0177534b1c1d31df98e221310a30029d50289c53fa8d11e713a0ea7026b4377e498314ccfac70f703a303550dfbff3a645a9af87eeb4a95f2753d2dbf5c9f5578dbf7ecdc4f5249dd07db5cac2980b6de1e0c5d1670971f6d5c887430ef7d44877251805da4921c8d78995251b2e92f19448fed4d78d0e45e9a9443be6971c08df9bd514945336cd6110102fda4abb1d07e9fd272097b9c897bcf10cad1ba58c66e77bf5423ef320915ce864cca5570635b620e2d81ec9cd4b47c2cff46059de28248a04986d6b5f5cd246003231115303335afc92647ff24c7049b31ce8365b359f914500d73dfee4add2ccf7ddba6f1a23aa8adf818f63754e52abcd75f39eca73cc534892715935ff477db5feafebfb1120eb6af543d095dd0fdfe31d7de567e10a57e0dfd32253855bfb99722c9c7d43dbc57ad906d0d7cac685a9e2c7ea28bfaee80f8e8da0a06a7b07707d9916e96cac9218c410fe7c0d93087c1a16f1e1e58aee24b4cf1dd2ef71e9efc741b2af57ef09933039a6a6de9b48b0dc9b17690c51cafdb1472fe27cf2e59114e982e7e2dc65ec59fa41d81ea5397a1a095ede726441094d000a2f59bd13b97ee8673b9ebe5a2d05d3cd3574caf450915e2ff853318bf0ab43165bbd9016bcf86f04dc84a428954197f9efad9a23e314e8a1f0dcb2aaca865ea47f18dd5784bcb919387a62db63592122a61f0413a7b51d4f1cd4c5bc67e0dc71d1c9d8c118cc570b8d3111794122d345994e27c9ab89fae027f",
+    "sharedSecret": "ae838fb418c48a9d619480d3819f4d82331f30fc6d90eaf3255a081df96ca347"
+  },
+  "interop": {
+    "vaultPrivateKey": "477a1ff848d4f729b96697df0dac32691fb7a08941b0c04576da9098cff69a97",
+    "context": {
+      "purpose": "application_answers",
+      "orgId": "org-1",
+      "subjectId": "form-1",
+      "fieldId": "answers"
+    },
+    "envelope": {
+      "v": 1,
+      "purpose": "application_answers",
+      "zip": "none",
+      "ct": "jqzr31eQS6NZg86rO3k0sT/Xw1G402eVFWwXsigFyIjRnxuIYy7cnc8+u52q",
+      "iv": "1heeK23i9WBz2eMU",
+      "keys": [
+        {
+          "recipient": "org_vault",
+          "rkv": 1,
+          "ek": "ZFOGfVJRjrmykpP+a8QauZC2/9gBTZWySwSKDT/P6xPOVATsIYUj0hcEpHSbGJeR",
+          "epk": "305e3f29700046938f455798e7f4c44ff0c6f8ee942f097227b3c7bd3b3d6319",
+          "kemCt": "Cbg3hWT43O3e2UghreCB7k9i9BGVxAlSJ/tVtlqYXsXJgHyX+5RIm61l7NK479m6ovUedOgZUkovu562cwOW7bjdo5Dh0ER3cGIBPS+4Q9L5PR0MipE8VnkDK1lP9dPdKOwvW1jbdfjbQyTZpO7k4/vUmPZnRC9lrTqkjyuiX/3t0sEAPGb5jzttA6L4vZsSrF13qEvz6gXTFS9feXJcyEj1RVnsZJnkf8EdYDz+iRP/s1+c8ERPUip3Q+AlBF+wla1jSKpRSQSm0JM01lhUWXgpmetBN6Gdh9hL5QohKcbW4hnfUIgMrSIuhKLVYtyxvPeteAAN1TixFvglbNnUqBnaSOMfbTyXXTKdCX8yRXHy/qMAdvz+sd0S22X7cQVwqR777FWyE1yM4uKI0SdUcX20mizS/LL3lCvntoU4QUVGD3fxxH043Op8wAmPhW4DPHkC0ukHgdxRYLBk3tIsqBFOHQlcxn0jXBHsxeDrh7UZhGxsS34EKMgfRg2JbStocw6+e1baVHx7O9iCWtpSPULAdUrskg4x2ZZCqNq/c3hP3eXzGR3J+IrV9S5SOXNMhyIEbp3WberyhbNujw5i6uu41q9IQZT35SXhrNN8Bx1QGu4OBgexQLEZaBKQMdjddAYy25Q0ZpnX472DxcQdls4bVcYLpRU8XJJtm90dBucyWWAU4rampVTpDWF053+THHYlfBY5oiPUdaZSV1Zx6KI+4ST6pQHuYPVH5JFjQRnvcEKIHlu36ktqndfpIpTU/KwVf9tu3dLQjCLGyC8238SK87KLXC5iUkenuSg94NctJARFH1YwB1nbDBX+Y8XatwQRFubXnV0WyoUJnE3nzE0evY6+ZuoCi8QBp4XmnA68o+06wMCkbHxkeFxFQZb4iFtwZ+YWZAFMXrj1m7EIXFFvpAL6GkWIH6Yk7PLjufOjH4M//WOBM0sRlWfXslxlXQb++LJN/8K4D7SBMfJAUxsiur29rDvzyivRigt+ui0cgxJqbs0F43evLogl3Yq0qs4LM+mHm4ItBeJOYZXWiQZzsTKkAG0OJfnDB3+qP1vcAmy+B5A4PJ4uGWKI7jAWfHd/ibUURaAOZjgC3Ln2nulsVOpUIBOcVNciJUsPBVJeIi0kVOMIUKJH49WpsI4OWZ7wQJZzdFfQDEwTv/x4rl5hI0WWtLKoa8QiFCM501qoR+I6xK2h/zRwGLgFIXCUdjc4euW2AXvpnW8Pl0WRy1ZsI2kRDX4xLAC4KHmudveHFPgnQ1aUGYP5pWltzOkBvsXiWeGnDhzPdwnfnXfMlJ7v8BOPKj0HSh/FaygXtFi+lPhX+T98vxykJ+S9ubNfI7VZ5Zlp0JDF8BSJrzVQbUf/7WvKhNnWxz254O/PHi4w3pIdxHh/faxHWtZ1x+j5jGWhvEzIypcHqY6Vag+QP1iGh5oLON4aD/8PIjbr1QM=",
+          "iv": "C7fjWf6B7k2LvOof"
+        }
+      ]
+    },
+    "plaintext": {
+      "hello": "pq-interop",
+      "n": 42
+    }
+  }
+}
