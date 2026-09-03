@@ -3,8 +3,9 @@ import { PageContainer } from '@comitium/ui/page-container';
 import { ArrowRightIcon } from '@phosphor-icons/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { LandingBackground } from '@/components/landing/landing-background';
-import { getAppUrl } from '@/config/web-origins';
 import { buildSeoHead } from '@/lib/seo/public';
+
+const EARLY_ACCESS_URL = 'mailto:illia.yablonski@comitium.co?subject=Comitium%20early%20access';
 
 export const Route = createFileRoute('/')({
   head: () =>
@@ -33,8 +34,8 @@ function LandingPage() {
             </h1>
 
             <Button asChild size="lg" className="mt-9 h-11 px-5">
-              <a href={getAppUrl('/')}>
-                Get early access
+              <a href={EARLY_ACCESS_URL}>
+                Request early access
                 <ArrowRightIcon data-icon="inline-end" />
               </a>
             </Button>
