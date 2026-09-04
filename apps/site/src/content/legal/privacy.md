@@ -48,6 +48,12 @@ Some Organizations enable AI-assisted recruiting features. On their instructions
 
 Information marked as required is needed to create an account, submit an application, authorize a transaction, or provide another requested feature. Without it, that part of the Service may not work. Organizations separately decide which application information they require.
 
+## Google API Services
+
+If you connect Google Calendar, Comitium accesses your calendars, availability, and event information only to schedule interviews, prevent conflicts, and create, update, or delete related events.
+
+Comitium's use and transfer of information received from Google APIs will adhere to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including its Limited Use requirements.
+
 ## Encryption and security
 
 Private recruitment content submitted through Comitium's web application is encrypted in the browser before upload. Incoming email and protected records created by requested processing are encrypted before storage. Ongoing access within the Service is limited to authorized recipients holding the required keys.
