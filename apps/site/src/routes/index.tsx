@@ -33,6 +33,10 @@ function LandingPage() {
               Hiring built for privacy and accountability.
             </h1>
 
+            <p className="mt-5 max-w-2xl text-copy-18 text-muted-foreground text-pretty">
+              An ATS for managing candidates and interviews in one place.
+            </p>
+
             <Button asChild size="lg" className="mt-9 h-11 px-5">
               <a href={EARLY_ACCESS_URL}>
                 Request early access
