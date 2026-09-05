@@ -61,7 +61,7 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
           />
         </CardHeader>
 
-        <CollapsibleContent className="min-h-0 w-full overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:200ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:flex-1 data-open:animate-accordion-down data-open:overflow-y-auto data-open:overscroll-contain motion-reduce:animate-none!">
+        <CollapsibleContent className="min-h-0 w-72 max-w-[calc(100vw-2rem)] overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:200ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:animate-accordion-down data-open:overflow-y-auto data-open:overscroll-contain motion-reduce:animate-none!">
           <CardContent className="flex w-full flex-col gap-3 px-4 pt-1 pb-4">
             <div className="flex flex-col gap-1">
               <Link

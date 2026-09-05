@@ -80,7 +80,7 @@ export function ApplicationReviewCard({
           <HomeEmptyState
             icon={CheckCircleIcon}
             title="Your review queue is clear"
-            description="Assigned reviews and passive reviews you can submit will appear here."
+            description="Assigned and available reviews will appear here."
           />
         )}
       </CardContent>

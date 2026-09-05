@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { FeedbackFormSelect, resolveFeedbackFormId } from '@/components/features/form-builder/feedback-form-select';
 import { EditorToolbar } from '@/components/tiptap-ui/editor-toolbars';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
 import {
@@ -104,7 +105,7 @@ export function TemplateEditorSheet({ orgId, open, onOpenChange, mode, template 
     (data: FormData) => {
       const externalTitle = data.externalTitle?.trim() || undefined;
       const instructionsValue = instructions && tipTapToPlainText(instructions).trim() ? instructions : null;
-      const feedbackFormId = data.feedbackFormId === ORG_DEFAULT_FORM_VALUE ? null : data.feedbackFormId;
+      const feedbackFormId = resolveFeedbackFormId(data.feedbackFormId);
 
       if (isCreate) {
         createMutate(
@@ -262,23 +263,11 @@ export function TemplateEditorSheet({ orgId, open, onOpenChange, mode, template 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Feedback form</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value={ORG_DEFAULT_FORM_VALUE}>Use org default</SelectItem>
-                          {(feedbackForms ?? []).map((feedbackForm) => (
-                            <SelectItem key={feedbackForm.id} value={feedbackForm.id}>
-                              {feedbackForm.isDefaultForm ? `${feedbackForm.title} (org default)` : feedbackForm.title}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <FeedbackFormSelect
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      forms={feedbackForms ?? []}
+                    />
                   </FormItem>
                 )}
               />

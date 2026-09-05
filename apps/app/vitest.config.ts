@@ -7,6 +7,9 @@ import { vitestEnv } from '../../tooling/vitest/env';
 
 export default defineConfig({
 	plugins: [react(), tsconfigPaths()],
+	resolve: {
+		dedupe: ['react', 'react-dom'],
+	},
 	optimizeDeps: {
 		include: [
 			'@dnd-kit/react',
