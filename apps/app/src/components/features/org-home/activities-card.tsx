@@ -81,7 +81,7 @@ export function ActivitiesCard({
           <HomeEmptyState
             icon={CheckCircleIcon}
             title="You're all caught up"
-            description="Reviews, scheduling tasks, and offers will appear here."
+            description="Tasks and offers requiring action will appear here."
           />
         )}
       </CardContent>

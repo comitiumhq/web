@@ -25,6 +25,7 @@ import { useQueryPipelineSummary } from '@/hooks/queries/use-query-pipeline-summ
 import { useDecryptCandidateNames } from '@/hooks/use-decrypt-candidate-names';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { PipelineCandidate, PipelineCandidateSorting, PipelineJob, StageType } from '@/lib/schemas/pipeline';
+import { resolveJobCreationAvailability } from '@/lib/workspace-setup';
 import type { PipelineTab } from '../types';
 import { DashboardEmptyState } from './empty-state';
 import { PipelineContent } from './pipeline-content';
@@ -56,7 +57,11 @@ export function GlobalPipelineDashboard({ org, activeTab, onTabChange }: GlobalP
   const isCandidateTableView = !isActiveTab;
   const bulkCapabilitiesQuery = useQueryBulkOperationCapabilities(isCandidateTableView ? org.id : null);
   const maxBulkSelection = bulkCapabilitiesQuery.data?.maxItems;
-  const canCreateJob = creationContext?.orgWide === true || (creationContext?.departmentIds.length ?? 0) > 0;
+  const {
+    hasAccess: hasCreateJobAccess,
+    canCreate: canCreateJob,
+    disabledReason: createJobDisabledReason,
+  } = resolveJobCreationAvailability(creationContext, isAdmin);
 
   useEffect(() => {
     setSelectedApp(null);
@@ -245,8 +250,12 @@ export function GlobalPipelineDashboard({ org, activeTab, onTabChange }: GlobalP
   if (hasNoPipelineData) {
     return (
       <div className="flex h-full flex-col overflow-hidden bg-background">
-        <DashboardEmptyState isAdmin={isAdmin} onCreateJob={canCreateJob ? handleCreateJobClick : undefined} />
-        <CreateJobDialog orgId={org.id} open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+        <DashboardEmptyState
+          isAdmin={isAdmin}
+          onCreateJob={hasCreateJobAccess ? handleCreateJobClick : undefined}
+          createJobDisabledReason={createJobDisabledReason}
+        />
+        <CreateJobDialog orgId={org.id} open={createDialogOpen && canCreateJob} onOpenChange={setCreateDialogOpen} />
       </div>
     );
   }

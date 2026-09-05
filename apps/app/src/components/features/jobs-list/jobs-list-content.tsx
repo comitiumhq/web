@@ -1,16 +1,17 @@
 import type { JobDraftListItem, OrgJobListItem } from '@comitium/schemas/jobs';
-import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Input } from '@comitium/ui/input';
 import { PageContainer } from '@comitium/ui/page-container';
-import { BriefcaseIcon, MagnifyingGlassIcon, MagnifyingGlassMinusIcon, PlusIcon } from '@phosphor-icons/react';
-import { useCallback, useMemo, useState } from 'react';
+import { BriefcaseIcon, MagnifyingGlassIcon, MagnifyingGlassMinusIcon } from '@phosphor-icons/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CreateJobButton } from '@/components/features/job-creation/create-job-button';
 import { useQueryJobCreationContext } from '@/hooks/queries/use-query-job-creation-context';
 import { type StatusFilter, useJobsWithDrafts } from '@/hooks/queries/use-query-jobs-with-drafts';
 import { useQueryOrgDepartments, useQueryOrgLocations } from '@/hooks/queries/use-query-org-structure';
 import { useDebounce } from '@/hooks/use-debounce';
 import { usePermissions } from '@/hooks/use-permissions';
 import { isDefined } from '@/lib/utils';
+import { resolveJobCreationAvailability } from '@/lib/workspace-setup';
 
 import { CreateJobDialog } from './create-job-dialog';
 import type { JobsRow } from './jobs-columns';
@@ -32,6 +33,7 @@ interface JobsListContentProps {
   orgId: string;
   filters: JobsListFilters;
   onFiltersChange: (filters: JobsListFilters) => void;
+  createDialogRequested?: boolean;
 }
 
 interface TextFilterFields {
@@ -111,13 +113,19 @@ function computeStatusCounts(
   return { all: open + closed + draft, open, draft, closed };
 }
 
-export function JobsListContent({ orgId, filters, onFiltersChange }: JobsListContentProps) {
+export function JobsListContent({
+  orgId,
+  filters,
+  onFiltersChange,
+  createDialogRequested = false,
+}: JobsListContentProps) {
   const [search, setSearch] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createDialogPending, setCreateDialogPending] = useState(createDialogRequested);
   const debouncedSearch = useDebounce(search, 300);
   const { status, departmentId, locationId } = filters;
   const { isAdmin } = usePermissions();
-  const { data: creationContext } = useQueryJobCreationContext(orgId);
+  const { data: creationContext, isFetching: isCreationContextFetching } = useQueryJobCreationContext(orgId);
   const { data: departmentsData } = useQueryOrgDepartments(orgId);
   const { data: locationsData } = useQueryOrgLocations(orgId);
   const departments = departmentsData?.data ?? [];
@@ -173,8 +181,11 @@ export function JobsListContent({ orgId, filters, onFiltersChange }: JobsListCon
     updateFilters({ departmentId: undefined, locationId: undefined });
   }, [updateFilters]);
 
-  const canCreateJob =
-    isDefined(creationContext) && (creationContext.orgWide || creationContext.departmentIds.length > 0);
+  const {
+    hasAccess: hasCreateJobAccess,
+    canCreate: canCreateJob,
+    disabledReason: createJobDisabledReason,
+  } = resolveJobCreationAvailability(creationContext, isAdmin);
   const activeFilterCount = (departmentId ? 1 : 0) + (locationId ? 1 : 0);
   const isGlobalEmpty = !isLoading && jobs.length === 0 && drafts.length === 0;
 
@@ -182,19 +193,29 @@ export function JobsListContent({ orgId, filters, onFiltersChange }: JobsListCon
     setCreateDialogOpen(true);
   }, []);
 
-  const createJobButton = canCreateJob ? (
-    <Button className="shrink-0" onClick={handleCreateJobClick}>
-      <PlusIcon data-icon="inline-start" />
-      New Job
-    </Button>
+  useEffect(() => {
+    if (createDialogRequested) {
+      setCreateDialogPending(true);
+    }
+  }, [createDialogRequested]);
+
+  useEffect(() => {
+    if (!createDialogPending || !isDefined(creationContext) || isCreationContextFetching) {
+      return;
+    }
+
+    if (canCreateJob) {
+      setCreateDialogOpen(true);
+    }
+    setCreateDialogPending(false);
+  }, [canCreateJob, createDialogPending, creationContext, isCreationContextFetching]);
+
+  const createJobButton = hasCreateJobAccess ? (
+    <CreateJobButton disabledReason={createJobDisabledReason} onClick={handleCreateJobClick} />
   ) : null;
 
   const emptyState = isGlobalEmpty ? (
-    <EmptyState
-      icon={BriefcaseIcon}
-      title="No jobs posted yet"
-      description="Post your first job to start reviewing candidates."
-    >
+    <EmptyState icon={BriefcaseIcon} title="No jobs posted yet" description="Create a job to get started.">
       {createJobButton && <div className="mt-5">{createJobButton}</div>}
     </EmptyState>
   ) : (
@@ -243,7 +264,7 @@ export function JobsListContent({ orgId, filters, onFiltersChange }: JobsListCon
       )}
 
       <div className="min-h-0 flex-1">
-        <PageContainer className="flex h-full flex-col pb-6">
+        <PageContainer className={isGlobalEmpty ? 'flex h-full flex-col' : 'flex h-full flex-col pb-6'}>
           <JobsTable
             orgId={orgId}
             rows={isGlobalEmpty ? [] : rows}
@@ -254,7 +275,7 @@ export function JobsListContent({ orgId, filters, onFiltersChange }: JobsListCon
         </PageContainer>
       </div>
 
-      <CreateJobDialog orgId={orgId} open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+      <CreateJobDialog orgId={orgId} open={createDialogOpen && canCreateJob} onOpenChange={setCreateDialogOpen} />
     </div>
   );
 }

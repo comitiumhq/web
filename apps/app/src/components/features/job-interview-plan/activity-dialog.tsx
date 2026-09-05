@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { resolveFeedbackFormId } from '@/components/features/form-builder/feedback-form-select';
 import { useCreateOwnerActivity, useUpdateOwnerActivity } from '@/hooks/mutations/use-stage-activity-mutations';
 import type { StageType } from '@/lib/schemas/pipeline';
 import {
@@ -195,7 +196,7 @@ export function ActivityDialog({
       submitActivity({
         activityType: 'application_review',
         reviewers: data.reviewerUserIds.map((userId) => ({ userId })),
-        feedbackFormId: data.feedbackFormId === ORG_DEFAULT_FORM_VALUE ? null : data.feedbackFormId,
+        feedbackFormId: resolveFeedbackFormId(data.feedbackFormId),
       });
     },
     [submitActivity],
@@ -217,11 +218,6 @@ export function ActivityDialog({
   const emailItems: ActivityTemplateOption[] = emailTemplates.map((template) => ({
     id: template.id,
     label: template.name,
-  }));
-
-  const feedbackFormItems: ActivityTemplateOption[] = feedbackForms.map((form) => ({
-    id: form.id,
-    label: form.isDefaultForm ? `${form.title} (org default)` : form.title,
   }));
 
   const title = isEdit ? 'Edit activity' : 'Add activity';
@@ -287,7 +283,7 @@ export function ActivityDialog({
           <ApplicationReviewActivityForm
             form={reviewForm}
             onSubmit={handleSubmitReview}
-            feedbackFormItems={feedbackFormItems}
+            feedbackForms={feedbackForms}
             members={members}
             footer={footer}
           />

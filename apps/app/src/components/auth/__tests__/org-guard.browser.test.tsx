@@ -59,6 +59,10 @@ vi.mock('@/components/features/vault-access/vault-access-banner', () => ({
   VaultAccessBanner: () => <aside>Vault access required</aside>,
 }));
 
+vi.mock('@/components/features/workspace-setup/workspace-setup-shell', () => ({
+  WorkspaceSetupShell: ({ children }: { children: ReactNode }) => children,
+}));
+
 vi.mock('@/components/header/workspace-header', () => ({
   WorkspaceHeader: () => <header>Workspace header</header>,
 }));

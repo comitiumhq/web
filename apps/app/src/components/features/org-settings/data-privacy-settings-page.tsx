@@ -1,4 +1,3 @@
-import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
@@ -12,7 +11,7 @@ import { Switch } from '@comitium/ui/switch';
 import { Textarea } from '@comitium/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { InfoIcon, WarningIcon } from '@phosphor-icons/react';
+import { InfoIcon } from '@phosphor-icons/react';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
@@ -79,8 +78,6 @@ function DataPrivacySettingsForm({ orgId, settings }: DataPrivacySettingsFormPro
 
   const isDirty = form.formState.isDirty;
   const criteriaEvaluationEnabled = useWatch({ control: form.control, name: 'aiCriteriaEvaluationEnabled' });
-  const privacyPolicyUrl = useWatch({ control: form.control, name: 'recruitingPrivacyPolicyUrl' });
-  const isPrivacyPolicyMissing = privacyPolicyUrl.trim().length === 0;
 
   useEffect(() => {
     if (!isDirty) {
@@ -181,14 +178,6 @@ function DataPrivacySettingsForm({ orgId, settings }: DataPrivacySettingsFormPro
                   </FormItem>
                 )}
               />
-
-              {isPrivacyPolicyMissing && (
-                <Alert variant="warning">
-                  <WarningIcon />
-                  <AlertTitle>Privacy notice required before publishing</AlertTitle>
-                  <AlertDescription>Required before publishing a job that accepts applications.</AlertDescription>
-                </Alert>
-              )}
             </CardContent>
           </Card>
 

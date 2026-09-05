@@ -2,6 +2,7 @@ import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { invalidateSettingsUsage } from '@/hooks/mutations/invalidate-settings-usage';
+import { invalidateWorkspaceSetup } from '@/hooks/mutations/invalidate-workspace-setup';
 import { showMutationError } from '@/hooks/mutations/mutation-error';
 import { qk } from '@/hooks/query-keys';
 import { hasApiErrorCode } from '@/lib/api/client';
@@ -148,6 +149,7 @@ export function useCreateDraftFromTemplate() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: qk.jobs.draftsOrg(variables.orgId) });
       queryClient.invalidateQueries({ queryKey: qk.interviewPlans.root(variables.orgId) });
+      invalidateWorkspaceSetup(queryClient, variables.orgId);
       invalidateSettingsUsage(queryClient);
     },
     onError: onMutationError,

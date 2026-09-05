@@ -40,7 +40,7 @@ const locationFormSchema = createOrgLocationBodySchema
     path: ['locationType'],
     message: 'Select a location type',
   })
-  .refine((data) => isDefined(data.cityId), {
+  .refine(({ cityId, locationType }) => locationType === 'remote' || isDefined(cityId), {
     path: ['cityId'],
     message: 'Select a city',
   });
@@ -105,6 +105,7 @@ export function LocationSheet({ orgId, location, open, onOpenChange }: LocationS
   const addressLocality = form.watch('addressLocality');
   const addressRegion = form.watch('addressRegion');
   const addressCountry = form.watch('addressCountry');
+  const locationType = form.watch('locationType');
   const cityInputValue = locationCityLabel(addressLocality, addressRegion, addressCountry);
 
   useEffect(() => {
@@ -112,6 +113,12 @@ export function LocationSheet({ orgId, location, open, onOpenChange }: LocationS
       form.reset(locationDefaults(location));
     }
   }, [form, location, open]);
+
+  useEffect(() => {
+    if (locationType === 'remote') {
+      form.clearErrors('cityId');
+    }
+  }, [form, locationType]);
 
   const onSubmit = useCallback(
     async (data: LocationFormData) => {
@@ -233,7 +240,7 @@ export function LocationSheet({ orgId, location, open, onOpenChange }: LocationS
                   name="cityId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel>{locationType === 'remote' ? 'City (optional)' : 'City'}</FormLabel>
                       <FormControl>
                         <CitySearchInput
                           searchCities={searchCities}

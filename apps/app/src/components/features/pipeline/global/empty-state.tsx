@@ -1,27 +1,25 @@
-import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
-import { BriefcaseIcon, PlusIcon } from '@phosphor-icons/react';
+import { BriefcaseIcon } from '@phosphor-icons/react';
+import { CreateJobButton } from '@/components/features/job-creation/create-job-button';
 import { HiringTeamIcon } from '@/lib/constants/domain-icons';
 
 interface DashboardEmptyStateProps {
   isAdmin: boolean;
   onCreateJob?: () => void;
+  createJobDisabledReason?: string;
 }
 
-export function DashboardEmptyState({ isAdmin, onCreateJob }: DashboardEmptyStateProps) {
+export function DashboardEmptyState({ isAdmin, onCreateJob, createJobDisabledReason }: DashboardEmptyStateProps) {
   if (isAdmin || onCreateJob) {
     return (
       <EmptyState
         icon={BriefcaseIcon}
         title="No open jobs yet"
-        description="Post your first job to start receiving applications."
+        description="Create a job to get started."
         className="flex-1"
       >
         {onCreateJob && (
-          <Button className="mt-5" onClick={onCreateJob}>
-            <PlusIcon data-icon="inline-start" />
-            New Job
-          </Button>
+          <CreateJobButton className="mt-5" onClick={onCreateJob} disabledReason={createJobDisabledReason} />
         )}
       </EmptyState>
     );

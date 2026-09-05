@@ -1,12 +1,11 @@
-import { ORG_DEFAULT_FORM_VALUE } from '@comitium/schemas/forms/form-definitions';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
+import { Form, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { InfoIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import type { SubmitHandler, UseFormReturn } from 'react-hook-form';
+import { FeedbackFormSelect } from '@/components/features/form-builder/feedback-form-select';
 import { MemberOptionsMultiSelect } from '@/components/features/team-management/members/members-multi-select';
-import type { ActivityMemberOption } from '@/lib/schemas/stage-activities';
+import type { ActivityFeedbackFormOption, ActivityMemberOption } from '@/lib/schemas/stage-activities';
 
 import type { ApplicationReviewFormData, ScheduleInterviewFormData, SendEmailFormData } from './activity-dialog-schema';
 import { ActivityTemplateField, type ActivityTemplateOption } from './activity-template-field';
@@ -86,7 +85,7 @@ export function SendEmailActivityForm({ form, onSubmit, emailItems, footer }: Se
 interface ApplicationReviewActivityFormProps {
   form: UseFormReturn<ApplicationReviewFormData>;
   onSubmit: SubmitHandler<ApplicationReviewFormData>;
-  feedbackFormItems: ActivityTemplateOption[];
+  feedbackForms: ActivityFeedbackFormOption[];
   members: ActivityMemberOption[];
   footer: ReactNode;
 }
@@ -94,7 +93,7 @@ interface ApplicationReviewActivityFormProps {
 export function ApplicationReviewActivityForm({
   form,
   onSubmit,
-  feedbackFormItems,
+  feedbackForms,
   members,
   footer,
 }: ApplicationReviewActivityFormProps) {
@@ -142,21 +141,7 @@ export function ApplicationReviewActivityForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Feedback form</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value={ORG_DEFAULT_FORM_VALUE}>Use org default</SelectItem>
-                  {feedbackFormItems.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FeedbackFormSelect value={field.value} onValueChange={field.onChange} forms={feedbackForms} />
               <FormMessage />
             </FormItem>
           )}

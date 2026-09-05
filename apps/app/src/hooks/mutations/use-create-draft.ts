@@ -6,6 +6,7 @@ import { invalidateSettingsUsage } from '@/hooks/mutations/invalidate-settings-u
 import { qk } from '@/hooks/query-keys';
 import { createDraft } from '@/lib/api/jobs';
 import { getErrorMessage } from '@/lib/utils';
+import { invalidateWorkspaceSetup } from './invalidate-workspace-setup';
 
 function getSuccessToast(data: CreateDraftParams): string | null {
   if ('sourceJobId' in data) {
@@ -29,6 +30,7 @@ export function useCreateDraft(orgId: string, options?: UseCreateDraftOptions) {
     onSuccess: (draft, data) => {
       queryClient.invalidateQueries({ queryKey: qk.jobs.draftsRoot() });
       queryClient.invalidateQueries({ queryKey: qk.interviewPlans.root(orgId) });
+      invalidateWorkspaceSetup(queryClient, orgId);
       invalidateSettingsUsage(queryClient);
 
       if (navigateOnSuccess) {

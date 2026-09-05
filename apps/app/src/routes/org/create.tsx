@@ -47,7 +47,7 @@ function OrganizationOnboardingBoundary() {
     if (createdOrganizationId) {
       queryClient.invalidateQueries({ queryKey: qk.orgs.my() });
       navigate({
-        to: '/org/$orgId/organization/company',
+        to: '/org/$orgId',
         params: { orgId: createdOrganizationId },
         replace: true,
       });

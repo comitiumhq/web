@@ -18,6 +18,8 @@ export const qk = {
   org: {
     detail: (orgId?: string | null) => ['org', orgId] as const,
     permissions: (orgId?: string | null) => ['org-permissions', orgId] as const,
+    workspaceSetup: (orgId?: string) => ['org', orgId, 'workspace-setup'] as const,
+    jobCreationContext: (orgId: string) => ['org', orgId, 'job-creation-context'] as const,
     team: (orgId?: string) => ['org', orgId, 'team'] as const,
     teamMember: (orgId?: string, userId?: string) => ['org', orgId, 'team-member', userId] as const,
     teamCalendarStatus: (orgId?: string) => ['org', orgId, 'team', 'calendar-status'] as const,

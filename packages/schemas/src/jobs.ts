@@ -221,7 +221,10 @@ export const createDraftResponseSchema = z.object({
 export const jobCreationContextSchema = z.object({
   orgWide: z.boolean(),
   departmentIds: z.array(uuidSchema),
+  setupAllowsJobCreation: z.boolean(),
 });
+
+export type JobCreationContext = z.infer<typeof jobCreationContextSchema>;
 
 export const publishDraftResponseSchema = preparedRelayedOnchainOperationSchema;
 
