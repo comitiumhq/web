@@ -79,7 +79,15 @@ export function FileWidget({ question, field }: FileWidgetProps) {
 
   return (
     <div className="relative">
-      <input ref={inputRef} type="file" accept={accept} onChange={handleChange} className="sr-only" name={field.name} />
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={handleChange}
+        className="sr-only"
+        name={field.name}
+        aria-label={isResume ? 'Resume PDF file' : 'Attachment file'}
+      />
       <Attachment state="idle" className="w-full cursor-pointer">
         <AttachmentTrigger
           type="button"

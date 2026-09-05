@@ -18,21 +18,6 @@ interface ApplicationSubmission {
   fieldValues: FormSubmissionFieldValue[];
 }
 
-export function resolveAiCriteriaEvaluationChoice(form: NestedForm, policyEnabled: boolean, optOut: boolean) {
-  const hasResumeQuestion = form.sections.some((section) =>
-    section.questions.some((question) => question.questionType === 'resume'),
-  );
-
-  return {
-    showResumeProcessing: hasResumeQuestion,
-    showCriteriaEvaluation: hasResumeQuestion && policyEnabled,
-    finalization: {
-      policyEnabled,
-      optOut: hasResumeQuestion && policyEnabled && optOut,
-    },
-  };
-}
-
 export function extractApplicationSubmission(form: NestedForm, values: Record<string, unknown>): ApplicationSubmission {
   const answersByVisibility = new Map<AnswerVisibility, Record<string, unknown>>([['standard', {}]]);
   let resumeUpload: ApplicationSubmission['resumeUpload'] = null;

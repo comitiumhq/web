@@ -2,9 +2,14 @@ import { PageLoader } from '@comitium/ui/page-loader';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { AuthGuard } from '@/components/auth/auth-guard';
+import { OrganizationAccessUnavailable } from '@/components/auth/organization-access-unavailable';
 import { useQueryMyOrgs } from '@/hooks/queries/use-query-my-orgs';
 import { useQueryOrgCreation } from '@/hooks/queries/use-query-org-creation';
-import { canAccessOrganizationOnboarding, getAccessibleCreatedOrganizationId } from '@/lib/schemas/org';
+import {
+  canAccessOrganizationOnboarding,
+  getAccessibleCreatedOrganizationId,
+  hasInactiveOrganizationMembership,
+} from '@/lib/schemas/org';
 import { getPreferredOrg } from '@/lib/utils/org';
 
 export const Route = createFileRoute('/')({
@@ -48,6 +53,14 @@ function AuthenticatedAppEntry() {
       navigate({ to: '/org/create', replace: true });
     }
   }, [creation.data, creation.isSuccess, navigate, orgs.data, orgs.isSuccess]);
+
+  if (!orgs.isSuccess || !creation.isSuccess) {
+    return <PageLoader />;
+  }
+
+  if (orgs.data.length === 0 && hasInactiveOrganizationMembership(creation.data)) {
+    return <OrganizationAccessUnavailable />;
+  }
 
   return <PageLoader />;
 }

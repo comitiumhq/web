@@ -21,7 +21,7 @@ import { useForm } from 'react-hook-form';
 import { buildDefaultValues, buildFormSchema, FormRenderer } from '@/components/features/form-runtime';
 import { useApplyJob } from '@/hooks/mutations/use-apply-job';
 import { qk } from '@/hooks/query-keys';
-import { extractApplicationSubmission, resolveAiCriteriaEvaluationChoice } from '@/lib/forms/application-submission';
+import { extractApplicationSubmission } from '@/lib/forms/application-submission';
 import {
   clearApplicationDraft,
   createApplicationDraftKey,
@@ -31,6 +31,7 @@ import {
 import { ApplicationPrivacyNotice } from './application-privacy-notice';
 import { ApplicationSuccess } from './application-success';
 import { ConfirmDialog } from './confirm-dialog';
+import { useApplicationResumeProcessing } from './use-application-resume-processing';
 
 interface ApplicationFormProps {
   applyForm: NestedForm;
@@ -89,7 +90,6 @@ function AuthenticatedApplicationForm({
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<Record<string, unknown> | null>(null);
-  const [aiCriteriaEvaluationOptOut, setAiCriteriaEvaluationOptOut] = useState(false);
   const [isApplicationSubmitted, setIsApplicationSubmitted] = useState(false);
   const [validationIssues, setValidationIssues] = useState<ApplicationValidationIssue[]>([]);
   const applicationFormRef = useRef<HTMLFormElement>(null);
@@ -98,11 +98,6 @@ function AuthenticatedApplicationForm({
   const editedSinceReviewRef = useRef(false);
 
   const schema = useMemo(() => buildFormSchema(applyForm), [applyForm]);
-  const aiCriteriaEvaluation = resolveAiCriteriaEvaluationChoice(
-    applyForm,
-    policy.aiCriteriaEvaluation.enabled,
-    aiCriteriaEvaluationOptOut,
-  );
   const draftKey = useMemo(
     () => createApplicationDraftKey(accountId, jobData.postingId, applyForm.form.id),
     [accountId, jobData.postingId, applyForm.form.id],
@@ -121,10 +116,12 @@ function AuthenticatedApplicationForm({
     defaultValues,
     reValidateMode: 'onSubmit',
   });
-
-  useEffect(() => {
-    setAiCriteriaEvaluationOptOut(false);
-  }, [aiCriteriaEvaluation.showCriteriaEvaluation, jobData.postingId]);
+  const { privacyNoticeProps, resolveFinalization } = useApplicationResumeProcessing({
+    applyForm,
+    control: form.control,
+    policyEnabled: policy.aiCriteriaEvaluation.enabled,
+    postingId: jobData.postingId,
+  });
 
   const clearValidationSummary = useCallback(() => {
     validationSummaryVisibleRef.current = false;
@@ -227,6 +224,7 @@ function AuthenticatedApplicationForm({
 
     const { answerBuckets, resumeUpload, fileUploads, candidateIdentityInputs, candidateProfileInput, fieldValues } =
       extractApplicationSubmission(applyForm, pendingFormData);
+    const aiCriteriaEvaluation = resolveFinalization(resumeUpload !== null);
 
     submitApplication({
       address,
@@ -239,18 +237,9 @@ function AuthenticatedApplicationForm({
       fileUploads,
       candidateIdentityInputs,
       candidateProfileInput,
-      aiCriteriaEvaluation: aiCriteriaEvaluation.finalization,
+      aiCriteriaEvaluation,
     });
-  }, [
-    isConnected,
-    address,
-    pendingFormData,
-    stakeAmount,
-    applyForm,
-    jobData,
-    submitApplication,
-    aiCriteriaEvaluation.finalization,
-  ]);
+  }, [isConnected, address, pendingFormData, stakeAmount, applyForm, jobData, submitApplication, resolveFinalization]);
 
   useEffect(() => {
     if (validationIssues.length > 0) {
@@ -323,13 +312,7 @@ function AuthenticatedApplicationForm({
         </form>
       </Form>
 
-      <ApplicationPrivacyNotice
-        policy={policy}
-        showResumeProcessing={aiCriteriaEvaluation.showResumeProcessing}
-        showCriteriaEvaluation={aiCriteriaEvaluation.showCriteriaEvaluation}
-        criteriaEvaluationOptOut={aiCriteriaEvaluationOptOut}
-        onCriteriaEvaluationOptOutChange={setAiCriteriaEvaluationOptOut}
-      />
+      <ApplicationPrivacyNotice policy={policy} {...privacyNoticeProps} />
 
       {stakeAmount !== null && (
         <ConfirmDialog

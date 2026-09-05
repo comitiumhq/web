@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { qk } from '@/hooks/query-keys';
 import type { InviteInput } from '@/lib/api/orgs-invites';
 import { inviteMembers } from '@/lib/api/orgs-invites';
+import { invalidateWorkspaceSetup } from './invalidate-workspace-setup';
 
 interface InviteMembersParams {
   orgId: string;
@@ -33,6 +34,7 @@ export function useInviteMembers() {
       }
 
       queryClient.invalidateQueries({ queryKey: qk.org.invites(orgId) });
+      invalidateWorkspaceSetup(queryClient, orgId);
     },
     onError: (error: Error) => {
       toast.error(error.message);

@@ -1,7 +1,7 @@
 import type { NestedForm } from '@comitium/schemas/forms/form-definitions';
 import { describe, expect, it } from 'vitest';
 
-import { extractApplicationSubmission, resolveAiCriteriaEvaluationChoice } from '../application-submission';
+import { extractApplicationSubmission } from '../application-submission';
 
 const EMAIL_ID = '11111111-1111-4111-8111-111111111111';
 const FIRST_NAME_ID = '22222222-2222-4222-8222-222222222222';
@@ -91,23 +91,6 @@ const form: NestedForm = {
   ],
 };
 
-const formWithResume: NestedForm = {
-  ...form,
-  sections: form.sections.map((section) => ({
-    ...section,
-    questions: [
-      ...section.questions,
-      {
-        ...section.questions[0],
-        id: '88888888-8888-4888-8888-888888888888',
-        position: section.questions.length,
-        questionType: 'resume',
-        prompt: 'Resume',
-      },
-    ],
-  })),
-};
-
 describe('application submission contract', () => {
   it('keeps names in standard answers and reserves processor identity access for email', () => {
     const submission = extractApplicationSubmission(form, {
@@ -132,50 +115,5 @@ describe('application submission contract', () => {
       { visibility: 'private', questionIds: [PRIVATE_ID], answers: { [PRIVATE_ID]: 'Private answer' } },
     ]);
     expect(submission.fieldValues).toEqual([]);
-  });
-
-  it.each([
-    [
-      form,
-      true,
-      true,
-      {
-        showResumeProcessing: false,
-        showCriteriaEvaluation: false,
-        finalization: { policyEnabled: true, optOut: false },
-      },
-    ],
-    [
-      formWithResume,
-      false,
-      true,
-      {
-        showResumeProcessing: true,
-        showCriteriaEvaluation: false,
-        finalization: { policyEnabled: false, optOut: false },
-      },
-    ],
-    [
-      formWithResume,
-      true,
-      false,
-      {
-        showResumeProcessing: true,
-        showCriteriaEvaluation: true,
-        finalization: { policyEnabled: true, optOut: false },
-      },
-    ],
-    [
-      formWithResume,
-      true,
-      true,
-      {
-        showResumeProcessing: true,
-        showCriteriaEvaluation: true,
-        finalization: { policyEnabled: true, optOut: true },
-      },
-    ],
-  ] as const)('resolves AI criteria evaluation choice', (applicationForm, policyEnabled, optOut, expected) => {
-    expect(resolveAiCriteriaEvaluationChoice(applicationForm, policyEnabled, optOut)).toEqual(expected);
   });
 });

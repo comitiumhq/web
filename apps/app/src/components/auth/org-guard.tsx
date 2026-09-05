@@ -6,6 +6,7 @@ import { RouteNotFound } from '@comitium/ui/route-not-found';
 import { SignInIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { VaultAccessBanner } from '@/components/features/vault-access/vault-access-banner';
+import { WorkspaceSetupShell } from '@/components/features/workspace-setup/workspace-setup-shell';
 import { type MyOrg, useQueryMyOrgs } from '@/hooks/queries/use-query-my-orgs';
 import { useAutoDetectTimezone } from '@/hooks/use-auto-detect-timezone';
 import { PermissionsProvider, useQueryOrgMe } from '@/hooks/use-permissions';
@@ -74,12 +75,16 @@ function OrgGuardContent({ org, children }: { org: MyOrg; children: ReactNode })
   return (
     <PermissionsProvider orgId={org.id}>
       <AutoDetectTimezone orgId={org.id} />
-      {!org.hasVaultAccess && pendingVaultBootstrapOrganizationId !== org.id && (
-        <div className="px-4 pt-3">
-          <VaultAccessBanner />
+      <WorkspaceSetupShell orgId={org.id}>
+        <div className="flex h-full min-h-0 flex-col">
+          {!org.hasVaultAccess && pendingVaultBootstrapOrganizationId !== org.id && (
+            <div className="shrink-0 px-4 pt-3">
+              <VaultAccessBanner />
+            </div>
+          )}
+          <div className="min-h-0 flex-1">{children}</div>
         </div>
-      )}
-      {children}
+      </WorkspaceSetupShell>
     </PermissionsProvider>
   );
 }

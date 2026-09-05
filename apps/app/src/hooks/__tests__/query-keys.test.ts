@@ -9,6 +9,8 @@ describe('query key factory', () => {
     expect(qk.org.teamMember('org-1', 'user-1')).toEqual(['org', 'org-1', 'team-member', 'user-1']);
     expect(qk.org.memberAccess('org-1', 'user-1')).toEqual(['org', 'org-1', 'members', 'user-1', 'access']);
     expect(qk.org.permissions('org-1')).toEqual(['org-permissions', 'org-1']);
+    expect(qk.org.workspaceSetup('org-1')).toEqual(['org', 'org-1', 'workspace-setup']);
+    expect(qk.org.jobCreationContext('org-1')).toEqual(['org', 'org-1', 'job-creation-context']);
     expect(qk.orgs.creation()).toEqual(['orgs', 'creation']);
   });
 

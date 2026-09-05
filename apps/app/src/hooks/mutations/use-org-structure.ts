@@ -19,6 +19,7 @@ import type {
   UpdateOrgDepartmentBody,
   UpdateOrgLocationBody,
 } from '@/lib/schemas/org-structure';
+import { invalidateWorkspaceSetup } from './invalidate-workspace-setup';
 import { useContractAuthorityMutation } from './use-contract-authority-mutation';
 
 function invalidateOrgStructure(queryClient: ReturnType<typeof useQueryClient>, orgId: string) {
@@ -67,6 +68,7 @@ export function useCreateOrgDepartment() {
     onSuccess: (_, { orgId }) => {
       toast.success('Department created');
       invalidateOrgStructure(queryClient, orgId);
+      invalidateWorkspaceSetup(queryClient, orgId);
     },
 
     onError: showMutationError,
@@ -136,6 +138,7 @@ export function useCreateOrgLocation() {
     onSuccess: (_, { orgId }) => {
       toast.success('Location created');
       invalidateOrgStructure(queryClient, orgId);
+      invalidateWorkspaceSetup(queryClient, orgId);
     },
 
     onError: showMutationError,

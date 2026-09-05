@@ -1,5 +1,6 @@
 import { requireWalletAccount } from '@comitium/auth/require-wallet-account';
 import { useAccount, useActiveWallet } from '@comitium/auth/use-wallet';
+import { refreshAfterOnchainOperationSettles } from '@comitium/chain/onchain-operation-observer';
 import { normalizeIpfsUri, requireIpfsUri } from '@comitium/schemas/ipfs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -9,6 +10,7 @@ import { submitPreparedRelayedOperation } from '@/lib/onchain-operation-signatur
 import type { MyOrg, OrgDetails } from '@/lib/schemas/org';
 import { ORG_PROFILE_LOGO_MAX_LENGTH, orgSettingsSchema } from '@/lib/schemas/org-settings-form';
 import { qk } from '../query-keys';
+import { invalidateWorkspaceSetup } from './invalidate-workspace-setup';
 
 export interface OrgMetadataFormData {
   name: string;
@@ -57,7 +59,7 @@ export function useUpdateOrgMetadata(orgId: string) {
 
       await submitPreparedRelayedOperation(orgId, prepared, account);
 
-      return { profile: { ...profile, logo: logoCid } };
+      return { operationId: prepared.operationId, profile: { ...profile, logo: logoCid } };
     },
     onMutate: async () => {
       toast.loading('Saving organization profile...', { id: 'update-org' });
@@ -66,7 +68,9 @@ export function useUpdateOrgMetadata(orgId: string) {
         queryClient.cancelQueries({ queryKey: qk.orgs.my(), exact: true }),
       ]);
     },
-    onSuccess: ({ profile }) => {
+    onSuccess: ({ operationId, profile }) => {
+      invalidateWorkspaceSetup(queryClient, orgId);
+      void refreshAfterOnchainOperationSettles(operationId, () => invalidateWorkspaceSetup(queryClient, orgId));
       queryClient.setQueryData<OrgDetails>(qk.org.detail(orgId), (current) => {
         if (!current) {
           return current;

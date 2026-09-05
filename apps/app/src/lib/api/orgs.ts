@@ -1,4 +1,4 @@
-import { dataArraySchema, successSchema } from '@comitium/schemas/public';
+import { dataArraySchema, dataSchema, successSchema } from '@comitium/schemas/public';
 import type { PrepareOrgContentUriUpdateData, UpdateMemberProfileData } from '@/lib/schemas/org';
 import {
   myOrgSchema,
@@ -6,6 +6,7 @@ import {
   orgMeSchema,
   orgTreasuryStatusSchema,
   prepareOrgContentUriUpdateResponseSchema,
+  workspaceSetupSchema,
 } from '@/lib/schemas/org';
 
 import { api } from './client';
@@ -20,6 +21,10 @@ export function getOrg(orgId: string) {
 
 export function getOrgMe(orgId: string) {
   return api.get(`/orgs/${orgId}/member`, orgMeSchema);
+}
+
+export function getWorkspaceSetup(orgId: string) {
+  return api.get(`/orgs/${orgId}/workspace-setup`, dataSchema(workspaceSetupSchema));
 }
 
 export function getOrgTreasuryStatus(orgId: string) {

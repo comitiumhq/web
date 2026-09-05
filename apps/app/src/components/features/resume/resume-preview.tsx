@@ -40,7 +40,7 @@ export function ResumePreview({
 
   return (
     <div className={cn('flex flex-col gap-4', className)}>
-      {!hasResume && <p className="text-copy-14 text-muted-foreground">No resume uploaded.</p>}
+      {!hasResume && <p className="text-copy-14 text-muted-foreground">No resume provided.</p>}
 
       {hasResume && isLoading && !pdfData && (
         <div className="flex flex-col gap-3">

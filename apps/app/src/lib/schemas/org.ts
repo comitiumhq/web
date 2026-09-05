@@ -109,6 +109,26 @@ export const orgMeSchema = z.object({
 
 export type OrgMeResponse = z.infer<typeof orgMeSchema>;
 
+const WORKSPACE_SETUP_REQUIRED_TOTAL = 5;
+
+export const workspaceSetupSchema = z.object({
+  required: z.object({
+    companyDetails: z.object({ complete: z.boolean() }),
+    department: z.object({ complete: z.boolean() }),
+    location: z.object({ complete: z.boolean() }),
+    recruitingPrivacy: z.object({ complete: z.boolean() }),
+    firstJob: z.object({ complete: z.boolean() }),
+  }),
+  recommended: z.object({
+    inviteTeammate: z.object({ complete: z.boolean() }),
+  }),
+  completedRequired: z.number().int().min(0).max(WORKSPACE_SETUP_REQUIRED_TOTAL),
+  requiredTotal: z.literal(WORKSPACE_SETUP_REQUIRED_TOTAL),
+  complete: z.boolean(),
+});
+
+export type WorkspaceSetup = z.infer<typeof workspaceSetupSchema>;
+
 // --- My orgs list ---
 
 export const myOrgSchema = z.object({
@@ -306,6 +326,7 @@ export const balanceHistorySchema = z.object({
 
 export const orgCreationStatusSchema = z.discriminatedUnion('status', [
   z.object({ status: z.literal('needs_verification') }),
+  z.object({ status: z.literal('inactive_membership') }),
   z.object({ status: z.literal('ready'), email: z.string(), domain: z.string() }),
   z.object({ status: z.literal('failed'), email: z.string(), domain: z.string() }),
   z.object({ status: z.literal('creating'), email: z.string().nullable(), domain: z.string() }),
@@ -322,7 +343,7 @@ export function canAccessOrganizationOnboarding(
     return false;
   }
 
-  return status.status !== 'created';
+  return status.status !== 'created' && status.status !== 'inactive_membership';
 }
 
 export function getAccessibleCreatedOrganizationId(status?: OrgCreationStatus): string | null {
@@ -331,6 +352,10 @@ export function getAccessibleCreatedOrganizationId(status?: OrgCreationStatus): 
   }
 
   return status.organizationId;
+}
+
+export function hasInactiveOrganizationMembership(status: OrgCreationStatus): boolean {
+  return status.status === 'inactive_membership' || (status.status === 'created' && !status.hasActiveMembership);
 }
 
 export const sendVerificationSchema = z.discriminatedUnion('status', [
