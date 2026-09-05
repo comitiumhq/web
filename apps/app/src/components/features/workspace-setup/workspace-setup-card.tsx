@@ -140,9 +140,7 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
                 aria-label={setupRowAriaLabel('Invite a member', setup.recommended.inviteTeammate.complete)}
                 className={setupRowClassName(setup.recommended.inviteTeammate.complete)}
               >
-                <SetupRowContent complete={setup.recommended.inviteTeammate.complete}>
-                  Invite a member
-                </SetupRowContent>
+                <SetupRowContent complete={setup.recommended.inviteTeammate.complete}>Invite a member</SetupRowContent>
               </Link>
             </div>
           </CardContent>

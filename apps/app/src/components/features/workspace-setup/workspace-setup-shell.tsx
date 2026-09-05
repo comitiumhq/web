@@ -19,10 +19,7 @@ export function WorkspaceSetupShell({ children, orgId }: WorkspaceSetupShellProp
       <div className="h-full min-h-0">{children}</div>
 
       {showSetup && (
-        <aside
-          aria-label="Getting started"
-          className="fixed bottom-4 left-4 z-40 w-fit max-w-[calc(100vw-2rem)]"
-        >
+        <aside aria-label="Getting started" className="fixed bottom-4 left-4 z-40 w-fit max-w-[calc(100vw-2rem)]">
           {setup ? <WorkspaceSetupCard key={orgId} orgId={orgId} setup={setup} /> : <WorkspaceSetupCardSkeleton />}
         </aside>
       )}
