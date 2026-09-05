@@ -67,7 +67,7 @@ describe('workspace setup card', () => {
       .element(screen.getByRole('progressbar'))
       .toHaveAttribute('aria-label', '2 of 5 getting started steps complete');
     await expect.element(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '40');
-    await expect.element(screen.getByRole('link', { name: /Invite a teammate/ })).toBeInTheDocument();
+    await expect.element(screen.getByRole('link', { name: /Invite a member/ })).toBeInTheDocument();
     await expect
       .element(screen.getByRole('link', { name: 'Complete: Add a department' }))
       .toHaveAttribute('href', '/org/$orgId/organization/departments');

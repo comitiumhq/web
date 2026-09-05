@@ -22,7 +22,6 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
   const storageKey = `${WORKSPACE_SETUP_OPEN_STORAGE_PREFIX}:${orgId}`;
   const [open, setOpen] = useState(() => globalThis.localStorage?.getItem(storageKey) !== 'false');
   const progress = (setup.completedRequired / setup.requiredTotal) * 100;
-  const progressSummary = `${setup.completedRequired} of ${setup.requiredTotal} steps completed`;
   const jobCreationAvailable = isJobCreationAllowedBySetup(setup);
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -34,12 +33,12 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
     <Card
       size="sm"
       className={cn(
-        'min-w-0 gap-0 bg-popover/90 py-0 shadow-lg backdrop-blur-2xl supports-[backdrop-filter]:bg-popover/60 xl:transition-[width]! xl:[transition-duration:200ms]! xl:ease-[cubic-bezier(0.4,0,0.2,1)]! motion-reduce:transition-none!',
-        open ? 'w-full xl:w-72' : 'w-full xl:w-64',
+        'max-h-[calc(100dvh-2rem)] min-w-0 max-w-[calc(100vw-2rem)] gap-0 bg-popover/90 py-0 shadow-lg backdrop-blur-2xl transition-[width]! [transition-duration:200ms]! ease-[cubic-bezier(0.4,0,0.2,1)]! supports-[backdrop-filter]:bg-popover/60 motion-reduce:transition-none!',
+        open ? 'w-72' : 'w-64',
       )}
     >
-      <Collapsible open={open} onOpenChange={handleOpenChange}>
-        <CardHeader className="gap-0 px-4 py-3">
+      <Collapsible open={open} onOpenChange={handleOpenChange} className="flex min-h-0 flex-1 flex-col">
+        <CardHeader className="shrink-0 gap-0 px-4 py-3">
           <CollapsibleTrigger className="group grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-md text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
             <CardTitle className="truncate whitespace-nowrap text-heading-14">Getting started</CardTitle>
             <span className="whitespace-nowrap text-label-12 text-muted-foreground tabular-nums">
@@ -54,29 +53,16 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
             />
           </CollapsibleTrigger>
 
-          <div
-            aria-hidden={open}
-            className={cn(
-              'grid transition-[grid-template-rows,opacity,margin] duration-150 ease-out motion-reduce:transition-none',
-              open ? 'mt-0 grid-rows-[0fr] opacity-0' : 'mt-2 grid-rows-[1fr] opacity-100',
-            )}
-          >
-            <div className="overflow-hidden">
-              <p className="whitespace-nowrap text-label-12 text-muted-foreground">{progressSummary}</p>
-              <Progress value={progress} className="mt-2 h-1.5" aria-valuenow={progress} />
-            </div>
-          </div>
+          <Progress
+            value={progress}
+            className="mt-2 h-1.5"
+            aria-label={`${setup.completedRequired} of ${setup.requiredTotal} getting started steps complete`}
+            aria-valuenow={progress}
+          />
         </CardHeader>
 
-        <CollapsibleContent className="w-full overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:200ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:animate-accordion-down motion-reduce:animate-none!">
-          <CardContent className="flex flex-col gap-3 px-4 pt-1 pb-4 xl:w-72">
-            <Progress
-              value={progress}
-              className="h-1.5"
-              aria-label={`${setup.completedRequired} of ${setup.requiredTotal} getting started steps complete`}
-              aria-valuenow={progress}
-            />
-
+        <CollapsibleContent className="min-h-0 w-full overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:200ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:flex-1 data-open:animate-accordion-down data-open:overflow-y-auto data-open:overscroll-contain motion-reduce:animate-none!">
+          <CardContent className="flex w-full flex-col gap-3 px-4 pt-1 pb-4">
             <div className="flex flex-col gap-1">
               <Link
                 to="/org/$orgId/organization/company"
@@ -147,15 +133,15 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
             <Separator />
 
             <div>
-              <p className="px-2 pb-1 text-label-12 text-muted-foreground">Recommended</p>
+              <p className="px-2 pb-1 text-label-12 text-muted-foreground">Optional</p>
               <Link
                 to="/org/$orgId/organization/members"
                 params={{ orgId }}
-                aria-label={setupRowAriaLabel('Invite a teammate', setup.recommended.inviteTeammate.complete)}
+                aria-label={setupRowAriaLabel('Invite a member', setup.recommended.inviteTeammate.complete)}
                 className={setupRowClassName(setup.recommended.inviteTeammate.complete)}
               >
                 <SetupRowContent complete={setup.recommended.inviteTeammate.complete}>
-                  Invite a teammate
+                  Invite a member
                 </SetupRowContent>
               </Link>
             </div>
@@ -170,16 +156,16 @@ export function WorkspaceSetupCardSkeleton() {
   return (
     <Card
       size="sm"
-      className="w-full min-w-0 gap-0 bg-popover/90 py-0 shadow-lg backdrop-blur-2xl supports-[backdrop-filter]:bg-popover/60 xl:w-72"
+      className="max-h-[calc(100dvh-2rem)] w-72 max-w-[calc(100vw-2rem)] min-w-0 gap-0 bg-popover/90 py-0 shadow-lg backdrop-blur-2xl supports-[backdrop-filter]:bg-popover/60"
       aria-label="Loading getting started"
     >
-      <CardHeader className="px-4 py-3">
+      <CardHeader className="shrink-0 px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="h-4 w-8" />
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3 px-4 pt-1 pb-4">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-4 pt-1 pb-4">
         <Skeleton className="h-1.5 w-full rounded-full" />
         <div className="flex flex-col gap-1">
           <Skeleton className="h-9 w-full" />
@@ -218,7 +204,10 @@ function SetupRowContent({
       />
       <span className={cn('min-w-0 flex-1 leading-5', { 'text-muted-foreground': complete })}>{children}</span>
       {!complete && showAction && (
-        <ArrowRightIcon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+        <ArrowRightIcon
+          aria-hidden="true"
+          className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+        />
       )}
     </>
   );
@@ -230,7 +219,7 @@ function setupRowAriaLabel(label: string, complete: boolean): string {
 
 function setupRowClassName(complete: boolean, disabled = false): string {
   return cn(
-    'flex min-h-10 w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left text-label-14 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+    'group flex min-h-10 w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left text-label-14 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
     {
       'text-muted-foreground': complete,
       'cursor-not-allowed opacity-50 hover:bg-transparent': disabled,

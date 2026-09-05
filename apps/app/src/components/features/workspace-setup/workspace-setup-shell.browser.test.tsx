@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import type { WorkspaceSetup } from '@/lib/schemas/org';
@@ -27,15 +26,6 @@ vi.mock('@/hooks/queries/use-query-workspace-setup', () => ({
 vi.mock('./workspace-setup-card', () => ({
   WorkspaceSetupCard: () => <section>Getting started card</section>,
   WorkspaceSetupCardSkeleton: () => <section>Loading getting started</section>,
-}));
-
-vi.mock('@comitium/ui/sheet', () => ({
-  Sheet: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SheetTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SheetContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SheetHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SheetTitle: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SheetDescription: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 function setup(complete = false): WorkspaceSetup {
@@ -73,8 +63,8 @@ describe('workspace setup shell', () => {
     );
 
     await expect.element(screen.getByText('Organization work')).toBeInTheDocument();
-    await expect.element(screen.getByRole('button', { name: /Open checklist/ })).toBeInTheDocument();
     await expect.element(screen.getByRole('complementary', { name: 'Getting started' })).toBeInTheDocument();
+    await expect.element(screen.getByText('Getting started card')).toBeInTheDocument();
     expect(mocks.enabled).toHaveBeenCalledWith(true);
   });
 
