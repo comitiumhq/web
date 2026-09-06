@@ -4,7 +4,6 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
 import { getImageUploadMaxSizeLabel, getSupportedImageFormats, validateImageUpload } from '../lib/image-upload';
 import { Button } from './button';
-import { Input } from './input';
 
 interface ImageUploaderProps {
   size?: string;
@@ -180,7 +179,7 @@ export const ImageUploader = ({
           disabled={disabled}
           onClick={openFilePicker}
         />
-        <Input
+        <input
           ref={inputRef}
           id={inputId}
           type="file"

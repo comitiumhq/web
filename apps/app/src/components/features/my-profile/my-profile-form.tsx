@@ -90,63 +90,65 @@ export function MyProfileForm({ orgId, meData }: MyProfileFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Card className="ring-inset">
           <CardContent className="flex min-w-0 flex-col gap-6">
-            <ProfilePhotoField
-              name={meData.name}
-              email={meData.email}
-              imageSrc={avatarImage}
-              maxSize={MAX_FILE_UPLOAD_SIZE}
-              disabled={avatarMutation.isPending}
-              onChange={handleAvatarChange}
-            />
-
-            <div className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Jane Doe" className="h-10" maxLength={255} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div className="grid min-w-0 grid-cols-1 items-start gap-6 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-center">
+              <ProfilePhotoField
+                name={meData.name}
+                email={meData.email}
+                imageSrc={avatarImage}
+                maxSize={MAX_FILE_UPLOAD_SIZE}
+                disabled={avatarMutation.isPending}
+                onChange={handleAvatarChange}
               />
 
-              <FormField
-                control={form.control}
-                name="jobTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job title</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g. Recruiter, Engineering Manager"
-                        className="h-10"
-                        maxLength={150}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="flex min-w-0 flex-col gap-5">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Jane Doe" className="h-10" maxLength={255} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="timezone"
-                render={({ field }) => (
-                  <FormItem className="sm:col-span-2">
-                    <FormLabel>Time zone</FormLabel>
-                    <FormControl>
-                      <TimezonePicker value={field.value} onChange={field.onChange} className="h-10" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="jobTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job title</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Recruiter, Engineering Manager"
+                          className="h-10"
+                          maxLength={150}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
+
+            <FormField
+              control={form.control}
+              name="timezone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Time zone</FormLabel>
+                  <FormControl>
+                    <TimezonePicker value={field.value} onChange={field.onChange} className="h-10" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex flex-col gap-2">
               <FormLabel>Email signature</FormLabel>

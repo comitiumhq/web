@@ -21,7 +21,7 @@ function CompanyPage() {
 
   return (
     <RoutePermissionGuard permission={Permission.ORG_SETTINGS_WRITE} orgId={org.id}>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
         <PageHeader title="Company Profile" />
         <SettingsForm org={org} />
       </div>

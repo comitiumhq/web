@@ -1,8 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
-import { getImageUploadMaxSizeLabel, validateImageUpload } from '@comitium/ui/image-upload';
+import { validateImageUpload } from '@comitium/ui/image-upload';
 import { InitialsAvatar } from '@comitium/ui/initials-avatar';
-import { Input } from '@comitium/ui/input';
 import { Slider } from '@comitium/ui/slider';
 import { CameraIcon, MinusIcon, PlusIcon } from '@phosphor-icons/react';
 import type { ChangeEvent } from 'react';
@@ -90,15 +89,14 @@ export function ProfilePhotoField({ disabled, imageSrc, maxSize, name, email, on
   }, [closeEditor, croppedArea, onChange, selectedPhoto]);
 
   const pickerLabel = imageSrc ? 'Change profile photo' : 'Upload profile photo';
-  const maxSizeLabel = getImageUploadMaxSizeLabel(maxSize);
 
   return (
     <>
-      <div className="flex min-w-0 items-center gap-4">
+      <div className="flex w-28 flex-col items-start gap-2">
         <button
           type="button"
           aria-label={pickerLabel}
-          className="group relative size-16 shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="group relative size-28 shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={disabled}
           onClick={() => inputRef.current?.click()}
         >
@@ -106,25 +104,21 @@ export function ProfilePhotoField({ disabled, imageSrc, maxSize, name, email, on
             identity={{ name, email }}
             imageSrc={imageSrc}
             imageAlt={imageSrc ? 'Profile photo' : ''}
-            className="size-16 text-base ring-1 ring-border"
+            className="size-28 text-2xl ring-1 ring-border"
           />
           <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
-            <CameraIcon className="size-4" weight="fill" />
+            <CameraIcon className="size-5" weight="fill" />
             <span className="sr-only">{pickerLabel}</span>
           </span>
         </button>
 
-        <div className="min-w-0">
-          <h2 className="font-medium">Profile photo</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">PNG, JPEG or WebP. Up to {maxSizeLabel}.</p>
-          {error && (
-            <p className="mt-1 text-sm text-destructive" role="alert">
-              {error}
-            </p>
-          )}
-        </div>
+        {error && (
+          <p className="text-xs text-destructive" role="alert">
+            {error}
+          </p>
+        )}
 
-        <Input
+        <input
           ref={inputRef}
           type="file"
           className="sr-only"
