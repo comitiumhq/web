@@ -3,7 +3,6 @@ import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import type { MemberDisplayIdentity } from '@comitium/ui/display-name';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@comitium/ui/tooltip';
 import { useSortable } from '@dnd-kit/react/sortable';
 import {
@@ -17,6 +16,7 @@ import {
   TrashIcon,
 } from '@phosphor-icons/react';
 import { memo, useCallback, useState } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import { useDeleteOwnerActivity } from '@/hooks/mutations/use-stage-activity-mutations';
 import { ApplicationReviewIcon, FeedbackFormIcon } from '@/lib/constants/domain-icons';
 import type { StageActivity, StageActivityOwner } from '@/lib/schemas/stage-activities';
@@ -265,6 +265,7 @@ function MemberAvatarStack({ members, memberMap }: MemberAvatarStackProps) {
           const identity = {
             name: entry.name ?? member?.name,
             email: entry.email ?? member?.email,
+            avatarUrl: member?.avatarUrl,
           };
           const tooltipLabel = getActivityMemberLabel(identity, entry.isActive);
 
@@ -272,7 +273,7 @@ function MemberAvatarStack({ members, memberMap }: MemberAvatarStackProps) {
             <Tooltip key={entry.userId}>
               <TooltipTrigger asChild>
                 <div className="ring-2 ring-background rounded-full">
-                  <InitialsAvatar identity={identity} size="sm" />
+                  <MemberAvatar identity={identity} size="sm" />
                 </div>
               </TooltipTrigger>
               <TooltipContent>

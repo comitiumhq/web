@@ -1,8 +1,8 @@
 import type { DisplayIdentity } from '@comitium/schemas/common';
 import { formatInTimezone, formatRelativeTime } from '@comitium/ui/date';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { memo } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import type { ActivityFeedRow } from '@/lib/schemas/emails';
 import { getActorDisplayName } from '@/lib/utils';
 
@@ -33,7 +33,7 @@ export const TimelineEventRow = memo(function TimelineEventRow({
 
   return (
     <div className="flex items-start gap-2.5 px-1 py-2">
-      <InitialsAvatar identity={toDisplayIdentity(event)} size="sm" className="mt-0.5 shrink-0" />
+      <MemberAvatar identity={toDisplayIdentity(event)} size="sm" className="mt-0.5 shrink-0" />
       <EventBody event={event} selectedApplicationId={selectedApplicationId} />
       <Tooltip>
         <TooltipTrigger asChild>
@@ -66,5 +66,6 @@ function toDisplayIdentity(event: ActivityFeedRow): DisplayIdentity {
     walletAddress: event.actor.externalWallet ?? '',
     name: event.actor.name,
     email: null,
+    avatarUrl: event.actor.avatarUrl,
   };
 }

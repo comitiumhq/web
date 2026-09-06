@@ -5,11 +5,11 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { WarningCircleIcon, XIcon } from '@phosphor-icons/react';
 import { memo, useCallback, useState } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import { HiringTeamIcon } from '@/lib/constants/domain-icons';
 import { isDefined } from '@/lib/utils';
 
@@ -125,7 +125,7 @@ const HiringTeamRow = memo(function HiringTeamRow({
 
   return (
     <div className={`flex items-center gap-3 px-4 py-3 ${divided ? 'border-t border-border' : ''}`}>
-      <InitialsAvatar identity={member} size="md" />
+      <MemberAvatar identity={member} size="md" />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-label-14 font-medium">{displayName}</span>
         <MemberSecondaryLine member={member} />

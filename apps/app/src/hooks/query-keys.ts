@@ -22,6 +22,7 @@ export const qk = {
     jobCreationContext: (orgId: string) => ['org', orgId, 'job-creation-context'] as const,
     team: (orgId?: string) => ['org', orgId, 'team'] as const,
     teamMember: (orgId?: string, userId?: string) => ['org', orgId, 'team-member', userId] as const,
+    memberAvatar: (avatarUrl?: string | null) => ['org-member-avatar', avatarUrl] as const,
     teamCalendarStatus: (orgId?: string) => ['org', orgId, 'team', 'calendar-status'] as const,
     departmentsRoot: (orgId: string | null) => ['org', orgId, 'departments'] as const,
     departments: (orgId: string | null, params: unknown) => ['org', orgId, 'departments', params] as const,
@@ -51,6 +52,7 @@ export const qk = {
       interviewEventId
         ? (['feedback-submissions', applicationId, 'interview', interviewEventId] as const)
         : (['feedback-submissions', applicationId] as const),
+    feedbackSubmissionsRoot: () => ['feedback-submissions'] as const,
     formSubmission: (applicationId: string | null) => ['application-form-submission', applicationId] as const,
     candidateProfileInput: (applicationId: string | null) =>
       ['application', applicationId, 'candidate-profile-input'] as const,
@@ -88,6 +90,7 @@ export const qk = {
   },
   jobs: {
     root: () => ['jobs'] as const,
+    detailRoot: () => ['job'] as const,
     detail: (jobId: string) => ['job', jobId] as const,
     summary: (jobId: string | null) => ['job', jobId, 'summary'] as const,
     orgRoot: (orgId?: string) => ['jobs', 'org', orgId] as const,

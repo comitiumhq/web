@@ -19,7 +19,7 @@ export function AccountSettingsPage() {
   const methods = getLinkedSignInMethods(user);
 
   return (
-    <PageContainer size="settings" className="py-6 sm:py-10">
+    <PageContainer size="personal" className="py-6 sm:py-10">
       <div className="grid gap-8 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-10">
         <AccountSidebar />
 

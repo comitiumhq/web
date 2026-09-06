@@ -129,7 +129,7 @@ async function upload<T>(
   return parseResponse(data, schema);
 }
 
-async function getBlob(url: string): Promise<ArrayBuffer> {
+async function getBinaryResponse(url: string): Promise<Response> {
   const response = await fetch(`${API_URL}${url}`, {
     headers: await createRequestHeaders(),
     credentials: 'include',
@@ -141,7 +141,15 @@ async function getBlob(url: string): Promise<ArrayBuffer> {
     handleError(response, data);
   }
 
-  return response.arrayBuffer();
+  return response;
+}
+
+async function getBlob(url: string): Promise<ArrayBuffer> {
+  return (await getBinaryResponse(url)).arrayBuffer();
+}
+
+async function getFile(url: string): Promise<Blob> {
+  return (await getBinaryResponse(url)).blob();
 }
 
 async function putBlob<T>(url: string, body: Blob, uploadToken: string, schema?: ResponseSchema<T>): Promise<T> {
@@ -185,4 +193,5 @@ export const api = {
     upload<T>(url, formData, schema, options),
   putBlob,
   getBlob,
+  getFile,
 };

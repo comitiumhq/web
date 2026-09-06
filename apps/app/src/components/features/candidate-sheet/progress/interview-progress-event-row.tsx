@@ -1,9 +1,9 @@
 import { formatInTimezone } from '@comitium/ui/date';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { ArrowSquareOutIcon, CheckCircleIcon, QuestionIcon, XCircleIcon } from '@phosphor-icons/react';
 import { memo } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import type { OrgTeamMember } from '@/hooks/queries/use-query-org-team';
 import {
   type InterviewProgressEvent,
@@ -83,7 +83,7 @@ function InterviewerAvatar({ interviewer, memberMap }: InterviewerAvatarProps) {
             },
           )}
         >
-          <InitialsAvatar identity={identity} size="sm" />
+          <MemberAvatar identity={identity} size="sm" />
           <RsvpStatusIcon status={interviewer.rsvpStatus} />
         </button>
       </TooltipTrigger>

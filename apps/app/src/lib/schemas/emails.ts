@@ -217,6 +217,7 @@ export const activityFeedRowSchema = z.object({
     userId: uuidSchema.nullable(),
     externalWallet: walletAddressSchema.nullable(),
     name: z.string().nullable(),
+    avatarUrl: z.string().nullable(),
   }),
   metadata: activityFeedMetadataSchema,
   payload: activityPayloadSchema,

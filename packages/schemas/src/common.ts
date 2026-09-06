@@ -41,6 +41,7 @@ const displayIdentitySchema = z.object({
   walletAddress: walletAddressSchema,
   name: z.string().nullable().optional(),
   email: z.string().nullable().optional(),
+  avatarUrl: z.string().nullable().optional(),
 });
 
 export type DisplayIdentity = z.infer<typeof displayIdentitySchema>;

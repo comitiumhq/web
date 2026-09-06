@@ -1,14 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../client';
-import { prepareOrgContentUriUpdate } from '../orgs';
+import { deleteMemberAvatar, prepareOrgContentUriUpdate, uploadMemberAvatar } from '../orgs';
 
 vi.mock('../client', () => ({
   api: {
+    delete: vi.fn(),
     post: vi.fn(),
+    upload: vi.fn(),
   },
 }));
 
+const mockDelete = vi.mocked(api.delete);
 const mockPost = vi.mocked(api.post);
+const mockUpload = vi.mocked(api.upload);
 
 describe('prepareOrgContentUriUpdate', () => {
   beforeEach(() => {
@@ -32,5 +36,35 @@ describe('prepareOrgContentUriUpdate', () => {
     await prepareOrgContentUriUpdate('org-id', payload);
 
     expect(mockPost).toHaveBeenCalledExactlyOnceWith('/orgs/org-id/profile/prepare', payload, expect.anything());
+  });
+});
+
+describe('member avatar API', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('uploads the selected image as multipart form data', async () => {
+    const file = new File(['image'], 'avatar.png', { type: 'image/png' });
+    const crop = { x: 0.1, y: 0.2, width: 0.5, height: 0.5 };
+    mockUpload.mockResolvedValue({ avatarUrl: '/orgs/org-id/members/user-id/avatar/version-id' });
+
+    await uploadMemberAvatar('org-id', { file, crop });
+
+    expect(mockUpload).toHaveBeenCalledExactlyOnceWith(
+      '/orgs/org-id/member/avatar',
+      expect.any(FormData),
+      expect.anything(),
+    );
+    const formData = mockUpload.mock.calls[0]?.[1];
+    expect(formData?.get('file')).toBe(file);
+    expect(formData?.get('crop')).toBe(JSON.stringify(crop));
+  });
+
+  it('removes the current member avatar', async () => {
+    mockDelete.mockResolvedValue({ success: true });
+
+    await expect(deleteMemberAvatar('org-id')).resolves.toEqual({ avatarUrl: null });
+    expect(mockDelete).toHaveBeenCalledExactlyOnceWith('/orgs/org-id/member/avatar', expect.anything());
   });
 });

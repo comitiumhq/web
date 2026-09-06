@@ -1,4 +1,5 @@
 import type { DisplayIdentity } from '@comitium/schemas/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { page } from 'vitest/browser';
@@ -35,7 +36,12 @@ const state: ReadyUserMenuState = {
 
 describe('UserMenuDropdown personal destinations', () => {
   it('keeps global Account separate from organization Settings', async () => {
-    const screen = await render(<UserMenuDropdown state={state} />);
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const screen = await render(
+      <QueryClientProvider client={queryClient}>
+        <UserMenuDropdown state={state} />
+      </QueryClientProvider>,
+    );
 
     await screen.getByRole('button', { name: 'Open account menu' }).click();
 

@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { cn } from '../lib/cn';
 import { getNameInitials } from '../lib/get-name-initials';
 
-import { Avatar, AvatarFallback } from './avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './avatar';
 
 interface AvatarIdentity {
   walletAddress?: string | null;
@@ -13,6 +13,8 @@ interface AvatarIdentity {
 
 interface InitialsAvatarProps {
   identity: AvatarIdentity;
+  imageSrc?: string | null;
+  imageAlt?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -25,12 +27,19 @@ const sizeClasses = {
 
 const iconSizes = { sm: 12, md: 16, lg: 20 } as const;
 
-export const InitialsAvatar = memo(function InitialsAvatar({ identity, size = 'md', className }: InitialsAvatarProps) {
+export const InitialsAvatar = memo(function InitialsAvatar({
+  identity,
+  imageSrc,
+  imageAlt = '',
+  size = 'md',
+  className,
+}: InitialsAvatarProps) {
   const name = identity.name || identity.email;
   const initials = name ? getNameInitials(name) : null;
 
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
+      {imageSrc ? <AvatarImage src={imageSrc} alt={imageAlt} /> : null}
       <AvatarFallback>{initials ?? <UserCircleIcon size={iconSizes[size]} />}</AvatarFallback>
     </Avatar>
   );

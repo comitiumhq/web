@@ -39,7 +39,7 @@ function PersonalSettingsLayoutContent({ orgId }: { orgId: string }) {
   ];
 
   return (
-    <PageContainer size="settings" className="h-full">
+    <PageContainer size="personal" className="h-full">
       <div className="flex h-full min-h-0 gap-10 overflow-hidden">
         <aside className="hidden w-52 shrink-0 py-6 sm:py-10 lg:block">
           <nav className="sticky top-6 flex flex-col gap-1">

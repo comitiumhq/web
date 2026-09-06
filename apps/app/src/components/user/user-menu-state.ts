@@ -67,6 +67,7 @@ export function useUserMenuState(): UserMenuState {
     walletAddress,
     name: profileName ?? publicOrgMember?.name ?? null,
     email: accountEmail,
+    avatarUrl: orgMe?.avatarUrl ?? null,
   });
 
   const handleSelectOrg = useCallback(

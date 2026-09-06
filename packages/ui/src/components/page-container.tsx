@@ -8,6 +8,7 @@ const pageContainerVariants = cva('mx-auto w-full px-4 sm:px-6 lg:px-8', {
     size: {
       workspace: 'max-w-[1440px]',
       settings: 'max-w-6xl',
+      personal: 'max-w-5xl',
       content: 'max-w-5xl',
       list: 'max-w-4xl',
       editor: 'max-w-4xl',

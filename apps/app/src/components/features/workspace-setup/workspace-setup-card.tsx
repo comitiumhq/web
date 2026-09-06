@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
 import { Progress } from '@comitium/ui/progress';
 import { Separator } from '@comitium/ui/separator';
-import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { ArrowRightIcon, CaretDownIcon, CheckCircleIcon, CircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
@@ -146,38 +145,6 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
-  );
-}
-
-export function WorkspaceSetupCardSkeleton() {
-  return (
-    <Card
-      size="sm"
-      className="max-h-[calc(100dvh-2rem)] w-72 max-w-[calc(100vw-2rem)] min-w-0 gap-0 bg-popover/90 py-0 shadow-lg backdrop-blur-2xl supports-[backdrop-filter]:bg-popover/60"
-      aria-label="Loading getting started"
-    >
-      <CardHeader className="shrink-0 px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-4 w-8" />
-        </div>
-      </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-4 pt-1 pb-4">
-        <Skeleton className="h-1.5 w-full rounded-full" />
-        <div className="flex flex-col gap-1">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-        </div>
-        <Separator />
-        <div className="flex flex-col gap-1">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-9 w-full" />
-        </div>
-      </CardContent>
     </Card>
   );
 }

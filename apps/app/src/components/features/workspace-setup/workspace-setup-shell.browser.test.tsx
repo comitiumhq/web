@@ -25,7 +25,6 @@ vi.mock('@/hooks/queries/use-query-workspace-setup', () => ({
 
 vi.mock('./workspace-setup-card', () => ({
   WorkspaceSetupCard: () => <section>Getting started card</section>,
-  WorkspaceSetupCardSkeleton: () => <section>Loading getting started</section>,
 }));
 
 function setup(complete = false): WorkspaceSetup {
@@ -98,7 +97,7 @@ describe('workspace setup shell', () => {
     await expect.element(screen.getByText('Organization work')).toBeInTheDocument();
   });
 
-  it('shows the desktop setup placeholder without replacing organization work while the admin read is loading', async () => {
+  it('does not flash setup UI while the admin read is loading', async () => {
     mocks.isAdmin = true;
     mocks.isLoading = true;
     const screen = await render(
@@ -107,7 +106,7 @@ describe('workspace setup shell', () => {
       </WorkspaceSetupShell>,
     );
 
-    await expect.element(screen.getByText('Loading getting started')).toBeInTheDocument();
+    expect(document.querySelector('aside[aria-label="Getting started"]')).toBeNull();
     await expect.element(screen.getByText('Organization work')).toBeInTheDocument();
   });
 });

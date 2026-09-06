@@ -61,6 +61,7 @@ export const FeedEventCard = memo(function FeedEventCard({
         <NoteCard
           noteId={(event.payload as NotePayload).noteId}
           authorName={event.actor.name}
+          authorAvatarUrl={event.actor.avatarUrl}
           isPrivate={(event.payload as NotePayload).isPrivate}
           createdAt={event.createdAt}
           orgId={orgId}

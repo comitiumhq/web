@@ -4,11 +4,11 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { FeatureSheetBody, FeatureSheetContent, FeatureSheetHeader } from '@comitium/ui/feature-sheet';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { DotsThreeIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
 import type { OrgRole, OrgTeamMember } from '@/lib/schemas/org';
 import { cn } from '@/lib/utils';
@@ -75,7 +75,7 @@ function MemberPermissionsContent({ org, userId, currentTreasury }: MemberPermis
     <>
       <FeatureSheetHeader>
         <div className="flex items-center gap-3 pr-8">
-          <InitialsAvatar identity={member} size="lg" />
+          <MemberAvatar identity={member} size="lg" />
           <div className="min-w-0 flex-1">
             <SheetTitle className="text-heading-20 truncate">{model.displayName}</SheetTitle>
             <SheetDescription className="truncate">{model.identityLine}</SheetDescription>

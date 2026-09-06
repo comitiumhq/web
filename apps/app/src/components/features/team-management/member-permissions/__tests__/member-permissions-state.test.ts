@@ -16,6 +16,7 @@ function makeMember(overrides: Partial<OrgTeamMember> = {}): OrgTeamMember {
     email: 'member@example.com',
     name: 'Member',
     jobTitle: null,
+    avatarUrl: null,
     role: 'org_member',
     timezone: null,
     isActive: true,

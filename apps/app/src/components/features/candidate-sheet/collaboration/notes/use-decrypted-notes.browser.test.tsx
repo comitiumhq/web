@@ -75,7 +75,7 @@ function noteActivity(noteId: string, content: EncryptedEnvelope): ActivityFeedR
     applicationId: null,
     jobId: null,
     jobTitle: null,
-    actor: { userId: null, externalWallet: null, name: 'Recruiter' },
+    actor: { userId: null, externalWallet: null, name: 'Recruiter', avatarUrl: null },
     metadata: {},
     payload: { kind: 'note', noteId, content, isPrivate: false },
   } as ActivityFeedRow;

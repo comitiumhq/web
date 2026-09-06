@@ -1,8 +1,8 @@
 import { truncateAddress } from '@comitium/ui/display-name';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { TableCell, TableRow } from '@comitium/ui/table';
 import { type KeyboardEvent, type MouseEvent, memo, type ReactNode, useCallback } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import type { OrgTeamMember } from '@/hooks/queries/use-query-org-team';
 import type { OrgRole } from '@/lib/schemas/org';
 import { cn, getMemberDisplayName } from '@/lib/utils';
@@ -118,7 +118,7 @@ export const MemberRow = memo(function MemberRow({ member, onSelect }: MemberRow
     >
       <TableCell>
         <div className="flex items-center gap-2.5">
-          <InitialsAvatar identity={member} size="md" />
+          <MemberAvatar identity={member} size="md" />
           <div className="flex min-w-0 flex-col items-start">
             <span className="flex max-w-50 items-center gap-2 text-label-14">
               <span className="min-w-0 truncate">{displayName}</span>

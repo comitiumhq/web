@@ -1,8 +1,8 @@
 import { getMemberDisplayName, type MemberDisplayIdentity } from '@comitium/ui/display-name';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { PlusIcon, XIcon } from '@phosphor-icons/react';
 import { memo, useCallback, useMemo } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 
 type MemberOption = MemberDisplayIdentity & { userId: string };
 
@@ -85,7 +85,7 @@ const MemberChip = memo(function MemberChip({ userId, member, onRemove }: Member
 
   return (
     <div className="inline-flex items-center gap-1.5 rounded-full border bg-muted pl-1 pr-2 py-0.5">
-      {member && <InitialsAvatar identity={member} size="sm" />}
+      {member && <MemberAvatar identity={member} size="sm" />}
       <span className="text-label-12">{member ? getMemberDisplayName(member) : 'Former member'}</span>
       <button
         type="button"

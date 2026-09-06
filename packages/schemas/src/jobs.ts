@@ -83,6 +83,7 @@ export const hiringTeamMemberSchema = z.object({
   userId: uuidSchema,
   email: z.string().nullable(),
   name: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
   role: z.enum(['hiring_member', 'hiring_manager']).nullable(),
   effectiveAccessRole: z.string().nullable(),
   permissions: z.array(z.string()),
@@ -134,7 +135,9 @@ export type JobApplicationData = z.infer<typeof jobApplicationDataSchema>;
 const hiringTeamSummarySchema = z.object({
   members: z.array(
     z.object({
+      userId: uuidSchema,
       name: z.string().nullable(),
+      avatarUrl: z.string().nullable(),
     }),
   ),
   total: z.number(),

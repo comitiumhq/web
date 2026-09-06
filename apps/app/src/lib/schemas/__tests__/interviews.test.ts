@@ -92,7 +92,7 @@ describe('candidate sheet interview contracts', () => {
           location: null,
           meetingUrl: null,
         },
-        interviewers: [{ userId: USER_ID, name: 'Ari Singh', role: 'lead' }],
+        interviewers: [{ userId: USER_ID, name: 'Ari Singh', role: 'lead', avatarUrl: null }],
         applicationSubmission: null,
         hasResume: false,
         resumeFileId: null,

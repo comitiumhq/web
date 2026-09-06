@@ -1,10 +1,10 @@
 import { UploadIcon, XIcon } from '@phosphor-icons/react';
 import type { ChangeEvent, DragEvent } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
+import { getImageUploadMaxSizeLabel, getSupportedImageFormats, validateImageUpload } from '../lib/image-upload';
 import { Button } from './button';
 import { Input } from './input';
-import { Label } from './label';
 
 interface ImageUploaderProps {
   size?: string;
@@ -27,6 +27,8 @@ export const ImageUploader = ({
   initialImage = null,
   onImageChange,
 }: ImageUploaderProps) => {
+  const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(initialImage);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -42,14 +44,9 @@ export const ImageUploader = ({
         return;
       }
 
-      if (!acceptedTypes.includes(file.type)) {
-        setError(`Use ${getSupportedFormats(acceptedTypes)}.`);
-
-        return;
-      }
-
-      if (file.size === 0 || file.size > maxSize) {
-        setError(`Image must be ${getMaxSizeLabel(maxSize)} or smaller.`);
+      const validationError = validateImageUpload(file, acceptedTypes, maxSize);
+      if (validationError) {
+        setError(validationError);
 
         return;
       }
@@ -116,9 +113,15 @@ export const ImageUploader = ({
     onImageChange?.(null);
   }, [onImageChange]);
 
-  const inputId = `file-upload-${label.replace(/\s+/g, '-').toLowerCase()}`;
-  const supportedFormats = getSupportedFormats(acceptedTypes);
-  const maxSizeLabel = getMaxSizeLabel(maxSize);
+  const openFilePicker = useCallback(() => {
+    if (!disabled) {
+      inputRef.current?.click();
+    }
+  }, [disabled]);
+
+  const supportedFormats = getSupportedImageFormats(acceptedTypes);
+  const maxSizeLabel = getImageUploadMaxSizeLabel(maxSize);
+  const pickerLabel = `${preview ? 'Change' : 'Upload'} ${label.toLowerCase()}`;
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
@@ -137,53 +140,57 @@ export const ImageUploader = ({
         onDragLeave={handleDragLeave}
       >
         {preview ? (
-          <div className="relative group w-full h-full">
-            <img src={preview} alt={label} className="w-full h-full object-cover rounded-xl" />
+          <>
+            <img src={preview} alt={label} className="size-full rounded-xl object-cover" />
             {!disabled && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-background opacity-0 transition-all duration-200 group-hover:opacity-60">
+              <>
+                <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 rounded-xl bg-background/70 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+                  <UploadIcon className="size-5" />
+                  <span className="text-label-12">Change</span>
+                </div>
                 <Button
                   type="button"
                   onClick={removeImage}
-                  size="icon-sm"
-                  className="rounded-full bg-background text-foreground opacity-0 shadow-sm transition-opacity duration-200 hover:scale-105 hover:bg-background group-hover:opacity-100"
+                  size="icon-xs"
+                  variant="outline"
+                  aria-label={`Remove ${label.toLowerCase()}`}
+                  className="absolute right-2 top-2 z-30 rounded-full bg-background shadow-sm hover:bg-background"
                 >
                   <XIcon />
                 </Button>
-              </div>
+              </>
             )}
-          </div>
+          </>
         ) : (
-          <div className="text-center flex flex-col justify-center h-full">
+          <div className="pointer-events-none flex h-full flex-col justify-center text-center">
             <UploadIcon
               className={cn('mx-auto mb-2 size-6 transition-colors', getUploadIconClassName(disabled, isDragging))}
             />
-            <div className="text-label-14">
-              <Label
-                htmlFor={disabled ? undefined : inputId}
-                className={cn('justify-self-center', {
-                  'cursor-not-allowed': disabled,
-                  'cursor-pointer': !disabled,
-                })}
-              >
-                <span
-                  className={cn('block text-label-12 transition-colors', getUploadTextClassName(disabled, isDragging))}
-                >
-                  Upload {label.toLowerCase()}
-                </span>
-              </Label>
-              {!disabled && (
-                <Input
-                  id={inputId}
-                  type="file"
-                  className="sr-only"
-                  accept={acceptedTypes.join(',')}
-                  onChange={handleFileInput}
-                  disabled={disabled}
-                />
-              )}
-            </div>
+            <span className={cn('text-label-12 transition-colors', getUploadTextClassName(disabled, isDragging))}>
+              Upload {label.toLowerCase()}
+            </span>
           </div>
         )}
+
+        <button
+          type="button"
+          aria-controls={inputId}
+          aria-label={pickerLabel}
+          className="absolute inset-0 z-20 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed"
+          disabled={disabled}
+          onClick={openFilePicker}
+        />
+        <Input
+          ref={inputRef}
+          id={inputId}
+          type="file"
+          className="sr-only"
+          accept={acceptedTypes.join(',')}
+          onChange={handleFileInput}
+          disabled={disabled}
+          tabIndex={-1}
+          aria-hidden="true"
+        />
       </div>
 
       <p className="text-label-12 text-muted-foreground">
@@ -197,30 +204,6 @@ export const ImageUploader = ({
     </div>
   );
 };
-
-function getSupportedFormats(acceptedTypes: string[]) {
-  return [
-    ...new Set(
-      acceptedTypes.map((type) => {
-        const ext = type.split('/')[1];
-
-        if (ext === 'svg+xml') {
-          return 'SVG';
-        }
-
-        if (ext === 'jpg') {
-          return 'JPEG';
-        }
-
-        return ext.toUpperCase();
-      }),
-    ),
-  ].join(', ');
-}
-
-function getMaxSizeLabel(maxSize: number) {
-  return `${Math.round(maxSize / (1024 * 1024))} MB`;
-}
 
 function getDropzoneClassName(disabled: boolean, isDragging: boolean) {
   if (disabled) {
