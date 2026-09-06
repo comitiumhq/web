@@ -8,11 +8,13 @@ import { LockIcon, XIcon } from '@phosphor-icons/react';
 import { memo, useCallback, useState } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
-import { cn, formatRelativeTime, getActorDisplayName, getNameInitials } from '@/lib/utils';
+import { MemberAvatar } from '@/components/user/member-avatar';
+import { formatRelativeTime, getActorDisplayName } from '@/lib/utils';
 
 interface NoteCardProps {
   noteId: string;
   authorName: string | null;
+  authorAvatarUrl: string | null;
   isPrivate: boolean;
   createdAt: string;
   orgId: string;
@@ -27,6 +29,7 @@ interface NoteCardProps {
 export const NoteCard = memo(function NoteCard({
   noteId,
   authorName,
+  authorAvatarUrl,
   isPrivate,
   createdAt,
   orgId,
@@ -38,7 +41,6 @@ export const NoteCard = memo(function NoteCard({
   isDeleting,
 }: NoteCardProps) {
   const actorName = getActorDisplayName(authorName);
-  const initials = getNameInitials(authorName);
 
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
@@ -55,14 +57,7 @@ export const NoteCard = memo(function NoteCard({
   return (
     <Card size="sm" className="gap-0 py-0">
       <div className="flex items-center gap-2 px-4 py-2.5">
-        <div
-          className={cn('flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium', {
-            'bg-muted text-muted-foreground': !isPrivate,
-            'bg-secondary text-secondary-foreground': isPrivate,
-          })}
-        >
-          {initials}
-        </div>
+        <MemberAvatar identity={{ name: authorName, avatarUrl: authorAvatarUrl }} size="sm" />
 
         <span className="text-label-13 font-medium flex-1 truncate">{actorName}</span>
 

@@ -228,6 +228,7 @@ export const candidateSheetConsiderationContextSchema = z.object({
     z.object({
       userId: uuidSchema,
       name: z.string().nullable(),
+      avatarUrl: z.string().nullable(),
       role: z.enum(['hiring_manager', 'hiring_member']),
     }),
   ),

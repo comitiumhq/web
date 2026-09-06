@@ -16,6 +16,7 @@ const switcherLeadingSlotClassName = 'flex size-7 shrink-0 items-center justify-
 const orgSwitchSections = ['/pipeline', '/jobs', '/settings', '/organization', '/interviews'] as const;
 
 interface AccountContextSwitcherProps {
+  avatarImageSrc?: string | null;
   currentOrgId: string | null;
   identity: DisplayIdentity | null;
   onSelectOrg: (id: string) => void;
@@ -89,11 +90,17 @@ const OrgMenuItem = memo(function OrgMenuItem({ org, selected, onSelect }: OrgMe
   );
 });
 
-export function AccountContextSwitcher({ currentOrgId, identity, onSelectOrg, orgs }: AccountContextSwitcherProps) {
+export function AccountContextSwitcher({
+  avatarImageSrc,
+  currentOrgId,
+  identity,
+  onSelectOrg,
+  orgs,
+}: AccountContextSwitcherProps) {
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger className="h-auto px-3 py-2.5">
-        <UserAccountSummary identity={identity} />
+        <UserAccountSummary identity={identity} avatarImageSrc={avatarImageSrc} />
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent className="w-64">
         <div className="max-h-56 overflow-y-auto">

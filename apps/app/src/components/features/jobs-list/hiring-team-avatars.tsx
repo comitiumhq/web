@@ -1,6 +1,6 @@
 import type { OrgJobListItem } from '@comitium/schemas/jobs';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { memo } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 
 interface HiringTeamAvatarsProps {
   team: OrgJobListItem['hiringTeam'];
@@ -16,13 +16,8 @@ export const HiringTeamAvatars = memo(function HiringTeamAvatars({ team }: Hirin
   return (
     <div className="flex items-center">
       <div className="flex items-center [&>*+*]:-ml-1.5">
-        {team.members.map((m, i) => (
-          <InitialsAvatar
-            key={i}
-            identity={{ walletAddress: '', name: m.name }}
-            size="sm"
-            className="ring-2 ring-card"
-          />
+        {team.members.map((member) => (
+          <MemberAvatar key={member.userId} identity={member} size="sm" className="ring-2 ring-card" />
         ))}
       </div>
       {overflow > 0 && <span className="text-label-12 text-muted-foreground pl-2">+{overflow}</span>}

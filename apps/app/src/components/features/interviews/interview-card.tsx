@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import {
   ArrowSquareOutIcon,
@@ -29,6 +28,7 @@ import {
 } from '@phosphor-icons/react';
 import { addMinutes, isBefore } from 'date-fns';
 import { memo, type ReactNode, useCallback, useMemo, useState } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import { useCompleteInterview } from '@/hooks/mutations/use-interview-mutations';
 import { useQueryInterviewRsvp } from '@/hooks/queries/use-query-interview-rsvp';
 import { useQueryOrgTeamMap } from '@/hooks/queries/use-query-org-team';
@@ -320,7 +320,7 @@ export const InterviewCard = memo(function InterviewCard({
                         aria-label={getInterviewerRsvpAccessibleLabel(displayName, status)}
                         className="relative rounded-full ring-2 ring-background focus-visible:outline-none focus-visible:ring-ring"
                       >
-                        <InitialsAvatar identity={identity} size="sm" />
+                        <MemberAvatar identity={identity} size="sm" />
                         {status && <RsvpDot status={status} />}
                       </button>
                     </TooltipTrigger>

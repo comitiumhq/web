@@ -11,6 +11,7 @@ import { UserAccountSummary } from '@comitium/ui/user-account-summary';
 import { UserAvatar } from '@comitium/ui/user-avatar';
 import { GearIcon, SignOutIcon, UserCircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { useMemberAvatar } from '@/hooks/queries/use-member-avatar';
 import { AccountContextSwitcher } from './account-context-switcher';
 import type { ReadyUserMenuState } from './user-menu-state';
 
@@ -31,6 +32,7 @@ function LogoutMenuItem({ onDisconnect }: Pick<ReadyUserMenuState, 'onDisconnect
 
 export function UserMenuDropdown({ state }: UserMenuDropdownProps) {
   const hasSwitchableContexts = state.orgs.length > 0;
+  const avatarImageSrc = useMemberAvatar(state.identity?.avatarUrl);
 
   return (
     <DropdownMenu modal={false}>
@@ -41,20 +43,25 @@ export function UserMenuDropdown({ state }: UserMenuDropdownProps) {
           className="rounded-full shrink-0 p-0 overflow-hidden"
           aria-label="Open account menu"
         >
-          <UserAvatar identity={state.identity} />
+          <UserAvatar
+            identity={state.identity}
+            imageSrc={avatarImageSrc}
+            imageAlt={avatarImageSrc && state.identity?.name ? state.identity.name : ''}
+          />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-64">
         {hasSwitchableContexts ? (
           <AccountContextSwitcher
+            avatarImageSrc={avatarImageSrc}
             currentOrgId={state.currentOrgId}
             identity={state.identity}
             onSelectOrg={state.onSelectOrg}
             orgs={state.orgs}
           />
         ) : (
-          <UserAccountSummary identity={state.identity} className="px-3 py-2.5" />
+          <UserAccountSummary identity={state.identity} avatarImageSrc={avatarImageSrc} className="px-3 py-2.5" />
         )}
 
         <DropdownMenuSeparator />

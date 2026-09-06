@@ -1,8 +1,8 @@
 import { Button } from '@comitium/ui/button';
 import type { MemberDisplayIdentity } from '@comitium/ui/display-name';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { XIcon } from '@phosphor-icons/react';
 import { memo, useCallback } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 
 interface ResourceColumnProps {
   userId: string;
@@ -23,7 +23,7 @@ export const ResourceColumn = memo(function ResourceColumn({
 
   return (
     <div className="flex items-center gap-2 px-2 py-1.5 min-w-0 w-full">
-      <InitialsAvatar identity={identity} size="md" />
+      <MemberAvatar identity={identity} size="md" />
       <div className="flex flex-col min-w-0 flex-1">
         <span className="text-label-13 font-medium truncate">{title}</span>
         {timeZone && <span className="text-label-12 text-muted-foreground truncate">{timeZone}</span>}

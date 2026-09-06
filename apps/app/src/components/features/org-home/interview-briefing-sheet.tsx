@@ -3,7 +3,6 @@ import { Button } from '@comitium/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { FeatureErrorFallback } from '@comitium/ui/error-fallbacks';
 import { FeatureSheetBody, FeatureSheetContent, FeatureSheetHeader } from '@comitium/ui/feature-sheet';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
@@ -18,6 +17,7 @@ import {
 } from '@/components/features/feedback-submission';
 import { ResumePreview } from '@/components/features/resume/resume-preview';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import { useQueryInterviewBriefing } from '@/hooks/queries/use-query-interviews';
 import { useQueryOrgVaultKey } from '@/hooks/queries/use-query-org-vault-key';
 import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
@@ -391,7 +391,7 @@ function InterviewPanel({ interviewers }: { interviewers: InterviewBriefing['int
       <CardContent className="flex flex-wrap gap-x-6 gap-y-4 pt-3">
         {interviewers.map((interviewer) => (
           <div key={interviewer.userId} className="flex min-w-44 items-center gap-2.5">
-            <InitialsAvatar identity={{ name: interviewer.name }} size="sm" />
+            <MemberAvatar identity={interviewer} size="sm" />
             <div className="min-w-0">
               <p className="truncate text-label-14">{interviewer.name ?? 'Team member'}</p>
               <p className="text-copy-12 text-muted-foreground">{getInterviewerRoleLabel(interviewer.role)}</p>

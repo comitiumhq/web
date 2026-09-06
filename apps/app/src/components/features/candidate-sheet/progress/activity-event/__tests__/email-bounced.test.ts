@@ -19,6 +19,7 @@ describe('email_bounced timeline event', () => {
         userId: null,
         externalWallet: null,
         name: null,
+        avatarUrl: null,
       },
       metadata: {
         recipientEmail: 'candidate@example.com',

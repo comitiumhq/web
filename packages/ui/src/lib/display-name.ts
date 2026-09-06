@@ -15,12 +15,14 @@ interface DisplayIdentityInput {
   walletAddress: string | null;
   name: string | null;
   email: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface MemberDisplayIdentity {
   walletAddress?: string | null;
   name?: string | null;
   email?: string | null;
+  avatarUrl?: string | null;
 }
 
 export function truncateAddress(address: string): string {
@@ -63,7 +65,12 @@ export function getMemberDisplayName(identity: MemberDisplayIdentity): string {
   return 'Team member';
 }
 
-export function createDisplayIdentity({ walletAddress, name, email }: DisplayIdentityInput): DisplayIdentity | null {
+export function createDisplayIdentity({
+  walletAddress,
+  name,
+  email,
+  avatarUrl,
+}: DisplayIdentityInput): DisplayIdentity | null {
   if (!walletAddress) {
     return null;
   }
@@ -72,6 +79,7 @@ export function createDisplayIdentity({ walletAddress, name, email }: DisplayIde
     walletAddress,
     name,
     email,
+    avatarUrl,
   };
 }
 

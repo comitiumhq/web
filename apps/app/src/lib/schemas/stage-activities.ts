@@ -96,6 +96,7 @@ const activityMemberOptionSchema = z.object({
   userId: uuidSchema,
   name: z.string().nullable(),
   email: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
 });
 
 export type ActivityInterviewTemplateOption = z.infer<typeof activityInterviewTemplateOptionSchema>;

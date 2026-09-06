@@ -101,12 +101,14 @@ export function NotesTab({
           {!isInitialError &&
             notes.map((note) => {
               const isOwnNote = note.author === currentUserId;
+              const author = memberMap.get(note.author);
 
               return (
                 <NoteCard
                   key={note.id}
                   noteId={note.id}
-                  authorName={memberMap.get(note.author)?.name ?? null}
+                  authorName={author?.name ?? null}
+                  authorAvatarUrl={author?.avatarUrl ?? null}
                   isPrivate={note.isPrivate}
                   createdAt={note.createdAt}
                   orgId={orgId}

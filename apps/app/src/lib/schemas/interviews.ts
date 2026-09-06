@@ -335,6 +335,7 @@ export const interviewBriefingResponseSchema = z.object({
       z.object({
         userId: uuidSchema,
         name: z.string().nullable(),
+        avatarUrl: z.string().nullable(),
         role: z.enum(['interviewer', 'shadow', 'lead']),
       }),
     ),

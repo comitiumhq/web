@@ -103,6 +103,7 @@ export const orgMeSchema = z.object({
   name: z.string().nullable(),
   jobTitle: z.string().nullable(),
   email: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
   emailSignature: tipTapDocSchema.nullable(),
   timezone: z.string().nullable(),
 });
@@ -225,6 +226,7 @@ export const orgTeamMemberSchema = z.object({
   email: z.string().nullable(),
   name: z.string().nullable(),
   jobTitle: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
   role: orgRoleSchema,
   timezone: z.string().nullable(),
   isActive: z.boolean(),

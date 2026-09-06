@@ -1,4 +1,5 @@
 import { dataArraySchema, dataSchema, successSchema } from '@comitium/schemas/public';
+import { z } from 'zod';
 import type { PrepareOrgContentUriUpdateData, UpdateMemberProfileData } from '@/lib/schemas/org';
 import {
   myOrgSchema,
@@ -10,6 +11,20 @@ import {
 } from '@/lib/schemas/org';
 
 import { api } from './client';
+
+const memberAvatarResponseSchema = z.object({ avatarUrl: z.string() });
+
+export interface MemberAvatarCrop {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface MemberAvatarUpload {
+  file: File;
+  crop: MemberAvatarCrop;
+}
 
 export function getMyOrgs() {
   return api.get('/orgs', dataArraySchema(myOrgSchema));
@@ -33,6 +48,20 @@ export function getOrgTreasuryStatus(orgId: string) {
 
 export function updateMemberProfile(orgId: string, data: UpdateMemberProfileData) {
   return api.patch(`/orgs/${orgId}/member/profile`, data, successSchema);
+}
+
+export function uploadMemberAvatar(orgId: string, { file, crop }: MemberAvatarUpload) {
+  const formData = new FormData();
+  formData.set('file', file);
+  formData.set('crop', JSON.stringify(crop));
+
+  return api.upload(`/orgs/${orgId}/member/avatar`, formData, memberAvatarResponseSchema);
+}
+
+export async function deleteMemberAvatar(orgId: string) {
+  await api.delete(`/orgs/${orgId}/member/avatar`, successSchema);
+
+  return { avatarUrl: null };
 }
 
 export function prepareOrgContentUriUpdate(orgId: string, data: PrepareOrgContentUriUpdateData) {

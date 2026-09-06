@@ -19,8 +19,8 @@ export function AccountSettingsPage() {
   const methods = getLinkedSignInMethods(user);
 
   return (
-    <PageContainer size="settings" className="py-6 sm:py-10">
-      <div className="grid gap-8 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-10">
+    <PageContainer size="settings" className="py-6 sm:px-4 lg:px-4">
+      <div className="grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)]">
         <AccountSidebar />
 
         <main className="min-w-0">
@@ -48,7 +48,7 @@ export function AccountSettingsPage() {
 
 function AccountSidebar() {
   return (
-    <aside className="min-w-0 md:sticky md:top-6 md:self-start">
+    <aside className="min-w-0 lg:sticky lg:top-6 lg:self-start">
       <h1 className="text-heading-20">Account</h1>
 
       <nav aria-label="Account" className="mt-4">

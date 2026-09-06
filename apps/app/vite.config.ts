@@ -35,7 +35,7 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: ['@radix-ui/react-focus-scope', '@radix-ui/react-compose-refs', '@radix-ui/react-slot'],
+    include: ['@radix-ui/react-focus-scope', '@radix-ui/react-compose-refs', '@radix-ui/react-slot', 'idb-keyval'],
   },
   plugins: [
     ssrExclude(),

@@ -3,9 +3,9 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { formatRelativeTime } from '@comitium/ui/date';
 import { getMemberDisplayName, type MemberDisplayIdentity } from '@comitium/ui/display-name';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
-import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { CaretDownIcon, CaretUpIcon, DotsThreeVerticalIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react';
 import { memo, useCallback, useState } from 'react';
+import { MemberAvatar } from '@/components/user/member-avatar';
 import { useDeleteFeedbackSubmission } from '@/hooks/mutations/use-feedback-submission';
 import type { FeedbackSubmission } from '@/lib/schemas/feedback-submissions';
 
@@ -67,7 +67,7 @@ export const SubmittedRow = memo(function SubmittedRow({
   return (
     <>
       <div className="flex items-center gap-1 px-4 py-2.5">
-        <InitialsAvatar identity={identity} size="sm" className="shrink-0" />
+        <MemberAvatar identity={identity} size="sm" className="shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-label-13 font-medium truncate">{getMemberDisplayName(identity)}</p>
           <p className="text-label-12 text-muted-foreground">{formatRelativeTime(submission.submittedAt)}</p>

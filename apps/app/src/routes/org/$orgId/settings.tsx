@@ -39,9 +39,9 @@ function PersonalSettingsLayoutContent({ orgId }: { orgId: string }) {
   ];
 
   return (
-    <PageContainer size="settings" className="h-full">
-      <div className="flex h-full min-h-0 gap-10 overflow-hidden">
-        <aside className="hidden w-52 shrink-0 py-6 sm:py-10 lg:block">
+    <PageContainer size="settings" className="h-full sm:px-4 lg:px-4">
+      <div className="flex h-full min-h-0 gap-8 overflow-hidden">
+        <aside className="hidden w-68 shrink-0 py-6 lg:block">
           <nav className="sticky top-6 flex flex-col gap-1">
             {items.map((item) => (
               <PersonalSettingsNavLink key={item.path} item={item} active={item.match(pathname)} />
@@ -49,7 +49,7 @@ function PersonalSettingsLayoutContent({ orgId }: { orgId: string }) {
           </nav>
         </aside>
 
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col py-6 sm:py-10">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col py-6">
           <nav className="mb-6 flex gap-1 lg:hidden">
             {items.map((item) => (
               <PersonalSettingsNavLink key={item.path} item={item} active={item.match(pathname)} />

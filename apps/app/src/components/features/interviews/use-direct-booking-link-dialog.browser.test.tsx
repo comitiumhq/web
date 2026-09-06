@@ -26,6 +26,7 @@ const member = {
   email: 'interviewer@example.com',
   name: 'Interviewer',
   jobTitle: null,
+  avatarUrl: null,
   role: 'org_member',
   timezone: 'Europe/Warsaw',
   isActive: true,
