@@ -83,7 +83,7 @@ export function FeedbackSubmissionSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-[720px] flex flex-col p-0">
-        <SheetHeader className="border-b shrink-0 px-6 py-4 gap-1">
+        <SheetHeader className="shrink-0 px-6 py-4 gap-1">
           <SheetTitle>{getSheetTitle(flow.mode, source)}</SheetTitle>
           <SheetDescription className="flex flex-col items-start gap-0.5">
             <span>{sheetDescription}</span>

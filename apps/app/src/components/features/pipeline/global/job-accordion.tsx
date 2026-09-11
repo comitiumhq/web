@@ -144,7 +144,7 @@ export function JobAccordion({ job, orgId, stageType, defaultExpanded, onApplica
         </div>
       </div>
 
-      {expanded && <div className="border-t border-border bg-muted/50">{kanbanContent}</div>}
+      {expanded && <div className="border-t border-border bg-kanban-canvas">{kanbanContent}</div>}
     </Card>
   );
 }

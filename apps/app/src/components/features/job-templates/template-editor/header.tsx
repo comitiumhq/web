@@ -90,7 +90,7 @@ export const TemplateHeader = memo(function TemplateHeader({
 
   return (
     <>
-      <div className="flex shrink-0 items-start justify-between gap-3 border-b px-6 py-5">
+      <div className="flex shrink-0 items-start justify-between gap-3 px-6 py-5">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <SheetTitle className="text-heading-20 truncate">

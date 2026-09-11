@@ -35,7 +35,7 @@ export function DraftPreviewDialog({ orgId, draft, descriptionMarkdown, open, on
         side="right"
         className="w-full data-[side=right]:sm:max-w-[56rem] p-0 flex flex-col overflow-hidden"
       >
-        <div className="shrink-0 px-6 pt-6 pb-4 border-b border-border">
+        <div className="shrink-0 px-6 pt-6 pb-4">
           <div className="mb-3">
             <Badge variant="secondary">Draft preview</Badge>
           </div>

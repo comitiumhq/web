@@ -136,7 +136,7 @@ export function CandidateSheetSkeleton() {
 
 function CandidateHeaderSkeleton() {
   return (
-    <div aria-hidden className="shrink-0 border-b border-border px-6 py-4 pr-14 sm:pr-6">
+    <div aria-hidden className="shrink-0 px-6 py-4 pr-14 sm:pr-6">
       <div className="flex flex-col items-stretch gap-3 min-[900px]:flex-row min-[900px]:items-start min-[900px]:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex h-[26px] items-center">

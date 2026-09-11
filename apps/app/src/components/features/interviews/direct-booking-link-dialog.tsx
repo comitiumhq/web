@@ -61,7 +61,7 @@ export function DirectBookingLinkDialog({
   return (
     <Sheet open={open} onOpenChange={dialog.handleOpenChange}>
       <SheetContent side="right" className="flex flex-col p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-3xl">
-        <SheetHeader className="border-b shrink-0">
+        <SheetHeader className="shrink-0">
           <SheetTitle>Send scheduling link</SheetTitle>
           <SheetDescription>Configure the interview and email the candidate a link to choose a time.</SheetDescription>
         </SheetHeader>
@@ -148,7 +148,7 @@ export function DirectBookingLinkDialog({
               </div>
             </div>
 
-            <SheetFooter className="border-t shrink-0 flex-row justify-end gap-2">
+            <SheetFooter className="shrink-0 flex-row justify-end gap-2">
               <Button type="button" variant="outline" onClick={dialog.handleCancel}>
                 Cancel
               </Button>

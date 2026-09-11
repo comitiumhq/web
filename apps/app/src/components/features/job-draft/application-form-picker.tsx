@@ -1,11 +1,13 @@
 import type { ApplicationFormOption } from '@comitium/schemas/forms/form-definitions';
+import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Form } from '@comitium/ui/form';
 import { Skeleton } from '@comitium/ui/skeleton';
+import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { CheckIcon, EyeIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { EyeIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { type FieldValues, useForm } from 'react-hook-form';
@@ -95,7 +97,7 @@ export function ApplicationFormPicker({ orgId, owner, formId, onChange }: Applic
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5">
       {forms.map((form) => (
         <ApplicationFormOptionRow
           key={form.id}
@@ -172,26 +174,23 @@ const ApplicationFormOptionRow = memo(function ApplicationFormOptionRow({
 
   return (
     <div
-      className={cn('relative flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors', {
-        'border-border hover:bg-accent': !isSelected,
-        'border-primary bg-primary/5': isSelected,
-      })}
+      className={cn(
+        selectionCardVariants({ selected: isSelected }),
+        'group relative flex min-h-18 items-center gap-3 overflow-hidden px-4 py-3',
+      )}
     >
       <button
         type="button"
         onClick={handleSelect}
         aria-label={`Select ${form.title}`}
-        className="absolute inset-0 rounded-xl"
+        aria-pressed={isSelected}
+        className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
       />
 
       <span className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex flex-wrap items-center gap-2">
           <span className="text-label-14 font-medium">{form.title}</span>
-          {form.isDefaultForm ? (
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-label-12 text-secondary-foreground">
-              Default
-            </span>
-          ) : null}
+          {form.isDefaultForm ? <Badge variant="subtle">Default</Badge> : null}
         </span>
         <FormMetaLine detail={form} />
       </span>
@@ -204,7 +203,7 @@ const ApplicationFormOptionRow = memo(function ApplicationFormOptionRow({
             size="icon-sm"
             onClick={handlePreviewClick}
             aria-label={`Preview ${form.title}`}
-            className="relative text-muted-foreground"
+            className="relative text-muted-foreground hover:text-foreground"
           >
             <EyeIcon />
           </Button>
@@ -212,31 +211,10 @@ const ApplicationFormOptionRow = memo(function ApplicationFormOptionRow({
         <TooltipContent>Preview</TooltipContent>
       </Tooltip>
 
-      <SelectionIndicator isSelected={isSelected} />
+      <SelectionCardIndicator selected={isSelected} />
 
       <ApplicationFormPreviewDialog formDetail={form} open={isPreviewOpen} onOpenChange={setIsPreviewOpen} />
     </div>
-  );
-});
-
-interface SelectionIndicatorProps {
-  isSelected: boolean;
-}
-
-const SelectionIndicator = memo(function SelectionIndicator({ isSelected }: SelectionIndicatorProps) {
-  return (
-    <span
-      className={cn(
-        'pointer-events-none relative flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
-        {
-          'border-border': !isSelected,
-          'border-primary bg-primary text-primary-foreground': isSelected,
-        },
-      )}
-      aria-hidden="true"
-    >
-      {isSelected ? <CheckIcon className="size-3" /> : null}
-    </span>
   );
 });
 
@@ -270,9 +248,8 @@ const ApplicationFormPreviewDialog = memo(function ApplicationFormPreviewDialog(
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
-        <DialogHeader className="border-b px-6 py-5 pr-14">
+        <DialogHeader className="px-6 pt-6 pr-14">
           <DialogTitle className="text-heading-20">Candidate form preview</DialogTitle>
-          <DialogDescription>Try the candidate experience. Test responses are not saved.</DialogDescription>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           {questionCount > 0 ? (
@@ -294,14 +271,17 @@ const ApplicationFormPreviewDialog = memo(function ApplicationFormPreviewDialog(
 
 function ApplicationFormListSkeleton() {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-xl border px-4 py-3">
+        <div
+          key={i}
+          className="flex min-h-18 items-center gap-3 rounded-2xl border border-control-border bg-control px-4 py-3"
+        >
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <Skeleton className="h-3.5 w-48" />
             <Skeleton className="h-3 w-40" />
           </div>
-          <Skeleton className="h-8 w-20 shrink-0 rounded-md" />
+          <Skeleton className="size-8 shrink-0 rounded-full" />
           <Skeleton className="size-5 shrink-0 rounded-full" />
         </div>
       ))}

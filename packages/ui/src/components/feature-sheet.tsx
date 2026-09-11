@@ -26,7 +26,7 @@ function FeatureSheetContent({ className, width, ...props }: FeatureSheetContent
 }
 
 function FeatureSheetHeader({ className, ...props }: React.ComponentProps<typeof SheetHeader>) {
-  return <SheetHeader className={cn('shrink-0 border-b border-border px-6 py-4', className)} {...props} />;
+  return <SheetHeader className={cn('shrink-0 px-6 py-4', className)} {...props} />;
 }
 
 function FeatureSheetBody({ className, ...props }: React.ComponentProps<'div'>) {
@@ -42,7 +42,7 @@ function FeatureSheetFooter({ className, stackOnMobile = false, ...props }: Feat
 
   return (
     <SheetFooter
-      className={cn('shrink-0 gap-2 border-t border-border px-6 py-4', alignmentClassName, className)}
+      className={cn('shrink-0 gap-2 px-6 py-4', alignmentClassName, className)}
       {...props}
     />
   );

@@ -220,7 +220,7 @@ export function EmailSheet({
   return (
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <FeatureSheetContent ref={sheetContentRef} width="2xl">
-        <FeatureSheetHeader className="border-b-0">
+        <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Email candidate</SheetTitle>
           <SheetDescription>Compose and review the message before sending.</SheetDescription>
         </FeatureSheetHeader>
@@ -280,7 +280,7 @@ export function EmailSheet({
               <EmailMessageField content={editorContent} handleRef={editorRef} disabled={isSending} />
             </FeatureSheetBody>
 
-            <FeatureSheetFooter className="border-t-0">
+            <FeatureSheetFooter>
               <Button variant="outline" onClick={handleCancel} disabled={isSending} type="button">
                 Cancel
               </Button>

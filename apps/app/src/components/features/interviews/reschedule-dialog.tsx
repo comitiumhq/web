@@ -164,7 +164,7 @@ export function RescheduleInterviewDialog({
           side="right"
           className="flex flex-col p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-6xl"
         >
-          <SheetHeader className="border-b shrink-0">
+          <SheetHeader className="shrink-0">
             <SheetTitle>Reschedule Interview</SheetTitle>
             <SheetDescription>Pick a new time slot. Interviewers and meeting details stay the same.</SheetDescription>
           </SheetHeader>
@@ -207,7 +207,7 @@ export function RescheduleInterviewDialog({
             <ReasonPicker state={picker} disabled={isPending} idPrefix="reschedule" />
           </div>
 
-          <SheetFooter className="border-t shrink-0 flex-row justify-end gap-2">
+          <SheetFooter className="shrink-0 flex-row justify-end gap-2">
             <Button type="button" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>

@@ -72,6 +72,7 @@
     "./scroll-area": "./src/components/scroll-area.tsx",
     "./search-select": "./src/components/search-select.tsx",
     "./section-header": "./src/components/section-header.tsx",
+    "./selection-card": "./src/components/selection-card.tsx",
     "./select": "./src/components/select.tsx",
     "./separator": "./src/components/separator.tsx",
     "./sheet": "./src/components/sheet.tsx",

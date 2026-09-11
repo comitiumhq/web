@@ -174,7 +174,9 @@ export function KanbanBoardSkeleton() {
     </div>
   ));
 
-  return <div className="flex h-full w-full min-w-0 max-w-full overflow-x-auto p-4">{columns}</div>;
+  return (
+    <div className="flex h-full w-full min-w-0 max-w-full overflow-x-auto bg-kanban-canvas p-4">{columns}</div>
+  );
 }
 
 export function PipelineTableSkeleton({
@@ -339,7 +341,7 @@ function JobAccordionSkeleton({ expanded = false }: JobAccordionSkeletonProps) {
       </div>
 
       {expanded && (
-        <div className="border-t border-border bg-muted/50">
+        <div className="border-t border-border bg-kanban-canvas">
           <KanbanBoardSkeleton />
         </div>
       )}
@@ -349,7 +351,7 @@ function JobAccordionSkeleton({ expanded = false }: JobAccordionSkeletonProps) {
 
 function PipelineCandidateCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
+    <div className="rounded-xl border border-border bg-card p-3">
       <Skeleton className="h-5 w-36" />
       <Skeleton className="mt-2 h-4 w-24" />
       <div className="mt-4 flex flex-wrap gap-2">

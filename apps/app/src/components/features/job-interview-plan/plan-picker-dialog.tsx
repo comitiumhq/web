@@ -9,7 +9,8 @@ import {
   DialogTrigger,
 } from '@comitium/ui/dialog';
 import { Input } from '@comitium/ui/input';
-import { CheckIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
+import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { type ChangeEvent, memo, useCallback, useMemo, useState } from 'react';
 import type { InterviewPlanSummary } from '@/lib/schemas/pipeline';
 import { cn } from '@/lib/utils';
@@ -117,14 +118,14 @@ const PlanOption = memo(function PlanOption({ plan, selected, onSelect }: PlanOp
       aria-pressed={selected}
       onClick={handleClick}
       className={cn(
-        'flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-        { 'border-primary bg-primary/5': selected },
+        selectionCardVariants({ selected }),
+        'flex w-full items-center gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
       )}
     >
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
           <span className="truncate text-label-14 font-medium">{plan.name}</span>
-          {plan.isDefault ? <Badge variant="secondary">Default</Badge> : null}
+          {plan.isDefault ? <Badge variant="subtle">Default</Badge> : null}
         </span>
         <span className="mt-0.5 block text-label-12 text-muted-foreground">
           {plan.stageCount} {plan.stageCount === 1 ? 'stage' : 'stages'}
@@ -133,15 +134,7 @@ const PlanOption = memo(function PlanOption({ plan, selected, onSelect }: PlanOp
           <span className="mt-2 block truncate text-copy-13 text-muted-foreground">{plan.stageNames.join(' · ')}</span>
         ) : null}
       </span>
-      <span
-        className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2', {
-          'border-border': !selected,
-          'border-primary bg-primary text-primary-foreground': selected,
-        })}
-        aria-hidden="true"
-      >
-        {selected ? <CheckIcon className="size-3" /> : null}
-      </span>
+      <SelectionCardIndicator selected={selected} />
     </button>
   );
 });

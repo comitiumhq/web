@@ -84,7 +84,7 @@ export const TemplateRow = memo(function TemplateRow({ orgId, template, onEdit }
         <TableCell>
           <div className="flex items-center gap-2">
             <span className="text-label-14">{template.name}</span>
-            {template.isDefault && <Badge variant="secondary">Default</Badge>}
+            {template.isDefault && <Badge variant="subtle">Default</Badge>}
           </div>
         </TableCell>
         <TableCell className="text-label-14 text-muted-foreground tabular-nums">{template.stageCount}</TableCell>

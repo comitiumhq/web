@@ -132,13 +132,13 @@ export const KanbanCard = memo(function KanbanCard({
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
       onClick={handleClick}
-      data-shadow={isDragging || undefined}
       className={cn(
-        'relative flex h-30 w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card p-3 text-left transition-all duration-150',
-        'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+        'relative flex h-30 w-full shrink-0 cursor-grab flex-col overflow-hidden rounded-xl border border-border bg-card p-3 text-left outline-none transition-[background-color,border-color,box-shadow,opacity] duration-150 ease-out active:cursor-grabbing motion-reduce:transition-none',
+        'focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 focus-visible:ring-offset-kanban-canvas',
+        'data-[dnd-placeholder=clone]:opacity-40 data-[dnd-placeholder=clone]:shadow-none data-[dnd-placeholder=clone]:ring-0',
         {
-          'hover:border-primary/40 hover:shadow-sm': !isDragging,
-          'opacity-40 shadow-none': isDragging,
+          'hover:border-input hover:shadow-sm': !isDragging,
+          'z-50 cursor-grabbing border-primary/35 opacity-95 shadow-xl ring-1 ring-primary/25': isDragging,
         },
       )}
     >

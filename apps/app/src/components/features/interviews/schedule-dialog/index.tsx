@@ -186,7 +186,7 @@ export function ScheduleInterviewDialog({
           side="right"
           className="flex flex-col p-0 [&>[data-slot=sheet-close]]:top-2 [&>[data-slot=sheet-close]]:right-2 data-[side=right]:w-full data-[side=right]:sm:w-[calc(100vw-5rem)] data-[side=right]:sm:max-w-[1800px]"
         >
-          <SheetHeader className="shrink-0 border-b px-4 py-3">
+          <SheetHeader className="shrink-0 px-4 py-3">
             <SheetTitle>Schedule Interview</SheetTitle>
             <SheetDescription className="sr-only">Set up an interview for this candidate.</SheetDescription>
           </SheetHeader>
@@ -244,7 +244,7 @@ export function ScheduleInterviewDialog({
                 />
               </div>
 
-              <SheetFooter className="shrink-0 flex-row justify-end gap-2 border-t px-4 py-3">
+              <SheetFooter className="shrink-0 flex-row justify-end gap-2 px-4 py-3">
                 <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>

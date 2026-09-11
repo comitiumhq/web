@@ -188,7 +188,7 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center justify-end gap-2 border-t px-6 py-4">
+      <div className="flex shrink-0 items-center justify-end gap-2 px-6 py-4">
         {isNew ? (
           <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>
             Cancel
