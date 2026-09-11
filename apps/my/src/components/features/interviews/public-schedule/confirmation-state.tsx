@@ -51,7 +51,7 @@ export function PublicScheduleConfirmation({
                 </p>
               </div>
 
-              <div className="w-full rounded-xl bg-muted/50 px-4 py-3 ring-1 ring-foreground/10">
+              <div className="w-full rounded-xl bg-muted/50 px-4 py-3 ring-1 ring-border">
                 <p className="text-heading-14">{formatInTimezone(confirmation.scheduledAt, timeZone, 'EEE, MMM d')}</p>
                 <p className="mt-1 text-copy-14 text-muted-foreground">
                   {formatInTimezone(confirmation.scheduledAt, timeZone, 'h:mm a')} ({timeZone})

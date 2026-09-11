@@ -2,6 +2,7 @@ import { APPLICATION_TERMINAL_OUTCOME_LABEL } from '@comitium/ui/application-out
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { ScrollArea } from '@comitium/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@comitium/ui/table';
 import { useInfiniteScrollSentinel } from '@comitium/ui/use-infinite-scroll-sentinel';
 import { memo, useCallback } from 'react';
 import { PipelineTableSkeleton } from '@/components/features/pipeline/shared/pipeline-skeletons';
@@ -32,20 +33,20 @@ const ArchivedApplicationRow = memo(function ArchivedApplicationRow({
   }, [app.id, onCandidateClick]);
 
   return (
-    <tr className="border-b border-border last:border-b-0 hover:bg-muted">
-      <td className="p-3">
+    <TableRow>
+      <TableCell>
         <button type="button" className="font-medium hover:underline" onClick={handleClick}>
           {candidateName}
         </button>
         {app.duplicateAttemptCount > 0 && (
           <p className="text-xs text-muted-foreground">{app.duplicateAttemptCount + 1} application attempts</p>
         )}
-      </td>
-      <td className="p-3 text-muted-foreground">{APPLICATION_TERMINAL_OUTCOME_LABEL[app.terminalOutcome]}</td>
-      <td className="p-3 text-muted-foreground">{app.archiveReasonLabel ?? '—'}</td>
-      <td className="p-3 text-muted-foreground">{app.archivedAtStageName ?? '—'}</td>
-      <td className="p-3 text-muted-foreground">{formatDate(app.terminalOutcomeAt)}</td>
-    </tr>
+      </TableCell>
+      <TableCell className="text-muted-foreground">{APPLICATION_TERMINAL_OUTCOME_LABEL[app.terminalOutcome]}</TableCell>
+      <TableCell className="text-muted-foreground">{app.archiveReasonLabel ?? '—'}</TableCell>
+      <TableCell className="text-muted-foreground">{app.archivedAtStageName ?? '—'}</TableCell>
+      <TableCell className="text-muted-foreground">{formatDate(app.terminalOutcomeAt)}</TableCell>
+    </TableRow>
   );
 });
 
@@ -80,17 +81,17 @@ export function ArchivedSection({ jobId, orgId, onCandidateClick }: ArchivedSect
     <ScrollArea className="h-full">
       <div className="p-4">
         <Card size="sm" className="overflow-hidden py-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted">
-                <th className="p-3 text-left font-medium text-muted-foreground">Candidate</th>
-                <th className="p-3 text-left font-medium text-muted-foreground">Decision</th>
-                <th className="p-3 text-left font-medium text-muted-foreground">Reason</th>
-                <th className="p-3 text-left font-medium text-muted-foreground">Stage</th>
-                <th className="p-3 text-left font-medium text-muted-foreground">Closed</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Candidate</TableHead>
+                <TableHead>Decision</TableHead>
+                <TableHead>Reason</TableHead>
+                <TableHead>Stage</TableHead>
+                <TableHead>Closed</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {archived.map((app) => {
                 const candidateName = getCandidateDisplayName({
                   applicationId: app.id,
@@ -107,8 +108,8 @@ export function ArchivedSection({ jobId, orgId, onCandidateClick }: ArchivedSect
                   />
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </Card>
         <div ref={loadMoreRef} className="h-1" aria-hidden="true" />
         {isFetchingNextPage && <PipelineTableSkeleton activeTab="archived" rows={3} scope="job" />}

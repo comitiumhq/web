@@ -222,7 +222,7 @@ export function DataTableVirtual<TData extends RowData>({
         className={cn('overflow-auto [overflow-anchor:none] [scrollbar-gutter:stable]', maxHeightClassName)}
       >
         <table aria-label={ariaLabel} className="grid w-full" style={innerStyle}>
-          <thead className="sticky top-0 z-10 grid bg-muted shadow-[0_1px_0_0_var(--border)]">
+          <thead className="sticky top-0 z-10 grid bg-table-header shadow-[0_1px_0_0_var(--border)]">
             <tr className="grid min-h-11 items-center" style={{ gridTemplateColumns }}>
               {headers.map((header) => (
                 <HeaderCell key={header.id} header={header} />
@@ -329,8 +329,8 @@ const DataRow = memo(function DataRow<TData extends RowData>({
       className={cn(
         'absolute left-0 top-0 grid w-full items-center bg-card',
         'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-inset',
-        { 'border-b border-border': showBottomBorder },
-        { 'cursor-pointer hover:bg-muted/40': onRowClick },
+        { 'border-b border-border/70': showBottomBorder },
+        { 'cursor-pointer transition-colors hover:bg-table-row-hover': onRowClick },
         selected && 'bg-primary/[0.06] hover:bg-primary/[0.09]',
         rowClassName,
       )}
@@ -381,7 +381,7 @@ function LoadingRow<TData extends RowData>({
       ref={measureElement}
       data-index={virtualIndex}
       className={cn('absolute left-0 top-0 grid w-full items-center bg-card', {
-        'border-b border-border': showBottomBorder,
+        'border-b border-border/70': showBottomBorder,
       })}
       style={style}
     >
@@ -418,7 +418,7 @@ function HeaderCell<TData extends RowData>({ header }: { header: Header<TData, u
         onClick={header.column.getToggleSortingHandler()}
         className={cn(
           '-ml-2 inline-flex h-9 max-w-full items-center gap-1 rounded-lg px-2 transition-colors',
-          'hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50',
+          'hover:bg-table-row-hover hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50',
           { 'text-foreground': sorted !== false },
         )}
       >

@@ -135,7 +135,7 @@ const PlanOption = memo(function PlanOption({ plan, selected, onSelect }: PlanOp
       </span>
       <span
         className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2', {
-          'border-muted-foreground/30': !selected,
+          'border-border': !selected,
           'border-primary bg-primary text-primary-foreground': selected,
         })}
         aria-hidden="true"

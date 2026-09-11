@@ -50,7 +50,7 @@ function SlotPickerMessage({
   description: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-muted/50 p-4 ring-1 ring-foreground/10">
+    <div className="flex items-start gap-3 rounded-xl bg-muted/50 p-4 ring-1 ring-border">
       <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
       <div className="min-w-0">
         <p className="text-heading-14">{title}</p>

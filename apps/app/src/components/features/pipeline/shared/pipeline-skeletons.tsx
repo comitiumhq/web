@@ -78,14 +78,17 @@ export function PipelineStageControlsSkeleton({
       )}
     >
       <div className="min-w-0 overflow-hidden">
-        <div className="flex min-w-max items-center rounded-4xl border border-input bg-input/30 p-1">
+        <div className="flex min-w-max items-center rounded-4xl border border-control-border bg-segment-track bg-clip-padding p-1">
           {TAB_SKELETONS.map(({ key, widthClassName }, index) => (
             <Fragment key={key}>
               {index > 0 && (
                 <CaretRightIcon aria-hidden weight="bold" className="mx-0.5 size-4 shrink-0 text-muted-foreground/25" />
               )}
               <div
-                className={cn('flex h-9 items-center gap-1.5 rounded-3xl px-3.5', activeTab === key && 'bg-secondary')}
+                className={cn(
+                  'flex h-9 items-center gap-1.5 rounded-3xl px-3.5',
+                  activeTab === key && 'bg-segment shadow-[var(--segment-shadow)]',
+                )}
               >
                 <Skeleton className="h-4 w-6" />
                 <Skeleton className={cn('h-3', widthClassName)} />
@@ -97,7 +100,7 @@ export function PipelineStageControlsSkeleton({
 
       <div className={cn('flex shrink-0 items-center gap-2', showSearch && 'min-w-0')}>
         {showSearch && <Skeleton className="h-11 min-w-0 flex-1 rounded-4xl xl:w-64 xl:flex-none" />}
-        <div className="flex h-11 shrink-0 items-center gap-2 rounded-4xl border border-input px-4">
+        <div className="flex h-11 shrink-0 items-center gap-2 rounded-4xl border border-control-border bg-control bg-clip-padding px-4">
           <Skeleton className="size-4 rounded-md" />
           <Skeleton className="h-3.5 w-14" />
           <Skeleton className="size-5 rounded-full" />
@@ -194,7 +197,7 @@ export function PipelineTableSkeleton({
       )}
 
       <Card size="sm" className="min-h-0 overflow-hidden py-0">
-        <div className="grid min-h-11 items-center bg-muted" style={gridStyle}>
+        <div className="grid min-h-11 items-center bg-table-header" style={gridStyle}>
           {columns.map((column, index) => (
             <div key={column.id} className={cn('min-w-0 overflow-hidden px-3', index === 0 && 'pl-4')}>
               <Skeleton className={cn('h-3.5 max-w-full bg-foreground/10', getTableSkeletonHeaderWidth(column.type))} />

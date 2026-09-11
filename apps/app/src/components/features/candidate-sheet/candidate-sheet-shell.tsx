@@ -210,7 +210,7 @@ function ActivitiesContentSkeleton() {
       <section>
         <Skeleton className="h-4 w-32 rounded-md" />
 
-        <div className="mt-3 flex items-center gap-3 rounded-xl ring-1 ring-foreground/10 px-4 py-3">
+        <div className="mt-3 flex items-center gap-3 rounded-xl ring-1 ring-border px-4 py-3">
           <Skeleton className="size-8 shrink-0 rounded-lg" />
           <div className="min-w-0 flex-1">
             <Skeleton className="h-4 w-48 max-w-full rounded-md" />
@@ -226,7 +226,7 @@ function ActivitiesContentSkeleton() {
           <Skeleton className="h-8 w-28 rounded-lg" />
         </div>
 
-        <div className="mt-3 hidden overflow-hidden rounded-xl ring-1 ring-foreground/10 sm:block">
+        <div className="mt-3 hidden overflow-hidden rounded-xl ring-1 ring-border sm:block">
           <div className="grid grid-cols-[1.5fr_repeat(3,0.6fr)] gap-4 bg-muted/25 px-4 py-3">
             <Skeleton className="h-3 w-14 rounded-md" />
             <Skeleton className="h-3 w-12 justify-self-end rounded-md" />
@@ -238,7 +238,7 @@ function ActivitiesContentSkeleton() {
           <ProgressRow />
         </div>
 
-        <div className="mt-3 divide-y divide-border overflow-hidden rounded-xl ring-1 ring-foreground/10 sm:hidden">
+        <div className="mt-3 divide-y divide-border overflow-hidden rounded-xl ring-1 ring-border sm:hidden">
           <CompactProgressRow />
           <CompactProgressRow />
         </div>
@@ -290,7 +290,7 @@ function CollaborationSkeleton() {
         <FeedRow />
         <FeedRow short />
 
-        <div className="rounded-xl ring-1 ring-foreground/10 p-4">
+        <div className="rounded-xl ring-1 ring-border p-4">
           <div className="flex items-center gap-3">
             <Skeleton className="size-7 shrink-0 rounded-full" />
             <Skeleton className="h-3.5 w-28 rounded-md" />
@@ -300,7 +300,7 @@ function CollaborationSkeleton() {
           <Skeleton className="mt-2 h-3.5 w-3/4 rounded-md" />
         </div>
 
-        <div className="rounded-xl ring-1 ring-foreground/10 p-4">
+        <div className="rounded-xl ring-1 ring-border p-4">
           <div className="flex items-center gap-3">
             <Skeleton className="size-7 shrink-0 rounded-full" />
             <Skeleton className="h-3.5 w-24 rounded-md" />

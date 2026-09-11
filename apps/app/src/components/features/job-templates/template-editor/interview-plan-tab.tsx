@@ -140,7 +140,7 @@ const TemplateOption = memo(function TemplateOption({
 
         <span
           className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors', {
-            'border-muted-foreground/30': !isSelected,
+            'border-border': !isSelected,
             'border-primary bg-primary text-primary-foreground': isSelected,
           })}
           aria-hidden="true"

@@ -51,7 +51,7 @@ export function SettingsSidebar({ entries, pathname }: SettingsSidebarProps) {
 
   return (
     <aside className="hidden h-full w-68 shrink-0 py-6 lg:block">
-      <nav className="flex h-full min-h-0 flex-col gap-1 overflow-y-auto rounded-2xl bg-card p-4 text-card-foreground ring-1 ring-foreground/10 ring-inset">
+      <nav className="flex h-full min-h-0 flex-col gap-1 overflow-y-auto rounded-2xl bg-card p-4 text-card-foreground ring-1 ring-border ring-inset">
         {entries.map((entry) => {
           if (entry.type === 'item') {
             return <DesktopLink key={entry.path} item={entry} active={entry.match(pathname)} />;

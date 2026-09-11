@@ -229,7 +229,7 @@ const SelectionIndicator = memo(function SelectionIndicator({ isSelected }: Sele
       className={cn(
         'pointer-events-none relative flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
         {
-          'border-muted-foreground/30': !isSelected,
+          'border-border': !isSelected,
           'border-primary bg-primary text-primary-foreground': isSelected,
         },
       )}

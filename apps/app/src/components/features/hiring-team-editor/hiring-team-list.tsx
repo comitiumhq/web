@@ -42,7 +42,7 @@ export function HiringTeamList({
 }: HiringTeamListProps) {
   if (isLoading) {
     return (
-      <div className="overflow-hidden rounded-2xl ring-1 ring-foreground/10">
+      <div className="overflow-hidden rounded-2xl ring-1 ring-border">
         {SKELETON_ROWS.map((key, index) => (
           <HiringTeamRowSkeleton key={key} divided={index > 0} />
         ))}
@@ -67,7 +67,7 @@ export function HiringTeamList({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl ring-1 ring-foreground/10">
+    <div className="overflow-hidden rounded-2xl ring-1 ring-border">
       {members.map((member, index) => (
         <HiringTeamRow
           key={member.userId}

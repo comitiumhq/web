@@ -104,9 +104,9 @@ export function ProfilePhotoField({ disabled, imageSrc, maxSize, name, email, on
             identity={{ name, email }}
             imageSrc={imageSrc}
             imageAlt={imageSrc ? 'Profile photo' : ''}
-            className="size-28 text-2xl ring-1 ring-border"
+            className="size-28 text-2xl"
           />
-          <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+          <span className="absolute inset-0 flex items-center justify-center rounded-full bg-foreground/8 text-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
             <CameraIcon className="size-5" weight="fill" />
             <span className="sr-only">{pickerLabel}</span>
           </span>
