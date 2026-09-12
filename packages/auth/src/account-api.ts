@@ -3,6 +3,8 @@ import { type User, type UserKeyShare, userKeyShareSchema, userSchema } from '@c
 import { successSchema } from '@comitium/schemas/public';
 import type { z } from 'zod';
 
+import { type ZkIdentityApi, zkIdentityAttemptSchema, zkIdentityStatusSchema } from './zk-identity';
+
 interface AuthApiTransport {
   get<T>(url: string, schema: z.ZodType<T>): Promise<T>;
   post<T>(url: string, body: unknown, schema: z.ZodType<T>): Promise<T>;
@@ -13,7 +15,7 @@ interface InitializeEncryptionKeyBundleInput {
   publicKey: PublicEncryptionKey;
 }
 
-export interface AuthAccountApi {
+export interface AuthAccountApi extends ZkIdentityApi {
   getSession(): Promise<User | null>;
   getUserKeyShare(): Promise<UserKeyShare>;
   initializeEncryptionKeyBundle(input: InitializeEncryptionKeyBundleInput): Promise<unknown>;
@@ -21,8 +23,12 @@ export interface AuthAccountApi {
 
 export function createAuthAccountApi(transport: AuthApiTransport): AuthAccountApi {
   return {
+    completeZkIdentityAttempt: (attemptId, input) =>
+      transport.post(`/users/zk-identity/attempts/${attemptId}/complete`, input, zkIdentityStatusSchema),
+    createZkIdentityAttempt: () => transport.post('/users/zk-identity/attempts', undefined, zkIdentityAttemptSchema),
     getSession: () => transport.post('/auth/session', undefined, userSchema),
     getUserKeyShare: () => transport.get('/users/key-share', userKeyShareSchema),
+    getZkIdentityStatus: () => transport.get('/users/zk-identity', zkIdentityStatusSchema),
     initializeEncryptionKeyBundle: (input) => transport.post('/users/encryption-key-bundle', input, successSchema),
   };
 }

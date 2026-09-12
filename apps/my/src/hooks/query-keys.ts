@@ -3,6 +3,9 @@ export const qk = {
     sessionRoot: () => ['auth', 'session'] as const,
     session: (privyUserId: string | null) => ['auth', 'session', privyUserId] as const,
   },
+  account: {
+    zkIdentity: (userId: string) => ['account', 'zk-identity', userId] as const,
+  },
   cities: {
     search: (query: string) => ['cities', query] as const,
   },
