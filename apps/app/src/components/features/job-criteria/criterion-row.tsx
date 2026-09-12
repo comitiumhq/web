@@ -1,5 +1,6 @@
 import type { EvaluationCriterion } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { Input } from '@comitium/ui/input';
 import { Textarea } from '@comitium/ui/textarea';
@@ -59,9 +60,14 @@ export const CriterionRow = memo(function CriterionRow({
     [id, onUpdate],
   );
 
-  const handleToggle = useCallback(() => {
-    onToggle(id);
-  }, [id, onToggle]);
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (open !== isExpanded) {
+        onToggle(id);
+      }
+    },
+    [id, isExpanded, onToggle],
+  );
 
   const handleDeleteRequest = useCallback(() => {
     setConfirmOpen(true);
@@ -73,13 +79,20 @@ export const CriterionRow = memo(function CriterionRow({
   }, [id, onRemove]);
 
   return (
-    <div
+    <Collapsible
       ref={ref}
-      className={cn('overflow-hidden rounded-xl border border-border bg-card transition-opacity', {
-        'opacity-50': isDragging,
-      })}
+      open={isExpanded}
+      onOpenChange={handleOpenChange}
+      className={cn(
+        'group/criterion overflow-hidden rounded-xl border border-border bg-card bg-clip-padding transition-[border-color,box-shadow,opacity] duration-150 ease-out motion-reduce:transition-none',
+        {
+          'hover:border-input': !isExpanded && !isDragging,
+          'border-input shadow-[var(--segment-shadow)]': isExpanded && !isDragging,
+          'z-50 cursor-grabbing border-primary/35 opacity-95 shadow-xl ring-1 ring-primary/20': isDragging,
+        },
+      )}
     >
-      <div className="flex items-center transition-colors hover:bg-accent">
+      <div className="flex items-center transition-colors hover:bg-foreground/[0.025]">
         <span
           ref={handleRef}
           className="flex shrink-0 cursor-grab items-center self-stretch pl-2 pr-1 text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
@@ -87,40 +100,48 @@ export const CriterionRow = memo(function CriterionRow({
           <DotsSixVerticalIcon className="size-4" />
         </span>
 
-        <button
-          type="button"
-          aria-expanded={isExpanded}
-          className="flex flex-1 items-center gap-3 py-3 pl-1 text-left"
-          onClick={handleToggle}
-        >
-          <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border text-label-12 tabular-nums text-muted-foreground">
-            {index + 1}
-          </span>
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className="flex flex-1 items-center gap-3 py-3 pl-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
+          >
+            <span
+              className={cn(
+                'flex size-5 shrink-0 items-center justify-center rounded-full bg-foreground/6 text-label-12 tabular-nums text-muted-foreground transition-colors',
+                { 'bg-foreground/10 text-foreground/80': isExpanded },
+              )}
+            >
+              {index + 1}
+            </span>
 
-          <span className={cn('flex-1 truncate text-label-14 font-medium', { 'text-muted-foreground': !isFilled })}>
-            {isFilled ? criterion.title : 'Untitled criterion'}
-          </span>
+            <span className={cn('flex-1 truncate text-label-14 font-medium', { 'text-muted-foreground': !isFilled })}>
+              {isFilled ? criterion.title : 'Untitled criterion'}
+            </span>
 
-          <CaretDownIcon
-            className={cn('size-4 shrink-0 text-muted-foreground transition-transform duration-150', {
-              'rotate-180': isExpanded,
-            })}
-          />
-        </button>
+            <CaretDownIcon
+              className={cn(
+                'size-4 shrink-0 text-muted-foreground transition-transform duration-150 motion-reduce:transition-none',
+                {
+                  'rotate-180': isExpanded,
+                },
+              )}
+            />
+          </button>
+        </CollapsibleTrigger>
 
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
           aria-label="Delete criterion"
-          className="mx-1 shrink-0 text-muted-foreground"
+          className="mx-1 shrink-0 text-muted-foreground transition-[color,background-color,opacity] hover:bg-destructive/10 hover:text-destructive-text focus-visible:opacity-100 md:opacity-0 md:group-hover/criterion:opacity-100 md:group-focus-within/criterion:opacity-100"
           onClick={handleDeleteRequest}
         >
           <TrashIcon />
         </Button>
       </div>
 
-      {isExpanded && (
+      <CollapsibleContent className="overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:180ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:animate-accordion-down motion-reduce:animate-none!">
         <div className="flex flex-col gap-4 px-3.5 pb-3.5 pt-1">
           <div className="flex flex-col gap-2">
             <label htmlFor={titleId} className="text-label-14">
@@ -156,7 +177,7 @@ export const CriterionRow = memo(function CriterionRow({
             />
           </div>
         </div>
-      )}
+      </CollapsibleContent>
 
       <ConfirmDialog
         open={confirmOpen}
@@ -175,6 +196,6 @@ export const CriterionRow = memo(function CriterionRow({
         actionLabel="Delete"
         onConfirm={handleDeleteConfirm}
       />
-    </div>
+    </Collapsible>
   );
 });

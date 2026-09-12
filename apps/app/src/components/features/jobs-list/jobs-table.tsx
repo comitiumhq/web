@@ -3,9 +3,9 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
 import { useMediaQuery } from '@comitium/ui/use-media-query';
 import { useNavigate } from '@tanstack/react-router';
-import type { Row, SortingState, VisibilityState } from '@tanstack/react-table';
+import type { Row, SortingState } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDeleteDraft } from '@/hooks/mutations/use-delete-draft';
 
 import { getJobsColumns, type JobsRow } from './jobs-columns';
@@ -29,36 +29,7 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
   const [draftToDelete, setDraftToDelete] = useState<JobDraftListItem | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const hideCreated = useMediaQuery('(max-width: 1279px)');
-  const hideStake = useMediaQuery('(max-width: 1099px)');
-  const hideTeam = useMediaQuery('(max-width: 959px)');
   const isMobile = useMediaQuery('(max-width: 639px)');
-
-  const defaultVisibility = useMemo<VisibilityState>(
-    () => ({ created: !hideCreated, stake: !hideStake, team: !hideTeam }),
-    [hideCreated, hideStake, hideTeam],
-  );
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(defaultVisibility);
-
-  useEffect(() => {
-    setColumnVisibility(defaultVisibility);
-  }, [defaultVisibility]);
-
-  const gridMinWidth = useMemo(() => {
-    if (hideTeam) {
-      return '560px';
-    }
-
-    if (hideStake) {
-      return '660px';
-    }
-
-    if (hideCreated) {
-      return '760px';
-    }
-
-    return '880px';
-  }, [hideCreated, hideStake, hideTeam]);
 
   const columns = useMemo(
     () => getJobsColumns({ orgId, isAdmin, onRequestDelete: setDraftToDelete }),
@@ -119,14 +90,12 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
           className={rows.length === 0 && !loading ? 'min-h-0 border-0 bg-transparent' : 'min-h-0'}
           maxHeightClassName="max-h-full"
           columns={columns}
-          columnVisibility={columnVisibility}
           data={rows}
           emptyState={emptyState}
           getRowId={getJobsRowId}
-          gridMinWidth={gridMinWidth}
+          gridMinWidth={isAdmin ? '880px' : '776px'}
           loadingMore={loading}
           loadingMoreRowCount={rows.length === 0 ? 8 : 3}
-          onColumnVisibilityChange={setColumnVisibility}
           onRowClick={handleRowClick}
           onSortingChange={setSorting}
           sorting={sorting}

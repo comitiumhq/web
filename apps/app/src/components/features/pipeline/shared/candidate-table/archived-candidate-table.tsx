@@ -1,20 +1,12 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { APPLICATION_TERMINAL_OUTCOME_LABEL } from '@comitium/ui/application-outcome-labels';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
-import { useMediaQuery } from '@comitium/ui/use-media-query';
-import {
-  type ColumnDef,
-  functionalUpdate,
-  type OnChangeFn,
-  type Row,
-  type RowSelectionState,
-  type SortingState,
-  type VisibilityState,
-} from '@tanstack/react-table';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type ColumnDef, functionalUpdate, type OnChangeFn, type Row, type RowSelectionState, type SortingState } from '@tanstack/react-table';
+import { useCallback, useMemo } from 'react';
 import type { PipelineCandidate, PipelineCandidateSorting } from '@/lib/schemas/pipeline';
 
 import { CandidateIdentityCell, DateCell, getCandidateRowId, JobCell, StageCell } from './cells';
+import { getArchivedTableGridMinWidth } from './columns';
 
 const ARCHIVED_ROW_ESTIMATE_PX = 68;
 
@@ -51,19 +43,6 @@ export function ArchivedCandidateTable({
   onSortChange,
   rowSelection,
 }: ArchivedCandidateTableProps) {
-  const isTabletTable = useMediaQuery('(max-width: 900px)');
-  const isMobileTable = useMediaQuery('(max-width: 680px)');
-  const defaultColumnVisibility = useMemo(
-    () => getArchivedColumnVisibility({ isMobileTable, isTabletTable }),
-    [isMobileTable, isTabletTable],
-  );
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(defaultColumnVisibility);
-  const showJobInCandidate = columnVisibility.job === false;
-
-  useEffect(() => {
-    setColumnVisibility(defaultColumnVisibility);
-  }, [defaultColumnVisibility]);
-
   const handleRowClick = useCallback(
     (row: Row<PipelineCandidate>) => {
       onCandidateClick?.(row.original.id);
@@ -71,8 +50,8 @@ export function ArchivedCandidateTable({
     [onCandidateClick],
   );
   const columns = useMemo(
-    () => getArchivedColumns({ namesMap, orgId, showJob: showJobInCandidate }),
-    [namesMap, orgId, showJobInCandidate],
+    () => getArchivedColumns({ namesMap, orgId, showJob: false }),
+    [namesMap, orgId],
   );
 
   const tableSorting = useMemo<SortingState>(
@@ -104,15 +83,14 @@ export function ArchivedCandidateTable({
       manualSorting
       className={className}
       maxHeightClassName={maxHeightClassName}
-      columnVisibility={columnVisibility}
       columns={columns}
       data={candidates}
       enableRowSelection={Boolean(onRowSelectionChange && maxSelectedRows)}
       getRowId={getCandidateRowId}
+      gridMinWidth={getArchivedTableGridMinWidth('global')}
       hasNextPage={hasNextPage}
       loadingMore={loadingMore}
       maxSelectedRows={maxSelectedRows}
-      onColumnVisibilityChange={setColumnVisibility}
       onLoadMore={onLoadMore}
       onRowClick={onCandidateClick ? handleRowClick : undefined}
       onRowSelectionChange={onRowSelectionChange}
@@ -192,16 +170,4 @@ function getArchivedColumns(params: {
       meta: { gridSize: '8rem', label: 'Closed', skeletonClassName: 'w-20' },
     },
   ];
-}
-
-function getArchivedColumnVisibility(params: { isMobileTable: boolean; isTabletTable: boolean }): VisibilityState {
-  if (params.isMobileTable) {
-    return { job: false, stage: false, reason: false, terminal: false };
-  }
-
-  if (params.isTabletTable) {
-    return { stage: false, reason: false };
-  }
-
-  return {};
 }

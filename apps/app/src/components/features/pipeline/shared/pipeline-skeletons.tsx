@@ -6,7 +6,11 @@ import { CaretRightIcon } from '@phosphor-icons/react';
 import { type CSSProperties, Fragment, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { PipelineTab } from '../types';
-import { getCandidateColumns } from './candidate-table/columns';
+import {
+  getArchivedTableGridMinWidth,
+  getCandidateColumns,
+  getCandidateTableGridMinWidth,
+} from './candidate-table/columns';
 
 const TAB_SKELETONS = [
   { key: 'review', widthClassName: 'w-28' },
@@ -189,6 +193,10 @@ export function PipelineTableSkeleton({
   const columns = useMemo(() => getTableSkeletonLayout(activeTab, scope), [activeTab, scope]);
   const gridTemplateColumns = useMemo(() => columns.map((column) => column.gridSize).join(' '), [columns]);
   const gridStyle = useMemo<CSSProperties>(() => ({ gridTemplateColumns }), [gridTemplateColumns]);
+  const gridMinWidth =
+    activeTab === 'archived'
+      ? getArchivedTableGridMinWidth(scope)
+      : getCandidateTableGridMinWidth(activeTab, scope);
 
   return (
     <div className={cn('flex min-h-0 flex-col gap-3', className)}>
@@ -199,28 +207,35 @@ export function PipelineTableSkeleton({
       )}
 
       <Card size="sm" className="min-h-0 overflow-hidden py-0">
-        <div className="grid min-h-11 items-center bg-table-header" style={gridStyle}>
-          {columns.map((column, index) => (
-            <div key={column.id} className={cn('min-w-0 overflow-hidden px-3', index === 0 && 'pl-4')}>
-              <Skeleton className={cn('h-3.5 max-w-full bg-foreground/10', getTableSkeletonHeaderWidth(column.type))} />
-            </div>
-          ))}
-        </div>
-
-        <div>
-          {Array.from({ length: rows }).map((_, index) => (
-            <div
-              key={index}
-              className="grid min-h-[68px] items-center border-b border-border last:border-b-0"
-              style={gridStyle}
-            >
-              {columns.map((column, cellIndex) => (
-                <div key={column.id} className={cn('min-w-0 overflow-hidden px-3 py-3', cellIndex === 0 && 'pl-4')}>
-                  <TableSkeletonCell column={column.type} rowIndex={index} />
+        <div className="overflow-x-auto">
+          <div style={{ minWidth: gridMinWidth }}>
+            <div className="grid min-h-11 items-center bg-table-header" style={gridStyle}>
+              {columns.map((column, index) => (
+                <div key={column.id} className={cn('min-w-0 overflow-hidden px-3', index === 0 && 'pl-4')}>
+                  <Skeleton className={cn('h-3.5 max-w-full', getTableSkeletonHeaderWidth(column.type))} />
                 </div>
               ))}
             </div>
-          ))}
+
+            <div>
+              {Array.from({ length: rows }).map((_, index) => (
+                <div
+                  key={index}
+                  className="grid min-h-[68px] items-center border-b border-border last:border-b-0"
+                  style={gridStyle}
+                >
+                  {columns.map((column, cellIndex) => (
+                    <div
+                      key={column.id}
+                      className={cn('min-w-0 overflow-hidden px-3 py-3', cellIndex === 0 && 'pl-4')}
+                    >
+                      <TableSkeletonCell column={column.type} rowIndex={index} />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </Card>
     </div>
@@ -288,7 +303,7 @@ function getTableSkeletonLayout(
     scope,
   }).map((column, index) => ({
     id: column.id ?? `column-${index}`,
-    gridSize: column.meta?.gridSize ?? 'minmax(0,1fr)',
+    gridSize: column.meta?.gridSize ?? '150px',
     type: getCandidateSkeletonColumnType(column.id),
   }));
 }

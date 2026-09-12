@@ -42,7 +42,7 @@ export function HiringTeamList({
 }: HiringTeamListProps) {
   if (isLoading) {
     return (
-      <div className="overflow-hidden rounded-2xl ring-1 ring-border">
+      <div className="overflow-hidden rounded-2xl bg-card ring-1 ring-border">
         {SKELETON_ROWS.map((key, index) => (
           <HiringTeamRowSkeleton key={key} divided={index > 0} />
         ))}
@@ -67,7 +67,7 @@ export function HiringTeamList({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl ring-1 ring-border">
+    <div className="overflow-hidden rounded-2xl bg-card ring-1 ring-border">
       {members.map((member, index) => (
         <HiringTeamRow
           key={member.userId}
@@ -156,8 +156,9 @@ const HiringTeamRow = memo(function HiringTeamRow({
           aria-label={`Remove ${displayName}`}
           onClick={handleRemoveRequest}
           disabled={isRemoving}
+          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive-text"
         >
-          <XIcon className="text-muted-foreground" />
+          <XIcon />
         </Button>
       ) : null}
 

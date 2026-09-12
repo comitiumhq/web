@@ -1,5 +1,5 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
-import type { ColumnDef, VisibilityState } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import { parseISO } from 'date-fns';
 import type { PipelineCandidate } from '@/lib/schemas/pipeline';
 
@@ -8,6 +8,17 @@ import { DeadlineCell, StatusCell } from './status-deadline';
 
 export type CandidateTableVariant = 'review' | 'offer' | 'hired';
 export type CandidateTableScope = 'global' | 'job';
+
+const CANDIDATE_TABLE_GRID_MIN_WIDTH: Record<CandidateTableVariant, Record<CandidateTableScope, string>> = {
+  review: { global: '72rem', job: '60rem' },
+  offer: { global: '52rem', job: '36rem' },
+  hired: { global: '52rem', job: '36rem' },
+};
+
+const ARCHIVED_TABLE_GRID_MIN_WIDTH: Record<CandidateTableScope, string> = {
+  global: '68rem',
+  job: '56rem',
+};
 
 interface ColumnContext {
   namesMap: Map<string, CandidateProfile>;
@@ -69,18 +80,18 @@ function jobColumn(orgId: string, compact: boolean): ColumnDef<PipelineCandidate
 
 const criteriaColumn: ColumnDef<PipelineCandidate> = {
   id: 'criteria',
-  header: 'Match criteria',
+  header: 'Criteria',
   accessorFn: (candidate) => candidate.criterionSummary?.metCount ?? 0,
   enableSorting: true,
   cell: ({ row }) => <CriteriaCell candidate={row.original} />,
   meta: {
-    gridSize: 'minmax(6.5rem,0.55fr)',
-    label: 'Match criteria',
+    gridSize: '8rem',
+    label: 'Criteria',
     skeletonClassName: 'w-10',
   },
 };
 
-function appliedColumn(compact: boolean): ColumnDef<PipelineCandidate> {
+function appliedColumn(): ColumnDef<PipelineCandidate> {
   return {
     id: 'applied',
     header: 'Applied',
@@ -88,7 +99,7 @@ function appliedColumn(compact: boolean): ColumnDef<PipelineCandidate> {
     enableSorting: true,
     cell: ({ row }) => <DateCell iso={row.original.appliedAt} />,
     meta: {
-      gridSize: compact ? 'minmax(6rem,0.5fr)' : '8rem',
+      gridSize: '8rem',
       label: 'Applied',
       skeletonClassName: 'w-16',
     },
@@ -103,7 +114,7 @@ function stageAgeColumn(sortable: boolean): ColumnDef<PipelineCandidate> {
     enableSorting: sortable,
     cell: ({ row }) => <StageAgeCell candidate={row.original} />,
     meta: {
-      gridSize: 'minmax(6rem,0.5fr)',
+      gridSize: '8rem',
       label: 'Time in review',
       skeletonClassName: 'w-10',
     },
@@ -134,7 +145,7 @@ const statusColumn: ColumnDef<PipelineCandidate> = {
   header: 'Status',
   cell: ({ row }) => <StatusCell candidate={row.original} />,
   meta: {
-    gridSize: 'minmax(10rem,0.85fr)',
+    gridSize: 'minmax(12rem,0.9fr)',
     label: 'Status',
     skeletonClassName: 'w-28 rounded-4xl',
   },
@@ -156,7 +167,7 @@ function deadlineColumn(timezone: string, sortable: boolean): ColumnDef<Pipeline
     enableSorting: sortable,
     cell: ({ row }) => <DeadlineCell candidate={row.original} timezone={timezone} />,
     meta: {
-      gridSize: 'minmax(7rem,0.65fr)',
+      gridSize: 'minmax(9rem,0.7fr)',
       label: 'Deadline',
       skeletonClassName: 'w-24 rounded-4xl',
     },
@@ -181,36 +192,24 @@ export function getCandidateColumns(
       deadlineColumn(ctx.timezone, isJobScope),
       criteriaColumn,
       stageAgeColumn(!isJobScope),
-      appliedColumn(true),
+      appliedColumn(),
     ];
   }
 
   if (variant === 'offer') {
-    return [...lead, appliedColumn(false), dateColumn('updated', 'Updated', (candidate) => candidate.updatedAt)];
+    return [...lead, appliedColumn(), dateColumn('updated', 'Updated', (candidate) => candidate.updatedAt)];
   }
 
-  return [...lead, appliedColumn(false), dateColumn('terminal', 'Hired', (candidate) => candidate.terminalOutcomeAt)];
+  return [...lead, appliedColumn(), dateColumn('terminal', 'Hired', (candidate) => candidate.terminalOutcomeAt)];
 }
 
-export function getResponsiveColumnVisibility(
+export function getCandidateTableGridMinWidth(
   variant: CandidateTableVariant,
-  { isMobileTable, isTabletTable }: { isMobileTable: boolean; isTabletTable: boolean },
-): VisibilityState {
-  if (isMobileTable) {
-    if (variant === 'review') {
-      return { job: false, criteria: false, inReview: false, applied: false };
-    }
+  scope: CandidateTableScope,
+): string {
+  return CANDIDATE_TABLE_GRID_MIN_WIDTH[variant][scope];
+}
 
-    return { job: false, criteria: false, applied: false, updated: false, terminal: false };
-  }
-
-  if (isTabletTable) {
-    if (variant === 'review') {
-      return { job: false, criteria: false, applied: false };
-    }
-
-    return { job: false, criteria: false };
-  }
-
-  return {};
+export function getArchivedTableGridMinWidth(scope: CandidateTableScope): string {
+  return ARCHIVED_TABLE_GRID_MIN_WIDTH[scope];
 }

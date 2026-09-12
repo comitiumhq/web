@@ -64,17 +64,17 @@ export const PlanPickerDialog = memo(function PlanPickerDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm" disabled={disabled}>
+        <Button type="button" variant={selectedPlanId === null ? 'default' : 'ghost'} size="sm" disabled={disabled}>
           {selectedPlanId === null ? 'Select plan' : 'Change plan'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden sm:max-w-xl">
+        <DialogHeader className="shrink-0">
           <DialogTitle>Select interview plan</DialogTitle>
           <DialogDescription className="sr-only">Available interview plans</DialogDescription>
         </DialogHeader>
 
-        <div className="relative">
+        <div className="relative shrink-0">
           <MagnifyingGlassIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
@@ -85,7 +85,7 @@ export const PlanPickerDialog = memo(function PlanPickerDialog({
           />
         </div>
 
-        <div className="max-h-[min(28rem,55vh)] overflow-y-auto pr-1">
+        <div className="-m-1 min-h-0 max-h-[min(28rem,55dvh)] flex-1 overflow-y-auto p-1">
           {filteredPlans.length > 0 ? (
             <div className="flex flex-col gap-2">
               {filteredPlans.map((plan) => (
