@@ -39,8 +39,8 @@ export function ReasonSettingsList({ orgId }: ReasonSettingsListProps) {
       <EntitySettingsPage
         title="Cancel / Reschedule Reasons"
         tab={tab}
-        activeCount={activeReasons.length}
-        archivedCount={archivedReasons.length}
+        activeCount={isLoading ? null : activeReasons.length}
+        archivedCount={isLoading ? null : archivedReasons.length}
         isError={Boolean(error)}
         errorDescription="We couldn't load reasons. Please try again."
         onTabChange={handleTabChange}

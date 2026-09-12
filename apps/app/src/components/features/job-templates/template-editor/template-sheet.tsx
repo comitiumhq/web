@@ -37,7 +37,7 @@ export function TemplateSheet({ orgId, templateId, isNew, open, onOpenChange, on
   if (!open || (!templateId && !isNew)) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <FeatureSheetContent side="right" width="full-6xl">
+        <FeatureSheetContent side="right" size="workspace">
           <SheetTitle className="sr-only">Job template editor</SheetTitle>
           <SheetDescription className="sr-only">Edit reusable job template defaults.</SheetDescription>
         </FeatureSheetContent>
@@ -47,7 +47,7 @@ export function TemplateSheet({ orgId, templateId, isNew, open, onOpenChange, on
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <FeatureSheetContent side="right" width="full-6xl">
+      <FeatureSheetContent side="right" size="workspace">
         <TemplateEditor
           key={templateId ?? 'new'}
           orgId={orgId}

@@ -2,26 +2,25 @@ import type * as React from 'react';
 import { cn } from '../lib/cn';
 import { SheetContent, SheetFooter, SheetHeader } from './sheet';
 
-const FEATURE_SHEET_WIDTH_CLASSES = {
-  md: 'data-[side=right]:sm:max-w-lg',
-  lg: 'data-[side=right]:sm:max-w-xl',
-  xl: 'data-[side=right]:sm:max-w-2xl',
-  '2xl': 'data-[side=right]:sm:max-w-3xl',
-  'fixed-640': '!w-full sm:!w-[640px] sm:!max-w-[640px]',
-  'full-xl': 'data-[side=right]:w-full data-[side=right]:sm:max-w-xl',
-  'full-6xl': 'data-[side=right]:w-full data-[side=right]:sm:max-w-6xl',
+const FEATURE_SHEET_SIZE_CLASSES = {
+  compact: 'data-[side=right]:w-full data-[side=right]:sm:max-w-xl',
+  form: 'data-[side=right]:w-full data-[side=right]:sm:max-w-2xl',
+  editor: 'data-[side=right]:w-full data-[side=right]:sm:max-w-3xl',
+  wide: 'data-[side=right]:w-full data-[side=right]:sm:max-w-6xl',
+  workspace:
+    'data-[side=right]:w-full data-[side=right]:sm:w-[calc(100vw-5rem)] data-[side=right]:sm:max-w-[1800px]',
 } as const;
 
-type FeatureSheetWidth = keyof typeof FEATURE_SHEET_WIDTH_CLASSES;
+type FeatureSheetSize = keyof typeof FEATURE_SHEET_SIZE_CLASSES;
 
 type FeatureSheetContentProps = Omit<React.ComponentProps<typeof SheetContent>, 'className'> & {
   className?: string;
-  width: FeatureSheetWidth;
+  size: FeatureSheetSize;
 };
 
-function FeatureSheetContent({ className, width, ...props }: FeatureSheetContentProps) {
+function FeatureSheetContent({ className, size, ...props }: FeatureSheetContentProps) {
   return (
-    <SheetContent className={cn('flex flex-col gap-0 p-0', FEATURE_SHEET_WIDTH_CLASSES[width], className)} {...props} />
+    <SheetContent className={cn('flex flex-col gap-0 p-0', FEATURE_SHEET_SIZE_CLASSES[size], className)} {...props} />
   );
 }
 

@@ -148,7 +148,7 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent side="right" width="2xl" className="w-full">
+      <FeatureSheetContent side="right" size="editor">
         <FeatureSheetHeader>
           <SheetTitle className="pr-8 text-heading-20">
             {candidateName ?? (candidateProfileError ? 'Candidate name unavailable' : 'Candidate')}

@@ -53,10 +53,15 @@ export const DepartmentRow = memo(function DepartmentRow({
     <>
       <TableRow
         className={cn({ 'cursor-pointer': !department.isArchived, 'opacity-50': department.isArchived })}
-        onClick={handleRowClick}
+        aria-label={!department.isArchived ? `Edit ${department.name}` : undefined}
+        onClick={!department.isArchived ? handleRowClick : undefined}
       >
         <TableCell>
-          <div className="min-w-0">
+          <div
+            className={cn('relative min-w-0', {
+              'pl-5 before:absolute before:left-1 before:top-1/2 before:h-px before:w-2 before:bg-border': parentName,
+            })}
+          >
             <span className="text-label-14 truncate block">{department.name}</span>
           </div>
         </TableCell>
@@ -81,7 +86,7 @@ export const DepartmentRow = memo(function DepartmentRow({
                 onClick={stopClickPropagation}
               >
                 <DotsThreeIcon />
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Actions for {department.name}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopClickPropagation}>

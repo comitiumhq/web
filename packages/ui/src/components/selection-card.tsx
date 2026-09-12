@@ -4,12 +4,12 @@ import type * as React from 'react';
 import { cn } from '../lib/cn';
 
 const selectionCardVariants = cva(
-  'group/selection-card rounded-2xl border border-control-border bg-control bg-clip-padding transition-[background-color,border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none',
+  'group/selection-card rounded-2xl border border-border bg-card bg-clip-padding outline-1 outline-transparent transition-[border-color,outline-color] duration-150 ease-out motion-reduce:transition-none',
   {
     variants: {
       selected: {
-        false: 'hover:border-control-border-hover hover:bg-control-hover',
-        true: 'border-primary bg-control shadow-[0_0_0_1px_var(--primary)] hover:bg-control',
+        false: 'hover:border-input',
+        true: 'border-primary outline-primary',
       },
     },
     defaultVariants: {

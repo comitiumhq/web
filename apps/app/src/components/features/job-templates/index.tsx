@@ -1,7 +1,9 @@
+import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { DATA_TABLE_CLASS, DATA_TABLE_SCROLL_AREA_CLASS } from '@comitium/ui/data-table';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { PageHeader } from '@comitium/ui/page-header';
+import { Skeleton } from '@comitium/ui/skeleton';
 import { TableSkeleton, type TableSkeletonColumn } from '@comitium/ui/table-skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { WarningCircleIcon } from '@phosphor-icons/react';
@@ -31,9 +33,15 @@ export function JobTemplateSettings({ orgId, activeTemplateId, onOpenTemplate, o
   const [tab, setTab] = useState<JobTemplateStatus>('active');
   const [isCreating, setIsCreating] = useState(false);
 
-  const { data, isLoading, error } = useQueryJobTemplates(orgId, { status: tab, limit: 100 });
+  const activeQuery = useQueryJobTemplates(orgId, { status: 'active', limit: 100 });
+  const inactiveQuery = useQueryJobTemplates(orgId, { status: 'inactive', limit: 100 });
+  const archivedQuery = useQueryJobTemplates(orgId, { status: 'archived', limit: 100 });
+  const queries = { active: activeQuery, inactive: inactiveQuery, archived: archivedQuery };
+  const currentQuery = queries[tab];
+  const isLoading = currentQuery.isLoading;
+  const error = activeQuery.error || inactiveQuery.error || archivedQuery.error;
 
-  const templates = useMemo<JobTemplateListItem[]>(() => data?.data ?? [], [data]);
+  const templates = useMemo<JobTemplateListItem[]>(() => currentQuery.data?.data ?? [], [currentQuery.data]);
 
   const handleTabChange = useCallback((value: string) => {
     setTab(value as JobTemplateStatus);
@@ -91,9 +99,27 @@ export function JobTemplateSettings({ orgId, activeTemplateId, onOpenTemplate, o
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Tabs value={tab} onValueChange={handleTabChange}>
               <TabsList variant="line">
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="inactive">Inactive</TabsTrigger>
-                <TabsTrigger value="archived">Archived</TabsTrigger>
+                <TabsTrigger value="active">
+                  Active{' '}
+                  <TemplateCount
+                    isLoading={activeQuery.isLoading}
+                    value={activeQuery.data?.pagination.hasMore ? '100+' : (activeQuery.data?.data.length ?? 0)}
+                  />
+                </TabsTrigger>
+                <TabsTrigger value="inactive">
+                  Inactive{' '}
+                  <TemplateCount
+                    isLoading={inactiveQuery.isLoading}
+                    value={inactiveQuery.data?.pagination.hasMore ? '100+' : (inactiveQuery.data?.data.length ?? 0)}
+                  />
+                </TabsTrigger>
+                <TabsTrigger value="archived">
+                  Archived{' '}
+                  <TemplateCount
+                    isLoading={archivedQuery.isLoading}
+                    value={archivedQuery.data?.pagination.hasMore ? '100+' : (archivedQuery.data?.data.length ?? 0)}
+                  />
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -133,4 +159,12 @@ export function JobTemplateSettings({ orgId, activeTemplateId, onOpenTemplate, o
       />
     </>
   );
+}
+
+function TemplateCount({ isLoading, value }: { isLoading: boolean; value: number | string }) {
+  if (isLoading) {
+    return <Skeleton className="size-5 rounded-full" aria-label="Loading count" />;
+  }
+
+  return <Badge variant="secondary">{value}</Badge>;
 }

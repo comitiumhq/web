@@ -66,7 +66,8 @@ export const TemplateRow = memo(function TemplateRow({ orgId, template, onEdit }
     <>
       <TableRow
         className={cn({ 'cursor-pointer': !template.isArchived, 'opacity-50': template.isArchived })}
-        onClick={handleRowClick}
+        aria-label={canEdit ? `Edit ${template.title}` : undefined}
+        onClick={canEdit ? handleRowClick : undefined}
       >
         <TableCell>
           <span className="text-label-14">{template.title}</span>
@@ -92,7 +93,7 @@ export const TemplateRow = memo(function TemplateRow({ orgId, template, onEdit }
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon-sm" disabled={anyPending} onClick={stopRowClick}>
                 <DotsThreeIcon />
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Actions for {template.title}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>

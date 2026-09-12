@@ -69,7 +69,8 @@ export const LocationRow = memo(function LocationRow({ orgId, location, onEdit }
     <>
       <TableRow
         className={cn({ 'cursor-pointer': !location.isArchived, 'opacity-50': location.isArchived })}
-        onClick={handleRowClick}
+        aria-label={!location.isArchived ? `Edit ${location.name}` : undefined}
+        onClick={!location.isArchived ? handleRowClick : undefined}
       >
         <TableCell>
           <div className="min-w-0">
@@ -88,7 +89,7 @@ export const LocationRow = memo(function LocationRow({ orgId, location, onEdit }
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
                 <DotsThreeIcon />
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Actions for {location.name}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]">

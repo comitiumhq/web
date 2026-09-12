@@ -104,7 +104,7 @@ function EmailMessageHelp({ text }: { text: string }) {
 
 export function EmailDeliverySummary({ sender, recipient }: { sender: string; recipient: string }) {
   return (
-    <div className="divide-y divide-border rounded-xl border border-border bg-card">
+    <div className="divide-y divide-border rounded-xl border border-border bg-card bg-clip-padding">
       <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-4 px-4 py-3">
         <span className="text-muted-foreground">From</span>
         <span className="min-w-0 truncate">{sender}</span>

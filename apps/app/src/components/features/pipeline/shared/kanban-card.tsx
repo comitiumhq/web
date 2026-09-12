@@ -133,7 +133,7 @@ export const KanbanCard = memo(function KanbanCard({
       onPointerCancel={handlePointerEnd}
       onClick={handleClick}
       className={cn(
-        'relative flex h-30 w-full shrink-0 cursor-grab flex-col overflow-hidden rounded-xl border border-border bg-card p-3 text-left outline-none transition-[background-color,border-color,box-shadow,opacity] duration-150 ease-out active:cursor-grabbing motion-reduce:transition-none',
+        'relative flex h-30 w-full shrink-0 cursor-grab flex-col overflow-hidden rounded-xl border border-border bg-card bg-clip-padding p-3 text-left outline-none transition-[background-color,border-color,box-shadow,opacity] duration-150 ease-out active:cursor-grabbing motion-reduce:transition-none',
         'focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 focus-visible:ring-offset-kanban-canvas',
         'data-[dnd-placeholder=clone]:opacity-40 data-[dnd-placeholder=clone]:shadow-none data-[dnd-placeholder=clone]:ring-0',
         {

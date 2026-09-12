@@ -90,7 +90,7 @@ export function StageSection({
 
   return (
     <>
-      <section className="overflow-hidden rounded-2xl bg-card shadow-[var(--segment-shadow)]">
+      <section className="overflow-hidden rounded-2xl border border-border bg-card bg-clip-padding">
         <header className="flex items-center justify-between gap-3 px-4 pt-3 pb-1">
           <h3 className="truncate text-label-14 font-medium">{stage.name}</h3>
           {canManage && canAddAnyActivity ? (

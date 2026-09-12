@@ -301,7 +301,7 @@ export function ArchiveApplicationSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
-      <FeatureSheetContent ref={sheetContentRef} width="2xl">
+      <FeatureSheetContent ref={sheetContentRef} size="editor">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Archive application</SheetTitle>
           <SheetDescription>{description}</SheetDescription>

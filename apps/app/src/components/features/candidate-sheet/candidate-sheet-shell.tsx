@@ -1,11 +1,9 @@
 import { Button } from '@comitium/ui/button';
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
+import { FeatureSheetContent } from '@comitium/ui/feature-sheet';
+import { Sheet, SheetClose, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { CaretLeftIcon, CaretRightIcon, XIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
-
-const SHEET_CLASS =
-  'h-full overflow-visible bg-background p-0 data-[side=right]:w-full data-[side=right]:sm:w-[calc(100vw-5rem)] data-[side=right]:sm:max-w-[1800px]';
 
 interface CandidateSheetPager {
   onPrev: () => void;
@@ -33,12 +31,17 @@ export function CandidateSheetShell({
 }: CandidateSheetShellProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className={SHEET_CLASS} showCloseButton={false}>
+      <FeatureSheetContent
+        side="right"
+        size="workspace"
+        className="h-full overflow-visible bg-background"
+        showCloseButton={false}
+      >
         <SheetTitle className="sr-only">{title}</SheetTitle>
         <SheetDescription className="sr-only">{description}</SheetDescription>
         <div className="flex h-full min-w-0 flex-col overflow-hidden">{children}</div>
         <CandidateSheetEdgeControls pager={pager} />
-      </SheetContent>
+      </FeatureSheetContent>
     </Sheet>
   );
 }

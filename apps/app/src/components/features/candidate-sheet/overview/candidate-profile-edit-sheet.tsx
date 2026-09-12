@@ -136,7 +136,7 @@ export function CandidateProfileEditSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent width="fixed-640">
+      <FeatureSheetContent size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Edit candidate profile</SheetTitle>
           <SheetDescription>Update candidate-wide contact and profile details.</SheetDescription>

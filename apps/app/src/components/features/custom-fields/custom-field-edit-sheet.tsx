@@ -137,7 +137,7 @@ export function CustomFieldEditSheet({ orgId, field, open, onOpenChange }: Custo
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent width="xl">
+      <FeatureSheetContent size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Edit custom field</SheetTitle>
           <SheetDescription>Only the title, description, and options can be edited after creation.</SheetDescription>

@@ -1,9 +1,10 @@
 import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
 import { Button } from '@comitium/ui/button';
 import { BROWSER_TZ } from '@comitium/ui/date';
+import { FeatureSheetContent, FeatureSheetFooter, FeatureSheetHeader } from '@comitium/ui/feature-sheet';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@comitium/ui/sheet';
+import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -182,14 +183,15 @@ export function ScheduleInterviewDialog({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
+        <FeatureSheetContent
           side="right"
-          className="flex flex-col p-0 [&>[data-slot=sheet-close]]:top-2 [&>[data-slot=sheet-close]]:right-2 data-[side=right]:w-full data-[side=right]:sm:w-[calc(100vw-5rem)] data-[side=right]:sm:max-w-[1800px]"
+          size="workspace"
+          className="[&>[data-slot=sheet-close]]:top-2 [&>[data-slot=sheet-close]]:right-2"
         >
-          <SheetHeader className="shrink-0 px-4 py-3">
+          <FeatureSheetHeader className="px-4 py-3">
             <SheetTitle>Schedule Interview</SheetTitle>
             <SheetDescription className="sr-only">Set up an interview for this candidate.</SheetDescription>
-          </SheetHeader>
+          </FeatureSheetHeader>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col flex-1 min-h-0">
@@ -244,7 +246,7 @@ export function ScheduleInterviewDialog({
                 />
               </div>
 
-              <SheetFooter className="shrink-0 flex-row justify-end gap-2 px-4 py-3">
+              <FeatureSheetFooter className="px-4 py-3">
                 <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>
@@ -255,10 +257,10 @@ export function ScheduleInterviewDialog({
                   {isPending && <SpinnerGapIcon data-icon="inline-start" className="animate-spin" />}
                   Schedule
                 </Button>
-              </SheetFooter>
+              </FeatureSheetFooter>
             </form>
           </Form>
-        </SheetContent>
+        </FeatureSheetContent>
       </Sheet>
       <AvailabilityConflictDialog
         open={conflictingBody !== null}

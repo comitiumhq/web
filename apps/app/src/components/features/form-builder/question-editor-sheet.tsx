@@ -117,7 +117,7 @@ export function QuestionEditorSheet({ formClass, state, onClose, onSubmit, isPen
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <FeatureSheetContent width="full-xl">
+      <FeatureSheetContent size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">{sheetTitle}</SheetTitle>
           <SheetDescription>

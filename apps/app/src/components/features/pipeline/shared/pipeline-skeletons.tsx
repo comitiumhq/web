@@ -366,7 +366,7 @@ function JobAccordionSkeleton({ expanded = false }: JobAccordionSkeletonProps) {
 
 function PipelineCandidateCardSkeleton() {
   return (
-    <div className="rounded-xl border border-border bg-card p-3">
+    <div className="rounded-xl border border-border bg-card bg-clip-padding p-3">
       <Skeleton className="h-5 w-36" />
       <Skeleton className="mt-2 h-4 w-24" />
       <div className="mt-4 flex flex-wrap gap-2">

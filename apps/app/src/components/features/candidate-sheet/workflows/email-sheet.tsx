@@ -219,7 +219,7 @@ export function EmailSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
-      <FeatureSheetContent ref={sheetContentRef} width="2xl">
+      <FeatureSheetContent ref={sheetContentRef} size="editor">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Email candidate</SheetTitle>
           <SheetDescription>Compose and review the message before sending.</SheetDescription>

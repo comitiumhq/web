@@ -65,7 +65,7 @@ function getTreasuryDescription(treasuryError: string | null, isTreasuryWallet: 
     return null;
   }
 
-  return 'Connect the treasury wallet to deposit or withdraw funds.';
+  return 'Deposits and withdrawals are available only to the organization treasury wallet.';
 }
 
 function BalanceMetric({ label, value, isLoading, isMuted = false }: BalanceMetricProps) {

@@ -10,7 +10,9 @@ import { JobRoutePermissionGuard } from '@/components/auth/route-permission-guar
 import { JobDetailLayout } from '@/components/features/job-detail/job-detail-layout';
 import { JobDetailRouteOrgProvider } from '@/components/features/job-detail/job-detail-route-context';
 import { DraftFormProvider, useDraftFormContext } from '@/components/features/job-draft/draft-form-context';
+import { DraftSectionSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
 import { DraftShellActions } from '@/components/features/job-draft/draft-shell-actions';
+import { DRAFT_SECTIONS, type DraftTab } from '@/components/features/job-draft/sections';
 import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
 import { isJobPublishing } from '@/lib/jobs/status';
@@ -38,7 +40,11 @@ function JobRouteLayout() {
     return <RouteNotFound />;
   }
 
-  return <OrgGuard orgId={orgId}>{renderJobRoute}</OrgGuard>;
+  return (
+    <OrgGuard orgId={orgId} loadingFallback={<JobRouteLoadingState orgId={orgId} jobId={jobId} pathname={pathname} />}>
+      {renderJobRoute}
+    </OrgGuard>
+  );
 }
 
 function isBareJobRoute(pathname: string, orgId: string, jobId: string): boolean {
@@ -59,9 +65,7 @@ function JobRouteShell({ org, jobId, pathname }: JobRouteShellProps) {
   if (isLoading) {
     return (
       <JobDetailRouteOrgProvider org={org}>
-        <JobDetailLayout orgId={org.id} jobId={jobId} job={null}>
-          <PageLoader />
-        </JobDetailLayout>
+        <JobRouteLoadingState orgId={org.id} jobId={jobId} pathname={pathname} />
       </JobDetailRouteOrgProvider>
     );
   }
@@ -113,6 +117,20 @@ function JobRouteShell({ org, jobId, pathname }: JobRouteShellProps) {
       </JobDetailLayout>
     </JobDetailRouteOrgProvider>
   );
+}
+
+function JobRouteLoadingState({ orgId, jobId, pathname }: { orgId: string; jobId: string; pathname: string }) {
+  const loadingTab = getDraftTabFromPathname(pathname);
+
+  return (
+    <JobDetailLayout orgId={orgId} jobId={jobId} job={null} showNavigationSkeleton={loadingTab !== null}>
+      {loadingTab ? <DraftSectionSkeleton tab={loadingTab} /> : <PageLoader />}
+    </JobDetailLayout>
+  );
+}
+
+function getDraftTabFromPathname(pathname: string): DraftTab | null {
+  return DRAFT_SECTIONS.find((section) => pathname.endsWith(`/${section.id}`))?.id ?? null;
 }
 
 const DRAFT_ONLY_JOB_ROUTE_SUFFIXES = ['details', 'description', 'application-form', 'criteria'] as const;

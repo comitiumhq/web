@@ -40,8 +40,8 @@ export function CustomFieldsSettingsList({ orgId }: CustomFieldsSettingsListProp
       <EntitySettingsPage
         title="Custom Fields"
         tab={tab}
-        activeCount={activeFields.length}
-        archivedCount={archivedFields.length}
+        activeCount={isLoading ? null : activeFields.length}
+        archivedCount={isLoading ? null : archivedFields.length}
         isError={Boolean(error)}
         errorDescription="We couldn't load custom fields."
         onTabChange={handleTabChange}

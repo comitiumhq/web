@@ -70,8 +70,8 @@ export function LocationsSettingsList({ orgId }: LocationsSettingsListProps) {
       <EntitySettingsPage
         title="Locations"
         tab={tab}
-        activeCount={activeLocations.length}
-        archivedCount={archivedLocations.length}
+        activeCount={isLoading ? null : activeLocations.length}
+        archivedCount={isLoading ? null : archivedLocations.length}
         isError={Boolean(error)}
         errorDescription="We couldn't load locations. Please try again."
         onTabChange={handleTabChange}

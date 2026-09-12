@@ -6,8 +6,9 @@ import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submis
 import { extractSubmissionFieldValues } from '@comitium/schemas/forms/submission-field-values';
 import { splitAnswersByVisibility } from '@comitium/schemas/forms/visibility';
 import { Button } from '@comitium/ui/button';
+import { FeatureSheetContent, FeatureSheetHeader } from '@comitium/ui/feature-sheet';
 import { Form } from '@comitium/ui/form';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@comitium/ui/sheet';
+import { Sheet, SheetDescription, SheetFooter, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -82,14 +83,14 @@ export function FeedbackSubmissionSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-[720px] flex flex-col p-0">
-        <SheetHeader className="shrink-0 px-6 py-4 gap-1">
+      <FeatureSheetContent side="right" size="editor">
+        <FeatureSheetHeader className="gap-1">
           <SheetTitle>{getSheetTitle(flow.mode, source)}</SheetTitle>
           <SheetDescription className="flex flex-col items-start gap-0.5">
             <span>{sheetDescription}</span>
             {formTitle && <span className="text-label-12">{formTitle}</span>}
           </SheetDescription>
-        </SheetHeader>
+        </FeatureSheetHeader>
         <FeedbackSubmissionView
           flow={flow}
           applicationId={applicationId}
@@ -100,7 +101,7 @@ export function FeedbackSubmissionSheet({
           onComplete={handleClose}
           onCancel={handleClose}
         />
-      </SheetContent>
+      </FeatureSheetContent>
     </Sheet>
   );
 }

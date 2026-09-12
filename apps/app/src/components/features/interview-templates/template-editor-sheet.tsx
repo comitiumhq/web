@@ -176,7 +176,7 @@ export function TemplateEditorSheet({ orgId, open, onOpenChange, mode, template 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <FeatureSheetContent side="right" width="xl">
+      <FeatureSheetContent side="right" size="form">
         <FeatureSheetHeader className="py-5">
           <SheetTitle>{sheetTitle}</SheetTitle>
           <SheetDescription>{sheetDescription}</SheetDescription>

@@ -115,8 +115,8 @@ export function TagSettingsList({ orgId }: TagSettingsListProps) {
       <EntitySettingsPage
         title="Candidate Tags"
         tab={tab}
-        activeCount={activeTags.length}
-        archivedCount={archivedTags.length}
+        activeCount={isLoading ? null : activeTags.length}
+        archivedCount={isLoading ? null : archivedTags.length}
         isError={false}
         errorDescription=""
         onTabChange={handleTabChange}

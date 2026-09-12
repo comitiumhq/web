@@ -23,7 +23,7 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: 'border border-control-border bg-segment-track bg-clip-padding',
-        line: 'gap-1 bg-transparent',
+        line: 'gap-1 bg-transparent p-0',
       },
     },
     defaultVariants: {
@@ -137,6 +137,13 @@ function TabsList({
           className="pointer-events-none absolute top-0 left-0 z-0 rounded-3xl bg-segment opacity-0 shadow-[var(--segment-shadow)] transition-[transform,width,height,opacity] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform motion-reduce:transition-none"
         />
       )}
+      {variant === 'line' && (
+        <span
+          data-slot="tabs-line"
+          aria-hidden="true"
+          className="pointer-events-none absolute z-0 bg-border/70 group-data-horizontal/tabs:inset-x-0 group-data-horizontal/tabs:bottom-[-5px] group-data-horizontal/tabs:h-px group-data-vertical/tabs:inset-y-0 group-data-vertical/tabs:-right-1 group-data-vertical/tabs:w-px"
+        />
+      )}
       {children}
     </TabsPrimitive.List>
   );
@@ -148,9 +155,9 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
       data-slot="tabs-trigger"
       className={cn(
         "relative z-10 inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2 py-1 text-sm font-normal whitespace-nowrap text-foreground/60 transition-colors duration-200 ease-out group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start group-data-vertical/tabs:px-2.5 group-data-vertical/tabs:py-1.5 hover:text-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        'group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:data-active:ring-0 group-data-[variant=line]/tabs-list:data-active:shadow-none',
+        'group-data-[variant=line]/tabs-list:h-full group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:data-active:ring-0 group-data-[variant=line]/tabs-list:data-active:shadow-none',
         'data-active:text-foreground dark:data-active:text-foreground',
-        'after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
+        'after:absolute after:bg-primary after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
         className,
       )}
       {...props}

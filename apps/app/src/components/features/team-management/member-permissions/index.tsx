@@ -29,7 +29,7 @@ interface MemberPermissionsSheetProps {
 export function MemberPermissionsSheet({ org, userId, currentTreasury, onOpenChange }: MemberPermissionsSheetProps) {
   return (
     <Sheet open={userId !== null} onOpenChange={onOpenChange}>
-      <FeatureSheetContent width="fixed-640">
+      <FeatureSheetContent size="form">
         {userId !== null && <MemberPermissionsContent org={org} userId={userId} currentTreasury={currentTreasury} />}
       </FeatureSheetContent>
     </Sheet>

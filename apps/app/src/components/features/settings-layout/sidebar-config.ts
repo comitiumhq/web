@@ -194,7 +194,7 @@ export function buildSidebarEntries(basePath: string): SidebarEntry[] {
         },
         {
           type: 'item',
-          label: 'Cancel / Reschedule reasons',
+          label: 'Cancel / Reschedule Reasons',
           path: `${basePath}/interview-reasons`,
           icon: CancelRescheduleReasonsIcon,
           match: (p) => p.startsWith(`${basePath}/interview-reasons`),

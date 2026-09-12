@@ -172,7 +172,7 @@ export function LocationSheet({ orgId, location, open, onOpenChange }: LocationS
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent width="xl">
+      <FeatureSheetContent size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">{title}</SheetTitle>
           <SheetDescription>Used when creating jobs and shown on public postings and careers filters.</SheetDescription>

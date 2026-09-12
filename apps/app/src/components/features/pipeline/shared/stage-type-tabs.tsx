@@ -74,12 +74,10 @@ const StageTypeTabTrigger = memo(function StageTypeTabTrigger({ tab, label, coun
       className="group h-9 flex-none items-center rounded-3xl px-3.5"
     >
       <span className="flex items-baseline gap-1.5">
-        <span className="text-label-13 font-medium leading-none tabular-nums text-muted-foreground group-data-[state=active]:text-foreground/70">
+        <span className="text-label-13 font-medium leading-none text-muted-foreground tabular-nums transition-colors duration-200 ease-out group-hover:text-foreground/70 group-data-[state=active]:text-foreground/70 motion-reduce:transition-none">
           {count}
         </span>
-        <span className="text-label-14 leading-none text-muted-foreground group-data-[state=active]:text-foreground">
-          {label}
-        </span>
+        <span className="text-label-14 leading-none">{label}</span>
       </span>
     </TabsTrigger>
   );

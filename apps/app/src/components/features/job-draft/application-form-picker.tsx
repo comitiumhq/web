@@ -4,8 +4,8 @@ import { Button } from '@comitium/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Form } from '@comitium/ui/form';
-import { Skeleton } from '@comitium/ui/skeleton';
 import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
+import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { EyeIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
@@ -269,13 +269,13 @@ const ApplicationFormPreviewDialog = memo(function ApplicationFormPreviewDialog(
   );
 });
 
-function ApplicationFormListSkeleton() {
+export function ApplicationFormListSkeleton() {
   return (
-    <div className="flex flex-col gap-2.5">
-      {Array.from({ length: 3 }).map((_, i) => (
+    <div aria-hidden="true" className="flex flex-col gap-2.5">
+      {['form-1', 'form-2', 'form-3', 'form-4'].map((key) => (
         <div
-          key={i}
-          className="flex min-h-18 items-center gap-3 rounded-2xl border border-control-border bg-control px-4 py-3"
+          key={key}
+          className="flex min-h-18 items-center gap-3 rounded-2xl border border-border bg-card bg-clip-padding px-4 py-3"
         >
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <Skeleton className="h-3.5 w-48" />

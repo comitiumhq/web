@@ -1,10 +1,16 @@
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
+import {
+  FeatureSheetBody,
+  FeatureSheetContent,
+  FeatureSheetFooter,
+  FeatureSheetHeader,
+} from '@comitium/ui/feature-sheet';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@comitium/ui/sheet';
+import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { EnvelopeIcon, SpinnerGapIcon, WarningIcon } from '@phosphor-icons/react';
 import { useCallback } from 'react';
 import { EditorToolbar } from '@/components/tiptap-ui/editor-toolbars';
@@ -60,15 +66,15 @@ export function DirectBookingLinkDialog({
 
   return (
     <Sheet open={open} onOpenChange={dialog.handleOpenChange}>
-      <SheetContent side="right" className="flex flex-col p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-3xl">
-        <SheetHeader className="shrink-0">
+      <FeatureSheetContent side="right" size="editor">
+        <FeatureSheetHeader>
           <SheetTitle>Send scheduling link</SheetTitle>
           <SheetDescription>Configure the interview and email the candidate a link to choose a time.</SheetDescription>
-        </SheetHeader>
+        </FeatureSheetHeader>
 
         <Form {...dialog.form}>
           <form onSubmit={dialog.form.handleSubmit(dialog.handleSubmit)} className="flex flex-col flex-1 min-h-0">
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <FeatureSheetBody className="space-y-4">
               {!candidateEmail && (
                 <Alert variant="warning">
                   <WarningIcon />
@@ -146,9 +152,9 @@ export function DirectBookingLinkDialog({
                 />
                 <p className="text-copy-14 text-muted-foreground">The scheduling link is added below your message.</p>
               </div>
-            </div>
+            </FeatureSheetBody>
 
-            <SheetFooter className="shrink-0 flex-row justify-end gap-2">
+            <FeatureSheetFooter>
               <Button type="button" variant="outline" onClick={dialog.handleCancel}>
                 Cancel
               </Button>
@@ -160,10 +166,10 @@ export function DirectBookingLinkDialog({
                 )}
                 Send scheduling link
               </Button>
-            </SheetFooter>
+            </FeatureSheetFooter>
           </form>
         </Form>
-      </SheetContent>
+      </FeatureSheetContent>
     </Sheet>
   );
 }
