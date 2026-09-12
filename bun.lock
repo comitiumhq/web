@@ -275,6 +275,7 @@
       "name": "@comitium/ui",
       "version": "0.1.0",
       "dependencies": {
+        "@base-ui/react": "1.5.0",
         "@comitium/schemas": "workspace:*",
         "@date-fns/tz": "1.4.1",
         "@fontsource-variable/geist": "5.2.9",

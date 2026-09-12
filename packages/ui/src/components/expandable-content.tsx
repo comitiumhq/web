@@ -135,7 +135,7 @@ function ExpandableFrame({
           type="button"
           variant="ghost"
           size="xs"
-          className="-ml-2 mt-1 h-6 px-2 text-muted-foreground hover:text-foreground"
+          className="-ml-2 mt-1 h-6 px-2 text-muted-foreground hover:bg-transparent hover:text-foreground aria-expanded:bg-transparent dark:hover:bg-transparent"
           aria-expanded={isExpanded}
           aria-controls={contentId}
           onClick={handleToggle}

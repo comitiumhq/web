@@ -71,7 +71,7 @@
     "./route-not-found": "./src/components/route-not-found.tsx",
     "./salary": "./src/lib/salary.ts",
     "./scroll-area": "./src/components/scroll-area.tsx",
-    "./search-select": "./src/components/search-select.tsx",
+    "./combobox": "./src/components/combobox.tsx",
     "./section-header": "./src/components/section-header.tsx",
     "./selection-card": "./src/components/selection-card.tsx",
     "./select": "./src/components/select.tsx",
@@ -115,6 +115,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "1.5.0",
     "@comitium/schemas": "workspace:*",
     "@tanstack/react-query": "5.90.21",
     "@tanstack/react-router": "1.147.3",

@@ -3,7 +3,7 @@ import { FeatureSheetContent } from '@comitium/ui/feature-sheet';
 import { Sheet, SheetClose, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { CaretLeftIcon, CaretRightIcon, XIcon } from '@phosphor-icons/react';
-import type { ReactNode } from 'react';
+import { type ReactNode, useRef } from 'react';
 
 interface CandidateSheetPager {
   onPrev: () => void;
@@ -29,11 +29,21 @@ export function CandidateSheetShell({
   pager,
   onOpenChange,
 }: CandidateSheetShellProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleOpenAutoFocus = (event: Event) => {
+    event.preventDefault();
+    contentRef.current?.focus({ preventScroll: true });
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <FeatureSheetContent
+        ref={contentRef}
         side="right"
         size="workspace"
+        tabIndex={-1}
+        onOpenAutoFocus={handleOpenAutoFocus}
         className="h-full overflow-visible bg-background"
         showCloseButton={false}
       >

@@ -9,6 +9,7 @@ import {
   type PublicJobSort,
 } from '@comitium/schemas/job-enums';
 import { Button } from '@comitium/ui/button';
+import { Combobox } from '@comitium/ui/combobox';
 import { Input } from '@comitium/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
@@ -190,18 +191,18 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
 
             <div className="min-w-0">
               <div className="mb-2 text-label-13 font-medium">Category</div>
-              <Select value={pendingFilters.category || ''} onValueChange={handleCategoryChange}>
-                <SelectTrigger size="sm" className="w-full min-w-0 justify-between">
-                  <SelectValue placeholder="All categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Combobox
+                selectionMode="single"
+                size="sm"
+                ariaLabel="Category"
+                options={CATEGORIES}
+                value={pendingFilters.category || null}
+                onValueChange={(nextValue) => handleCategoryChange(nextValue ?? '')}
+                placeholder="All categories"
+                searchPlaceholder="Search categories…"
+                emptyMessage="No categories found."
+                clearLabel="All categories"
+              />
             </div>
           </div>
 

@@ -1,62 +1,48 @@
 import { Button } from '@comitium/ui/button';
 import { Calendar } from '@comitium/ui/calendar';
-import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { TimezonePicker } from '@comitium/ui/timezone-picker';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { useIlamyCalendarContext } from '@ilamy/calendar';
-import { CalendarXIcon, CaretDownIcon, PlusIcon } from '@phosphor-icons/react';
+import { CaretDownIcon } from '@phosphor-icons/react';
 import { useCallback, useState } from 'react';
 import type { OrgTeamMember } from '@/lib/schemas/org';
 
-export interface AvailableMember {
-  member: OrgTeamMember;
-  hasCalendar: boolean;
-}
+import { InterviewerMultiCombobox } from '../../interviewer-multi-combobox';
+import type { SelectedInterviewer } from '../../types';
 
 interface HeaderControlsProps {
-  availableMembers: AvailableMember[];
-  onAdd: (userId: string) => void;
+  members: readonly OrgTeamMember[];
+  calendarStatusMap: ReadonlyMap<string, boolean>;
+  interviewers: readonly SelectedInterviewer[];
+  onInterviewersChange?: (interviewers: SelectedInterviewer[]) => void;
   timeZone: string;
   onTimeZoneChange: (tz: string) => void;
   canAddInterviewer?: boolean;
-  lockInterviewers?: boolean;
 }
 
 function HeaderControls({
-  availableMembers,
-  onAdd,
+  members,
+  calendarStatusMap,
+  interviewers,
+  onInterviewersChange,
   timeZone,
   onTimeZoneChange,
   canAddInterviewer = true,
-  lockInterviewers = false,
 }: HeaderControlsProps) {
-  const addDisabled = !canAddInterviewer || availableMembers.length === 0;
-
   return (
     <>
-      {!lockInterviewers && (
-        <Select value="" onValueChange={onAdd} disabled={addDisabled}>
-          <SelectTrigger className="h-8 w-[160px] text-xs">
-            <span className="flex items-center gap-1">
-              <PlusIcon className="size-3.5" />
-              <SelectValue placeholder="Interviewer" />
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            {availableMembers.length === 0 ? (
-              <div className="px-2 py-1.5 text-copy-14 text-muted-foreground">No available members</div>
-            ) : (
-              <SelectGroup>
-                {availableMembers.map((entry) => (
-                  <MemberOption key={entry.member.userId} {...entry} />
-                ))}
-              </SelectGroup>
-            )}
-          </SelectContent>
-        </Select>
+      {onInterviewersChange && (
+        <InterviewerMultiCombobox
+          members={members}
+          calendarStatusMap={calendarStatusMap}
+          interviewers={interviewers}
+          onChange={onInterviewersChange}
+          maxVisibleValues={1}
+          className="w-[260px]"
+          disabled={!canAddInterviewer}
+        />
       )}
+
       <TimezonePicker value={timeZone} onChange={onTimeZoneChange} className="h-8 w-[180px] text-xs" />
     </>
   );
@@ -65,6 +51,7 @@ function HeaderControls({
 export function CalendarHeader(controlsProps: HeaderControlsProps) {
   const { currentDate, today, selectDate, setCurrentDate } = useIlamyCalendarContext();
   const [pickerOpen, setPickerOpen] = useState(false);
+
   const pickerDate = new Date(currentDate.year(), currentDate.month(), currentDate.date());
 
   const handleTimeZoneChange = useCallback(
@@ -115,6 +102,7 @@ export function CalendarHeader(controlsProps: HeaderControlsProps) {
           </div>
         </PopoverContent>
       </Popover>
+
       <div className="flex items-center gap-1.5">
         <HeaderControls {...controlsProps} onTimeZoneChange={handleTimeZoneChange} />
       </div>
@@ -127,29 +115,5 @@ export function CalendarHeaderEmpty(props: HeaderControlsProps) {
     <div className="flex flex-wrap items-center justify-end gap-1.5 px-3 py-2 border-b">
       <HeaderControls {...props} />
     </div>
-  );
-}
-
-function MemberOption({ member, hasCalendar }: AvailableMember) {
-  const item = (
-    <SelectItem value={member.userId} disabled={!hasCalendar}>
-      <span className="flex items-center gap-1.5">
-        {getMemberDisplayName(member)}
-        {!hasCalendar && <CalendarXIcon className="size-3 text-muted-foreground" />}
-      </span>
-    </SelectItem>
-  );
-
-  if (hasCalendar) {
-    return item;
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div>{item}</div>
-      </TooltipTrigger>
-      <TooltipContent>Ask {getMemberDisplayName(member)} to connect a calendar in Settings → Calendar.</TooltipContent>
-    </Tooltip>
   );
 }

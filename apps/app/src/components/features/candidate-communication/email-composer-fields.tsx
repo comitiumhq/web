@@ -1,6 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import { Label } from '@comitium/ui/label';
-import { SearchSelect, type SearchSelectOption } from '@comitium/ui/search-select';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { InfoIcon } from '@phosphor-icons/react';
@@ -9,7 +9,7 @@ import { EditorToolbar } from '@/components/tiptap-ui/editor-toolbars';
 import { RichTextEditor, type RichTextEditorHandle } from '@/components/tiptap-ui/rich-text-editor';
 
 interface EmailTemplateFieldProps {
-  options: SearchSelectOption[];
+  options: ComboboxOption[];
   value: string | null;
   onValueChange: (value: string | null) => void;
   placeholder: string;
@@ -39,7 +39,8 @@ export function EmailTemplateField({
       {loading ? (
         <Skeleton className="h-9 w-full rounded-4xl" />
       ) : (
-        <SearchSelect
+        <Combobox
+          selectionMode="single"
           ariaLabel={label}
           options={options}
           value={value}
@@ -47,6 +48,7 @@ export function EmailTemplateField({
           placeholder={placeholder}
           searchPlaceholder="Search templates..."
           emptyMessage={emptyMessage}
+          clearLabel="Clear template"
           disabled={disabled}
           portalContainerRef={portalContainerRef}
         />

@@ -6,6 +6,7 @@ import {
   SALARY_PERIODS,
 } from '@comitium/schemas/job-enums';
 import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
+import { Combobox } from '@comitium/ui/combobox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@comitium/ui/input-group';
@@ -117,22 +118,19 @@ export function DraftDetailsTab({
                     <FormLabel className="gap-1">
                       Team <RequiredMarker show={showPublishRequiredMarkers} />
                     </FormLabel>
-                    <Select onValueChange={handleDepartmentChange} value={field.value ?? ''}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select team" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          {departmentOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Combobox
+                        selectionMode="single"
+                        ariaLabel="Team"
+                        options={departmentOptions}
+                        value={field.value ?? null}
+                        clearable={false}
+                        onValueChange={(nextValue) => nextValue && handleDepartmentChange(nextValue)}
+                        placeholder="Select team"
+                        searchPlaceholder="Search teams…"
+                        emptyMessage="No teams found."
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -146,22 +144,19 @@ export function DraftDetailsTab({
                     <FormLabel className="gap-1">
                       Location <RequiredMarker show={showPublishRequiredMarkers} />
                     </FormLabel>
-                    <Select onValueChange={handleLocationChange} value={field.value ?? ''}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select location" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          {locationOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Combobox
+                        selectionMode="single"
+                        ariaLabel="Location"
+                        options={locationOptions}
+                        value={field.value ?? null}
+                        clearable={false}
+                        onValueChange={(nextValue) => nextValue && handleLocationChange(nextValue)}
+                        placeholder="Select location"
+                        searchPlaceholder="Search locations…"
+                        emptyMessage="No locations found."
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -243,6 +238,7 @@ export function DraftDetailsTab({
                 placeholder="USD ($)"
                 options={COMPENSATION_CURRENCIES}
                 displayOptions={CURRENCIES}
+                searchable
               />
               <RangeConnector>per</RangeConnector>
               <CompactSelectField
@@ -348,22 +344,18 @@ function SelectField({ control, name, label, placeholder, options, required }: S
             {label}
             <RequiredMarker show={required ?? false} />
           </FormLabel>
-          <Select onValueChange={field.onChange} value={field.value ?? ''}>
-            <FormControl>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectGroup>
-                {options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <FormControl>
+            <Combobox
+              selectionMode="single"
+              ariaLabel={label}
+              options={[...options]}
+              value={field.value ?? null}
+              onValueChange={field.onChange}
+              placeholder={placeholder}
+              searchPlaceholder={`Search ${label.toLowerCase()}…`}
+              emptyMessage={`No ${label.toLowerCase()} options found.`}
+            />
+          </FormControl>
           <FormMessage />
         </FormItem>
       )}
@@ -378,6 +370,7 @@ interface CompactSelectFieldProps {
   placeholder: string;
   options: readonly { value: string; label: string }[];
   displayOptions?: readonly { value: string; label: string }[];
+  searchable?: boolean;
   className?: string;
 }
 
@@ -388,6 +381,7 @@ function CompactSelectField({
   placeholder,
   options,
   displayOptions = options,
+  searchable = false,
   className,
 }: CompactSelectFieldProps) {
   return (
@@ -396,25 +390,44 @@ function CompactSelectField({
       name={name}
       render={({ field }) => {
         const selectedLabel = displayOptions.find((option) => option.value === field.value)?.label;
+        const searchableOptions = options.map((option) => ({
+          value: option.value,
+          label: displayOptions.find((displayOption) => displayOption.value === option.value)?.label ?? option.label,
+        }));
 
         return (
           <FormItem className={className}>
-            <Select onValueChange={field.onChange} value={field.value ?? ''}>
+            {searchable ? (
               <FormControl>
-                <SelectTrigger className="w-full" aria-label={ariaLabel}>
-                  <SelectValue placeholder={placeholder}>{selectedLabel}</SelectValue>
-                </SelectTrigger>
+                <Combobox
+                  selectionMode="single"
+                  ariaLabel={ariaLabel}
+                  options={searchableOptions}
+                  value={field.value ?? null}
+                  onValueChange={field.onChange}
+                  placeholder={placeholder}
+                  searchPlaceholder={`Search ${ariaLabel.toLowerCase()}…`}
+                  emptyMessage={`No ${ariaLabel.toLowerCase()} options found.`}
+                />
               </FormControl>
-              <SelectContent>
-                <SelectGroup>
-                  {options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            ) : (
+              <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                <FormControl>
+                  <SelectTrigger className="w-full" aria-label={ariaLabel}>
+                    <SelectValue placeholder={placeholder}>{selectedLabel}</SelectValue>
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectGroup>
+                    {options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
             <FormMessage />
           </FormItem>
         );

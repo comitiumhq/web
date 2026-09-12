@@ -1,8 +1,8 @@
-import { SearchSelect, type SearchSelectOption } from '@comitium/ui/search-select';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import type { RefObject } from 'react';
 
 interface ArchiveReasonSelectProps {
-  options: SearchSelectOption[];
+  options: ComboboxOption[];
   value: string | null;
   onValueChange: (value: string | null) => void;
   placeholder: string;
@@ -19,7 +19,8 @@ export function ArchiveReasonSelect({
   portalContainerRef,
 }: ArchiveReasonSelectProps) {
   return (
-    <SearchSelect
+    <Combobox
+      selectionMode="single"
       ariaLabel="Archive reason"
       options={options}
       value={value}

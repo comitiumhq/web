@@ -1,9 +1,9 @@
 import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
 import { Button } from '@comitium/ui/button';
+import { Combobox } from '@comitium/ui/combobox';
 import { BROWSER_TZ } from '@comitium/ui/date';
 import { FeatureSheetContent, FeatureSheetFooter, FeatureSheetHeader } from '@comitium/ui/feature-sheet';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
@@ -67,8 +67,14 @@ export function ScheduleInterviewDialog({
   }, [templates, selectedInterviewId]);
 
   const handleTemplateChange = useCallback(
-    (templateId: string) => {
-      form.setValue('interviewId', templateId);
+    (templateId: string | null) => {
+      form.setValue('interviewId', templateId ?? '');
+
+      if (!templateId) {
+        form.setValue('durationMinutes', DEFAULT_VALUES.durationMinutes);
+
+        return;
+      }
 
       const template = templates.find((t) => t.id === templateId);
 
@@ -202,20 +208,22 @@ export function ScheduleInterviewDialog({
                   render={({ field }) => (
                     <FormItem className="shrink-0">
                       <FormLabel>Interview type</FormLabel>
-                      <Select value={field.value} onValueChange={handleTemplateChange}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select interview type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {templates.map((t) => (
-                            <SelectItem key={t.id} value={t.id}>
-                              {t.title} ({t.durationMinutes} min)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Combobox
+                          selectionMode="single"
+                          ariaLabel="Interview type"
+                          options={templates.map((template) => ({
+                            value: template.id,
+                            label: `${template.title} (${template.durationMinutes} min)`,
+                          }))}
+                          value={field.value || null}
+                          onValueChange={handleTemplateChange}
+                          placeholder="Select interview type"
+                          searchPlaceholder="Search interview types…"
+                          emptyMessage="No interview types found."
+                          clearLabel="Clear interview type"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -1,9 +1,9 @@
 import { memo, useCallback } from 'react';
 
 import { ALL_TIMEZONES, BROWSER_TZ } from '../lib/timezones';
-import { SearchSelect, type SearchSelectOption } from './search-select';
+import { Combobox, type ComboboxOption } from './combobox';
 
-const TIMEZONE_OPTIONS: SearchSelectOption[] = ALL_TIMEZONES.map((tz) => ({
+const TIMEZONE_OPTIONS: ComboboxOption[] = ALL_TIMEZONES.map((tz) => ({
   value: tz,
   label: tz,
   trailing: tz === BROWSER_TZ ? 'your timezone' : undefined,
@@ -38,9 +38,11 @@ function TimezonePickerImpl({
   );
 
   return (
-    <SearchSelect
+    <Combobox
+      selectionMode="single"
       options={TIMEZONE_OPTIONS}
       value={value || BROWSER_TZ}
+      clearable={false}
       onValueChange={handleValueChange}
       placeholder={placeholder}
       searchPlaceholder="Search timezones..."

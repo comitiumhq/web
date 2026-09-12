@@ -1,7 +1,7 @@
 import { ORG_DEFAULT_FORM_VALUE } from '@comitium/schemas/forms/form-definitions';
 import { Badge } from '@comitium/ui/badge';
+import { Combobox } from '@comitium/ui/combobox';
 import { FormControl } from '@comitium/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 
 interface FeedbackFormOption {
   id: string;
@@ -23,29 +23,28 @@ export function FeedbackFormSelect({ value, onValueChange, forms }: FeedbackForm
   const defaultForm = forms.find((form) => form.isDefaultForm);
   const defaultFormTitle = defaultForm?.title ?? 'Default feedback form';
   const selectedValue = value === defaultForm?.id ? ORG_DEFAULT_FORM_VALUE : value;
+  const options = [
+    {
+      value: ORG_DEFAULT_FORM_VALUE,
+      label: defaultFormTitle,
+      trailing: <Badge variant="secondary">Default</Badge>,
+    },
+    ...forms.filter((form) => !form.isDefaultForm).map((form) => ({ value: form.id, label: form.title })),
+  ];
 
   return (
-    <Select value={selectedValue} onValueChange={onValueChange}>
-      <FormControl>
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-      </FormControl>
-      <SelectContent>
-        <SelectItem value={ORG_DEFAULT_FORM_VALUE} textValue={`${defaultFormTitle} (default)`}>
-          {defaultFormTitle}
-          <Badge variant="secondary" aria-hidden="true">
-            Default
-          </Badge>
-        </SelectItem>
-        {forms
-          .filter((form) => !form.isDefaultForm)
-          .map((form) => (
-            <SelectItem key={form.id} value={form.id}>
-              {form.title}
-            </SelectItem>
-          ))}
-      </SelectContent>
-    </Select>
+    <FormControl>
+      <Combobox
+        selectionMode="single"
+        ariaLabel="Feedback form"
+        options={options}
+        value={selectedValue}
+        clearable={false}
+        onValueChange={(nextValue) => nextValue && onValueChange(nextValue)}
+        placeholder="Select a feedback form"
+        searchPlaceholder="Search feedback forms…"
+        emptyMessage="No feedback forms found."
+      />
+    </FormControl>
   );
 }

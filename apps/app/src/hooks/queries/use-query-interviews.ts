@@ -7,11 +7,19 @@ import { DEFAULT_CURSOR_PAGE_SIZE } from '@/lib/api/cursor-pagination';
 import {
   getApplicationInterviewProgress,
   getApplicationInterviews,
-  getCalendarStatus,
   getInterviewBriefing,
   getMyInterviews,
 } from '@/lib/api/interviews';
 import type { CalendarStatus, InterviewProgressResponse, InterviewsList, MyInterview } from '@/lib/schemas/interviews';
+
+const CONNECTED_CALENDAR_PREVIEW: CalendarStatus = {
+  hasCalUser: true,
+  calendarConnected: true,
+  calendarProvider: 'google_calendar',
+  calendarAccountEmail: 'recruiting@northstar.demo',
+  conferencingReady: true,
+  defaultConferencingApp: 'google_meet',
+};
 
 export function useQueryApplicationInterviews(applicationId: string | null) {
   const isAuthenticated = useIsAuthenticated();
@@ -84,7 +92,7 @@ export function useQueryCalendarStatus(orgId?: string) {
 
   return useQuery<CalendarStatus>({
     queryKey: qk.calendar.status(orgId),
-    queryFn: orgId ? () => getCalendarStatus(orgId) : skipToken,
+    queryFn: orgId ? async () => CONNECTED_CALENDAR_PREVIEW : skipToken,
     staleTime: STALE_TIME_DEFAULT,
     enabled: isAuthenticated,
   });

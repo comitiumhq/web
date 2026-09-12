@@ -1,15 +1,8 @@
 import { Button } from '@comitium/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@comitium/ui/dialog';
+import { Combobox } from '@comitium/ui/combobox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -154,25 +147,23 @@ export function DepartmentSheet({ orgId, department, departments, open, onOpenCh
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Is under</FormLabel>
-                  <Select
-                    value={field.value ?? 'none'}
-                    onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
-                    disabled={isPending}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {parentOptions.map((option) => (
-                        <SelectItem key={option.id} value={option.id}>
-                          {departmentParentLabel(option)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Combobox
+                      selectionMode="single"
+                      ariaLabel="Parent department"
+                      options={parentOptions.map((option) => ({
+                        value: option.id,
+                        label: departmentParentLabel(option),
+                      }))}
+                      value={field.value ?? null}
+                      onValueChange={field.onChange}
+                      placeholder="None"
+                      searchPlaceholder="Search departments…"
+                      emptyMessage="No departments found."
+                      clearLabel="No parent department"
+                      disabled={isPending}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

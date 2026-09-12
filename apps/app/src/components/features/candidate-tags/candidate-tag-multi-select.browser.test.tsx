@@ -20,16 +20,15 @@ describe('CandidateTagMultiSelect', () => {
   it('adds multiple tags and removes an individual tag', async () => {
     const screen = await render(<Harness />);
 
-    await screen.getByRole('combobox', { name: 'Add tag' }).click();
+    await screen.getByRole('button', { name: 'Show tags options' }).click();
     await screen.getByText('Priority').click();
-    await expect.element(screen.getByRole('button', { name: 'Remove tag Priority' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Remove Priority' })).toBeInTheDocument();
 
-    await screen.getByRole('combobox', { name: 'Add tag' }).click();
     await screen.getByText('Referral').click();
-    await expect.element(screen.getByRole('button', { name: 'Remove tag Referral' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Remove Referral' })).toBeInTheDocument();
 
-    await screen.getByRole('button', { name: 'Remove tag Priority' }).click();
-    await expect.element(screen.getByRole('button', { name: 'Remove tag Priority' })).not.toBeInTheDocument();
-    await expect.element(screen.getByRole('button', { name: 'Remove tag Referral' })).toBeInTheDocument();
+    await screen.getByRole('button', { name: 'Remove Priority' }).click();
+    await expect.element(screen.getByRole('button', { name: 'Remove Priority' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Remove Referral' })).toBeInTheDocument();
   });
 });

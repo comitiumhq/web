@@ -1,9 +1,9 @@
 import { Button } from '@comitium/ui/button';
+import { Combobox } from '@comitium/ui/combobox';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
@@ -196,18 +196,18 @@ export function CreateJobDialog({ orgId, open, onOpenChange }: CreateJobDialogPr
                     {emptyOptionsMessage(departmentsLoading, 'teams')}
                   </p>
                 ) : (
-                  <Select value={departmentId ?? ''} onValueChange={setDepartmentId} disabled={isPending}>
-                    <SelectTrigger id="create-job-team" className="w-full min-w-0">
-                      <SelectValue placeholder="Select team" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {departmentOptions.map((department) => (
-                        <SelectItem key={department.id} value={department.id}>
-                          {department.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Combobox
+                    selectionMode="single"
+                    id="create-job-team"
+                    ariaLabel="Team"
+                    options={departmentOptions.map((department) => ({ value: department.id, label: department.name }))}
+                    value={departmentId}
+                    onValueChange={setDepartmentId}
+                    placeholder="Select team"
+                    searchPlaceholder="Search teams…"
+                    emptyMessage="No teams found."
+                    disabled={isPending}
+                  />
                 )}
               </div>
 
@@ -218,18 +218,18 @@ export function CreateJobDialog({ orgId, open, onOpenChange }: CreateJobDialogPr
                     {emptyOptionsMessage(locationsLoading, 'locations')}
                   </p>
                 ) : (
-                  <Select value={locationId ?? ''} onValueChange={setLocationId} disabled={isPending}>
-                    <SelectTrigger id="create-job-location" className="w-full min-w-0">
-                      <SelectValue placeholder="Select a location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {locationOptions.map((location) => (
-                        <SelectItem key={location.id} value={location.id}>
-                          {location.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Combobox
+                    selectionMode="single"
+                    id="create-job-location"
+                    ariaLabel="Location"
+                    options={locationOptions.map((location) => ({ value: location.id, label: location.name }))}
+                    value={locationId}
+                    onValueChange={setLocationId}
+                    placeholder="Select a location"
+                    searchPlaceholder="Search locations…"
+                    emptyMessage="No locations found."
+                    disabled={isPending}
+                  />
                 )}
               </div>
             </div>

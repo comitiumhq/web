@@ -9,8 +9,7 @@ import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { SearchSelect, type SearchSelectOption } from '@comitium/ui/search-select';
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@comitium/ui/select';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { Switch } from '@comitium/ui/switch';
 import { Textarea } from '@comitium/ui/textarea';
 import { CalendarIcon } from '@phosphor-icons/react';
@@ -115,13 +114,6 @@ interface PrimitiveEditProps {
   autoFocus?: boolean;
 }
 
-type SelectOption = {
-  value: string;
-  label: string;
-};
-
-const EMPTY_SELECT_VALUE = '__custom_field_empty__';
-
 function ShortTextEdit({
   value,
   onChange,
@@ -221,7 +213,7 @@ function MultipleChoiceEdit({
   disabled,
 }: PrimitiveEditProps & { selectableValues: SelectableValue[] | null }) {
   const current = isNonEmptyString(value) ? value : '';
-  const options = useMemo<SelectOption[]>(
+  const options = useMemo<ComboboxOption[]>(
     () =>
       visibleOptions(selectableValues, (sv) => sv.value === current).map((sv) => ({
         value: sv.value,
@@ -229,28 +221,21 @@ function MultipleChoiceEdit({
       })),
     [selectableValues, current],
   );
-  const handleChange = useCallback(
-    (next: string) => {
-      onChange(next === EMPTY_SELECT_VALUE ? null : next);
-    },
-    [onChange],
-  );
+  const handleChange = useCallback((next: string | null) => onChange(next), [onChange]);
 
   return (
-    <Select value={current} onValueChange={handleChange} disabled={disabled}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select option..." />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={EMPTY_SELECT_VALUE}>No value</SelectItem>
-        {options.length > 0 && <SelectSeparator />}
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Combobox
+      selectionMode="single"
+      ariaLabel="Custom field option"
+      options={options}
+      value={current || null}
+      onValueChange={handleChange}
+      placeholder="Select option…"
+      searchPlaceholder="Search options…"
+      emptyMessage="No options found."
+      clearLabel="No value"
+      disabled={disabled}
+    />
   );
 }
 
@@ -375,7 +360,7 @@ function DateEdit({ value, onChange, disabled }: PrimitiveEditProps) {
 
 function EmployeeEdit({ value, team, onChange, disabled }: PrimitiveEditProps & { team: OrgTeamMember[] }) {
   const current = isNonEmptyString(value) ? value : '';
-  const options = useMemo<SearchSelectOption[]>(
+  const options = useMemo<ComboboxOption[]>(
     () =>
       team
         .filter((member) => member.isActive || member.userId === current)
@@ -391,7 +376,8 @@ function EmployeeEdit({ value, team, onChange, disabled }: PrimitiveEditProps & 
   const handleChange = useCallback((next: string | null) => onChange(next), [onChange]);
 
   return (
-    <SearchSelect
+    <Combobox
+      selectionMode="single"
       options={options}
       value={current || null}
       onValueChange={handleChange}

@@ -27,7 +27,7 @@ import {
 import { ResourceColumn } from './column';
 import { getDraftHeightPercent, getDraftTopPercent, getZonedMinutes, isFutureSlot } from './draft-slot';
 import { CalendarEventProvider, renderEvent } from './event';
-import { type AvailableMember, CalendarHeader, CalendarHeaderEmpty } from './header';
+import { CalendarHeader, CalendarHeaderEmpty } from './header';
 import {
   BUSINESS_HOURS,
   type CalendarResourceData,
@@ -99,11 +99,14 @@ function InterviewerCalendarImpl({
   className = 'h-[640px]',
 }: InterviewerCalendarProps) {
   const lockInterviewers = !onInterviewersChange;
+  const calendarRef = useRef<HTMLDivElement>(null);
+
   const { data: orgMembers } = useQueryOrgTeam(orgId);
   const calendarStatusMap = useQueryTeamCalendarStatusMap(orgId);
-  const calendarRef = useRef<HTMLDivElement>(null);
+
   const interviewerUserIds = useMemo(() => interviewers.map((interviewer) => interviewer.userId), [interviewers]);
   const availabilityRange = useMemo(() => getAvailabilityRange(visibleDay, timeZone), [timeZone, visibleDay]);
+
   const availabilityQuery = useQueryInterviewBusy({
     applicationId,
     interviewerUserIds,
@@ -111,42 +114,8 @@ function InterviewerCalendarImpl({
     endTime: availabilityRange.end,
     timeZone,
   });
+
   const interviewerAvailability = availabilityQuery.data?.data.interviewers;
-
-  const availableMembers = useMemo<AvailableMember[]>(() => {
-    const selected = new Set(interviewerUserIds);
-
-    return (orgMembers ?? [])
-      .filter((member) => member.isActive && !selected.has(member.userId))
-      .map((member) => ({
-        member,
-        hasCalendar: calendarStatusMap.get(member.userId) ?? false,
-      }));
-  }, [calendarStatusMap, interviewerUserIds, orgMembers]);
-
-  const handleAdd = useCallback(
-    (userId: string) => {
-      if (!onInterviewersChange) {
-        return;
-      }
-
-      const entry = availableMembers.find((available) => available.member.userId === userId);
-
-      if (!entry?.hasCalendar) {
-        return;
-      }
-
-      onInterviewersChange([
-        ...interviewers,
-        {
-          userId: entry.member.userId,
-          member: entry.member,
-          role: 'interviewer',
-        },
-      ]);
-    },
-    [availableMembers, interviewers, onInterviewersChange],
-  );
 
   const handleRemove = useCallback(
     (userId: string) => {
@@ -162,6 +131,7 @@ function InterviewerCalendarImpl({
   const resources = useMemo(() => createCalendarResources(interviewers), [interviewers]);
 
   const availabilityIndex = useMemo(() => createAvailabilityIndex(interviewerAvailability), [interviewerAvailability]);
+
   const events = useMemo(
     () => createCalendarEvents({ availability: availabilityIndex, interviewers, timeZone, visibleDay }),
     [availabilityIndex, interviewers, timeZone, visibleDay],
@@ -239,14 +209,15 @@ function InterviewerCalendarImpl({
   const calendarHeader = useMemo(
     () => (
       <CalendarHeader
-        availableMembers={availableMembers}
-        onAdd={handleAdd}
+        members={orgMembers ?? []}
+        calendarStatusMap={calendarStatusMap}
+        interviewers={interviewers}
+        onInterviewersChange={onInterviewersChange}
         timeZone={timeZone}
         onTimeZoneChange={onTimeZoneChange}
-        lockInterviewers={lockInterviewers}
       />
     ),
-    [availableMembers, handleAdd, lockInterviewers, onTimeZoneChange, timeZone],
+    [calendarStatusMap, interviewers, onInterviewersChange, onTimeZoneChange, orgMembers, timeZone],
   );
 
   const draftStart = useMemo(() => (value ? parseISO(value) : null), [value]);
@@ -271,6 +242,7 @@ function InterviewerCalendarImpl({
     '--calendar-draft-height': `${getDraftHeightPercent(durationMinutes)}%`,
     '--calendar-draft-top': `${getDraftTopPercent(draftMinutes)}%`,
   };
+
   const draftPointerHandlers = useDraftSlotDrag({
     calendarRef,
     value,
@@ -281,6 +253,7 @@ function InterviewerCalendarImpl({
     isDropAllowed: isSlotWithinWorkingHours,
     onDisallowedDrop: showOutsideWorkingHoursError,
   });
+
   const calendarEventContext = useMemo(
     () => ({
       title: draftEventTitle,
@@ -306,12 +279,13 @@ function InterviewerCalendarImpl({
     return (
       <div className={cn('interviewer-calendar flex flex-col overflow-hidden rounded-md border bg-card', className)}>
         <CalendarHeaderEmpty
-          availableMembers={availableMembers}
-          onAdd={handleAdd}
+          members={orgMembers ?? []}
+          calendarStatusMap={calendarStatusMap}
+          interviewers={interviewers}
+          onInterviewersChange={onInterviewersChange}
           timeZone={timeZone}
           onTimeZoneChange={onTimeZoneChange}
           canAddInterviewer={hasInterviewType}
-          lockInterviewers={lockInterviewers}
         />
         <div className="flex flex-1 items-center justify-center">
           {hasInterviewType ? (
@@ -347,10 +321,12 @@ function InterviewerCalendarImpl({
 
   if (unavailableInterviewers.length > 0) {
     const unavailableUserIds = new Set(unavailableInterviewers.map((interviewer) => interviewer.userId));
+
     const unavailableNames = interviewers
       .filter((interviewer) => unavailableUserIds.has(interviewer.userId))
       .map((interviewer) => getMemberDisplayName(interviewer.member))
       .join(', ');
+
     const unavailableDescription = unavailableNames
       ? `Calendar availability is missing for: ${unavailableNames}. Check their connection and try again.`
       : 'One or more interviewer calendars are unavailable. Check their connection and try again.';

@@ -1,7 +1,7 @@
 import { normalizeCurrencyAnswer } from '@comitium/schemas/forms/answer-values';
 import { CURRENCIES } from '@comitium/schemas/job-enums';
+import { Combobox } from '@comitium/ui/combobox';
 import { Input } from '@comitium/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import type { ChangeEvent } from 'react';
 import { useCallback } from 'react';
 import type { ControllerRenderProps } from 'react-hook-form';
@@ -47,18 +47,18 @@ export function CurrencyWidget({ field }: CurrencyWidgetProps) {
         ref={field.ref}
         data-form-focus-target=""
       />
-      <Select value={value.currency} onValueChange={handleCurrencyChange}>
-        <SelectTrigger className="h-10 w-full rounded-4xl px-4">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent position="popper" align="end">
-          {CURRENCIES.map((currency) => (
-            <SelectItem key={currency.value} value={currency.value}>
-              {currency.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Combobox
+        selectionMode="single"
+        size="lg"
+        ariaLabel="Currency"
+        options={CURRENCIES}
+        value={value.currency}
+        clearable={false}
+        onValueChange={(nextValue) => nextValue && handleCurrencyChange(nextValue)}
+        placeholder="Currency"
+        searchPlaceholder="Search currencies…"
+        emptyMessage="No currencies found."
+      />
     </div>
   );
 }

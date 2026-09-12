@@ -1,7 +1,7 @@
 import type { HiringTeamRole } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
-import { SearchSelect, type SearchSelectOption } from '@comitium/ui/search-select';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { PlusIcon } from '@phosphor-icons/react';
 import { useCallback, useMemo, useState } from 'react';
@@ -18,7 +18,7 @@ interface HiringTeamComposerProps {
 export function HiringTeamComposer({ availableMembers, isAdding, onAdd }: HiringTeamComposerProps) {
   const [role, setRole] = useState<HiringTeamRole>('hiring_manager');
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
-  const memberOptions = useMemo<SearchSelectOption[]>(
+  const memberOptions = useMemo<ComboboxOption[]>(
     () =>
       availableMembers.map((member) => ({
         value: member.userId,
@@ -50,7 +50,8 @@ export function HiringTeamComposer({ availableMembers, isAdding, onAdd }: Hiring
     <div className="flex w-full flex-col gap-2">
       <span className="text-label-13 font-medium">Add member</span>
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-        <SearchSelect
+        <Combobox
+          selectionMode="single"
           options={memberOptions}
           value={selectedMemberId}
           onValueChange={handleSelectMember}

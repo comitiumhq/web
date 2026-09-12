@@ -8,7 +8,7 @@ import {
 } from '@comitium/ui/feature-sheet';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
-import type { SearchSelectOption } from '@comitium/ui/search-select';
+import type { ComboboxOption } from '@comitium/ui/combobox';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -104,7 +104,7 @@ export function EmailSheet({
   const senderLabel = getEmailSenderLabel(senderName);
 
   const templateOptions = useMemo(() => {
-    const options: SearchSelectOption[] = templates.map((template) => ({
+    const options: ComboboxOption[] = templates.map((template) => ({
       value: template.id,
       label: template.name,
       searchValue: `${template.name} ${template.useCase}`,

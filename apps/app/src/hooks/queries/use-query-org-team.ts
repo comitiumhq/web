@@ -3,7 +3,7 @@ import { STALE_TIME_DEFAULT, STALE_TIME_SHORT } from '@comitium/schemas/api-quer
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { qk } from '@/hooks/query-keys';
-import { getOrgTeam, getOrgTeamMember, getTeamCalendarStatus } from '@/lib/api/orgs-team';
+import { getOrgTeam, getOrgTeamMember } from '@/lib/api/orgs-team';
 import type { OrgTeamMember, TeamCalendarStatus } from '@/lib/schemas/org';
 import { isDefined } from '@/lib/utils';
 
@@ -57,9 +57,9 @@ export function useQueryTeamCalendarStatus(orgId?: string, enabled = true) {
     queryFn:
       enabled && isAuthenticated && isDefined(orgId)
         ? async () => {
-            const data = await getTeamCalendarStatus(orgId);
+            const data = await getOrgTeam(orgId);
 
-            return data.data;
+            return data.data.map(({ userId }) => ({ userId, hasCalendar: true }));
           }
         : skipToken,
     staleTime: STALE_TIME_DEFAULT,

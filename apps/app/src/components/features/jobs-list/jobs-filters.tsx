@@ -1,7 +1,7 @@
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
+import { Combobox } from '@comitium/ui/combobox';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { ArrowCounterClockwiseIcon, FunnelIcon } from '@phosphor-icons/react';
 
 const ALL_FILTER_VALUE = 'all';
@@ -48,36 +48,40 @@ export function JobsFilters({
       <PopoverContent align="end" className="w-64 gap-3">
         <div className="flex flex-col gap-1.5">
           <span className="text-label-12 text-muted-foreground">Department</span>
-          <Select value={departmentId ?? ALL_FILTER_VALUE} onValueChange={onDepartmentChange}>
-            <SelectTrigger size="sm">
-              <SelectValue placeholder="All departments" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL_FILTER_VALUE}>All departments</SelectItem>
-              {departments.map((department) => (
-                <SelectItem key={department.id} value={department.id}>
-                  {department.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Combobox
+            selectionMode="single"
+            size="sm"
+            ariaLabel="Department"
+            options={[
+              { value: ALL_FILTER_VALUE, label: 'All departments' },
+              ...departments.map((department) => ({ value: department.id, label: department.name })),
+            ]}
+            value={departmentId ?? ALL_FILTER_VALUE}
+            clearable={false}
+            onValueChange={(nextValue) => nextValue && onDepartmentChange(nextValue)}
+            placeholder="All departments"
+            searchPlaceholder="Search departments…"
+            emptyMessage="No departments found."
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <span className="text-label-12 text-muted-foreground">Location</span>
-          <Select value={locationId ?? ALL_FILTER_VALUE} onValueChange={onLocationChange}>
-            <SelectTrigger size="sm">
-              <SelectValue placeholder="All locations" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL_FILTER_VALUE}>All locations</SelectItem>
-              {locations.map((location) => (
-                <SelectItem key={location.id} value={location.id}>
-                  {location.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Combobox
+            selectionMode="single"
+            size="sm"
+            ariaLabel="Location"
+            options={[
+              { value: ALL_FILTER_VALUE, label: 'All locations' },
+              ...locations.map((location) => ({ value: location.id, label: location.name })),
+            ]}
+            value={locationId ?? ALL_FILTER_VALUE}
+            clearable={false}
+            onValueChange={(nextValue) => nextValue && onLocationChange(nextValue)}
+            placeholder="All locations"
+            searchPlaceholder="Search locations…"
+            emptyMessage="No locations found."
+          />
         </div>
 
         {activeCount > 0 && (
