@@ -37,6 +37,14 @@ export function isPrimaryInterviewFeedbackAction(
 }
 
 export function getCandidateSheetEmptyActivityMessage(actionState: CandidateSheetActionState): string {
+  if (actionState.nextAction?.kind === 'make_stage_decision') {
+    return 'All current activities are complete. Choose the next stage.';
+  }
+
+  if (actionState.status === 'waiting_decision') {
+    return 'All current activities are complete. Waiting for a stage decision.';
+  }
+
   if (!actionState.blockedReason) {
     return 'Nothing is waiting for action right now.';
   }

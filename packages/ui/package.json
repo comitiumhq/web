@@ -41,6 +41,7 @@
     "./empty-state-card": "./src/components/empty-state-card.tsx",
     "./empty-state-panel": "./src/components/empty-state-panel.tsx",
     "./error-fallbacks": "./src/components/error-fallbacks.tsx",
+    "./expandable-content": "./src/components/expandable-content.tsx",
     "./feature-sheet": "./src/components/feature-sheet.tsx",
     "./form": "./src/components/form.tsx",
     "./forms": "./src/forms/index.ts",

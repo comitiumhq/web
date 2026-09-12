@@ -76,7 +76,7 @@ export function CandidateSheetHeader({
   const stageSince = getStageSince(currentStageEnteredAt, appliedAt);
 
   return (
-    <SheetHeader className="shrink-0 gap-0 bg-background p-0">
+    <SheetHeader className="shrink-0 gap-0 border-b border-border bg-background p-0">
       <div className="px-6 py-4 pr-14 sm:pr-6">
         <div className="flex flex-col items-stretch gap-3 min-[900px]:flex-row min-[900px]:items-start min-[900px]:justify-between">
           <div className="min-w-0 flex-1">

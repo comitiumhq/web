@@ -13,7 +13,7 @@ const defaultComponents: Components = {
   a: ({ href, children }) => (
     <a
       href={href}
-      className="text-primary underline underline-offset-2 hover:opacity-80"
+      className="text-link underline underline-offset-2 hover:opacity-80"
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -37,7 +37,7 @@ const documentComponents: Components = {
   a: ({ href, children }) => (
     <a
       href={href}
-      className="font-medium text-primary transition-colors hover:text-primary/80"
+      className="font-medium text-link transition-colors hover:text-link/80"
       target={href?.startsWith('http') ? '_blank' : undefined}
       rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
     >

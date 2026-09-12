@@ -41,20 +41,49 @@ export function CustomFieldValueEdit({
 }: CustomFieldValueEditProps) {
   switch (fieldType) {
     case 'short_answer':
-      return <ShortTextEdit value={value} onChange={onChange} disabled={disabled} autoFocus={autoFocus} />;
+      return (
+        <ShortTextEdit
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          placeholder="Add a value..."
+        />
+      );
     case 'long_unformatted':
       return <LongTextEdit value={value} onChange={onChange} disabled={disabled} autoFocus={autoFocus} />;
     case 'phone':
       return (
-        <ShortTextEdit value={value} onChange={onChange} disabled={disabled} inputType="tel" autoFocus={autoFocus} />
+        <ShortTextEdit
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          inputType="tel"
+          autoFocus={autoFocus}
+          placeholder="Phone number..."
+        />
       );
     case 'url':
       return (
-        <ShortTextEdit value={value} onChange={onChange} disabled={disabled} inputType="url" autoFocus={autoFocus} />
+        <ShortTextEdit
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          inputType="url"
+          autoFocus={autoFocus}
+          placeholder="https://example.com"
+        />
       );
     case 'email':
       return (
-        <ShortTextEdit value={value} onChange={onChange} disabled={disabled} inputType="email" autoFocus={autoFocus} />
+        <ShortTextEdit
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          inputType="email"
+          autoFocus={autoFocus}
+          placeholder="name@example.com"
+        />
       );
     case 'multiple_choice':
       return (
@@ -99,11 +128,21 @@ function ShortTextEdit({
   disabled,
   inputType = 'text',
   autoFocus,
-}: PrimitiveEditProps & { inputType?: string }) {
+  placeholder,
+}: PrimitiveEditProps & { inputType?: string; placeholder: string }) {
   const display = isNonEmptyString(value) ? value : '';
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value), [onChange]);
 
-  return <Input type={inputType} value={display} onChange={handleChange} disabled={disabled} autoFocus={autoFocus} />;
+  return (
+    <Input
+      type={inputType}
+      value={display}
+      onChange={handleChange}
+      disabled={disabled}
+      autoFocus={autoFocus}
+      placeholder={placeholder}
+    />
+  );
 }
 
 function LongTextEdit({ value, onChange, disabled, autoFocus }: PrimitiveEditProps) {
@@ -118,6 +157,7 @@ function LongTextEdit({ value, onChange, disabled, autoFocus }: PrimitiveEditPro
       rows={8}
       className="max-h-[65vh]"
       autoFocus={autoFocus}
+      placeholder="Add details..."
     />
   );
 }
@@ -143,7 +183,16 @@ function NumberEdit({ value, onChange, disabled, autoFocus }: PrimitiveEditProps
     [onChange],
   );
 
-  return <Input type="number" value={display} onChange={handleChange} disabled={disabled} autoFocus={autoFocus} />;
+  return (
+    <Input
+      type="number"
+      value={display}
+      onChange={handleChange}
+      disabled={disabled}
+      autoFocus={autoFocus}
+      placeholder="Enter a number..."
+    />
+  );
 }
 
 function YesNoEdit({ value, onChange, disabled }: PrimitiveEditProps) {

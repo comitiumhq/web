@@ -6,7 +6,6 @@ import { CustomFieldValuesSection } from '@/components/features/custom-fields/cu
 
 import { CandidateProfileCard } from './candidate-profile-card';
 import { HiringTeamCard } from './hiring-team-card';
-import { ProcessingStatus } from './processing-status';
 
 interface CandidateOverviewProps {
   application: ApplicationApiResponse;
@@ -53,8 +52,6 @@ export function CandidateOverview({
         />
 
         <HiringTeamCard members={application.considerationContext.hiringTeam} />
-
-        {application.processing && <ProcessingStatus processing={application.processing} />}
 
         {application.candidateId && (
           <CustomFieldValuesSection candidateId={application.candidateId} orgId={orgId} canEdit={canEditCandidate} />

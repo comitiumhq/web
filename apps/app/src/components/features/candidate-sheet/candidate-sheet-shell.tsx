@@ -139,7 +139,7 @@ export function CandidateSheetSkeleton() {
 
 function CandidateHeaderSkeleton() {
   return (
-    <div aria-hidden className="shrink-0 px-6 py-4 pr-14 sm:pr-6">
+    <div aria-hidden className="shrink-0 border-b border-border px-6 py-4 pr-14 sm:pr-6">
       <div className="flex flex-col items-stretch gap-3 min-[900px]:flex-row min-[900px]:items-start min-[900px]:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex h-[26px] items-center">
@@ -194,7 +194,7 @@ function ApplicationsSkeleton() {
 function ActivitiesSkeleton() {
   return (
     <div className="relative min-h-0 min-w-0 overflow-hidden">
-      <div className="absolute inset-x-0 top-0 z-10 bg-background/80 px-4 py-3 backdrop-blur-md">
+      <div className="absolute inset-x-0 top-0 z-10 bg-background px-4 py-3">
         <div className="flex gap-2">
           <Skeleton className="h-8 w-20 rounded-lg" />
           <Skeleton className="h-8 w-16 rounded-lg" />
@@ -280,7 +280,7 @@ function CompactProgressRow() {
 function CollaborationSkeleton() {
   return (
     <div className="relative min-h-0 overflow-hidden border-l border-border">
-      <div className="absolute inset-x-0 top-0 z-10 bg-background/80 px-4 py-3 backdrop-blur-md">
+      <div className="absolute inset-x-0 top-0 z-10 bg-background px-4 py-3">
         <div className="flex gap-2">
           <Skeleton className="h-8 w-14 rounded-lg" />
           <Skeleton className="h-8 w-14 rounded-lg" />

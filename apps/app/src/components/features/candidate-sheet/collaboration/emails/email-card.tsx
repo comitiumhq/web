@@ -1,5 +1,6 @@
 import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/candidates';
 import { Card } from '@comitium/ui/card';
+import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { EnvelopeSimpleIcon } from '@phosphor-icons/react';
 import { memo } from 'react';
@@ -36,7 +37,9 @@ export const EmailCard = memo(function EmailCard({ email, candidateProfile }: Em
       <div className="px-4 py-3">
         <p className="text-label-14 font-medium mb-2">{email.content.subject}</p>
         <div className="text-copy-14">
-          <RichTextEditor content={email.content.body} readOnly />
+          <ExpandableContent collapsedLines={6}>
+            <RichTextEditor content={email.content.body} readOnly />
+          </ExpandableContent>
         </div>
       </div>
     </Card>

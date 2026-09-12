@@ -4,6 +4,7 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import type { ComponentType } from 'react';
 import type { Control, ControllerRenderProps, FieldValues } from 'react-hook-form';
 
+import { cn } from '../lib/cn';
 import { ChoiceWidget } from './widgets/choice-widget';
 import { CurrencyWidget } from './widgets/currency-widget';
 import { DateWidget } from './widgets/date-widget';
@@ -27,18 +28,19 @@ export interface FormRendererProps {
   control: Control<FieldValues>;
   locationInput: ComponentType<LocationInputProps>;
   formattableTextInput?: ComponentType<FormattableTextInputProps>;
-  variant?: 'application';
+  variant?: 'application' | 'feedback';
 }
 
 export function FormRenderer({ form, control, locationInput, formattableTextInput, variant }: FormRendererProps) {
   const sections = form.sections.filter((section) => section.questions.length > 0);
+  const isFeedback = variant === 'feedback';
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className={cn('flex flex-col', isFeedback ? 'gap-6' : 'gap-8')}>
       {sections.map((section) => (
-        <section key={section.id} className="flex flex-col gap-4">
+        <section key={section.id} className={cn('flex flex-col', isFeedback ? 'gap-3' : 'gap-4')}>
           {section.title && <h3 className="text-heading-16">{section.title}</h3>}
-          <div className="flex flex-col gap-5">
+          <div className={cn('flex flex-col', isFeedback ? 'gap-4' : 'gap-5')}>
             <SectionQuestions
               questions={section.questions}
               control={control}
@@ -58,7 +60,7 @@ interface SectionQuestionsProps {
   control: Control<FieldValues>;
   locationInput: ComponentType<LocationInputProps>;
   formattableTextInput?: ComponentType<FormattableTextInputProps>;
-  variant?: 'application';
+  variant?: FormRendererProps['variant'];
 }
 
 function SectionQuestions({ questions, control, locationInput, formattableTextInput, variant }: SectionQuestionsProps) {

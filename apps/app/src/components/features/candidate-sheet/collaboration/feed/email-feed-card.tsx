@@ -1,5 +1,6 @@
 import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/candidates';
 import { Card } from '@comitium/ui/card';
+import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { EnvelopeSimpleIcon } from '@phosphor-icons/react';
 import { memo } from 'react';
@@ -83,7 +84,9 @@ function EmailBody({ orgId, decryptedEmail, isDecrypting, decryptionError }: Ema
       <>
         <p className="mb-1.5 text-label-13 font-medium">{decryptedEmail.content.subject}</p>
         <div className="text-copy-13 text-muted-foreground">
-          <RichTextEditor content={decryptedEmail.content.body} readOnly />
+          <ExpandableContent collapsedLines={4}>
+            <RichTextEditor content={decryptedEmail.content.body} readOnly />
+          </ExpandableContent>
         </div>
       </>
     );

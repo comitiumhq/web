@@ -1,28 +1,29 @@
 import type { ApplicationProcessingStatus } from '@comitium/schemas/applications';
 
-const STATUS_LABELS: Record<ApplicationProcessingStatus['status'], string> = {
-  pending: 'Preparing application data',
-  processing: 'Processing application',
-  complete: 'Processing complete',
+const FAILURE_STATUS_LABELS = {
   retryable_failed: 'Application processing delayed',
   terminal_failed: 'Application processing unavailable',
-};
+} as const;
 
-interface ProcessingStatusProps {
+interface EvaluationStatusProps {
   processing: ApplicationProcessingStatus;
 }
 
-export function ProcessingStatus({ processing }: ProcessingStatusProps) {
+export function EvaluationStatus({ processing }: EvaluationStatusProps) {
   if (processing.criteriaEvaluationMode === null) {
     return null;
   }
 
-  if (processing.status !== 'complete') {
+  if (processing.status === 'retryable_failed' || processing.status === 'terminal_failed') {
     return (
       <div className="rounded-lg bg-muted/50 px-3 py-3">
-        <p className="text-label-14">{STATUS_LABELS[processing.status]}</p>
+        <p className="text-label-14">{FAILURE_STATUS_LABELS[processing.status]}</p>
       </div>
     );
+  }
+
+  if (processing.status !== 'complete') {
+    return null;
   }
 
   if (processing.criteriaEvaluationMode === 'disabled') {
