@@ -87,7 +87,7 @@ describe('InviteAcceptPage global account actions', () => {
 
     expect(mocks.acceptInvite).not.toHaveBeenCalled();
     await expect.element(screen.getByText('personal@example.com')).toBeInTheDocument();
-    await expect.element(screen.getByText('Invited via recruiter@comitium.test')).toBeInTheDocument();
+    await expect.element(screen.getByText('Invite sent to recruiter@comitium.test')).toBeInTheDocument();
 
     await screen.getByRole('button', { name: 'Join workspace' }).click();
 

@@ -1,5 +1,6 @@
 import { Badge } from '@comitium/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@comitium/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@comitium/ui/card';
+import { Skeleton } from '@comitium/ui/skeleton';
 import { BuildingsIcon } from '@phosphor-icons/react';
 import type { OrgRole } from '@/lib/schemas/org';
 import { formatOrgRole } from '@/lib/utils/org';
@@ -30,13 +31,13 @@ export function InviteCard({ invite, title, description, children }: InviteCardP
             <InviteOrgAvatar logo={invite.orgLogo} name={orgName} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-heading-16">{orgName}</p>
-              <p className="truncate text-copy-13 text-muted-foreground">Invited via {invite.email}</p>
+              <p className="truncate text-copy-13 text-muted-foreground">Invite sent to {invite.email}</p>
             </div>
             <Badge variant="outline">{formatOrgRole(invite.role)}</Badge>
           </div>
 
           <div className="grid gap-2">
-            <CardTitle className="text-heading-20">{title}</CardTitle>
+            <h1 className="font-heading text-heading-20">{title}</h1>
             <CardDescription>{description}</CardDescription>
           </div>
         </CardHeader>
@@ -73,7 +74,7 @@ export function InviteStatusCard({ icon: Icon, title, description, children }: I
           <div className="mb-1 flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground ring-1 ring-border">
             <Icon className="size-5" />
           </div>
-          <CardTitle className="text-heading-20">{title}</CardTitle>
+          <h1 className="font-heading text-heading-20">{title}</h1>
           <CardDescription className="w-full">{description}</CardDescription>
         </CardHeader>
         {children ? <CardContent className="flex flex-col gap-3">{children}</CardContent> : null}
@@ -85,25 +86,27 @@ export function InviteStatusCard({ icon: Icon, title, description, children }: I
 export function InviteLoadingCard() {
   return (
     <InvitePageShell>
-      <Card>
-        <CardHeader className="gap-5">
-          <div className="flex items-center gap-3">
-            <div className="size-11 rounded-xl bg-muted" />
-            <div className="grid flex-1 gap-2">
-              <div className="h-5 w-40 rounded-xl bg-muted" />
-              <div className="h-4 w-52 max-w-full rounded-xl bg-muted" />
+      <output aria-label="Loading invitation" className="block">
+        <Card>
+          <CardHeader className="gap-5">
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-11" />
+              <div className="grid flex-1 gap-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-52 max-w-full" />
+              </div>
             </div>
-          </div>
-          <div className="grid gap-2">
-            <div className="h-6 w-44 rounded-xl bg-muted" />
-            <div className="h-4 w-full rounded-xl bg-muted" />
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-3">
-          <div className="h-10 w-full rounded-4xl bg-muted" />
-          <div className="mx-auto h-4 w-52 rounded-xl bg-muted" />
-        </CardContent>
-      </Card>
+            <div className="grid gap-2">
+              <Skeleton className="h-6 w-44" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <Skeleton className="h-10 w-full rounded-4xl" />
+            <Skeleton className="mx-auto h-4 w-52" />
+          </CardContent>
+        </Card>
+      </output>
     </InvitePageShell>
   );
 }
