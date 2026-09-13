@@ -7,8 +7,7 @@ const FEATURE_SHEET_SIZE_CLASSES = {
   form: 'data-[side=right]:w-full data-[side=right]:sm:max-w-2xl',
   editor: 'data-[side=right]:w-full data-[side=right]:sm:max-w-3xl',
   wide: 'data-[side=right]:w-full data-[side=right]:sm:max-w-6xl',
-  workspace:
-    'data-[side=right]:w-full data-[side=right]:sm:w-[calc(100vw-5rem)] data-[side=right]:sm:max-w-[1800px]',
+  workspace: 'data-[side=right]:w-full data-[side=right]:sm:w-[calc(100vw-5rem)] data-[side=right]:sm:max-w-[1800px]',
 } as const;
 
 type FeatureSheetSize = keyof typeof FEATURE_SHEET_SIZE_CLASSES;
@@ -20,7 +19,14 @@ type FeatureSheetContentProps = Omit<React.ComponentProps<typeof SheetContent>, 
 
 function FeatureSheetContent({ className, size, ...props }: FeatureSheetContentProps) {
   return (
-    <SheetContent className={cn('flex flex-col gap-0 p-0', FEATURE_SHEET_SIZE_CLASSES[size], className)} {...props} />
+    <SheetContent
+      className={cn(
+        'flex flex-col gap-0 p-0 [--surface-border:var(--border)]',
+        FEATURE_SHEET_SIZE_CLASSES[size],
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
@@ -39,12 +45,7 @@ type FeatureSheetFooterProps = React.ComponentProps<typeof SheetFooter> & {
 function FeatureSheetFooter({ className, stackOnMobile = false, ...props }: FeatureSheetFooterProps) {
   const alignmentClassName = stackOnMobile ? 'sm:flex-row sm:justify-end' : 'flex-row justify-end';
 
-  return (
-    <SheetFooter
-      className={cn('shrink-0 gap-2 px-6 py-4', alignmentClassName, className)}
-      {...props}
-    />
-  );
+  return <SheetFooter className={cn('shrink-0 gap-2 px-6 py-4', alignmentClassName, className)} {...props} />;
 }
 
 export { FeatureSheetBody, FeatureSheetContent, FeatureSheetFooter, FeatureSheetHeader };

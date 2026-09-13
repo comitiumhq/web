@@ -29,7 +29,11 @@ function DataTable({
   ...props
 }: DataTableProps) {
   return (
-    <Card {...props} data-slot="data-table" className={cn('min-h-0 border border-border py-0 ring-0', className)}>
+    <Card
+      {...props}
+      data-slot="data-table"
+      className={cn('min-h-0 border border-surface-border py-0 ring-0', className)}
+    >
       <div
         data-slot="data-table-scroll-area"
         className={cn('min-h-0 overflow-auto [&_[data-slot=table-container]]:overflow-visible', scrollAreaClassName)}

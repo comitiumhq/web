@@ -44,7 +44,7 @@ export function CandidateSheetShell({
         size="workspace"
         tabIndex={-1}
         onOpenAutoFocus={handleOpenAutoFocus}
-        className="h-full overflow-visible"
+        className="h-full overflow-visible dark:[--surface-border:transparent]"
         showCloseButton={false}
       >
         <SheetTitle className="sr-only">{title}</SheetTitle>
@@ -123,7 +123,7 @@ export function CandidateSheetSkeleton() {
       </div>
 
       <div aria-hidden className="flex min-h-0 flex-1 flex-col overflow-hidden min-[900px]:hidden">
-        <div className="shrink-0 border-b border-border px-4 py-3">
+        <div className="shrink-0 border-b border-separator px-4 py-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <Skeleton className="h-3 w-20 rounded-md" />
             <Skeleton className="h-8 w-full rounded-md sm:max-w-sm" />
@@ -149,7 +149,7 @@ export function CandidateSheetSkeleton() {
 
 function CandidateHeaderSkeleton() {
   return (
-    <div aria-hidden className="shrink-0 border-b border-border px-6 py-4 pr-14 sm:pr-6">
+    <div aria-hidden className="shrink-0 border-b border-separator px-6 py-4 pr-14 sm:pr-6">
       <div className="flex flex-col items-stretch gap-3 min-[900px]:flex-row min-[900px]:items-start min-[900px]:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex h-[26px] items-center">
@@ -183,7 +183,7 @@ function CandidateHeaderSkeleton() {
 
 function ApplicationsSkeleton() {
   return (
-    <div className="flex h-full flex-col overflow-hidden border-r border-border">
+    <div className="flex h-full flex-col overflow-hidden border-r border-separator">
       <div className="shrink-0 px-3 pb-2 pt-3">
         <Skeleton className="h-3 w-24 rounded-md" />
       </div>
@@ -223,7 +223,7 @@ function ActivitiesContentSkeleton() {
       <section>
         <Skeleton className="h-4 w-32 rounded-md" />
 
-        <div className="mt-3 flex items-center gap-3 rounded-xl ring-1 ring-border px-4 py-3">
+        <div className="mt-3 flex items-center gap-3 rounded-xl ring-1 ring-surface-border px-4 py-3">
           <Skeleton className="size-8 shrink-0 rounded-lg" />
           <div className="min-w-0 flex-1">
             <Skeleton className="h-4 w-48 max-w-full rounded-md" />
@@ -239,7 +239,7 @@ function ActivitiesContentSkeleton() {
           <Skeleton className="h-8 w-28 rounded-lg" />
         </div>
 
-        <div className="mt-3 hidden overflow-hidden rounded-xl ring-1 ring-border sm:block">
+        <div className="mt-3 hidden overflow-hidden rounded-xl ring-1 ring-surface-border sm:block">
           <div className="grid grid-cols-[1.5fr_repeat(3,0.6fr)] gap-4 bg-muted/25 px-4 py-3">
             <Skeleton className="h-3 w-14 rounded-md" />
             <Skeleton className="h-3 w-12 justify-self-end rounded-md" />
@@ -251,7 +251,7 @@ function ActivitiesContentSkeleton() {
           <ProgressRow />
         </div>
 
-        <div className="mt-3 divide-y divide-border overflow-hidden rounded-xl ring-1 ring-border sm:hidden">
+        <div className="mt-3 divide-y divide-separator overflow-hidden rounded-xl ring-1 ring-surface-border sm:hidden">
           <CompactProgressRow />
           <CompactProgressRow />
         </div>
@@ -262,7 +262,7 @@ function ActivitiesContentSkeleton() {
 
 function ProgressRow({ short = false }: { short?: boolean }) {
   return (
-    <div className="grid grid-cols-[1.5fr_repeat(3,0.6fr)] items-center gap-4 border-t border-border px-4 py-3">
+    <div className="grid grid-cols-[1.5fr_repeat(3,0.6fr)] items-center gap-4 border-t border-separator px-4 py-3">
       <Skeleton className={short ? 'h-3.5 w-24 rounded-md' : 'h-3.5 w-36 max-w-full rounded-md'} />
       <Skeleton className="h-3 w-12 justify-self-end rounded-md" />
       <Skeleton className="h-3 w-10 justify-self-end rounded-md" />
@@ -289,7 +289,7 @@ function CompactProgressRow() {
 
 function CollaborationSkeleton() {
   return (
-    <div className="relative min-h-0 overflow-hidden border-l border-border">
+    <div className="relative min-h-0 overflow-hidden border-l border-separator">
       <div className="absolute inset-x-0 top-0 z-10 bg-background px-4 py-3">
         <div className="flex gap-2">
           <Skeleton className="h-8 w-14 rounded-lg" />
@@ -303,7 +303,7 @@ function CollaborationSkeleton() {
         <FeedRow />
         <FeedRow short />
 
-        <div className="rounded-xl ring-1 ring-border p-4">
+        <div className="rounded-xl ring-1 ring-surface-border p-4">
           <div className="flex items-center gap-3">
             <Skeleton className="size-7 shrink-0 rounded-full" />
             <Skeleton className="h-3.5 w-28 rounded-md" />
@@ -313,7 +313,7 @@ function CollaborationSkeleton() {
           <Skeleton className="mt-2 h-3.5 w-3/4 rounded-md" />
         </div>
 
-        <div className="rounded-xl ring-1 ring-border p-4">
+        <div className="rounded-xl ring-1 ring-surface-border p-4">
           <div className="flex items-center gap-3">
             <Skeleton className="size-7 shrink-0 rounded-full" />
             <Skeleton className="h-3.5 w-24 rounded-md" />

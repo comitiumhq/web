@@ -206,7 +206,7 @@ export function CareerJobDetailPage({
 
             <aside className="order-first lg:sticky lg:top-6 lg:order-none">
               <Card className="gap-0 overflow-hidden py-0">
-                <dl className="divide-y divide-border px-5">{detailItemNodes}</dl>
+                <dl className="divide-y divide-separator px-5">{detailItemNodes}</dl>
               </Card>
             </aside>
           </div>

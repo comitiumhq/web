@@ -5,7 +5,7 @@ import { CandidateAccountControls } from './candidate-account-controls';
 import { PublicNav } from './public-nav';
 
 const publicHeaderClassName =
-  'fixed top-0 left-0 z-40 w-full border-b border-border bg-background/80 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/65';
+  'fixed top-0 left-0 z-40 w-full border-b border-separator bg-background/80 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/65';
 
 export function PublicHeader() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });

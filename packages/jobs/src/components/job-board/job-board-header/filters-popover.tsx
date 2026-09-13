@@ -205,7 +205,7 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
             </div>
           </div>
 
-          <Separator className="bg-border/50" />
+          <Separator className="bg-separator" />
 
           <div className="px-3 py-3">
             <div className="mb-2 text-label-13 font-medium">Location type</div>
@@ -226,7 +226,7 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
             </ToggleGroup>
           </div>
 
-          <Separator className="bg-border/50" />
+          <Separator className="bg-separator" />
 
           <div className="px-3 py-3">
             <div className="mb-2 text-label-13 font-medium">Employment type</div>
@@ -247,7 +247,7 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
             </ToggleGroup>
           </div>
 
-          <Separator className="bg-border/50" />
+          <Separator className="bg-separator" />
 
           <div className="px-3 py-3">
             <div className="mb-2 text-label-13 font-medium">Annual USD salary range</div>
@@ -278,7 +278,7 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
             </div>
           </div>
 
-          <Separator className="bg-border/50" />
+          <Separator className="bg-separator" />
 
           <div className="flex gap-2 p-2">
             <Button

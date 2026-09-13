@@ -43,7 +43,10 @@ function getSkeletonContent(tab: DraftTab) {
 
 function SkeletonSurface({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div aria-hidden="true" className={`rounded-2xl border border-border bg-card bg-clip-padding p-6 ${className}`}>
+    <div
+      aria-hidden="true"
+      className={`rounded-2xl border border-surface-border bg-card bg-clip-padding p-6 ${className}`}
+    >
       {children}
     </div>
   );
@@ -142,7 +145,7 @@ function CriteriaSkeleton() {
       {criteria.map((criterion, index) => (
         <div
           key={criterion.key}
-          className="flex min-h-14 items-center gap-3 rounded-2xl border border-border bg-card bg-clip-padding px-4 py-3"
+          className="flex min-h-14 items-center gap-3 rounded-2xl border border-surface-border bg-card bg-clip-padding px-4 py-3"
         >
           <Skeleton className="size-4 shrink-0 rounded-md" />
           <Skeleton className="size-7 shrink-0 rounded-full" />

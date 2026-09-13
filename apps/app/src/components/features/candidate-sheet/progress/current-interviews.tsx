@@ -34,7 +34,7 @@ export function CurrentInterviews({
 
   return (
     <Card size="sm" className="gap-0 py-0">
-      <div className="divide-y divide-border">
+      <div className="divide-y divide-separator">
         {eventCards.map((card) => (
           <InterviewCard
             key={card.event.id}

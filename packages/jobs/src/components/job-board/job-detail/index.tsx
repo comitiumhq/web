@@ -50,7 +50,7 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
 
   return (
     <div className="flex flex-col overflow-hidden lg:h-full">
-      <div className="shrink-0 border-b border-border px-5 py-5">
+      <div className="shrink-0 border-b border-separator px-5 py-5">
         <div className="mb-3 flex items-start justify-between gap-4">
           <h2 className="text-heading-26 min-w-0 flex-1">{job.title || 'Untitled Position'}</h2>
           <div className="flex shrink-0 items-center gap-2">
@@ -111,7 +111,7 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
       </ScrollArea>
 
       {canApply && (
-        <div className="lg:hidden shrink-0 px-4 py-3 border-t border-border bg-background">
+        <div className="lg:hidden shrink-0 px-4 py-3 border-t border-separator bg-background">
           <ApplyButton applyUrl={applyUrl} size="default" fullWidth />
         </div>
       )}

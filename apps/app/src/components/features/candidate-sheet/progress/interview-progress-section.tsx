@@ -83,12 +83,12 @@ function InterviewProgressSkeleton() {
     <div aria-busy>
       <output className="sr-only">Loading interview progress</output>
 
-      <div className="flex flex-col divide-y divide-border rounded-xl ring-1 ring-border sm:hidden">
+      <div className="flex flex-col divide-y divide-separator rounded-xl ring-1 ring-surface-border sm:hidden">
         <CompactProgressSkeleton />
         <CompactProgressSkeleton />
       </div>
 
-      <div className="hidden overflow-hidden rounded-xl ring-1 ring-border sm:block">
+      <div className="hidden overflow-hidden rounded-xl ring-1 ring-surface-border sm:block">
         <div className="grid grid-cols-[46%_18%_18%_18%] bg-table-header px-3 py-3">
           <Skeleton className="h-3 w-14 rounded-md" />
           <Skeleton className="h-3 w-12 justify-self-end rounded-md" />
@@ -104,7 +104,7 @@ function InterviewProgressSkeleton() {
 
 function ProgressTableRowSkeleton({ short = false }: { short?: boolean }) {
   return (
-    <div className="grid grid-cols-[46%_18%_18%_18%] items-center border-t border-border px-3 py-3">
+    <div className="grid grid-cols-[46%_18%_18%_18%] items-center border-t border-separator px-3 py-3">
       <Skeleton className={short ? 'h-3.5 w-24 rounded-md' : 'h-3.5 w-36 max-w-full rounded-md'} />
       <Skeleton className="h-3 w-12 justify-self-end rounded-md" />
       <Skeleton className="h-3 w-10 justify-self-end rounded-md" />

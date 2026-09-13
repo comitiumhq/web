@@ -1,7 +1,7 @@
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
-import { Card } from '@comitium/ui/card';
-import { ArrowUpRightIcon, CaretDownIcon, CaretRightIcon, UsersIcon } from '@phosphor-icons/react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
+import { ArrowUpRightIcon, CaretDownIcon, UsersIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
 import type { MouseEvent, ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
@@ -11,7 +11,7 @@ import { useQueryKanban } from '@/hooks/queries/use-query-kanban';
 import { useDecryptCandidateNames } from '@/hooks/use-decrypt-candidate-names';
 import { useKanbanDrag } from '@/hooks/use-kanban-drag';
 import type { KanbanApplication, PipelineJob, StageType } from '@/lib/schemas/pipeline';
-import { formatLocation } from '@/lib/utils';
+import { cn, formatLocation } from '@/lib/utils';
 
 interface JobAccordionProps {
   job: PipelineJob;
@@ -20,6 +20,8 @@ interface JobAccordionProps {
   defaultExpanded?: boolean;
   onApplicationClick: (applicationId: string) => void;
 }
+
+const PANEL_PLACEHOLDER_CLASS_NAME = 'min-h-112';
 
 export function JobAccordion({ job, orgId, stageType, defaultExpanded, onApplicationClick }: JobAccordionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded ?? false);
@@ -59,23 +61,14 @@ export function JobAccordion({ job, orgId, stageType, defaultExpanded, onApplica
     [onApplicationClick],
   );
 
-  const handleToggle = useCallback(() => {
-    setExpanded((current) => !current);
-  }, []);
-
   const handleJobLinkClick = useCallback((event: MouseEvent<HTMLAnchorElement>) => {
     event.stopPropagation();
   }, []);
 
-  const chevron = expanded ? (
-    <CaretDownIcon className="size-4 text-muted-foreground" />
-  ) : (
-    <CaretRightIcon className="size-4 text-muted-foreground" />
-  );
   let kanbanContent: ReactNode;
 
   if (isKanbanLoading) {
-    kanbanContent = <KanbanBoardSkeleton />;
+    kanbanContent = <KanbanBoardSkeleton className={PANEL_PLACEHOLDER_CLASS_NAME} />;
   } else if (hasCandidates) {
     kanbanContent = (
       <KanbanBoard
@@ -93,7 +86,9 @@ export function JobAccordion({ job, orgId, stageType, defaultExpanded, onApplica
     );
   } else {
     kanbanContent = (
-      <div className="flex flex-col items-center justify-center gap-2 p-8 text-center">
+      <div
+        className={cn('flex flex-col items-center justify-center gap-2 p-8 text-center', PANEL_PLACEHOLDER_CLASS_NAME)}
+      >
         <UsersIcon className="size-6 text-muted-foreground" />
         <p className="text-copy-14 text-muted-foreground">No candidates in this stage yet</p>
       </div>
@@ -101,21 +96,30 @@ export function JobAccordion({ job, orgId, stageType, defaultExpanded, onApplica
   }
 
   return (
-    <Card size="sm" className="isolate shrink-0 gap-0 border border-border py-0 ring-0">
+    <Collapsible
+      open={expanded}
+      onOpenChange={setExpanded}
+      className="group/job-accordion isolate shrink-0 border-b border-separator last:border-b-0"
+    >
       <div className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 p-3">
-        <button
-          type="button"
-          className="absolute inset-0 rounded-2xl text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          aria-expanded={expanded}
-          aria-label={expanded ? 'Collapse job' : 'Expand job'}
-          onClick={handleToggle}
-        />
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className="absolute inset-0 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50"
+            aria-label={expanded ? 'Collapse job' : 'Expand job'}
+          />
+        </CollapsibleTrigger>
 
         <span
           aria-hidden="true"
           className="pointer-events-none relative z-10 flex size-8 items-center justify-center rounded-full bg-secondary text-muted-foreground"
         >
-          {chevron}
+          <CaretDownIcon
+            className={cn(
+              'size-4 transition-transform duration-200 ease-out motion-reduce:transition-none',
+              !expanded && '-rotate-90',
+            )}
+          />
         </span>
 
         <div className="pointer-events-none relative z-10 min-w-0 py-1">
@@ -144,8 +148,10 @@ export function JobAccordion({ job, orgId, stageType, defaultExpanded, onApplica
         </div>
       </div>
 
-      {expanded && <div className="border-t border-border bg-kanban-canvas">{kanbanContent}</div>}
-    </Card>
+      <CollapsibleContent className="overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:220ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:animate-accordion-down motion-reduce:animate-none!">
+        <div className="bg-kanban-canvas">{kanbanContent}</div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

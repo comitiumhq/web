@@ -43,7 +43,7 @@ export function PublicScheduleBookingStep({
             selectedSlot={selectedSlot}
           />
 
-          <section className="min-w-0 border-t border-border/70 p-5 sm:p-6 md:border-t-0 lg:p-8">
+          <section className="min-w-0 border-t border-separator p-5 sm:p-6 md:border-t-0 lg:p-8">
             <div className="mx-auto max-w-sm space-y-5">
               {submitError && (
                 <Alert variant="destructive">

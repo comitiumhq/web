@@ -9,8 +9,8 @@ export function DraftEditorSkeleton() {
   return (
     <div className="flex h-full overflow-hidden">
       {/* Sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r bg-card">
-        <div className="px-4 py-5 border-b shrink-0">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-separator bg-card lg:flex">
+        <div className="shrink-0 border-b border-separator px-4 py-5">
           <Skeleton className="h-4 w-16" />
           <Skeleton className="h-5 w-40 mt-4" />
           <Skeleton className="h-5 w-12 mt-1.5 rounded-full" />
@@ -23,14 +23,14 @@ export function DraftEditorSkeleton() {
             </div>
           ))}
         </nav>
-        <div className="border-t px-4 h-16 flex items-center shrink-0">
+        <div className="flex h-16 shrink-0 items-center border-t border-separator px-4">
           <Skeleton className="h-4 w-16" />
         </div>
       </aside>
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className="flex items-center justify-end gap-2 border-b px-6 py-3 shrink-0">
+        <div className="flex shrink-0 items-center justify-end gap-2 border-b border-separator px-6 py-3">
           <Skeleton className="h-8 w-20 rounded-md" />
           <Skeleton className="size-8 rounded-md" />
           <Skeleton className="h-8 w-20 rounded-md" />
@@ -48,7 +48,7 @@ export function DraftEditorSkeleton() {
           </PageContainer>
         </div>
 
-        <div className="border-t px-6 h-16 flex items-center justify-between shrink-0">
+        <div className="flex h-16 shrink-0 items-center justify-between border-t border-separator px-6">
           <Skeleton className="h-8 w-20 rounded-md" />
           <Skeleton className="h-8 w-24 rounded-md" />
         </div>

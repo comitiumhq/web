@@ -100,7 +100,6 @@ export const KanbanColumn = memo(function KanbanColumn({
                 index={appIndex}
                 column={id}
                 decryptedName={formatCandidateName(profile)}
-                currentTitle={profile?.currentTitle?.trim() || null}
                 company={profile?.currentCompany?.trim() || null}
                 onCardClick={onCardClick}
               />

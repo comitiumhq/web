@@ -12,7 +12,7 @@ import { Separator } from '@/components/tiptap-ui-primitive/separator';
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
 
 const TOOLBAR_CLASS_NAME =
-  'flex min-w-0 flex-wrap items-center gap-0.5 border-b border-border px-2 py-1 [&>*]:shrink-0';
+  'flex min-w-0 flex-wrap items-center gap-0.5 border-b border-separator px-2 py-1 [&>*]:shrink-0';
 
 function HorizontalRuleButton() {
   const { editor } = useTiptapEditor();

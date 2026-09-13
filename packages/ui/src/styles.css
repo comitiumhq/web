@@ -47,6 +47,7 @@
   --color-table-row-hover: var(--table-row-hover);
   --color-kanban-canvas: var(--kanban-canvas);
   --color-kanban-column: var(--kanban-column);
+  --color-separator: var(--separator);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
@@ -72,6 +73,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-surface-border: var(--surface-border);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
   --radius-sm: calc(var(--radius) * 0.6);
@@ -188,6 +190,7 @@
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
+  --surface-border: var(--border);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.5671 0.2095 257.94);
@@ -210,7 +213,8 @@
   --warning-text: oklch(0.54 0.14 74);
   --success-text: oklch(0.52 0.15 150);
   --info-text: oklch(0.5 0.22 263);
-  --border: oklch(0 0 0 / 7%);
+  --border: oklch(0 0 0 / 6%);
+  --separator: oklch(0 0 0 / 5%);
   --input: oklch(0 0 0 / 11%);
   --control: color-mix(in oklch, var(--background) 30%, var(--muted));
   --control-hover: var(--muted);
@@ -238,7 +242,7 @@
   --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0 0 0 / 7%);
+  --sidebar-border: var(--separator);
   --sidebar-ring: var(--ring);
 }
 
@@ -247,6 +251,7 @@
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.2103 0.0059 285.89);
   --card-foreground: var(--foreground);
+  --surface-border: transparent;
   --popover: var(--card);
   --popover-foreground: var(--foreground);
   --primary: oklch(0.5671 0.2095 257.94);
@@ -270,6 +275,7 @@
   --success-text: var(--success);
   --info-text: var(--info);
   --border: oklch(0.28 0.006 286.033);
+  --separator: oklch(0.25 0.006 286.033);
   --input: var(--border);
   --control: var(--secondary);
   --control-hover: var(--accent);
@@ -296,7 +302,7 @@
   --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: var(--muted);
   --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: var(--border);
+  --sidebar-border: var(--separator);
   --sidebar-ring: var(--ring);
 }
 

@@ -89,7 +89,7 @@ export const DepartmentAccessSection = memo(function DepartmentAccessSection({
           <p className="text-label-14">No Access Roles</p>
         </div>
       ) : (
-        <div className="divide-y divide-border">{grantRows}</div>
+        <div className="divide-y divide-separator">{grantRows}</div>
       )}
     </SectionCard>
   );

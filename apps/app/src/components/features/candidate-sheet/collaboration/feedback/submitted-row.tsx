@@ -116,7 +116,7 @@ export const SubmittedRow = memo(function SubmittedRow({
       </div>
 
       {open && (
-        <div className="border-t border-border bg-muted px-4 pb-3 pt-1">
+        <div className="border-t border-separator bg-muted px-4 pb-3 pt-1">
           <EntryBody
             entry={entry}
             snapshot={submission.formSnapshot}

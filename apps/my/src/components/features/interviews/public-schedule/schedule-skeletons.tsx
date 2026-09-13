@@ -2,7 +2,7 @@ import { Skeleton } from '@comitium/ui/skeleton';
 
 export function ScheduleSummarySkeleton() {
   return (
-    <aside className="flex min-w-0 flex-col gap-6 p-5 sm:p-6 md:row-span-2 md:min-h-[540px] md:border-r md:border-border/70 xl:row-span-1">
+    <aside className="flex min-w-0 flex-col gap-6 p-5 sm:p-6 md:row-span-2 md:min-h-[540px] md:border-r md:border-separator xl:row-span-1">
       <div className="flex items-start gap-3">
         <Skeleton className="size-11 rounded-xl" />
         <div className="min-w-0 flex-1 space-y-2">
@@ -16,7 +16,7 @@ export function ScheduleSummarySkeleton() {
         <Skeleton className="h-5 w-40" />
       </div>
 
-      <div className="space-y-3 border-t border-border/70 pt-5">
+      <div className="space-y-3 border-t border-separator pt-5">
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-5 w-36" />
         <Skeleton className="h-5 w-44" />

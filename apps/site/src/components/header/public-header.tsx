@@ -24,7 +24,7 @@ export function PublicHeader() {
     <header className={headerClassName}>
       <div
         className={cn(
-          'pointer-events-none absolute inset-0 border-b border-border bg-background/80 opacity-0 backdrop-blur-md transition-opacity duration-300 ease-out supports-[backdrop-filter]:bg-background/65',
+          'pointer-events-none absolute inset-0 border-b border-separator bg-background/80 opacity-0 backdrop-blur-md transition-opacity duration-300 ease-out supports-[backdrop-filter]:bg-background/65',
           isScrolled && 'opacity-100',
         )}
         aria-hidden="true"

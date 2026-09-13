@@ -21,7 +21,10 @@ export function InterviewPlanSkeleton() {
       </div>
 
       {STAGE_SKELETONS.map((stage) => (
-        <div key={stage.key} className="overflow-hidden rounded-2xl border border-border bg-card bg-clip-padding">
+        <div
+          key={stage.key}
+          className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding"
+        >
           <div className="flex items-center justify-between gap-4 px-4 py-3">
             <Skeleton className={`h-4 ${stage.titleWidth} rounded-md`} />
             <Skeleton className="h-8 w-16 rounded-full" />

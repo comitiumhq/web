@@ -33,7 +33,7 @@ export function AccountSettingsPage() {
               <CardHeader>
                 <CardTitle>Sign-in methods</CardTitle>
               </CardHeader>
-              <CardContent className="divide-y divide-border p-0">
+              <CardContent className="divide-y divide-separator p-0">
                 <EmailSignInMethod email={methods.email} refreshUser={refreshUser} />
                 <GoogleSignInMethod methods={methods} refreshUser={refreshUser} />
                 <PasskeySignInMethod passkeyCount={methods.passkeys.length} refreshUser={refreshUser} />

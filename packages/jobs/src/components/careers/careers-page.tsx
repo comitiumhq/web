@@ -92,7 +92,7 @@ export function CareersPage({
             </div>
           </div>
 
-          <div className="mt-5 border-t border-border pt-5">
+          <div className="mt-5 border-t border-separator pt-5">
             <div className="mb-4 flex items-center gap-2">
               <h2 className="text-heading-20">Open roles</h2>
               {isLoading ? (

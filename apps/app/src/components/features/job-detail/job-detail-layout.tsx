@@ -57,7 +57,7 @@ export function JobDetailLayout({
 
       <div className="flex min-h-0 flex-1">
         {showNav && (
-          <aside className="hidden w-56 shrink-0 border-r border-border p-3 md:block">
+          <aside className="hidden w-56 shrink-0 border-r border-separator p-3 md:block">
             {job ? (
               <JobNav
                 orgId={orgId}
@@ -88,7 +88,7 @@ function JobNavSkeleton({ orientation }: { orientation: 'vertical' | 'horizontal
   const containerClassName =
     orientation === 'vertical'
       ? 'flex flex-col gap-1'
-      : 'flex items-center gap-1 overflow-hidden border-b border-border px-4 py-2 md:hidden';
+      : 'flex items-center gap-1 overflow-hidden border-b border-separator px-4 py-2 md:hidden';
 
   return (
     <div aria-hidden="true" className={containerClassName}>
@@ -110,7 +110,7 @@ interface JobDetailHeaderBarProps {
 
 function JobDetailHeaderBar({ orgId, job, actions }: JobDetailHeaderBarProps) {
   return (
-    <header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-2 sm:px-6">
+    <header className="flex shrink-0 items-center gap-3 border-b border-separator px-4 py-2 sm:px-6">
       <Button asChild variant="ghost" size="icon-sm" className="shrink-0">
         <Link to="/org/$orgId/jobs" params={{ orgId }} search={{ status: 'all' }} aria-label="Back to jobs">
           <ArrowLeftIcon />
@@ -162,7 +162,7 @@ function JobNav({ orgId, jobId, job, pathname, orientation, draftStepStatuses }:
   const containerClassName =
     orientation === 'vertical'
       ? 'flex flex-col gap-1'
-      : 'flex items-center gap-1 overflow-x-auto border-b border-border px-4 py-2 scrollbar-hide md:hidden';
+      : 'flex items-center gap-1 overflow-x-auto border-b border-separator px-4 py-2 scrollbar-hide md:hidden';
 
   return (
     <nav className={containerClassName}>

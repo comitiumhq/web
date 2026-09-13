@@ -21,7 +21,7 @@ export function JobsTableSkeleton({ columns, gridMinWidth }: JobsTableSkeletonPr
   const gridStyle = useMemo<CSSProperties>(() => ({ gridTemplateColumns }), [gridTemplateColumns]);
 
   return (
-    <Card size="sm" className="min-h-0 overflow-hidden border border-border py-0 ring-0">
+    <Card size="sm" className="min-h-0 overflow-hidden border border-surface-border py-0 ring-0">
       <div className="overflow-x-auto">
         <div style={{ minWidth: gridMinWidth }}>
           <div className="grid min-h-11 items-center bg-table-header" style={gridStyle}>
@@ -35,7 +35,7 @@ export function JobsTableSkeleton({ columns, gridMinWidth }: JobsTableSkeletonPr
           {SKELETON_ROWS.map((rowIndex) => (
             <div
               key={rowIndex}
-              className="grid min-h-[68px] items-center border-b border-border/70 last:border-b-0"
+              className="grid min-h-[68px] items-center border-b border-separator last:border-b-0"
               style={gridStyle}
             >
               {columns.map((column, columnIndex) => (

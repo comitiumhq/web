@@ -38,7 +38,7 @@ export function PublicScheduleConfirmation({
             selectedSlot={confirmedSlot}
           />
 
-          <section className="min-w-0 border-t border-border/70 p-5 sm:p-6 md:border-t-0 lg:p-8">
+          <section className="min-w-0 border-t border-separator p-5 sm:p-6 md:border-t-0 lg:p-8">
             <div className="mx-auto flex max-w-sm flex-col items-center gap-5 text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-success/10 text-success-text ring-1 ring-success/20">
                 <CheckIcon className="size-6" aria-hidden="true" />

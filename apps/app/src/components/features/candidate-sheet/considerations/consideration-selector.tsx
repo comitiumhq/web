@@ -94,7 +94,7 @@ export function ConsiderationSelector({
   const hasCollectionStatus = hasConsiderationCollectionStatus || hasDuplicateAttemptCollectionStatus;
 
   return (
-    <div className="shrink-0 border-b border-border bg-background px-4 py-3">
+    <div className="shrink-0 border-b border-separator bg-background px-4 py-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <span className="shrink-0 text-xs font-medium text-muted-foreground">Applications</span>
         <Combobox

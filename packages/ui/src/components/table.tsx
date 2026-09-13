@@ -26,7 +26,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<'tfoot'>) {
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn('border-t bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
+      className={cn('border-t border-separator bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
       {...props}
     />
   );
@@ -52,7 +52,7 @@ function TableRow({ className, onClick, onKeyDown, tabIndex, ...props }: React.C
     <tr
       data-slot="table-row"
       className={cn(
-        'border-b border-border/70 transition-colors hover:bg-table-row-hover has-aria-expanded:bg-table-row-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-inset data-[state=selected]:bg-primary/[0.06] data-[state=selected]:hover:bg-primary/[0.09]',
+        'border-b border-separator transition-colors hover:bg-table-row-hover has-aria-expanded:bg-table-row-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-inset data-[state=selected]:bg-primary/[0.06] data-[state=selected]:hover:bg-primary/[0.09]',
         className,
       )}
       tabIndex={isInteractive ? (tabIndex ?? 0) : tabIndex}

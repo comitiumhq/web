@@ -267,7 +267,7 @@ function InterviewBriefingSkeleton({ feedbackDue }: { feedbackDue: boolean }) {
 function BriefingTabsSkeleton() {
   return (
     <div className="shrink-0 overflow-hidden px-6 pt-4 pb-2">
-      <div className="relative flex h-9 w-fit items-center gap-1 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-border/70">
+      <div className="relative flex h-9 w-fit items-center gap-1 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-separator">
         {BRIEFING_TAB_SKELETONS.map((tab) => (
           <Skeleton key={tab.key} className={cn('h-5 rounded-md', tab.width)} />
         ))}

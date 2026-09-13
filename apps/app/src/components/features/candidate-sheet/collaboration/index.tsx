@@ -115,7 +115,7 @@ export function CandidateCollaboration({
   return (
     <div
       className={cn('flex h-full flex-col overflow-hidden bg-background', {
-        'border-l border-border': variant === 'panel',
+        'border-l border-separator': variant === 'panel',
       })}
     >
       <Tabs value={activeTab} onValueChange={handleTabChange} className="relative flex h-full flex-col">

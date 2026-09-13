@@ -15,14 +15,14 @@ interface InterviewProgressTableProps {
 export function InterviewProgressTable({ visits, memberMap, timeZone }: InterviewProgressTableProps) {
   return (
     <>
-      <div className="flex flex-col divide-y divide-border rounded-xl bg-card bg-clip-padding ring-1 ring-border sm:hidden">
+      <div className="flex flex-col divide-y divide-separator rounded-xl bg-card bg-clip-padding ring-1 ring-surface-border sm:hidden">
         {visits.map((visit) => (
           <CompactStageVisit key={visit.id} visit={visit} memberMap={memberMap} timeZone={timeZone} />
         ))}
       </div>
 
       <Table
-        containerClassName="hidden rounded-xl bg-card bg-clip-padding ring-1 ring-border sm:block"
+        containerClassName="hidden rounded-xl bg-card bg-clip-padding ring-1 ring-surface-border sm:block"
         className="table-fixed"
       >
         <colgroup>
@@ -79,7 +79,7 @@ function StageVisitRows({ visit, memberMap, timeZone }: StageVisitRowsProps) {
       {visit.interviews.length > 0 && (
         <TableRow className="hover:bg-transparent">
           <TableCell colSpan={4} className="px-5 py-0 whitespace-normal">
-            <div className="flex flex-col divide-y divide-border">
+            <div className="flex flex-col divide-y divide-separator">
               {visit.interviews.map((event) => (
                 <InterviewProgressEventRow key={event.id} event={event} memberMap={memberMap} timeZone={timeZone} />
               ))}
@@ -115,7 +115,7 @@ function CompactStageVisit({ visit, memberMap, timeZone }: StageVisitRowsProps) 
       </dl>
 
       {visit.interviews.length > 0 && (
-        <div className="flex flex-col divide-y divide-border border-t border-border">
+        <div className="flex flex-col divide-y divide-separator border-t border-separator">
           {visit.interviews.map((event) => (
             <InterviewProgressEventRow key={event.id} event={event} memberMap={memberMap} timeZone={timeZone} />
           ))}

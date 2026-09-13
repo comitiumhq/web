@@ -4,7 +4,7 @@ import type * as React from 'react';
 import { cn } from '../lib/cn';
 
 const selectionCardVariants = cva(
-  'group/selection-card rounded-2xl border border-border bg-card bg-clip-padding outline-1 outline-transparent transition-[border-color,outline-color] duration-150 ease-out motion-reduce:transition-none',
+  'group/selection-card rounded-2xl border border-surface-border bg-card bg-clip-padding outline-1 outline-transparent transition-[border-color,outline-color] duration-150 ease-out motion-reduce:transition-none',
   {
     variants: {
       selected: {

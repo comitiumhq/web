@@ -183,7 +183,7 @@ function TimelineRowSkeleton({ compact = false }: { compact?: boolean }) {
 function MessageCardSkeleton() {
   return (
     <Card aria-hidden size="sm" className="gap-0 py-0">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+      <div className="flex items-center gap-2 border-b border-separator px-4 py-2.5">
         <Skeleton className="size-6 shrink-0 rounded-full" />
         <div className="min-w-0 flex-1">
           <Skeleton className="h-3.5 w-28 rounded-md" />

@@ -41,7 +41,7 @@ const ValidationErrorLink = memo(function ValidationErrorLink({
 
 export function PublishValidationBanner({ errors, onClickField, onDismiss }: PublishValidationBannerProps) {
   return (
-    <div className="px-6 py-3 border-b">
+    <div className="border-b border-separator px-6 py-3">
       <Alert variant="destructive" className="relative pr-10">
         <WarningCircleIcon />
         <p className="col-start-2 text-copy-14">

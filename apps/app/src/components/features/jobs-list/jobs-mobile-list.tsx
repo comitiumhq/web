@@ -34,7 +34,10 @@ export function JobsMobileList({
     return (
       <div className="flex flex-col gap-2">
         {SKELETON_ROWS.map((key) => (
-          <div key={key} className="flex flex-col gap-1.5 rounded-xl border border-border bg-card bg-clip-padding p-3">
+          <div
+            key={key}
+            className="flex flex-col gap-1.5 rounded-xl border border-surface-border bg-card bg-clip-padding p-3"
+          >
             <div className="flex items-center justify-between">
               <Skeleton className="h-4 w-40 max-w-[65%]" />
               <Skeleton className="h-5 w-16 rounded-4xl" />
@@ -101,7 +104,7 @@ const JobMobileCard = memo(function JobMobileCard({
       <button
         type="button"
         onClick={handleClick}
-        className="flex w-full flex-col gap-1.5 rounded-xl border border-border bg-card bg-clip-padding p-3 pr-10 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="flex w-full flex-col gap-1.5 rounded-xl border border-surface-border bg-card bg-clip-padding p-3 pr-10 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <span className="flex items-start justify-between gap-2">
           <span className="min-w-0 flex-1 truncate font-medium text-foreground">{title}</span>

@@ -18,7 +18,7 @@ interface StageItemProps {
 export const StageItem = memo(function StageItem({ stage, index, isPinned, onUpdateName, onRemove }: StageItemProps) {
   const { ref, isDragging } = useSortable({ id: stage.clientId, index, disabled: isPinned });
   const itemClassName = cn(
-    'group flex min-h-14 items-center gap-3 border-b border-border/60 px-3 py-2 transition-colors last:border-b-0',
+    'group flex min-h-14 items-center gap-3 border-b border-separator px-3 py-2 transition-colors last:border-b-0',
     {
       'hover:bg-muted/50': !isPinned,
       'relative z-50 bg-card shadow-lg ring-1 ring-primary/50': isDragging,

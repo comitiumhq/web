@@ -123,7 +123,7 @@ function CareerJobsStatusPanel({ type, hasActiveFilters = false, onClearFilters 
 
 function CareerJobSkeletonRow({ widthClassName, isLast }: CareerJobSkeletonRowProps) {
   return (
-    <div className={cn('min-h-30 border-b border-border px-4 py-4 sm:px-5', { 'border-b-0': isLast })}>
+    <div className={cn('min-h-30 border-b border-separator px-4 py-4 sm:px-5', { 'border-b-0': isLast })}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">

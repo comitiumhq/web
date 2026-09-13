@@ -24,11 +24,11 @@ export function HiringTeamSkeleton({ showComposer = true }: HiringTeamSkeletonPr
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card bg-clip-padding">
+      <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
         {MEMBER_SKELETONS.map((member, index) => (
           <div
             key={member.key}
-            className={`flex items-center gap-3 px-4 py-3 ${index > 0 ? 'border-t border-border' : ''}`}
+            className={`flex items-center gap-3 px-4 py-3 ${index > 0 ? 'border-t border-separator' : ''}`}
           >
             <Skeleton className="size-8 shrink-0 rounded-full" />
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">

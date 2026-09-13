@@ -151,11 +151,11 @@ export function SectionCard({
   } else if (canDragQuestions) {
     questionsContent = (
       <DragDropProvider onDragEnd={handleQuestionDragEnd}>
-        <div className="flex flex-col divide-y divide-border">{questionRows}</div>
+        <div className="flex flex-col divide-y divide-separator">{questionRows}</div>
       </DragDropProvider>
     );
   } else {
-    questionsContent = <div className="flex flex-col divide-y divide-border">{questionRows}</div>;
+    questionsContent = <div className="flex flex-col divide-y divide-separator">{questionRows}</div>;
   }
 
   return (

@@ -38,7 +38,7 @@ export const EmailFeedCard = memo(function EmailFeedCard({
 
   return (
     <Card size="sm" className="gap-0 py-0">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+      <div className="flex items-center gap-2 border-b border-separator px-4 py-2.5">
         <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground">
           {sender.initials}
         </div>

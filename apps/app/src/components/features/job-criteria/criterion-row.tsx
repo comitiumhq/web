@@ -84,10 +84,9 @@ export const CriterionRow = memo(function CriterionRow({
       open={isExpanded}
       onOpenChange={handleOpenChange}
       className={cn(
-        'group/criterion overflow-hidden rounded-xl border border-border bg-card bg-clip-padding transition-[border-color,opacity] duration-150 ease-out motion-reduce:transition-none',
+        'group/criterion overflow-hidden rounded-xl border border-surface-border bg-card bg-clip-padding transition-[border-color,opacity] duration-150 ease-out motion-reduce:transition-none',
         {
           'hover:border-input': !isExpanded && !isDragging,
-          'border-input': isExpanded && !isDragging,
           'z-50 cursor-grabbing border-primary/35 opacity-95 shadow-xl ring-1 ring-primary/20': isDragging,
         },
       )}

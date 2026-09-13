@@ -275,7 +275,7 @@ export function ApplicationFormListSkeleton() {
       {['form-1', 'form-2', 'form-3', 'form-4'].map((key) => (
         <div
           key={key}
-          className="flex min-h-18 items-center gap-3 rounded-2xl border border-border bg-card bg-clip-padding px-4 py-3"
+          className="flex min-h-18 items-center gap-3 rounded-2xl border border-surface-border bg-card bg-clip-padding px-4 py-3"
         >
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <Skeleton className="h-3.5 w-48" />

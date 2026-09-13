@@ -101,7 +101,7 @@ export function SelectionFieldPopup({
             )}
             {listFooter}
           </ComboboxPrimitive.List>
-          {footer && <div className="border-t p-1">{footer}</div>}
+          {footer && <div className="border-t border-separator p-1">{footer}</div>}
         </ComboboxPrimitive.Popup>
       </ComboboxPrimitive.Positioner>
     </ComboboxPrimitive.Portal>
@@ -115,7 +115,7 @@ function GroupedSelectionOptions({ optionMap }: { optionMap: Map<string, Selecti
         <ComboboxPrimitive.Group
           key={group.label}
           items={group.items}
-          className="border-t border-border/60 first:border-t-0"
+          className="border-t border-separator first:border-t-0"
         >
           <ComboboxPrimitive.GroupLabel className="px-3 pt-2 pb-1 text-xs font-medium text-muted-foreground">
             {group.label}

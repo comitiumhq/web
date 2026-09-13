@@ -59,7 +59,8 @@ export const DepartmentRow = memo(function DepartmentRow({
         <TableCell>
           <div
             className={cn('relative min-w-0', {
-              'pl-5 before:absolute before:left-1 before:top-1/2 before:h-px before:w-2 before:bg-border': parentName,
+              'pl-5 before:absolute before:left-1 before:top-1/2 before:h-px before:w-2 before:bg-separator':
+                parentName,
             })}
           >
             <span className="text-label-14 truncate block">{department.name}</span>

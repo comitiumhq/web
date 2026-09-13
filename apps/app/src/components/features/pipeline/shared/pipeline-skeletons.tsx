@@ -136,9 +136,11 @@ export function GlobalPipelineContentSkeleton({ activeTab }: GlobalPipelineConte
 
   return (
     <PageContainer className="flex flex-col gap-3 pb-6">
-      <JobAccordionSkeleton expanded />
-      <JobAccordionSkeleton />
-      <JobAccordionSkeleton />
+      <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
+        <JobAccordionSkeleton expanded />
+        <JobAccordionSkeleton />
+        <JobAccordionSkeleton />
+      </div>
     </PageContainer>
   );
 }
@@ -162,7 +164,7 @@ export function PipelineContentSkeleton({ activeTab, className }: PipelineConten
   );
 }
 
-export function KanbanBoardSkeleton() {
+export function KanbanBoardSkeleton({ className }: { className?: string } = {}) {
   const columns = KANBAN_COLUMN_SKELETONS.map((column, index) => (
     <div key={column.titleWidth} className="flex h-full w-72 shrink-0 flex-col p-2">
       <div className="mb-3 flex items-center gap-2">
@@ -179,7 +181,9 @@ export function KanbanBoardSkeleton() {
   ));
 
   return (
-    <div className="flex h-full w-full min-w-0 max-w-full overflow-x-auto bg-kanban-canvas p-4">{columns}</div>
+    <div className={cn('flex h-full w-full min-w-0 max-w-full overflow-x-auto bg-kanban-canvas p-4', className)}>
+      {columns}
+    </div>
   );
 }
 
@@ -194,9 +198,7 @@ export function PipelineTableSkeleton({
   const gridTemplateColumns = useMemo(() => columns.map((column) => column.gridSize).join(' '), [columns]);
   const gridStyle = useMemo<CSSProperties>(() => ({ gridTemplateColumns }), [gridTemplateColumns]);
   const gridMinWidth =
-    activeTab === 'archived'
-      ? getArchivedTableGridMinWidth(scope)
-      : getCandidateTableGridMinWidth(activeTab, scope);
+    activeTab === 'archived' ? getArchivedTableGridMinWidth(scope) : getCandidateTableGridMinWidth(activeTab, scope);
 
   return (
     <div className={cn('flex min-h-0 flex-col gap-3', className)}>
@@ -221,14 +223,11 @@ export function PipelineTableSkeleton({
               {Array.from({ length: rows }).map((_, index) => (
                 <div
                   key={index}
-                  className="grid min-h-[68px] items-center border-b border-border last:border-b-0"
+                  className="grid min-h-[68px] items-center border-b border-separator last:border-b-0"
                   style={gridStyle}
                 >
                   {columns.map((column, cellIndex) => (
-                    <div
-                      key={column.id}
-                      className={cn('min-w-0 overflow-hidden px-3 py-3', cellIndex === 0 && 'pl-4')}
-                    >
+                    <div key={column.id} className={cn('min-w-0 overflow-hidden px-3 py-3', cellIndex === 0 && 'pl-4')}>
                       <TableSkeletonCell column={column.type} rowIndex={index} />
                     </div>
                   ))}
@@ -340,7 +339,7 @@ function getCandidateSkeletonColumnType(columnId?: string): TableSkeletonColumn 
 
 function JobAccordionSkeleton({ expanded = false }: JobAccordionSkeletonProps) {
   return (
-    <Card size="sm" className="gap-0 border border-border py-0 ring-0">
+    <div className="border-b border-separator last:border-b-0">
       <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 p-3">
         <Skeleton className="size-8 rounded-full" />
 
@@ -355,21 +354,17 @@ function JobAccordionSkeleton({ expanded = false }: JobAccordionSkeletonProps) {
         <Skeleton className="size-8 rounded-4xl" />
       </div>
 
-      {expanded && (
-        <div className="border-t border-border bg-kanban-canvas">
-          <KanbanBoardSkeleton />
-        </div>
-      )}
-    </Card>
+      {expanded && <KanbanBoardSkeleton />}
+    </div>
   );
 }
 
 function PipelineCandidateCardSkeleton() {
   return (
-    <div className="rounded-xl border border-border bg-card bg-clip-padding p-3">
+    <div className="rounded-xl border border-transparent bg-card bg-clip-padding p-3">
       <Skeleton className="h-5 w-36" />
       <Skeleton className="mt-2 h-4 w-24" />
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex gap-2">
         <Skeleton className="h-6 w-32 rounded-4xl" />
         <Skeleton className="h-6 w-24 rounded-4xl" />
       </div>

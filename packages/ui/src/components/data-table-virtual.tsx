@@ -49,7 +49,7 @@ const DEFAULT_ROW_ESTIMATE_PX = 64;
 const DEFAULT_OVERSCAN = 10;
 const DEFAULT_LOADING_ROWS = 3;
 const LOAD_AHEAD_ROWS = 8;
-const DATA_TABLE_CARD_CLASS = 'overflow-hidden border border-border py-0 ring-0';
+const DATA_TABLE_CARD_CLASS = 'overflow-hidden border border-surface-border py-0 ring-0';
 const EMPTY_ROW_SELECTION: RowSelectionState = {};
 
 export interface DataTableVirtualProps<TData extends RowData> extends Omit<ComponentProps<typeof Card>, 'children'> {
@@ -329,7 +329,7 @@ const DataRow = memo(function DataRow<TData extends RowData>({
       className={cn(
         'absolute left-0 top-0 grid w-full items-center bg-card',
         'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-inset',
-        { 'border-b border-border/70': showBottomBorder },
+        { 'border-b border-separator': showBottomBorder },
         { 'cursor-pointer transition-colors hover:bg-table-row-hover': onRowClick },
         selected && 'bg-primary/[0.06] hover:bg-primary/[0.09]',
         rowClassName,
@@ -381,7 +381,7 @@ function LoadingRow<TData extends RowData>({
       ref={measureElement}
       data-index={virtualIndex}
       className={cn('absolute left-0 top-0 grid w-full items-center bg-card', {
-        'border-b border-border/70': showBottomBorder,
+        'border-b border-separator': showBottomBorder,
       })}
       style={style}
     >

@@ -46,7 +46,7 @@ export const TemplateSectionNav = memo(function TemplateSectionNav({
   onSelect,
 }: TemplateSectionNavProps) {
   return (
-    <nav className="hidden w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r p-3 lg:flex">
+    <nav className="hidden w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-separator p-3 lg:flex">
       {TEMPLATE_SECTION_ITEMS.map((item) => (
         <SectionItem
           key={item.id}
@@ -103,7 +103,7 @@ export const TemplateMobileSectionTabs = memo(function TemplateMobileSectionTabs
   onSelect,
 }: TemplateSectionNavProps) {
   return (
-    <div className="flex shrink-0 overflow-x-auto border-b bg-card lg:hidden">
+    <div className="flex shrink-0 overflow-x-auto border-b border-separator bg-card lg:hidden">
       {TEMPLATE_SECTION_ITEMS.map((item) => (
         <MobileSectionItem
           key={item.id}

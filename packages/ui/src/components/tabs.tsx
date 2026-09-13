@@ -141,7 +141,7 @@ function TabsList({
         <span
           data-slot="tabs-line"
           aria-hidden="true"
-          className="pointer-events-none absolute z-0 bg-border/70 group-data-horizontal/tabs:inset-x-0 group-data-horizontal/tabs:bottom-[-5px] group-data-horizontal/tabs:h-px group-data-vertical/tabs:inset-y-0 group-data-vertical/tabs:-right-1 group-data-vertical/tabs:w-px"
+          className="pointer-events-none absolute z-0 bg-separator group-data-horizontal/tabs:inset-x-0 group-data-horizontal/tabs:bottom-[-5px] group-data-horizontal/tabs:h-px group-data-vertical/tabs:inset-y-0 group-data-vertical/tabs:-right-1 group-data-vertical/tabs:w-px"
         />
       )}
       {children}
