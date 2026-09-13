@@ -1,6 +1,12 @@
 import { TZDate } from '@date-fns/tz';
-import { parseISO } from 'date-fns';
-import { CALENDAR_END_MINUTES, CALENDAR_SLOT_MINUTES, CALENDAR_START_MINUTES, getCalendarDay } from '../calendar-range';
+import { addMinutes, parseISO } from 'date-fns';
+import {
+  CALENDAR_END_MINUTES,
+  CALENDAR_GRID_SLOT_MINUTES,
+  CALENDAR_SNAP_MINUTES,
+  CALENDAR_START_MINUTES,
+  getCalendarDay,
+} from '../calendar-range';
 
 const CALENDAR_DURATION_MINUTES = CALENDAR_END_MINUTES - CALENDAR_START_MINUTES;
 
@@ -47,10 +53,22 @@ export function getMinimumDraftMinutes(
   }
 
   const currentMinutes = getZonedMinutes(now.toISOString(), timeZone);
-  const nextSlot = (Math.floor(currentMinutes / CALENDAR_SLOT_MINUTES) + 1) * CALENDAR_SLOT_MINUTES;
+  const nextSlot = (Math.floor(currentMinutes / CALENDAR_SNAP_MINUTES) + 1) * CALENDAR_SNAP_MINUTES;
   const minimumMinutes = Math.max(CALENDAR_START_MINUTES, nextSlot);
 
   return minimumMinutes <= getLastDraftStart(durationMinutes) ? minimumMinutes : null;
+}
+
+export function getPointerSlotStart(cellStart: Date, pointerOffsetPixels: number, cellHeight: number): Date {
+  if (cellHeight <= 0) {
+    return cellStart;
+  }
+
+  const subslotCount = CALENDAR_GRID_SLOT_MINUTES / CALENDAR_SNAP_MINUTES;
+  const clampedOffset = Math.min(Math.max(pointerOffsetPixels, 0), cellHeight - Number.EPSILON);
+  const subslotIndex = Math.min(subslotCount - 1, Math.floor((clampedOffset / cellHeight) * subslotCount));
+
+  return addMinutes(cellStart, subslotIndex * CALENDAR_SNAP_MINUTES);
 }
 
 function clampDraftMinutes(minutes: number, durationMinutes: number, minimumMinutes: number): number {
@@ -86,7 +104,7 @@ export function getDroppedDraftSlot(
     return null;
   }
 
-  const snappedMinutes = Math.round(minutes / CALENDAR_SLOT_MINUTES) * CALENDAR_SLOT_MINUTES;
+  const snappedMinutes = Math.round(minutes / CALENDAR_SNAP_MINUTES) * CALENDAR_SNAP_MINUTES;
   const nextMinutes = clampDraftMinutes(snappedMinutes, durationMinutes, minimumMinutes);
   const nextValue = createZonedSlot(value, timeZone, nextMinutes);
   const start = parseISO(nextValue);

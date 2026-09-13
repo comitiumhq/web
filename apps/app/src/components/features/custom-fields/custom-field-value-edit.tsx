@@ -5,11 +5,11 @@ import { Button } from '@comitium/ui/button';
 import { Calendar } from '@comitium/ui/calendar';
 import { Checkbox } from '@comitium/ui/checkbox';
 import { CitySearchInput } from '@comitium/ui/city-search-input';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { Switch } from '@comitium/ui/switch';
 import { Textarea } from '@comitium/ui/textarea';
 import { CalendarIcon } from '@phosphor-icons/react';
@@ -225,7 +225,6 @@ function MultipleChoiceEdit({
 
   return (
     <Combobox
-      selectionMode="single"
       ariaLabel="Custom field option"
       options={options}
       value={current || null}
@@ -377,7 +376,6 @@ function EmployeeEdit({ value, team, onChange, disabled }: PrimitiveEditProps & 
 
   return (
     <Combobox
-      selectionMode="single"
       options={options}
       value={current || null}
       onValueChange={handleChange}

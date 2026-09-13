@@ -3,14 +3,15 @@ import { Calendar } from '@comitium/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { TimezonePicker } from '@comitium/ui/timezone-picker';
 import { useIlamyCalendarContext } from '@ilamy/calendar';
-import { CaretDownIcon } from '@phosphor-icons/react';
-import { useCallback, useState } from 'react';
+import { CaretDownIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { type ReactNode, useCallback, useState } from 'react';
 import type { OrgTeamMember } from '@/lib/schemas/org';
 
-import { InterviewerMultiCombobox } from '../../interviewer-multi-combobox';
+import { InterviewerAutocomplete } from '../../interviewer-autocomplete';
 import type { SelectedInterviewer } from '../../types';
 
-interface HeaderControlsProps {
+interface CalendarHeaderProps {
+  interviewTypeControl?: ReactNode;
   members: readonly OrgTeamMember[];
   calendarStatusMap: ReadonlyMap<string, boolean>;
   interviewers: readonly SelectedInterviewer[];
@@ -18,49 +19,73 @@ interface HeaderControlsProps {
   timeZone: string;
   onTimeZoneChange: (tz: string) => void;
   canAddInterviewer?: boolean;
+  interviewerPickerOpen?: boolean;
+  onInterviewerPickerOpenChange?: (open: boolean) => void;
 }
 
-function HeaderControls({
+type CalendarSettingsProps = Pick<CalendarHeaderProps, 'interviewTypeControl' | 'timeZone' | 'onTimeZoneChange'>;
+
+function CalendarSettings({ interviewTypeControl, timeZone, onTimeZoneChange }: CalendarSettingsProps) {
+  return (
+    <div className="flex shrink-0 items-center gap-1.5">
+      {interviewTypeControl}
+
+      <TimezonePicker value={timeZone} onChange={onTimeZoneChange} className="calendar-timezone-picker h-8 text-xs" />
+    </div>
+  );
+}
+
+type InterviewerPickerProps = Pick<
+  CalendarHeaderProps,
+  | 'members'
+  | 'calendarStatusMap'
+  | 'interviewers'
+  | 'onInterviewersChange'
+  | 'canAddInterviewer'
+  | 'interviewerPickerOpen'
+  | 'onInterviewerPickerOpenChange'
+>;
+
+function InterviewerPicker({
   members,
   calendarStatusMap,
   interviewers,
   onInterviewersChange,
-  timeZone,
-  onTimeZoneChange,
   canAddInterviewer = true,
-}: HeaderControlsProps) {
-  return (
-    <>
-      {onInterviewersChange && (
-        <InterviewerMultiCombobox
-          members={members}
-          calendarStatusMap={calendarStatusMap}
-          interviewers={interviewers}
-          onChange={onInterviewersChange}
-          maxVisibleValues={1}
-          className="w-[260px]"
-          disabled={!canAddInterviewer}
-        />
-      )}
+  interviewerPickerOpen,
+  onInterviewerPickerOpenChange,
+}: InterviewerPickerProps) {
+  if (!onInterviewersChange) {
+    return null;
+  }
 
-      <TimezonePicker value={timeZone} onChange={onTimeZoneChange} className="h-8 w-[180px] text-xs" />
-    </>
+  return (
+    <InterviewerAutocomplete
+      members={members}
+      calendarStatusMap={calendarStatusMap}
+      interviewers={interviewers}
+      onChange={onInterviewersChange}
+      className="calendar-interviewer-picker"
+      disabled={!canAddInterviewer}
+      open={interviewerPickerOpen}
+      onOpenChange={onInterviewerPickerOpenChange}
+    />
   );
 }
 
-export function CalendarHeader(controlsProps: HeaderControlsProps) {
-  const { currentDate, today, selectDate, setCurrentDate } = useIlamyCalendarContext();
+function ScrollableControlBar({ children }: { children: ReactNode }) {
+  return (
+    <section className="calendar-controls-scroll w-full min-w-0 overflow-x-auto" aria-label="Scheduling controls">
+      <div className="flex min-w-max items-center gap-2 px-3 pt-0.5 pb-2">{children}</div>
+    </section>
+  );
+}
+
+function DateNavigator() {
+  const { currentDate, nextPeriod, prevPeriod, today, selectDate } = useIlamyCalendarContext();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const pickerDate = new Date(currentDate.year(), currentDate.month(), currentDate.date());
-
-  const handleTimeZoneChange = useCallback(
-    (nextTimeZone: string) => {
-      setCurrentDate(currentDate.tz(nextTimeZone, true));
-      controlsProps.onTimeZoneChange(nextTimeZone);
-    },
-    [controlsProps.onTimeZoneChange, currentDate, setCurrentDate],
-  );
 
   const handlePickDate = useCallback(
     (date?: Date) => {
@@ -85,35 +110,97 @@ export function CalendarHeader(controlsProps: HeaderControlsProps) {
   }, [today]);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+    <div className="flex h-8 min-w-0 shrink-0 items-center overflow-hidden rounded-4xl border border-control-border/55 bg-control">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className="rounded-none border-r border-control-border/50"
+        aria-label="Previous day"
+        onClick={prevPeriod}
+      >
+        <CaretLeftIcon />
+      </Button>
+
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger asChild>
-          <Button type="button" variant="ghost" size="sm" className="h-8 gap-1.5 px-2 font-medium">
-            <span>{currentDate.format('dddd, MMMM D, YYYY')}</span>
-            <CaretDownIcon data-icon="inline-end" className="opacity-60" />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 min-w-0 max-w-52 rounded-none px-2.5 font-normal"
+          >
+            <span className="truncate">{currentDate.format('ddd, MMM D, YYYY')}</span>
+            <CaretDownIcon data-icon="inline-end" className="shrink-0 opacity-60" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar mode="single" selected={pickerDate} onSelect={handlePickDate} />
-          <div className="border-t p-2">
-            <Button type="button" variant="ghost" size="sm" className="w-full justify-start" onClick={handleToday}>
-              Jump to today
-            </Button>
-          </div>
         </PopoverContent>
       </Popover>
 
-      <div className="flex items-center gap-1.5">
-        <HeaderControls {...controlsProps} onTimeZoneChange={handleTimeZoneChange} />
-      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="h-8 rounded-none border-x border-control-border/50 px-2.5 font-normal"
+        onClick={handleToday}
+      >
+        Today
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className="rounded-none"
+        aria-label="Next day"
+        onClick={nextPeriod}
+      >
+        <CaretRightIcon />
+      </Button>
     </div>
   );
 }
 
-export function CalendarHeaderEmpty(props: HeaderControlsProps) {
+export function CalendarHeader(props: CalendarHeaderProps) {
+  const { currentDate, setCurrentDate } = useIlamyCalendarContext();
+
+  const handleTimeZoneChange = useCallback(
+    (nextTimeZone: string) => {
+      setCurrentDate(currentDate.tz(nextTimeZone, true));
+      props.onTimeZoneChange(nextTimeZone);
+    },
+    [props.onTimeZoneChange, currentDate, setCurrentDate],
+  );
+
   return (
-    <div className="flex flex-wrap items-center justify-end gap-1.5 px-3 py-2 border-b">
-      <HeaderControls {...props} />
-    </div>
+    <ScrollableControlBar>
+      <CalendarSettings
+        interviewTypeControl={props.interviewTypeControl}
+        timeZone={props.timeZone}
+        onTimeZoneChange={handleTimeZoneChange}
+      />
+
+      <div className="ml-auto flex shrink-0 items-center justify-end gap-1.5">
+        <DateNavigator />
+        <InterviewerPicker {...props} />
+      </div>
+    </ScrollableControlBar>
+  );
+}
+
+export function CalendarHeaderEmpty(props: CalendarHeaderProps) {
+  return (
+    <ScrollableControlBar>
+      <CalendarSettings
+        interviewTypeControl={props.interviewTypeControl}
+        timeZone={props.timeZone}
+        onTimeZoneChange={props.onTimeZoneChange}
+      />
+
+      <div className="ml-auto flex shrink-0 items-center justify-end">
+        <InterviewerPicker {...props} />
+      </div>
+    </ScrollableControlBar>
   );
 }

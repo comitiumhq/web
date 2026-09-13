@@ -192,7 +192,6 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
             <div className="min-w-0">
               <div className="mb-2 text-label-13 font-medium">Category</div>
               <Combobox
-                selectionMode="single"
                 size="sm"
                 ariaLabel="Category"
                 options={CATEGORIES}

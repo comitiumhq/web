@@ -1,11 +1,12 @@
 import type { JobDraftListItem, OrgJobListItem } from '@comitium/schemas/jobs';
+import { formatCompactDate } from '@comitium/ui/date';
 import { Skeleton } from '@comitium/ui/skeleton';
 import type { ReactNode } from 'react';
 import { memo, useCallback } from 'react';
 import { JobStatusBadge } from '@/components/features/job-detail/job-status-badge';
 import { formatEmployerStake } from '@/lib/jobs';
 import { isJobPublishing } from '@/lib/jobs/status';
-
+import { PostingStatusValue } from './job-list-cell-values';
 import { ActionsCell, type JobsRow, metaLine } from './jobs-columns';
 
 const SKELETON_ROWS = ['s1', 's2', 's3', 's4'];
@@ -35,10 +36,18 @@ export function JobsMobileList({
         {SKELETON_ROWS.map((key) => (
           <div key={key} className="flex flex-col gap-1.5 rounded-xl border border-border bg-card bg-clip-padding p-3">
             <div className="flex items-center justify-between">
-              <Skeleton className="h-4 w-40 rounded-md" />
-              <Skeleton className="h-5 w-14 rounded-full" />
+              <Skeleton className="h-4 w-40 max-w-[65%]" />
+              <Skeleton className="h-5 w-16 rounded-4xl" />
             </div>
-            <Skeleton className="h-3 w-28 rounded-md" />
+            <Skeleton className="h-3 w-28" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-20 rounded-4xl" />
+              <Skeleton className="h-3 w-28" />
+            </div>
           </div>
         ))}
       </div>
@@ -100,9 +109,17 @@ const JobMobileCard = memo(function JobMobileCard({
         </span>
 
         {isDraft ? (
-          <span className="text-label-12 text-primary">
-            {isJobPublishing(row.draft.lifecycle) ? 'Publication submitted' : 'Finish setup →'}
-          </span>
+          <>
+            <span className="text-label-12 text-primary">
+              {isJobPublishing(row.draft.lifecycle) ? 'Publication submitted' : 'Finish setup →'}
+            </span>
+            <JobMobileOperationalMeta
+              candidateCount={row.draft.candidateCount}
+              interviewPlanName={row.draft.interviewPlanName}
+              postingStatus={row.draft.postingStatus}
+              updatedAt={row.draft.updatedAt}
+            />
+          </>
         ) : (
           <JobMobileMeta job={row.job} isAdmin={isAdmin} />
         )}
@@ -121,15 +138,49 @@ const JobMobileMeta = memo(function JobMobileMeta({ job, isAdmin }: { job: OrgJo
   return (
     <>
       {subtitle && <span className="truncate text-label-12 text-muted-foreground">{subtitle}</span>}
-      <span className="flex items-center gap-1.5 text-label-12 text-muted-foreground">
-        <span className="tabular-nums">{job.candidateCount} candidates</span>
-        {isAdmin && job.stake && (
-          <>
-            <span className="text-muted-foreground/60">·</span>
-            <span className="font-medium tabular-nums text-foreground">{formatEmployerStake(job.stake)}</span>
-          </>
-        )}
-      </span>
+      <JobMobileOperationalMeta
+        candidateCount={job.candidateCount}
+        interviewPlanName={job.interviewPlanName}
+        postingStatus={job.postingStatus}
+        stake={isAdmin ? job.stake : null}
+        updatedAt={job.updatedAt}
+      />
     </>
   );
 });
+
+interface JobMobileOperationalMetaProps {
+  candidateCount: number;
+  interviewPlanName: string | null;
+  postingStatus: OrgJobListItem['postingStatus'];
+  stake?: string | null;
+  updatedAt: string;
+}
+
+function JobMobileOperationalMeta({
+  candidateCount,
+  interviewPlanName,
+  postingStatus,
+  stake,
+  updatedAt,
+}: JobMobileOperationalMetaProps) {
+  return (
+    <>
+      <span className="flex items-center gap-1.5 text-label-12 text-muted-foreground">
+        <span className="tabular-nums">{candidateCount} candidates</span>
+        {stake && (
+          <>
+            <span className="text-muted-foreground/60">·</span>
+            <span className="font-medium tabular-nums text-foreground">{formatEmployerStake(stake)}</span>
+          </>
+        )}
+        <span className="text-muted-foreground/60">·</span>
+        <span className="tabular-nums">Updated {formatCompactDate(updatedAt)}</span>
+      </span>
+      <span className="flex min-w-0 items-center gap-2">
+        <PostingStatusValue status={postingStatus} />
+        <span className="truncate text-label-12 text-muted-foreground">Plan: {interviewPlanName ?? 'Not set'}</span>
+      </span>
+    </>
+  );
+}

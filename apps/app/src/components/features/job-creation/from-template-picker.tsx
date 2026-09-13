@@ -37,7 +37,6 @@ export const FromTemplatePicker = memo(function FromTemplatePicker({
     <div className="flex flex-col gap-1.5">
       <div className="text-label-13 text-muted-foreground">From template (optional)</div>
       <Combobox
-        selectionMode="single"
         ariaLabel="Job template"
         options={templates.map((template) => ({ value: template.id, label: template.title }))}
         value={value}

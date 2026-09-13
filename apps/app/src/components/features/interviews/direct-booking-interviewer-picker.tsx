@@ -1,7 +1,7 @@
 import { FormLabel } from '@comitium/ui/form';
 import type { OrgTeamMember } from '@/lib/schemas/org';
 
-import { InterviewerMultiCombobox } from './interviewer-multi-combobox';
+import { InterviewerAutocomplete } from './interviewer-autocomplete';
 import type { SelectedInterviewer } from './types';
 
 interface DirectBookingInterviewerPickerProps {
@@ -23,7 +23,7 @@ export function DirectBookingInterviewerPicker({
     <div className="space-y-2">
       <FormLabel>Interviewers</FormLabel>
 
-      <InterviewerMultiCombobox
+      <InterviewerAutocomplete
         members={members}
         calendarStatusMap={calendarStatusMap}
         interviewers={interviewers}

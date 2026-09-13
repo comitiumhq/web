@@ -39,7 +39,6 @@ function TimezonePickerImpl({
 
   return (
     <Combobox
-      selectionMode="single"
       options={TIMEZONE_OPTIONS}
       value={value || BROWSER_TZ}
       clearable={false}

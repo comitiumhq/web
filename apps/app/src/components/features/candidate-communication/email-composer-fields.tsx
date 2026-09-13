@@ -1,6 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
-import { Label } from '@comitium/ui/label';
 import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
+import { Label } from '@comitium/ui/label';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { InfoIcon } from '@phosphor-icons/react';
@@ -40,7 +40,6 @@ export function EmailTemplateField({
         <Skeleton className="h-9 w-full rounded-4xl" />
       ) : (
         <Combobox
-          selectionMode="single"
           ariaLabel={label}
           options={options}
           value={value}

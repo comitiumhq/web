@@ -149,7 +149,6 @@ export function DepartmentSheet({ orgId, department, departments, open, onOpenCh
                   <FormLabel>Is under</FormLabel>
                   <FormControl>
                     <Combobox
-                      selectionMode="single"
                       ariaLabel="Parent department"
                       options={parentOptions.map((option) => ({
                         value: option.id,

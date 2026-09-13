@@ -29,7 +29,6 @@ export function ActivityTemplateField<T extends FieldValues>({
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <Combobox
-              selectionMode="single"
               ariaLabel={label}
               options={items.map((item) => ({ value: item.id, label: item.label }))}
               value={(field.value as string) || null}

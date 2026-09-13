@@ -1,7 +1,7 @@
 import type { HiringTeamRole } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
-import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
+import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { PlusIcon } from '@phosphor-icons/react';
 import { useCallback, useMemo, useState } from 'react';
@@ -51,7 +51,6 @@ export function HiringTeamComposer({ availableMembers, isAdding, onAdd }: Hiring
       <span className="text-label-13 font-medium">Add member</span>
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
         <Combobox
-          selectionMode="single"
           options={memberOptions}
           value={selectedMemberId}
           onValueChange={handleSelectMember}

@@ -51,7 +51,6 @@ function ReasonSelectField({ state, disabled, id }: ReasonSelectFieldProps) {
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{labelText}</Label>
       <Combobox
-        selectionMode="single"
         id={id}
         ariaLabel={labelText}
         aria-invalid={state.reasonError}

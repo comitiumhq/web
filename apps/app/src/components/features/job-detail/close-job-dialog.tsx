@@ -111,7 +111,6 @@ export function CloseJobDialog({
               Reason for closing <span className="text-destructive">*</span>
             </p>
             <Combobox
-              selectionMode="single"
               ariaLabel="Reason for closing"
               options={(reasons ?? []).map((reason) => ({ value: reason.id, label: reason.label }))}
               value={reasonId || null}

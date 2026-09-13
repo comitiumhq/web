@@ -1,4 +1,4 @@
-import { Combobox } from '@comitium/ui/combobox';
+import { Autocomplete } from '@comitium/ui/autocomplete';
 import { getMemberDisplayName, type MemberDisplayIdentity } from '@comitium/ui/display-name';
 import { useMemo } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
@@ -37,8 +37,7 @@ export function MemberOptionsMultiSelect({
   );
 
   return (
-    <Combobox
-      selectionMode="multiple"
+    <Autocomplete
       size="sm"
       ariaLabel="Members"
       options={options}

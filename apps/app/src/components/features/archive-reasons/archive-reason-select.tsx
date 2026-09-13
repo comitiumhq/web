@@ -20,7 +20,6 @@ export function ArchiveReasonSelect({
 }: ArchiveReasonSelectProps) {
   return (
     <Combobox
-      selectionMode="single"
       ariaLabel="Archive reason"
       options={options}
       value={value}

@@ -48,7 +48,6 @@ export function CurrencyWidget({ field }: CurrencyWidgetProps) {
         data-form-focus-target=""
       />
       <Combobox
-        selectionMode="single"
         size="lg"
         ariaLabel="Currency"
         options={CURRENCIES}

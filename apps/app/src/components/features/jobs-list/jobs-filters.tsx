@@ -49,7 +49,6 @@ export function JobsFilters({
         <div className="flex flex-col gap-1.5">
           <span className="text-label-12 text-muted-foreground">Department</span>
           <Combobox
-            selectionMode="single"
             size="sm"
             ariaLabel="Department"
             options={[
@@ -68,7 +67,6 @@ export function JobsFilters({
         <div className="flex flex-col gap-1.5">
           <span className="text-label-12 text-muted-foreground">Location</span>
           <Combobox
-            selectionMode="single"
             size="sm"
             ariaLabel="Location"
             options={[

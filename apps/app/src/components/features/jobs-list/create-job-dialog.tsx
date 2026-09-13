@@ -197,7 +197,6 @@ export function CreateJobDialog({ orgId, open, onOpenChange }: CreateJobDialogPr
                   </p>
                 ) : (
                   <Combobox
-                    selectionMode="single"
                     id="create-job-team"
                     ariaLabel="Team"
                     options={departmentOptions.map((department) => ({ value: department.id, label: department.name }))}
@@ -219,7 +218,6 @@ export function CreateJobDialog({ orgId, open, onOpenChange }: CreateJobDialogPr
                   </p>
                 ) : (
                   <Combobox
-                    selectionMode="single"
                     id="create-job-location"
                     ariaLabel="Location"
                     options={locationOptions.map((location) => ({ value: location.id, label: location.name }))}

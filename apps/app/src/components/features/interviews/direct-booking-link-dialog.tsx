@@ -73,7 +73,6 @@ export function DirectBookingLinkDialog({
                     <FormLabel>Interview type</FormLabel>
                     <FormControl>
                       <Combobox
-                        selectionMode="single"
                         ariaLabel="Interview type"
                         options={dialog.templates.map((template) => ({
                           value: template.id,
@@ -104,7 +103,6 @@ export function DirectBookingLinkDialog({
                 <div className="space-y-2">
                   <Label>Email template</Label>
                   <Combobox
-                    selectionMode="single"
                     ariaLabel="Email template"
                     options={dialog.emailTemplates.map((template) => ({ value: template.id, label: template.name }))}
                     value={dialog.selectedTemplateId || null}

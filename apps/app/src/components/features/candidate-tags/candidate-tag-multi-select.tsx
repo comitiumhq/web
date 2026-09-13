@@ -1,9 +1,9 @@
-import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
+import { Autocomplete, type AutocompleteOption } from '@comitium/ui/autocomplete';
 import { useCallback, useMemo } from 'react';
 import { MAX_TAGS_PER_CANDIDATE } from '@/lib/schemas/candidate-tags';
 
 interface CandidateTagMultiSelectProps {
-  options: ComboboxOption[];
+  options: AutocompleteOption[];
   value: string[];
   placeholder: string;
   disabled?: boolean;
@@ -37,8 +37,7 @@ export function CandidateTagMultiSelect({
   );
 
   return (
-    <Combobox
-      selectionMode="multiple"
+    <Autocomplete
       ariaLabel="Tags"
       options={limitedOptions}
       value={value}
@@ -46,7 +45,6 @@ export function CandidateTagMultiSelect({
       searchPlaceholder="Search tags…"
       emptyMessage="No tags found."
       disabled={disabled}
-      maxVisibleValues={5}
       onValueChange={handleValueChange}
     />
   );

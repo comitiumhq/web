@@ -98,7 +98,6 @@ export function ConsiderationSelector({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <span className="shrink-0 text-xs font-medium text-muted-foreground">Applications</span>
         <Combobox
-          selectionMode="single"
           ariaLabel="Application"
           options={options}
           value={currentApplicationId}

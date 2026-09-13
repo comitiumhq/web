@@ -10,6 +10,10 @@ import { useDeleteDraft } from '@/hooks/mutations/use-delete-draft';
 
 import { getJobsColumns, type JobsRow } from './jobs-columns';
 import { JobsMobileList } from './jobs-mobile-list';
+import { JobsTableSkeleton } from './jobs-table-skeleton';
+
+const ADMIN_GRID_MIN_WIDTH = '93rem';
+const MEMBER_GRID_MIN_WIDTH = '85rem';
 
 interface JobsTableProps {
   orgId: string;
@@ -30,6 +34,7 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const isMobile = useMediaQuery('(max-width: 639px)');
+  const gridMinWidth = isAdmin ? ADMIN_GRID_MIN_WIDTH : MEMBER_GRID_MIN_WIDTH;
 
   const columns = useMemo(
     () => getJobsColumns({ orgId, isAdmin, onRequestDelete: setDraftToDelete }),
@@ -69,38 +74,48 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
     setDraftToDelete(null);
   }, [draftToDelete, deleteDraftMutate]);
 
+  let tableContent: ReactNode;
+
+  if (isMobile) {
+    tableContent = (
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <JobsMobileList
+          orgId={orgId}
+          rows={rows}
+          isAdmin={isAdmin}
+          loading={loading}
+          emptyState={emptyState}
+          onRowClick={navigateToRow}
+          onRequestDelete={setDraftToDelete}
+        />
+      </div>
+    );
+  } else if (loading && rows.length === 0) {
+    tableContent = <JobsTableSkeleton columns={columns} gridMinWidth={gridMinWidth} />;
+  } else {
+    tableContent = (
+      <DataTableVirtual
+        ariaLabel="Jobs"
+        size="sm"
+        className={rows.length === 0 && !loading ? 'min-h-0 border-0 bg-transparent' : 'min-h-0'}
+        maxHeightClassName="max-h-full"
+        columns={columns}
+        data={rows}
+        emptyState={emptyState}
+        getRowId={getJobsRowId}
+        gridMinWidth={gridMinWidth}
+        loadingMore={loading}
+        loadingMoreRowCount={rows.length === 0 ? 8 : 3}
+        onRowClick={handleRowClick}
+        onSortingChange={setSorting}
+        sorting={sorting}
+      />
+    );
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {isMobile ? (
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <JobsMobileList
-            orgId={orgId}
-            rows={rows}
-            isAdmin={isAdmin}
-            loading={loading}
-            emptyState={emptyState}
-            onRowClick={navigateToRow}
-            onRequestDelete={setDraftToDelete}
-          />
-        </div>
-      ) : (
-        <DataTableVirtual
-          ariaLabel="Jobs"
-          size="sm"
-          className={rows.length === 0 && !loading ? 'min-h-0 border-0 bg-transparent' : 'min-h-0'}
-          maxHeightClassName="max-h-full"
-          columns={columns}
-          data={rows}
-          emptyState={emptyState}
-          getRowId={getJobsRowId}
-          gridMinWidth={isAdmin ? '880px' : '776px'}
-          loadingMore={loading}
-          loadingMoreRowCount={rows.length === 0 ? 8 : 3}
-          onRowClick={handleRowClick}
-          onSortingChange={setSorting}
-          sorting={sorting}
-        />
-      )}
+      {tableContent}
 
       <ConfirmDialog
         open={draftToDelete !== null}

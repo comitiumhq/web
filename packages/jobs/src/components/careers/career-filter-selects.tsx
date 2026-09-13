@@ -84,7 +84,6 @@ export function CareerFilterSelects({ api, orgSlug, departments, filters, onFilt
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
       <Combobox
-        selectionMode="single"
         size="lg"
         ariaLabel="Department"
         options={[
@@ -104,7 +103,6 @@ export function CareerFilterSelects({ api, orgSlug, departments, filters, onFilt
       />
 
       <Combobox
-        selectionMode="single"
         size="lg"
         ariaLabel="Location"
         options={[

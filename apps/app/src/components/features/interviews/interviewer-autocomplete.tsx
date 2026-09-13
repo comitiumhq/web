@@ -1,4 +1,4 @@
-import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
+import { Autocomplete, type AutocompleteOption } from '@comitium/ui/autocomplete';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { CalendarXIcon } from '@phosphor-icons/react';
 import { useCallback, useMemo } from 'react';
@@ -7,29 +7,29 @@ import type { OrgTeamMember } from '@/lib/schemas/org';
 
 import type { SelectedInterviewer } from './types';
 
-interface InterviewerMultiComboboxProps {
+interface InterviewerAutocompleteProps {
   members: readonly OrgTeamMember[];
   calendarStatusMap: ReadonlyMap<string, boolean>;
   interviewers: readonly SelectedInterviewer[];
   onChange: (interviewers: SelectedInterviewer[]) => void;
   disabled?: boolean;
   className?: string;
-  maxVisibleValues?: number;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function InterviewerMultiCombobox({
+export function InterviewerAutocomplete({
   members,
   calendarStatusMap,
   interviewers,
   onChange,
   disabled,
   className,
-  maxVisibleValues,
-}: InterviewerMultiComboboxProps) {
+  open,
+  onOpenChange,
+}: InterviewerAutocompleteProps) {
   const activeMembers = useMemo(() => members.filter((member) => member.isActive), [members]);
-
   const selectedUserIds = useMemo(() => interviewers.map((interviewer) => interviewer.userId), [interviewers]);
-
   const options = useMemo(
     () => createInterviewerOptions(activeMembers, calendarStatusMap, interviewers),
     [activeMembers, calendarStatusMap, interviewers],
@@ -43,8 +43,7 @@ export function InterviewerMultiCombobox({
   );
 
   return (
-    <Combobox
-      selectionMode="multiple"
+    <Autocomplete
       size="sm"
       ariaLabel="Interviewers"
       options={options}
@@ -53,9 +52,10 @@ export function InterviewerMultiCombobox({
       placeholder="Add interviewers"
       searchPlaceholder="Search interviewers…"
       emptyMessage="No members found."
-      maxVisibleValues={maxVisibleValues}
       className={className}
       disabled={disabled}
+      open={open}
+      onOpenChange={onOpenChange}
     />
   );
 }
@@ -64,7 +64,7 @@ function createInterviewerOptions(
   activeMembers: readonly OrgTeamMember[],
   calendarStatusMap: ReadonlyMap<string, boolean>,
   selectedInterviewers: readonly SelectedInterviewer[],
-): ComboboxOption[] {
+): AutocompleteOption[] {
   const options = activeMembers.map((member) => {
     const hasCalendar = calendarStatusMap.get(member.userId) ?? false;
 
@@ -79,7 +79,6 @@ function createInterviewerOptions(
   });
 
   const activeUserIds = new Set(activeMembers.map((member) => member.userId));
-
   const unavailableSelectedOptions = selectedInterviewers
     .filter((interviewer) => !activeUserIds.has(interviewer.userId))
     .map((interviewer) => ({
@@ -99,7 +98,6 @@ function reconcileInterviewers(
   calendarStatusMap: ReadonlyMap<string, boolean>,
 ): SelectedInterviewer[] {
   const currentByUserId = new Map(currentInterviewers.map((interviewer) => [interviewer.userId, interviewer]));
-
   const activeByUserId = new Map(activeMembers.map((member) => [member.userId, member]));
 
   return nextUserIds.flatMap((userId) => {

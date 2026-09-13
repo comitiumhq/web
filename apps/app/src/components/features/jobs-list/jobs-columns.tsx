@@ -22,6 +22,7 @@ import { Permission } from '@/lib/schemas/org';
 import { formatLocation } from '@/lib/utils';
 
 import { HiringTeamAvatars } from './hiring-team-avatars';
+import { EmptyJobCellValue, InterviewPlanValue, PostingStatusValue } from './job-list-cell-values';
 
 export type JobsRow =
   | { kind: 'job'; id: string; job: OrgJobListItem }
@@ -146,7 +147,7 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
     },
     enableSorting: false,
     meta: {
-      gridSize: 'minmax(240px,1fr)',
+      gridSize: 'minmax(22rem,1fr)',
       headerClassName: 'pl-4',
       cellClassName: 'pl-4',
       label: 'Job',
@@ -163,19 +164,16 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
   const candidatesColumn: ColumnDef<JobsRow> = {
     id: 'candidates',
     header: 'Candidates',
-    accessorFn: (row) => (row.kind === 'job' ? row.job.candidateCount : -1),
+    accessorFn: (row) => (row.kind === 'job' ? row.job.candidateCount : row.draft.candidateCount),
     cell: ({ row }) => {
       const item = row.original;
+      const candidateCount = item.kind === 'job' ? item.job.candidateCount : item.draft.candidateCount;
 
-      if (item.kind !== 'job') {
-        return null;
-      }
-
-      return <span className="tabular-nums">{item.job.candidateCount}</span>;
+      return <span className="tabular-nums">{candidateCount}</span>;
     },
     enableSorting: true,
     meta: {
-      gridSize: '150px',
+      gridSize: '10rem',
       label: 'Candidates',
       skeletonClassName: 'w-8',
     },
@@ -183,12 +181,17 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
 
   const teamColumn: ColumnDef<JobsRow> = {
     id: 'team',
-    header: 'Team',
-    cell: ({ row }) => (row.original.kind === 'job' ? <HiringTeamAvatars team={row.original.job.hiringTeam} /> : null),
+    header: 'Hiring team',
+    cell: ({ row }) => {
+      const item = row.original;
+      const team = item.kind === 'job' ? item.job.hiringTeam : item.draft.hiringTeam;
+
+      return <HiringTeamAvatars team={team} />;
+    },
     enableSorting: false,
     meta: {
-      gridSize: '116px',
-      label: 'Team',
+      gridSize: '10rem',
+      label: 'Hiring team',
       loadingCell: (
         <div className="flex items-center [&>*+*]:-ml-1.5">
           <Skeleton className="size-7 rounded-full ring-2 ring-card" />
@@ -196,6 +199,23 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
         </div>
       ),
       skeletonClassName: 'w-16',
+    },
+  };
+
+  const interviewPlanColumn: ColumnDef<JobsRow> = {
+    id: 'interviewPlan',
+    header: 'Interview plan',
+    cell: ({ row }) => {
+      const item = row.original;
+      const interviewPlanName = item.kind === 'job' ? item.job.interviewPlanName : item.draft.interviewPlanName;
+
+      return <InterviewPlanValue name={interviewPlanName} />;
+    },
+    enableSorting: false,
+    meta: {
+      gridSize: 'minmax(15rem,0.8fr)',
+      label: 'Interview plan',
+      skeletonClassName: 'w-28',
     },
   };
 
@@ -207,14 +227,14 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
       const item = row.original;
 
       if (item.kind !== 'job' || !item.job.stake) {
-        return null;
+        return <EmptyJobCellValue>None</EmptyJobCellValue>;
       }
 
       return <span className="font-medium tabular-nums">{formatEmployerStake(item.job.stake)}</span>;
     },
     enableSorting: true,
     meta: {
-      gridSize: '104px',
+      gridSize: '8rem',
       label: 'Stake',
       skeletonClassName: 'w-12',
     },
@@ -230,29 +250,41 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
         <JobStatusBadge status={row.original.draft.status} />
       ),
     enableSorting: false,
-    meta: { gridSize: '104px', label: 'Status', skeletonClassName: 'h-5 w-16 rounded-full' },
+    meta: { gridSize: '8rem', label: 'Status', skeletonClassName: 'h-5 w-16 rounded-full' },
   };
 
-  const createdColumn: ColumnDef<JobsRow> = {
-    id: 'created',
-    header: 'Created',
-    accessorFn: (row) => (row.kind === 'job' ? row.job.createdAt : row.draft.updatedAt),
+  const postingColumn: ColumnDef<JobsRow> = {
+    id: 'posting',
+    header: 'Posting',
     cell: ({ row }) => {
       const item = row.original;
-      const iso = item.kind === 'job' ? item.job.createdAt : item.draft.updatedAt;
-      const prefix = item.kind === 'draft' ? 'edited ' : '';
+      const postingStatus = item.kind === 'job' ? item.job.postingStatus : item.draft.postingStatus;
+
+      return <PostingStatusValue status={postingStatus} />;
+    },
+    enableSorting: false,
+    meta: { gridSize: '9rem', label: 'Posting', skeletonClassName: 'h-5 w-20 rounded-full' },
+  };
+
+  const updatedColumn: ColumnDef<JobsRow> = {
+    id: 'updated',
+    header: 'Updated',
+    accessorFn: (row) => (row.kind === 'job' ? row.job.updatedAt : row.draft.updatedAt),
+    cell: ({ row }) => {
+      const item = row.original;
+      const iso = item.kind === 'job' ? item.job.updatedAt : item.draft.updatedAt;
 
       return (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="truncate tabular-nums text-muted-foreground">{`${prefix}${formatCompactDate(iso)}`}</span>
+            <span className="truncate tabular-nums text-muted-foreground">{formatCompactDate(iso)}</span>
           </TooltipTrigger>
           <TooltipContent>{formatRelativeTime(iso)}</TooltipContent>
         </Tooltip>
       );
     },
     enableSorting: true,
-    meta: { gridSize: '120px', label: 'Created', skeletonClassName: 'w-12' },
+    meta: { gridSize: '8rem', label: 'Updated', skeletonClassName: 'w-12' },
   };
 
   const actionsColumn: ColumnDef<JobsRow> = {
@@ -261,16 +293,16 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
     cell: ({ row }) => <ActionsCell orgId={orgId} row={row.original} onRequestDelete={onRequestDelete} />,
     enableSorting: false,
     enableHiding: false,
-    meta: { gridSize: '48px', label: 'Actions', skeletonClassName: 'ml-auto size-7 rounded-full' },
+    meta: { gridSize: '3rem', label: 'Actions', skeletonClassName: 'ml-auto size-7 rounded-full' },
   };
 
-  const columns: ColumnDef<JobsRow>[] = [jobColumn, candidatesColumn, teamColumn];
+  const columns: ColumnDef<JobsRow>[] = [jobColumn, candidatesColumn, teamColumn, interviewPlanColumn];
 
   if (isAdmin) {
     columns.push(stakeColumn);
   }
 
-  columns.push(statusColumn, createdColumn, actionsColumn);
+  columns.push(statusColumn, postingColumn, updatedColumn, actionsColumn);
 
   return columns;
 }

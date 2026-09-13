@@ -44,7 +44,7 @@ export function CandidateSheetShell({
         size="workspace"
         tabIndex={-1}
         onOpenAutoFocus={handleOpenAutoFocus}
-        className="h-full overflow-visible bg-background"
+        className="h-full overflow-visible"
         showCloseButton={false}
       >
         <SheetTitle className="sr-only">{title}</SheetTitle>

@@ -35,7 +35,6 @@ export function FeedbackFormSelect({ value, onValueChange, forms }: FeedbackForm
   return (
     <FormControl>
       <Combobox
-        selectionMode="single"
         ariaLabel="Feedback form"
         options={options}
         value={selectedValue}

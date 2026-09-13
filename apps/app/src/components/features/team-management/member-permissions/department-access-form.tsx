@@ -82,7 +82,6 @@ export function DepartmentAccessForm({
             </div>
           ) : (
             <Combobox
-              selectionMode="single"
               ariaLabel="Team"
               options={departmentOptions.map((option) => ({
                 value: option.id,

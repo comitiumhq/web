@@ -120,7 +120,6 @@ export function DraftDetailsTab({
                     </FormLabel>
                     <FormControl>
                       <Combobox
-                        selectionMode="single"
                         ariaLabel="Team"
                         options={departmentOptions}
                         value={field.value ?? null}
@@ -146,7 +145,6 @@ export function DraftDetailsTab({
                     </FormLabel>
                     <FormControl>
                       <Combobox
-                        selectionMode="single"
                         ariaLabel="Location"
                         options={locationOptions}
                         value={field.value ?? null}
@@ -346,7 +344,6 @@ function SelectField({ control, name, label, placeholder, options, required }: S
           </FormLabel>
           <FormControl>
             <Combobox
-              selectionMode="single"
               ariaLabel={label}
               options={[...options]}
               value={field.value ?? null}
@@ -400,7 +397,6 @@ function CompactSelectField({
             {searchable ? (
               <FormControl>
                 <Combobox
-                  selectionMode="single"
                   ariaLabel={ariaLabel}
                   options={searchableOptions}
                   value={field.value ?? null}

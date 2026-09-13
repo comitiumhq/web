@@ -10,7 +10,6 @@ function SingleComboboxHarness() {
 
   return (
     <Combobox
-      selectionMode="single"
       ariaLabel="Template"
       options={[
         { value: 'product', label: 'Product interview' },
@@ -29,7 +28,6 @@ function RequiredSingleComboboxHarness() {
 
   return (
     <Combobox
-      selectionMode="single"
       ariaLabel="Department"
       options={[
         { value: 'all', label: 'All departments' },
@@ -44,25 +42,6 @@ function RequiredSingleComboboxHarness() {
       }}
       placeholder="All departments"
       searchPlaceholder="Search departments…"
-    />
-  );
-}
-
-function MultipleComboboxHarness() {
-  const [value, setValue] = useState<string[]>([]);
-
-  return (
-    <Combobox
-      selectionMode="multiple"
-      ariaLabel="Interviewers"
-      options={[
-        { value: 'alex', label: 'Alex Morgan' },
-        { value: 'maya', label: 'Maya Chen' },
-      ]}
-      value={value}
-      onValueChange={setValue}
-      placeholder="Add interviewers"
-      searchPlaceholder="Search interviewers…"
     />
   );
 }
@@ -87,7 +66,6 @@ function ControlledComboboxHarness() {
 
   return (
     <Combobox
-      selectionMode="single"
       ariaLabel="Tag"
       options={[{ value: 'priority', label: 'Priority' }]}
       value={value}
@@ -111,7 +89,6 @@ function GroupedComboboxHarness() {
 
   return (
     <Combobox
-      selectionMode="single"
       ariaLabel="Reason"
       options={[
         { value: 'candidate', label: 'Candidate withdrew', group: 'Candidate' },
@@ -161,23 +138,6 @@ describe('Combobox', () => {
     await userEvent.keyboard('{Escape}');
 
     await expect.element(input).toHaveValue('Engineering');
-  });
-
-  it('keeps a multiple-select list open and renders removable selected values', async () => {
-    const screen = await render(<MultipleComboboxHarness />);
-
-    await screen.getByRole('button', { name: 'Show interviewers options' }).click();
-    await screen.getByRole('option', { name: 'Alex Morgan' }).click();
-    await screen.getByRole('option', { name: 'Maya Chen' }).click();
-
-    await expect.element(screen.getByRole('option', { name: 'Maya Chen' })).toBeVisible();
-    await expect.element(screen.getByRole('button', { name: 'Remove Alex Morgan' })).toBeVisible();
-    await expect.element(screen.getByRole('button', { name: 'Remove Maya Chen' })).toBeVisible();
-
-    await screen.getByRole('button', { name: 'Remove Alex Morgan' }).click();
-
-    await expect.element(screen.getByRole('button', { name: 'Remove Alex Morgan' })).not.toBeInTheDocument();
-    await expect.element(screen.getByRole('button', { name: 'Remove Maya Chen' })).toBeVisible();
   });
 
   it('keeps the dialog layout stable and closes only the options popup on Escape', async () => {
