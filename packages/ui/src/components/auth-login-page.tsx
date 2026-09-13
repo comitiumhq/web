@@ -307,12 +307,20 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
               type="button"
               variant="ghost"
               size="xs"
+              className="text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
               onClick={handleChangeEmail}
               disabled={pendingAction !== null}
             >
               Use another email
             </Button>
-            <Button type="button" variant="ghost" size="xs" onClick={sendCode} disabled={pendingAction !== null}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              className="text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
+              onClick={sendCode}
+              disabled={pendingAction !== null}
+            >
               {pendingAction === 'email' ? 'Sending...' : 'Resend code'}
             </Button>
           </div>

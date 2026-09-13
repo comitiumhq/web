@@ -6,7 +6,6 @@ import { PageHeader } from '@comitium/ui/page-header';
 import { Spinner } from '@comitium/ui/spinner';
 import { VERIFICATION_CODE_LENGTH, VerificationCodeInput } from '@comitium/ui/verification-code-input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeftIcon } from '@phosphor-icons/react';
 import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -145,18 +144,17 @@ export function EmailVerificationStep() {
               type="button"
               variant="ghost"
               size="xs"
-              className="-ml-2 text-muted-foreground"
+              className="-ml-2 text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
               onClick={handleChangeEmail}
               disabled={sendMutation.isPending || verifyMutation.isPending}
             >
-              <ArrowLeftIcon data-icon="inline-start" />
               Use another email
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="xs"
-              className="-mr-2 text-muted-foreground"
+              className="-mr-2 text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
               onClick={handleResendCode}
               disabled={cooldown.isActive || sendMutation.isPending || verifyMutation.isPending}
             >
@@ -209,7 +207,7 @@ export function EmailVerificationStep() {
 
           <Button type="submit" size="lg" className="w-full" disabled={sendMutation.isPending}>
             {sendMutation.isPending && <Spinner data-icon="inline-start" />}
-            {sendMutation.isPending ? 'Sending...' : 'Continue'}
+            {sendMutation.isPending ? 'Sending code...' : 'Send verification code'}
           </Button>
         </form>
       </Form>
