@@ -12,10 +12,10 @@ export function PublicHeader() {
 
   return (
     <header className={publicHeaderClassName}>
-      <div className="flex h-14 items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-5">
-          <Link to="/jobs" className="shrink-0">
-            <ComitiumLogo />
+      <div className="flex h-14 items-center justify-between gap-2 sm:gap-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-5">
+          <Link to="/jobs" className="shrink-0" aria-label="Comitium">
+            <ComitiumLogo textClassName="hidden sm:inline" />
           </Link>
 
           <PublicNav pathname={pathname} />

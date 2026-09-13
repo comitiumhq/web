@@ -18,7 +18,7 @@ interface PublicNavProps {
 
 export function PublicNav({ pathname }: PublicNavProps) {
   return (
-    <nav className="hidden items-center gap-1 md:flex">
+    <nav className="flex items-center gap-1 whitespace-nowrap" aria-label="Primary navigation">
       <HeaderNavLink item={JOBS_NAV_ITEM} pathname={pathname} />
 
       <HeaderNavLink item={MY_APPLICATIONS_NAV_ITEM} pathname={pathname} />

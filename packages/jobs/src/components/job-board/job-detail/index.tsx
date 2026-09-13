@@ -111,7 +111,7 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
       </ScrollArea>
 
       {canApply && (
-        <div className="lg:hidden shrink-0 px-4 py-3 border-t border-separator bg-background">
+        <div className="shrink-0 border-t border-separator bg-popover px-4 py-3 lg:hidden">
           <ApplyButton applyUrl={applyUrl} size="default" fullWidth />
         </div>
       )}
