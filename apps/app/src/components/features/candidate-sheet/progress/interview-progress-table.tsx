@@ -15,13 +15,16 @@ interface InterviewProgressTableProps {
 export function InterviewProgressTable({ visits, memberMap, timeZone }: InterviewProgressTableProps) {
   return (
     <>
-      <div className="flex flex-col divide-y divide-border rounded-xl ring-1 ring-border sm:hidden">
+      <div className="flex flex-col divide-y divide-border rounded-xl bg-card bg-clip-padding ring-1 ring-border sm:hidden">
         {visits.map((visit) => (
           <CompactStageVisit key={visit.id} visit={visit} memberMap={memberMap} timeZone={timeZone} />
         ))}
       </div>
 
-      <Table containerClassName="hidden rounded-xl ring-1 ring-border sm:block" className="table-fixed">
+      <Table
+        containerClassName="hidden rounded-xl bg-card bg-clip-padding ring-1 ring-border sm:block"
+        className="table-fixed"
+      >
         <colgroup>
           <col className="w-[46%]" />
           <col className="w-[18%]" />

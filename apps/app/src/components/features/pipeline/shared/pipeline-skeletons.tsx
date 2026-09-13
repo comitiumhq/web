@@ -164,13 +164,13 @@ export function PipelineContentSkeleton({ activeTab, className }: PipelineConten
 
 export function KanbanBoardSkeleton() {
   const columns = KANBAN_COLUMN_SKELETONS.map((column, index) => (
-    <div key={column.titleWidth} className="w-72 shrink-0 p-2">
+    <div key={column.titleWidth} className="flex h-full w-72 shrink-0 flex-col p-2">
       <div className="mb-3 flex items-center gap-2">
         <Skeleton className={cn('h-5', column.titleWidth)} />
         <Skeleton className="size-6 rounded-full" />
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2 rounded-xl bg-kanban-column p-2">
         {Array.from({ length: column.cards }).map((_, cardIndex) => (
           <PipelineCandidateCardSkeleton key={`${index}-${cardIndex}`} />
         ))}

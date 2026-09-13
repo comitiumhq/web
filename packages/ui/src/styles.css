@@ -46,6 +46,7 @@
   --color-table-header: var(--table-header);
   --color-table-row-hover: var(--table-row-hover);
   --color-kanban-canvas: var(--kanban-canvas);
+  --color-kanban-column: var(--kanban-column);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
@@ -223,6 +224,7 @@
   --table-header: color-mix(in oklch, var(--card) 97.5%, var(--card-foreground));
   --table-row-hover: oklch(0 0 0 / 2%);
   --kanban-canvas: color-mix(in oklch, var(--background) 50%, var(--muted));
+  --kanban-column: var(--muted);
   --ring: var(--primary);
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
@@ -281,6 +283,7 @@
   --table-header: color-mix(in oklch, var(--card) 96%, var(--card-foreground));
   --table-row-hover: oklch(1 0 0 / 3%);
   --kanban-canvas: color-mix(in oklch, var(--background) 80%, var(--muted));
+  --kanban-column: color-mix(in oklch, var(--background) 30%, var(--card));
   --ring: var(--primary);
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);

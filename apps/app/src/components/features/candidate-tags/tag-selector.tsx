@@ -1,5 +1,6 @@
 import { Button } from '@comitium/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@comitium/ui/command';
+import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { PlusIcon } from '@phosphor-icons/react';
 import { memo, useCallback, useMemo, useState } from 'react';
@@ -42,10 +43,11 @@ export function TagSelector({
 
   const { mutateAsync: createTagAsync, isPending: isCreating } = useCreateCandidateTag();
   const { mutate: assign, mutateAsync: assignAsync, isPending: isAssigning } = useAssignTagToCandidate();
-  const { mutate: unassign } = useUnassignTagFromCandidate();
+  const { mutate: unassign, isPending: isUnassigning } = useUnassignTagFromCandidate();
 
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [tagPendingRemoval, setTagPendingRemoval] = useState<DecryptedCandidateTag | null>(null);
 
   const assignedTagIds = useMemo(() => new Set(tagIds), [tagIds]);
   const activeTags = useMemo(() => tags.filter((t) => !t.isArchived), [tags]);
@@ -109,16 +111,30 @@ export function TagSelector({
     [assign, candidateId, closePopover, orgId],
   );
 
-  const handleRemove = useCallback(
+  const requestRemove = useCallback(
     (tagId: string) => {
-      if (!candidateId) {
-        return;
-      }
+      const tag = tagMap.get(tagId);
 
-      unassign({ candidateId, tagId, orgId });
+      if (tag) {
+        setTagPendingRemoval(tag);
+      }
     },
-    [unassign, candidateId, orgId],
+    [tagMap],
   );
+
+  const confirmRemove = () => {
+    if (!candidateId || !tagPendingRemoval) {
+      return;
+    }
+
+    unassign({ candidateId, tagId: tagPendingRemoval.id, orgId }, { onSuccess: () => setTagPendingRemoval(null) });
+  };
+
+  const handleRemoveDialogOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setTagPendingRemoval(null);
+    }
+  };
 
   const handleCreateAndAssign = useCallback(async () => {
     if (!vaultKey?.vaultPublicKey || !wrappedVaultKey || !candidateId) {
@@ -218,10 +234,26 @@ export function TagSelector({
       )}
 
       {visibleTags.map((tag) => (
-        <TagChip key={tag.id} tagId={tag.id} label={tag.label} onRemove={canAssign ? handleRemove : undefined} />
+        <TagChip key={tag.id} tagId={tag.id} label={tag.label} onRemove={canAssign ? requestRemove : undefined} />
       ))}
 
-      <TagOverflow tags={hiddenTags} onRemove={canAssign ? handleRemove : undefined} />
+      <TagOverflow tags={hiddenTags} onRemove={canAssign ? requestRemove : undefined} />
+
+      <ConfirmDialog
+        open={tagPendingRemoval !== null}
+        onOpenChange={handleRemoveDialogOpenChange}
+        title="Remove this tag?"
+        description={
+          <>
+            <span className="font-medium">&ldquo;{tagPendingRemoval?.label}&rdquo;</span> will be removed from this
+            candidate.
+          </>
+        }
+        actionLabel="Remove"
+        onConfirm={confirmRemove}
+        isPending={isUnassigning}
+        pendingLabel="Removing…"
+      />
     </div>
   );
 }

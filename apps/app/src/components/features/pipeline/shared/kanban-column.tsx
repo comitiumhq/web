@@ -80,7 +80,11 @@ export const KanbanColumn = memo(function KanbanColumn({
         </Badge>
       </div>
 
-      <div className={cn('flex min-h-0 flex-1 flex-col gap-2 px-0.5 pb-4', { 'overflow-y-auto': scrollable })}>
+      <div
+        className={cn('flex min-h-0 flex-1 flex-col gap-2 rounded-xl bg-kanban-column p-2 pb-4', {
+          'overflow-y-auto': scrollable,
+        })}
+      >
         {applications.length === 0 ? (
           <div className="flex h-30 shrink-0 items-center justify-center rounded-xl border border-dashed border-border/70">
             <p className="text-xs text-muted-foreground">No candidates</p>

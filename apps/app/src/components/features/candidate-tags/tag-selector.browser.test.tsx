@@ -1,6 +1,6 @@
+import { flushSync } from 'react-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { flushSync } from 'react-dom';
 import { TagSelector } from './tag-selector';
 
 const mocks = vi.hoisted(() => ({
@@ -27,7 +27,7 @@ vi.mock('@/hooks/mutations/use-candidate-tag', () => ({
     isPending: false,
   }),
   useCreateCandidateTag: () => ({ mutateAsync: mocks.createTagAsync, isPending: false }),
-  useUnassignTagFromCandidate: () => ({ mutate: mocks.unassign }),
+  useUnassignTagFromCandidate: () => ({ mutate: mocks.unassign, isPending: false }),
 }));
 
 vi.mock('@/hooks/queries/use-query-org-vault-key', () => ({
@@ -63,6 +63,24 @@ beforeEach(() => {
 });
 
 describe('TagSelector', () => {
+  it('requires confirmation before removing an assigned tag', async () => {
+    const screen = await render(
+      <TagSelector orgId="org-1" candidateId="candidate-1" tagIds={[existingTag.id]} canAssign maxVisibleTags={3} />,
+    );
+
+    await screen.getByRole('button', { name: 'Remove tag Priority' }).click();
+
+    await expect.element(screen.getByRole('heading', { name: 'Remove this tag?' })).toBeVisible();
+    expect(mocks.unassign).not.toHaveBeenCalled();
+
+    await screen.getByRole('button', { name: 'Remove', exact: true }).click();
+
+    expect(mocks.unassign).toHaveBeenCalledWith(
+      { candidateId: 'candidate-1', tagId: existingTag.id, orgId: 'org-1' },
+      expect.any(Object),
+    );
+  });
+
   it('keeps the options open until assigning an existing tag succeeds', async () => {
     const screen = await render(
       <TagSelector orgId="org-1" candidateId="candidate-1" tagIds={[]} canAssign maxVisibleTags={3} />,
