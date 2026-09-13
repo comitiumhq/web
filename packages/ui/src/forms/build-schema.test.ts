@@ -103,4 +103,11 @@ describe('buildFormSchema', () => {
   it('accepts score answers with an optional comment', () => {
     expect(validationMessage(requiredQuestion('score'), { score: 4, comment: 'Strong evidence.' })).toBeUndefined();
   });
+
+  it('requires a canonical city ID for candidate location answers', () => {
+    const question = requiredQuestion('candidate_location');
+
+    expect(validationMessage(question, { cityId: 2_950_159, city: 'Berlin', country: 'DE' })).toBeUndefined();
+    expect(validationMessage(question, { city: 'Berlin', country: 'DE' })).toBe('Select a location');
+  });
 });

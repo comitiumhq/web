@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Spinner } from '@comitium/ui/spinner';
 import { CheckCircleIcon, ShieldCheckIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState, type ReactNode } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
 
 import type {
   CompleteZkIdentityAttemptInput,

@@ -3,7 +3,6 @@ import { CryptoProxy, type PublicEncryptionKey } from '@comitium/crypto';
 import { feedbackAnswerBucketContext } from '@comitium/crypto/context';
 import type { WrappedKey } from '@comitium/schemas/common';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
-import { extractSubmissionFieldValues } from '@comitium/schemas/forms/submission-field-values';
 import { splitAnswersByVisibility } from '@comitium/schemas/forms/visibility';
 import { Button } from '@comitium/ui/button';
 import { Form } from '@comitium/ui/form';
@@ -16,7 +15,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { buildFormSchema, FormRenderer } from '@/components/features/form-runtime';
 import { useCreateFeedbackSubmission, useUpdateFeedbackSubmission } from '@/hooks/mutations/use-feedback-submission';
-import { cn, getErrorMessage } from '@/lib/utils';
+import { projectSubmissionFieldValues } from '@/lib/forms/submission-field-projections';
+import { cn, getErrorMessage, isDefined } from '@/lib/utils';
 import { formatSheetDescription, getFormTitle, getSheetTitle, getSourceContextLabel } from './labels';
 import {
   type FeedbackSubmissionFlowResult,
@@ -97,6 +97,7 @@ export function FeedbackSubmissionSheet({
           source={source}
           vaultPublicKey={vaultPublicKey}
           vaultKeyVersion={vaultKeyVersion}
+          wrappedVaultKey={wrappedVaultKey}
           onComplete={handleClose}
           onCancel={handleClose}
         />
@@ -134,6 +135,7 @@ export function FeedbackSubmissionPanel({
       source={source}
       vaultPublicKey={vaultPublicKey}
       vaultKeyVersion={vaultKeyVersion}
+      wrappedVaultKey={wrappedVaultKey}
       onComplete={onComplete}
       onCancel={onCancel}
       showFormContext
@@ -148,6 +150,7 @@ interface FeedbackSubmissionViewProps {
   source: FeedbackSubmissionSource | null;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
+  wrappedVaultKey: WrappedKey | undefined;
   onComplete: () => void;
   onCancel?: () => void;
   showFormContext?: boolean;
@@ -160,6 +163,7 @@ function FeedbackSubmissionView({
   source,
   vaultPublicKey,
   vaultKeyVersion,
+  wrappedVaultKey,
   onComplete,
   onCancel,
   showFormContext = false,
@@ -196,6 +200,7 @@ function FeedbackSubmissionView({
         previousSubmissionId={flow.previousSubmissionId}
         vaultPublicKey={vaultPublicKey}
         vaultKeyVersion={vaultKeyVersion}
+        wrappedVaultKey={wrappedVaultKey}
         onComplete={onComplete}
         onCancel={onCancel}
       />
@@ -241,28 +246,29 @@ interface FeedbackFormProps {
   previousSubmissionId: string | null;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
+  wrappedVaultKey: WrappedKey | undefined;
   onComplete: () => void;
   onCancel?: () => void;
 }
 
-function FeedbackForm({
-  applicationId,
-  orgId,
-  source,
-  snapshot,
-  defaultValues,
-  mode,
-  formId,
-  previousSubmissionId,
-  vaultPublicKey,
-  vaultKeyVersion,
-  onComplete,
-  onCancel,
-}: FeedbackFormProps) {
+function FeedbackForm(props: FeedbackFormProps) {
+  const {
+    applicationId,
+    orgId,
+    source,
+    snapshot,
+    defaultValues,
+    mode,
+    formId,
+    previousSubmissionId,
+    onComplete,
+    onCancel,
+  } = props;
   const { mutate: createSubmission, isPending: isCreating } = useCreateFeedbackSubmission();
   const { mutate: updateSubmission, isPending: isUpdating } = useUpdateFeedbackSubmission();
   const { ensureUnlocked } = useCryptoUnlock();
   const htmlFormId = useId();
+  const encryptionContext = getFeedbackEncryptionContext(props);
 
   const [isEncrypting, setIsEncrypting] = useState(false);
 
@@ -271,21 +277,23 @@ function FeedbackForm({
     defaultValues,
   });
 
-  const handleSubmit = useCallback(
-    async (values: Record<string, unknown>) => {
-      if (!vaultPublicKey || vaultKeyVersion === null) {
-        toast.error('Encryption keys not ready');
+  const handleSubmit = async (values: Record<string, unknown>) => {
+    if (!isDefined(encryptionContext)) {
+      toast.error('Encryption keys not ready');
 
-        return;
-      }
+      return;
+    }
 
-      setIsEncrypting(true);
+    const { vaultPublicKey, vaultKeyVersion, wrappedVaultKey } = encryptionContext;
 
-      try {
-        await ensureUnlocked();
+    setIsEncrypting(true);
 
-        const fieldValues = extractSubmissionFieldValues(snapshot, values);
-        const answerEnvelopes = await Promise.all(
+    try {
+      await ensureUnlocked();
+
+      const [fieldValues, answerEnvelopes] = await Promise.all([
+        projectSubmissionFieldValues(orgId, wrappedVaultKey, snapshot, values),
+        Promise.all(
           splitAnswersByVisibility(snapshot.sections, values).map(async (bucket) => ({
             visibility: bucket.visibility,
             answers: await CryptoProxy.encryptApplication(
@@ -295,51 +303,37 @@ function FeedbackForm({
               feedbackAnswerBucketContext(orgId, applicationId, formId, bucket.visibility),
             ),
           })),
-        );
+        ),
+      ]);
 
-        if (mode === 'edit' && previousSubmissionId) {
-          updateSubmission(
-            {
-              applicationId,
-              submissionId: previousSubmissionId,
-              body: { answerEnvelopes, fieldValues },
-            },
-            { onSuccess: onComplete },
-          );
-
-          return;
-        }
-
-        const sourceBody = getFeedbackSubmissionSourceBody(source);
-
-        createSubmission(
+      if (mode === 'edit' && previousSubmissionId) {
+        updateSubmission(
           {
             applicationId,
-            body: { ...sourceBody, formId, answerEnvelopes, fieldValues },
+            submissionId: previousSubmissionId,
+            body: { answerEnvelopes, fieldValues },
           },
           { onSuccess: onComplete },
         );
-      } catch (error) {
-        toast.error(getErrorMessage(error, 'Failed to encrypt feedback'));
-      } finally {
-        setIsEncrypting(false);
+
+        return;
       }
-    },
-    [
-      vaultPublicKey,
-      vaultKeyVersion,
-      mode,
-      previousSubmissionId,
-      applicationId,
-      orgId,
-      source,
-      formId,
-      createSubmission,
-      updateSubmission,
-      onComplete,
-      ensureUnlocked,
-    ],
-  );
+
+      const sourceBody = getFeedbackSubmissionSourceBody(source);
+
+      createSubmission(
+        {
+          applicationId,
+          body: { ...sourceBody, formId, answerEnvelopes, fieldValues },
+        },
+        { onSuccess: onComplete },
+      );
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to encrypt feedback'));
+    } finally {
+      setIsEncrypting(false);
+    }
+  };
 
   const isPending = isCreating || isUpdating || isEncrypting;
   const submitLabel = mode === 'edit' ? 'Save changes' : 'Submit feedback';
@@ -360,11 +354,37 @@ function FeedbackForm({
             Cancel
           </Button>
         )}
-        <Button type="submit" form={htmlFormId} disabled={isPending || !vaultPublicKey || vaultKeyVersion === null}>
+        <Button type="submit" form={htmlFormId} disabled={isPending || !isDefined(encryptionContext)}>
           {isPending && <Spinner data-icon="inline-start" />}
           {submitLabel}
         </Button>
       </SheetFooter>
     </div>
   );
+}
+
+interface FeedbackEncryptionContext {
+  vaultPublicKey: PublicEncryptionKey;
+  vaultKeyVersion: number;
+  wrappedVaultKey: WrappedKey;
+}
+
+function getFeedbackEncryptionContext({
+  vaultPublicKey,
+  vaultKeyVersion,
+  wrappedVaultKey,
+}: FeedbackFormProps): FeedbackEncryptionContext | null {
+  if (!isDefined(vaultPublicKey)) {
+    return null;
+  }
+
+  if (!isDefined(vaultKeyVersion)) {
+    return null;
+  }
+
+  if (!isDefined(wrappedVaultKey)) {
+    return null;
+  }
+
+  return { vaultPublicKey, vaultKeyVersion, wrappedVaultKey };
 }

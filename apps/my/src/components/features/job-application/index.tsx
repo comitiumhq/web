@@ -222,7 +222,7 @@ function AuthenticatedApplicationForm({
       return;
     }
 
-    const { answerBuckets, resumeUpload, fileUploads, candidateIdentityInputs, candidateProfileInput, fieldValues } =
+    const { answerBuckets, resumeUpload, fileUploads, candidateIdentityInputs, candidateProfileInput } =
       extractApplicationSubmission(applyForm, pendingFormData);
     const aiCriteriaEvaluation = resolveFinalization(resumeUpload !== null);
 
@@ -232,7 +232,6 @@ function AuthenticatedApplicationForm({
       stakeAmount,
       formId: applyForm.form.id,
       answerBuckets,
-      fieldValues,
       resumeUpload,
       fileUploads,
       candidateIdentityInputs,

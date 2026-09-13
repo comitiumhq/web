@@ -2,7 +2,6 @@ import { envelopeKeySchema, publicEncryptionKeySchema } from '@comitium/crypto/s
 import { z } from 'zod';
 import { archiveReasonTypeSchema } from './archive-reason-type';
 import { encryptedEnvelopeSchema } from './common';
-import { formSubmissionFieldValueSchema } from './forms/form-submission';
 import { interviewStatusEnum } from './interview-status';
 import { userWalletAuthorizationPayloadSchema } from './onchain-operations';
 import { PROCESSOR_RECIPIENT_REGEX } from './patterns';
@@ -550,7 +549,6 @@ export const finalizeApplicationInputSchema = z
           .strict(),
       )
       .max(8),
-    fieldValues: z.array(formSubmissionFieldValueSchema).max(500),
     uploadedFileIds: z.array(uuidSchema).max(20),
     aiCriteriaEvaluation: aiCriteriaEvaluationChoiceSchema,
     processingGrantId: uuidSchema,

@@ -1,5 +1,6 @@
 import { encryptedEnvelopeSchema } from '@comitium/crypto/schemas';
 import { z } from 'zod';
+import { hmacSha256HexSchema } from '../common';
 import { uuidSchema } from './contract-primitives';
 import { formSectionRowSchema, formSnapshotQuestionSchema } from './form-definitions';
 
@@ -24,14 +25,15 @@ const fieldValueIdentitySchema = z.object({
   ordinal: z.number().int().nonnegative(),
 });
 
-export const formSubmissionFieldValueSchema = z.discriminatedUnion('kind', [
-  fieldValueIdentitySchema.extend({ kind: z.literal('boolean'), value: z.boolean() }),
-  fieldValueIdentitySchema.extend({ kind: z.literal('option'), value: z.string() }),
+export const formSubmissionFieldProjectionSchema = z.discriminatedUnion('kind', [
+  fieldValueIdentitySchema.extend({ kind: z.literal('digest'), value: hmacSha256HexSchema }),
   fieldValueIdentitySchema.extend({ kind: z.literal('number'), value: z.string() }),
   fieldValueIdentitySchema.extend({ kind: z.literal('timestamp'), value: z.string() }),
 ]);
 
-export type FormSubmissionFieldValue = z.infer<typeof formSubmissionFieldValueSchema>;
+export type FormSubmissionFieldProjection = z.infer<typeof formSubmissionFieldProjectionSchema>;
+
+export const FORM_FIELD_PROJECTION_VERSION = 1;
 
 export const answerEnvelopeSchema = z.object({
   visibility: z.enum(['standard', 'private']),
@@ -84,6 +86,7 @@ export const formSubmissionResponseSchema = z
     id: uuidSchema,
     formId: uuidSchema,
     formSnapshot: formSnapshotSchema,
+    fieldProjectionVersion: z.number().int().nullable(),
     answerEnvelopes: z.array(answerEnvelopeSchema),
     candidateIdentityInputs: candidateIdentityInputsSchema,
     files: z.array(formSubmissionFileSchema),

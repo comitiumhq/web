@@ -1,5 +1,6 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
-import type { CandidateProfile } from '@comitium/schemas/candidates';
+import { type CandidateProfile, formatCandidateLocation } from '@comitium/schemas/candidates';
+import type { WrappedKey } from '@comitium/schemas/common';
 import { Button } from '@comitium/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
@@ -15,7 +16,7 @@ import {
 import { type ReactNode, useCallback, useState } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';
-import { formatUrlForDisplay, isUrl } from '@/lib/utils';
+import { formatUrlForDisplay, isDefined, isUrl } from '@/lib/utils';
 
 import { CandidateProfileEditSheet } from './candidate-profile-edit-sheet';
 
@@ -31,24 +32,16 @@ interface CandidateProfileCardProps {
   canEdit: boolean;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
+  wrappedVaultKey: WrappedKey | undefined;
 }
 
-export function CandidateProfileCard({
-  candidateId,
-  orgId,
-  profile,
-  isLoading,
-  hasEncryptedProfile,
-  queryError,
-  decryptionError,
-  onRetry,
-  canEdit,
-  vaultPublicKey,
-  vaultKeyVersion,
-}: CandidateProfileCardProps) {
+export function CandidateProfileCard(props: CandidateProfileCardProps) {
+  const { candidateId, orgId, profile, isLoading, hasEncryptedProfile, queryError, decryptionError, onRetry, canEdit } =
+    props;
   const { isUnlocked, runUnlocked } = useEncryptionUnlocked(orgId);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const canOpenEditor = canEdit && candidateId !== null && vaultPublicKey !== null && vaultKeyVersion !== null;
+  const editorProps = getCandidateProfileEditorProps(props);
+  const canOpenEditor = isDefined(editorProps);
   const handleEdit = useCallback(() => runUnlocked(() => setIsEditOpen(true)), [runUnlocked]);
 
   return (
@@ -71,7 +64,7 @@ export function CandidateProfileCard({
           <CandidateProfileContent
             profile={profile}
             orgId={orgId}
-            isCandidateResolved={candidateId !== null}
+            isCandidateResolved={isDefined(candidateId)}
             isUnlocked={isUnlocked}
             isLoading={isLoading}
             hasEncryptedProfile={hasEncryptedProfile}
@@ -86,15 +79,50 @@ export function CandidateProfileCard({
         <CandidateProfileEditSheet
           open={isEditOpen}
           onOpenChange={setIsEditOpen}
-          candidateId={candidateId}
           orgId={orgId}
           profile={profile}
-          vaultPublicKey={vaultPublicKey}
-          vaultKeyVersion={vaultKeyVersion}
+          {...editorProps}
         />
       )}
     </>
   );
+}
+
+interface CandidateProfileEditorProps {
+  candidateId: string;
+  vaultPublicKey: PublicEncryptionKey;
+  vaultKeyVersion: number;
+  wrappedVaultKey: WrappedKey;
+}
+
+function getCandidateProfileEditorProps({
+  canEdit,
+  candidateId,
+  vaultPublicKey,
+  vaultKeyVersion,
+  wrappedVaultKey,
+}: CandidateProfileCardProps): CandidateProfileEditorProps | null {
+  if (!canEdit) {
+    return null;
+  }
+
+  if (!isDefined(candidateId)) {
+    return null;
+  }
+
+  if (!isDefined(vaultPublicKey)) {
+    return null;
+  }
+
+  if (!isDefined(vaultKeyVersion)) {
+    return null;
+  }
+
+  if (!isDefined(wrappedVaultKey)) {
+    return null;
+  }
+
+  return { candidateId, vaultPublicKey, vaultKeyVersion, wrappedVaultKey };
 }
 
 interface CandidateProfileContentProps {
@@ -173,6 +201,7 @@ function CandidateProfileSkeleton() {
 
 function CandidateProfileFields({ profile }: { profile: CandidateProfile }) {
   const { phone, location, linkedIn, github, website, currentTitle, currentCompany } = profile;
+  const locationLabel = formatCandidateLocation(location);
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -184,7 +213,7 @@ function CandidateProfileFields({ profile }: { profile: CandidateProfile }) {
       {currentTitle && !currentCompany && <ProfileField icon={<BriefcaseIcon />}>{currentTitle}</ProfileField>}
       {!currentTitle && currentCompany && <ProfileField icon={<BuildingOfficeIcon />}>{currentCompany}</ProfileField>}
       {phone && <ProfileField icon={<PhoneIcon />}>{phone}</ProfileField>}
-      {location && <ProfileField icon={<MapPinIcon />}>{location}</ProfileField>}
+      {locationLabel && <ProfileField icon={<MapPinIcon />}>{locationLabel}</ProfileField>}
       {isUrl(linkedIn) && (
         <ProfileLink icon={<ArrowSquareOutIcon />} href={linkedIn}>
           LinkedIn

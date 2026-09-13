@@ -1,6 +1,7 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
 import type { ApplicationApiResponse } from '@comitium/schemas/applications';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
+import type { WrappedKey } from '@comitium/schemas/common';
 import { ScrollArea } from '@comitium/ui/scroll-area';
 import { CustomFieldValuesSection } from '@/components/features/custom-fields/custom-field-values-section';
 
@@ -19,6 +20,7 @@ interface CandidateOverviewProps {
   onRetryProfile: () => void;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
+  wrappedVaultKey: WrappedKey | undefined;
 }
 
 export function CandidateOverview({
@@ -32,6 +34,7 @@ export function CandidateOverview({
   onRetryProfile,
   vaultPublicKey,
   vaultKeyVersion,
+  wrappedVaultKey,
 }: CandidateOverviewProps) {
   const canEditCandidate = application.considerationContext.capabilities.candidate.canEditProfile;
 
@@ -50,6 +53,7 @@ export function CandidateOverview({
           canEdit={canEditCandidate}
           vaultPublicKey={vaultPublicKey}
           vaultKeyVersion={vaultKeyVersion}
+          wrappedVaultKey={wrappedVaultKey}
         />
 
         <HiringTeamCard members={application.considerationContext.hiringTeam} />

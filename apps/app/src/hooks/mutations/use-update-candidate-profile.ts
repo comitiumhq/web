@@ -2,11 +2,13 @@ import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
 import { CryptoProxy, type PublicEncryptionKey } from '@comitium/crypto';
 import { candidateProfileContext } from '@comitium/crypto/context';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
+import type { WrappedKey } from '@comitium/schemas/common';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { showMutationError } from '@/hooks/mutations/mutation-error';
 import { qk } from '@/hooks/query-keys';
 import { updateCandidateProfile } from '@/lib/api/candidates';
+import { projectCandidateProfileSearch } from '@/lib/candidates/profile-search-projection';
 
 interface UpdateCandidateProfileParams {
   candidateId: string;
@@ -14,6 +16,7 @@ interface UpdateCandidateProfileParams {
   profile: CandidateProfile;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
+  wrappedVaultKey: WrappedKey;
 }
 
 export function useUpdateCandidateProfile() {
@@ -27,17 +30,21 @@ export function useUpdateCandidateProfile() {
       profile,
       vaultPublicKey,
       vaultKeyVersion,
+      wrappedVaultKey,
     }: UpdateCandidateProfileParams) => {
       await ensureUnlocked();
 
-      const encryptedProfile = await CryptoProxy.encryptApplication(
-        vaultPublicKey,
-        vaultKeyVersion,
-        profile,
-        candidateProfileContext(orgId, candidateId),
-      );
+      const [encryptedProfile, searchProjection] = await Promise.all([
+        CryptoProxy.encryptApplication(
+          vaultPublicKey,
+          vaultKeyVersion,
+          profile,
+          candidateProfileContext(orgId, candidateId),
+        ),
+        projectCandidateProfileSearch(orgId, wrappedVaultKey, profile),
+      ]);
 
-      return updateCandidateProfile(candidateId, encryptedProfile);
+      return updateCandidateProfile(candidateId, encryptedProfile, searchProjection);
     },
 
     onSuccess: (_, { candidateId }) => {

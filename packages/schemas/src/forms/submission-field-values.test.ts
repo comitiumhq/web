@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { FormDefinitionSnapshot } from './form-submission';
 
-import { extractSubmissionFieldValues } from './submission-field-values';
+import { extractSubmissionFieldProjectionSources } from './submission-field-values';
 
 const SECTION_ID = '00000000-0000-4000-8000-000000000001';
 const BOOLEAN_QUESTION_ID = '00000000-0000-4000-8000-000000000002';
@@ -63,10 +63,10 @@ const snapshot: Pick<FormDefinitionSnapshot, 'sections'> = {
   ],
 };
 
-describe('extractSubmissionFieldValues', () => {
+describe('extractSubmissionFieldProjectionSources', () => {
   it('emits canonical typed values only for linked reusable fields', () => {
     expect(
-      extractSubmissionFieldValues(snapshot, {
+      extractSubmissionFieldProjectionSources(snapshot, {
         [BOOLEAN_QUESTION_ID]: true,
         [OPTION_QUESTION_ID]: ['platform', 'security'],
         [NUMBER_QUESTION_ID]: 'strong_yes',
@@ -138,7 +138,7 @@ describe('extractSubmissionFieldValues', () => {
 
   it('omits empty optional answers', () => {
     expect(
-      extractSubmissionFieldValues(snapshot, {
+      extractSubmissionFieldProjectionSources(snapshot, {
         [BOOLEAN_QUESTION_ID]: undefined,
         [OPTION_QUESTION_ID]: [],
         [NUMBER_QUESTION_ID]: '',
@@ -149,7 +149,7 @@ describe('extractSubmissionFieldValues', () => {
 
   it('expands numeric values to canonical decimal strings', () => {
     expect(
-      extractSubmissionFieldValues(snapshot, {
+      extractSubmissionFieldProjectionSources(snapshot, {
         [DIRECT_NUMBER_QUESTION_ID]: 0.0000001,
       }),
     ).toEqual([
@@ -163,7 +163,7 @@ describe('extractSubmissionFieldValues', () => {
     ]);
 
     expect(
-      extractSubmissionFieldValues(snapshot, {
+      extractSubmissionFieldProjectionSources(snapshot, {
         [DIRECT_NUMBER_QUESTION_ID]: 1e21,
       }),
     ).toEqual([
@@ -180,7 +180,7 @@ describe('extractSubmissionFieldValues', () => {
   it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
     'rejects non-finite numeric values',
     (value) => {
-      expect(() => extractSubmissionFieldValues(snapshot, { [DIRECT_NUMBER_QUESTION_ID]: value })).toThrow(
+      expect(() => extractSubmissionFieldProjectionSources(snapshot, { [DIRECT_NUMBER_QUESTION_ID]: value })).toThrow(
         'Invalid value for "number"',
       );
     },

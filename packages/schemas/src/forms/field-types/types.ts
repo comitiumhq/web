@@ -61,7 +61,7 @@ type FieldTypeCapabilities = {
   canBeFormConnectorTarget: boolean;
   requiresSingletonPerForm: boolean;
   requiresSelectableValues: boolean;
-  triggersWorkflow?: 'resume_processing' | 'set_candidate_location';
+  triggersWorkflow?: 'resume_processing';
 };
 
 export type SelectableValue = {

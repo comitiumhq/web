@@ -25,3 +25,5 @@ Comitium has no master decryption key. If every valid unlock path is lost, the e
 Application code uses [`CryptoProxy`](src/proxy.ts). Cryptographic operations and long-lived private keys stay inside a dedicated Web Worker; decrypted values return only when needed.
 
 Versioned envelopes use X-Wing (ML-KEM-768 and X25519), HKDF-SHA-256, and AES-256-GCM through Web Crypto and `@noble`. Supported JSON payloads may be compressed before encryption. Unsupported versions fail closed.
+
+Vault-key blind indexes share one internal HKDF/HMAC implementation. Tags, custom fields, candidate-profile fields, and reusable application-form fields retain separate wire-frozen namespaces and normalization rules.

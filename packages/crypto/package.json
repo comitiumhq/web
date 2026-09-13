@@ -7,12 +7,10 @@
   "exports": {
     ".": "./src/index.ts",
     "./context": "./src/context.ts",
-    "./custom-field-hash": "./src/custom-field-hash.ts",
     "./envelope-key": "./src/envelope-key.ts",
     "./key-bundle": "./src/key-bundle.ts",
     "./personal-key": "./src/personal-key.ts",
     "./schemas": "./src/schemas.ts",
-    "./tag-hash": "./src/tag-hash.ts",
     "./vault-key": "./src/vault-key.ts",
     "./version": "./src/version.ts"
   },

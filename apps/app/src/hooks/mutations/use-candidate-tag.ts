@@ -2,7 +2,6 @@ import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
 import type { PublicEncryptionKey } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateTagContext } from '@comitium/crypto/context';
-import { normalizeTagLabel } from '@comitium/crypto/tag-hash';
 import type { WrappedKey } from '@comitium/schemas/common';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -39,7 +38,6 @@ export async function buildEncryptedLabel(
   wrappedVaultKey: WrappedKey,
 ): Promise<CreateCandidateTagBody> {
   const displayLabel = label.trim();
-  const normalizedForHash = normalizeTagLabel(label);
   const [labelCiphertext, labelHash] = await Promise.all([
     CryptoProxy.encryptApplication(
       vaultPublicKey,
@@ -47,7 +45,7 @@ export async function buildEncryptedLabel(
       { label: displayLabel },
       candidateTagContext(orgId),
     ),
-    CryptoProxy.hashTagLabel(orgId, wrappedVaultKey, normalizedForHash),
+    CryptoProxy.hashTagLabel(orgId, wrappedVaultKey, label),
   ]);
 
   return { label: labelCiphertext, labelHash };

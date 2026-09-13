@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { isDefined } from '../guards';
 import { currencyAnswerSchema, scoreAnswerSchema } from './answer-values';
 
-import type { FormDefinitionSnapshot, FormSubmissionFieldValue } from './form-submission';
+import type { FormDefinitionSnapshot } from './form-submission';
 
 type SubmissionForm = Pick<FormDefinitionSnapshot, 'sections'>;
 type SubmissionQuestion = SubmissionForm['sections'][number]['questions'][number];
@@ -19,11 +19,25 @@ const canonicalDecimalFormatter = new Intl.NumberFormat('en-US', {
   useGrouping: false,
 });
 
-export function extractSubmissionFieldValues(
+export type SubmissionFieldProjectionSource =
+  | FieldProjectionSource<'boolean', boolean>
+  | FieldProjectionSource<'option', string>
+  | FieldProjectionSource<'number', string>
+  | FieldProjectionSource<'timestamp', string>;
+
+interface FieldProjectionSource<Kind extends string, Value> {
+  questionId: string;
+  reusableFieldId: string;
+  ordinal: number;
+  kind: Kind;
+  value: Value;
+}
+
+export function extractSubmissionFieldProjectionSources(
   form: SubmissionForm,
   answers: Record<string, unknown>,
-): FormSubmissionFieldValue[] {
-  const fieldValues: FormSubmissionFieldValue[] = [];
+): SubmissionFieldProjectionSource[] {
+  const fieldValues: SubmissionFieldProjectionSource[] = [];
 
   for (const question of form.sections.flatMap((section) => section.questions)) {
     const reusableField = question.reusableField;

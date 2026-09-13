@@ -1,7 +1,10 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
-import type { CandidateProfile } from '@comitium/schemas/candidates';
+import { type CandidateProfile, formatCandidateLocation } from '@comitium/schemas/candidates';
+import type { WrappedKey } from '@comitium/schemas/common';
 import { httpsUrlSchema } from '@comitium/schemas/common';
+import { candidateLocationValueSchema } from '@comitium/schemas/forms/field-types/candidate-location';
 import { Button } from '@comitium/ui/button';
+import { CitySearchInput } from '@comitium/ui/city-search-input';
 import {
   FeatureSheetBody,
   FeatureSheetContent,
@@ -17,6 +20,7 @@ import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useUpdateCandidateProfile } from '@/hooks/mutations/use-update-candidate-profile';
+import { searchCities } from '@/lib/api/cities';
 import { cn } from '@/lib/utils';
 
 const optionalProfileFieldSchema = z.string().trim().max(500, 'Use 500 characters or fewer');
@@ -29,7 +33,7 @@ const candidateProfileFormSchema = z.object({
   lastName: optionalProfileFieldSchema,
   email: optionalProfileFieldSchema,
   phone: optionalProfileFieldSchema,
-  location: optionalProfileFieldSchema,
+  location: candidateLocationValueSchema.nullable(),
   currentTitle: optionalProfileFieldSchema,
   currentCompany: optionalProfileFieldSchema,
   linkedIn: optionalProfileUrlSchema,
@@ -38,7 +42,7 @@ const candidateProfileFormSchema = z.object({
 });
 
 type CandidateProfileFormValues = z.infer<typeof candidateProfileFormSchema>;
-type CandidateProfileFieldName = keyof CandidateProfileFormValues;
+type CandidateProfileFieldName = Exclude<keyof CandidateProfileFormValues, 'location'>;
 
 interface CandidateProfileField {
   name: CandidateProfileFieldName;
@@ -53,7 +57,6 @@ const PROFILE_FIELDS: CandidateProfileField[] = [
   { name: 'lastName', label: 'Last name', autoComplete: 'family-name' },
   { name: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
   { name: 'phone', label: 'Phone', type: 'tel', autoComplete: 'tel' },
-  { name: 'location', label: 'Location', autoComplete: 'address-level2', fullWidth: true },
   { name: 'currentTitle', label: 'Current title' },
   { name: 'currentCompany', label: 'Current company' },
   { name: 'linkedIn', label: 'LinkedIn URL', type: 'url', fullWidth: true },
@@ -66,7 +69,7 @@ const EMPTY_PROFILE_FORM: CandidateProfileFormValues = {
   lastName: '',
   email: '',
   phone: '',
-  location: '',
+  location: null,
   currentTitle: '',
   currentCompany: '',
   linkedIn: '',
@@ -82,6 +85,7 @@ interface CandidateProfileEditSheetProps {
   profile: CandidateProfile | null;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
+  wrappedVaultKey: WrappedKey;
 }
 
 const FORM_ID = 'candidate-profile-edit-form';
@@ -94,6 +98,7 @@ export function CandidateProfileEditSheet({
   profile,
   vaultPublicKey,
   vaultKeyVersion,
+  wrappedVaultKey,
 }: CandidateProfileEditSheetProps) {
   const { mutateAsync: updateProfile, isPending } = useUpdateCandidateProfile();
   const form = useForm<CandidateProfileFormValues>({
@@ -127,11 +132,12 @@ export function CandidateProfileEditSheet({
         profile: toCandidateProfile(values),
         vaultPublicKey,
         vaultKeyVersion,
+        wrappedVaultKey,
       });
 
       onOpenChange(false);
     },
-    [candidateId, onOpenChange, orgId, updateProfile, vaultKeyVersion, vaultPublicKey],
+    [candidateId, onOpenChange, orgId, updateProfile, vaultKeyVersion, vaultPublicKey, wrappedVaultKey],
   );
 
   return (
@@ -170,6 +176,33 @@ export function CandidateProfileEditSheet({
                   )}
                 />
               ))}
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem className="sm:col-span-2">
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <CitySearchInput
+                        searchCities={searchCities}
+                        value={formatCandidateLocation(field.value) ?? ''}
+                        onCitySelect={(city) =>
+                          field.onChange({
+                            cityId: city.id,
+                            city: city.name,
+                            ...(city.admin1 ? { region: city.admin1 } : {}),
+                            country: city.countryCode,
+                          })
+                        }
+                        onTextChange={() => field.onChange(null)}
+                        onBlur={field.onBlur}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </form>
           </Form>
         </FeatureSheetBody>
@@ -198,7 +231,7 @@ function toProfileFormValues(profile: CandidateProfile | null): CandidateProfile
     lastName: profile.lastName ?? '',
     email: profile.email ?? '',
     phone: profile.phone ?? '',
-    location: profile.location ?? '',
+    location: profile.location,
     currentTitle: profile.currentTitle ?? '',
     currentCompany: profile.currentCompany ?? '',
     linkedIn: profile.linkedIn ?? '',
@@ -213,7 +246,7 @@ function toCandidateProfile(values: CandidateProfileFormValues): CandidateProfil
     lastName: normalizeProfileField(values.lastName),
     email: normalizeProfileField(values.email),
     phone: normalizeProfileField(values.phone),
-    location: normalizeProfileField(values.location),
+    location: values.location,
     currentTitle: normalizeProfileField(values.currentTitle),
     currentCompany: normalizeProfileField(values.currentCompany),
     linkedIn: normalizeProfileField(values.linkedIn),

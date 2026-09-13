@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { deriveTagHashKey, hmacTagLabel, normalizeTagLabel } from '../tag-hash';
+import { hashTagLabel, normalizeTagLabel } from '../tag-hash';
 
 describe('normalizeTagLabel', () => {
   it('trims whitespace and lowercases', () => {
@@ -37,49 +37,21 @@ describe('normalizeTagLabel', () => {
   });
 });
 
-describe('deriveTagHashKey', () => {
-  const vaultPrivKey = new Uint8Array(32).fill(1);
+describe('hashTagLabel', () => {
+  const vaultKey = new Uint8Array(32).fill(7);
 
-  it('produces a 32-byte key', () => {
-    const key = deriveTagHashKey(vaultPrivKey);
-    expect(key).toBeInstanceOf(Uint8Array);
-    expect(key).toHaveLength(32);
+  it('preserves the v1 wire contract', () => {
+    expect(hashTagLabel(vaultKey, 'Senior Engineer')).toBe(
+      'c095ecd8632ef5a0a5e43d22622e7b1e69ce996517868f2edb3366b341619e7c',
+    );
   });
 
-  it('is deterministic for the same vault key', () => {
-    expect(deriveTagHashKey(vaultPrivKey)).toEqual(deriveTagHashKey(vaultPrivKey));
-  });
+  it('normalizes labels and scopes digests to the vault key', () => {
+    const digest = hashTagLabel(vaultKey, '  Silver Medalist  ');
 
-  it('differs when vault private key differs', () => {
-    const otherKey = new Uint8Array(32).fill(2);
-    expect(deriveTagHashKey(vaultPrivKey)).not.toEqual(deriveTagHashKey(otherKey));
-  });
-});
-
-describe('hmacTagLabel', () => {
-  const tagKey = new Uint8Array(32).fill(7);
-
-  it('returns 64-char hex string', () => {
-    const hash = hmacTagLabel(tagKey, 'silver-medalist');
-    expect(hash).toMatch(/^[a-f0-9]{64}$/);
-  });
-
-  it('is deterministic', () => {
-    expect(hmacTagLabel(tagKey, 'silver-medalist')).toBe(hmacTagLabel(tagKey, 'silver-medalist'));
-  });
-
-  it('differs for different labels', () => {
-    expect(hmacTagLabel(tagKey, 'silver-medalist')).not.toBe(hmacTagLabel(tagKey, 'senior-eng'));
-  });
-
-  it('collapses equivalent normalized forms when used with normalizeTagLabel', () => {
-    const hashA = hmacTagLabel(tagKey, normalizeTagLabel('  Silver Medalist  '));
-    const hashB = hmacTagLabel(tagKey, normalizeTagLabel('silver medalist'));
-    expect(hashA).toBe(hashB);
-  });
-
-  it('differs for different tag keys', () => {
-    const otherKey = new Uint8Array(32).fill(8);
-    expect(hmacTagLabel(tagKey, 'silver-medalist')).not.toBe(hmacTagLabel(otherKey, 'silver-medalist'));
+    expect(digest).toBe(hashTagLabel(vaultKey, 'silver medalist'));
+    expect(digest).not.toBe(hashTagLabel(vaultKey, 'senior engineer'));
+    expect(digest).not.toBe(hashTagLabel(new Uint8Array(32).fill(8), 'silver medalist'));
+    expect(digest).toMatch(/^[a-f0-9]{64}$/);
   });
 });

@@ -3,8 +3,6 @@ import {
   extractCandidateProfileInput,
 } from '@comitium/schemas/forms/application-required-fields';
 import type { NestedForm } from '@comitium/schemas/forms/form-definitions';
-import type { FormSubmissionFieldValue } from '@comitium/schemas/forms/form-submission';
-import { extractSubmissionFieldValues } from '@comitium/schemas/forms/submission-field-values';
 import { type AnswerVisibility, questionVisibility } from '@comitium/schemas/forms/visibility';
 import { generateDatabaseId } from '@/lib/utils/database-id';
 import { type CandidateIdentityInputValue, extractCandidateIdentityInputs } from './candidate-identity-inputs';
@@ -15,7 +13,6 @@ interface ApplicationSubmission {
   fileUploads: { fileId: string; questionId: string; visibility: AnswerVisibility; file: File }[];
   candidateIdentityInputs: CandidateIdentityInputValue[];
   candidateProfileInput: CandidateProfileInputValue;
-  fieldValues: FormSubmissionFieldValue[];
 }
 
 export function extractApplicationSubmission(form: NestedForm, values: Record<string, unknown>): ApplicationSubmission {
@@ -27,7 +24,6 @@ export function extractApplicationSubmission(form: NestedForm, values: Record<st
     values,
   );
   const candidateProfileInput = extractCandidateProfileInput(form, values);
-  const fieldValues = extractSubmissionFieldValues(form, values);
 
   const putAnswer = (visibility: AnswerVisibility, questionId: string, value: unknown) => {
     const bucket = answersByVisibility.get(visibility) ?? {};
@@ -74,6 +70,5 @@ export function extractApplicationSubmission(form: NestedForm, values: Record<st
     fileUploads,
     candidateIdentityInputs,
     candidateProfileInput,
-    fieldValues,
   };
 }

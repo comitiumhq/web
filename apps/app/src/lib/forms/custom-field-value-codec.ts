@@ -1,6 +1,5 @@
-import { CryptoProxy, type PublicEncryptionKey } from '@comitium/crypto';
+import { CryptoProxy, isSearchableCustomFieldType, type PublicEncryptionKey } from '@comitium/crypto';
 import { customFieldValueContext } from '@comitium/crypto/context';
-import { isSearchableFieldType } from '@comitium/crypto/custom-field-hash';
 import type { WrappedKey } from '@comitium/schemas/common';
 import type { FieldTypeId } from '@comitium/schemas/forms';
 
@@ -31,7 +30,8 @@ export async function encodeCandidateCustomFieldValue({
     value,
     customFieldValueContext(orgId, candidateId, fieldId),
   );
-  const valueHash = isSearchableFieldType(fieldType)
+
+  const valueHash = isSearchableCustomFieldType(fieldType)
     ? await CryptoProxy.hashCustomFieldValue(orgId, wrappedVaultKey, fieldId, fieldType, value)
     : undefined;
 

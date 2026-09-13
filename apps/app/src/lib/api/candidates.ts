@@ -1,5 +1,6 @@
 import {
   type CandidateIdentityInput,
+  type CandidateProfileSearchProjection,
   type CreateCandidateBody,
   candidateApplicationTargetsResponseSchema,
   candidateFileFinalizeResponseSchema,
@@ -49,8 +50,24 @@ export function considerCandidateForJob(candidateId: string, jobId: string) {
   );
 }
 
-export function updateCandidateProfile(candidateId: string, profile: EncryptedEnvelope) {
-  return api.patch(`/candidates/${candidateId}/profile`, { profile }, candidateProfileUpdateResponseSchema);
+export function updateCandidateProfile(
+  candidateId: string,
+  profile: EncryptedEnvelope,
+  searchProjection: CandidateProfileSearchProjection,
+) {
+  return api.patch(
+    `/candidates/${candidateId}/profile`,
+    { profile, searchProjection },
+    candidateProfileUpdateResponseSchema,
+  );
+}
+
+export function projectCandidateProfileSearch(candidateId: string, searchProjection: CandidateProfileSearchProjection) {
+  return api.put(
+    `/candidates/${candidateId}/profile/search-projection`,
+    { searchProjection },
+    candidateProfileUpdateResponseSchema,
+  );
 }
 
 export function resolveCandidate(orgId: string, identities: CandidateIdentityInput[]) {

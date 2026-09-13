@@ -1,4 +1,4 @@
-import type { CandidateProfile } from '@comitium/schemas/candidates';
+import { type CandidateProfile, formatCandidateLocation } from '@comitium/schemas/candidates';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { Link } from '@tanstack/react-router';
 import { type KeyboardEvent, type MouseEvent, useCallback } from 'react';
@@ -39,7 +39,7 @@ function getCandidateSubtitle(
   }
 
   if (profile?.location) {
-    return profile.location;
+    return formatCandidateLocation(profile.location) ?? `Application ${candidate.id.slice(0, 8)}`;
   }
 
   return `Application ${candidate.id.slice(0, 8)}`;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-
-import { encryptedEnvelopeSchema } from './common';
+import { encryptedEnvelopeSchema, hmacSha256HexSchema } from './common';
+import { type CandidateLocationValue, candidateLocationValueSchema } from './forms/field-types/candidate-location';
 import { successSchema, uuidSchema } from './public';
 
 export const candidateSchema = z.object({
@@ -11,6 +11,7 @@ export const candidateSchema = z.object({
   updatedAt: z.string(),
   identityCount: z.number(),
   applicationCount: z.number(),
+  profileSearchProjectionVersion: z.number().int().nullable(),
 });
 
 export type CandidateResponse = z.infer<typeof candidateSchema>;
@@ -129,12 +130,33 @@ export const candidateProfileSchema = z.object({
   linkedIn: z.string().nullable(),
   github: z.string().nullable(),
   website: z.string().nullable(),
-  location: z.string().nullable(),
+  location: candidateLocationValueSchema.nullable(),
   currentTitle: z.string().nullable(),
   currentCompany: z.string().nullable(),
 });
 
 export type CandidateProfile = z.infer<typeof candidateProfileSchema>;
+
+export const CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION = 1;
+
+export const candidateProfileSearchProjectionSchema = z
+  .object({
+    version: z.literal(CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION),
+    contactEmailDigest: hmacSha256HexSchema.nullable(),
+    locationCityDigest: hmacSha256HexSchema.nullable(),
+    locationCountryDigest: hmacSha256HexSchema.nullable(),
+  })
+  .strict();
+
+export type CandidateProfileSearchProjection = z.infer<typeof candidateProfileSearchProjectionSchema>;
+
+export function formatCandidateLocation(location: CandidateLocationValue | null): string | null {
+  if (!location) {
+    return null;
+  }
+
+  return [location.city, location.region, location.country].filter(Boolean).join(', ');
+}
 export const candidateProfileUpdateResponseSchema = successSchema;
 
 const candidateFileKindSchema = z.enum(['resume', 'cover_letter', 'portfolio', 'attachment', 'other']);
