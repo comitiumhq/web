@@ -2,6 +2,7 @@ import { isDefined } from '@/lib/utils';
 
 import { HiringTeamComposer } from './hiring-team-composer';
 import { HiringTeamList } from './hiring-team-list';
+import { HiringTeamSkeleton } from './skeleton';
 import type { HiringTeamEditorProps } from './types';
 
 export type { HiringTeamEditorMember } from './types';
@@ -20,6 +21,10 @@ export function HiringTeamEditor({
   isRemoving = false,
 }: HiringTeamEditorProps) {
   const canAddMembers = !readOnly && isDefined(onAddMember);
+
+  if (isLoading) {
+    return <HiringTeamSkeleton showComposer={canAddMembers} />;
+  }
 
   return (
     <div className="flex flex-col gap-4">

@@ -206,14 +206,14 @@ export const ImageUploader = ({
 
 function getDropzoneClassName(disabled: boolean, isDragging: boolean) {
   if (disabled) {
-    return 'cursor-not-allowed opacity-50 border-input bg-input/30';
+    return 'cursor-not-allowed border-control-border bg-control bg-clip-padding opacity-50';
   }
 
   if (isDragging) {
     return 'border-primary bg-input/50';
   }
 
-  return 'border-input bg-input/30 hover:border-ring hover:bg-input/50 cursor-pointer';
+  return 'cursor-pointer border-control-border bg-control bg-clip-padding hover:border-control-border-hover hover:bg-control-hover';
 }
 
 function getUploadIconClassName(disabled: boolean, isDragging: boolean) {

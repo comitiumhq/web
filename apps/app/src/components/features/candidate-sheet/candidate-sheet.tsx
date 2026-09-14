@@ -417,6 +417,7 @@ export function CandidateSheet({
     candidateProfile: decryptedProfile,
     criterionSummary: application.criterionSummary,
     criterionAssessments: application.criterionAssessments,
+    processing: application.processing,
     reviewStatus: application.reviewStatus,
     emails: emailCollection,
     form: {

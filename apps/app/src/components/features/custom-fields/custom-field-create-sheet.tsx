@@ -95,7 +95,7 @@ export function CustomFieldCreateSheet({ orgId, open, onOpenChange }: CustomFiel
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent width="xl">
+      <FeatureSheetContent size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">New custom field</SheetTitle>
           <SheetDescription>

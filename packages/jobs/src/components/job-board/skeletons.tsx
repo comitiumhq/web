@@ -18,7 +18,7 @@ interface JobListSkeletonItemProps {
 
 export function JobListSkeletonItem({ widthClassName, isLast }: JobListSkeletonItemProps) {
   return (
-    <div className={cn('border-b border-border px-4 py-4', JOB_LIST_ROW_MIN_HEIGHT_CLASS, { 'border-b-0': isLast })}>
+    <div className={cn('border-b border-separator px-4 py-4', JOB_LIST_ROW_MIN_HEIGHT_CLASS, { 'border-b-0': isLast })}>
       <div className="flex items-start gap-3">
         <Skeleton className="mt-0.5 size-9 shrink-0 rounded-lg" />
 
@@ -72,7 +72,7 @@ function JobListSkeletonRows({ count = 3 }: { count?: number }) {
 export function JobDetailSkeleton() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-border px-5 py-5">
+      <div className="shrink-0 border-b border-separator px-5 py-5">
         <div className="mb-3 flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <Skeleton className="h-8 w-[72%] max-w-xl" />

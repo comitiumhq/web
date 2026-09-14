@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
+import type { ComboboxOption } from '@comitium/ui/combobox';
 import {
   FeatureSheetBody,
   FeatureSheetContent,
@@ -8,7 +9,6 @@ import {
 } from '@comitium/ui/feature-sheet';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
-import type { SearchSelectOption } from '@comitium/ui/search-select';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -104,7 +104,7 @@ export function EmailSheet({
   const senderLabel = getEmailSenderLabel(senderName);
 
   const templateOptions = useMemo(() => {
-    const options: SearchSelectOption[] = templates.map((template) => ({
+    const options: ComboboxOption[] = templates.map((template) => ({
       value: template.id,
       label: template.name,
       searchValue: `${template.name} ${template.useCase}`,
@@ -219,8 +219,8 @@ export function EmailSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
-      <FeatureSheetContent ref={sheetContentRef} width="2xl">
-        <FeatureSheetHeader className="border-b-0">
+      <FeatureSheetContent ref={sheetContentRef} size="editor">
+        <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Email candidate</SheetTitle>
           <SheetDescription>Compose and review the message before sending.</SheetDescription>
         </FeatureSheetHeader>
@@ -280,7 +280,7 @@ export function EmailSheet({
               <EmailMessageField content={editorContent} handleRef={editorRef} disabled={isSending} />
             </FeatureSheetBody>
 
-            <FeatureSheetFooter className="border-t-0">
+            <FeatureSheetFooter>
               <Button variant="outline" onClick={handleCancel} disabled={isSending} type="button">
                 Cancel
               </Button>

@@ -177,6 +177,7 @@ export function ApplicationSubmissionView({ className, form, orgId }: Applicatio
               files={filesByQuestion}
               fileMeta={fileMeta}
               canReadPrivate={submission.canReadPrivate}
+              longAnswerPreviewLines={8}
               onDownloadAttachment={onDownloadAttachment}
               downloadingQuestionId={downloadingQuestionId}
             />

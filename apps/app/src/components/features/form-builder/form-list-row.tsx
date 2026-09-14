@@ -59,7 +59,11 @@ export const FormListRow = memo(function FormListRow({ orgId, form, canManage, o
 
   return (
     <>
-      <TableRow className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })} onClick={handleRowClick}>
+      <TableRow
+        className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })}
+        aria-label={!isArchived ? `Open ${form.title}` : undefined}
+        onClick={!isArchived ? handleRowClick : undefined}
+      >
         <TableCell>
           <div className="flex items-center gap-2">
             <span className="text-label-14 truncate block">{form.title}</span>
@@ -104,7 +108,7 @@ export const FormListRow = memo(function FormListRow({ orgId, form, canManage, o
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
                   <DotsThreeIcon />
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">Actions for {form.title}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>

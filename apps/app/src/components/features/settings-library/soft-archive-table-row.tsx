@@ -65,7 +65,11 @@ export function SoftArchiveTableRow<T extends ArchivableEntity>({
 
   return (
     <>
-      <TableRow className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })} onClick={handleRowClick}>
+      <TableRow
+        className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })}
+        aria-label={!isArchived ? `Edit ${entity.label}` : undefined}
+        onClick={!isArchived ? handleRowClick : undefined}
+      >
         <TableCell>
           <span className="text-label-14 truncate block">{entity.label}</span>
         </TableCell>
@@ -78,7 +82,7 @@ export function SoftArchiveTableRow<T extends ArchivableEntity>({
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
                 <DotsThreeIcon />
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Actions for {entity.label}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>

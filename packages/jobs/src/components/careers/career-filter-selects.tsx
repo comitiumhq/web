@@ -1,4 +1,5 @@
 import { EMPLOYMENT_TYPES, type EmploymentType, LOCATION_TYPES, type LocationType } from '@comitium/schemas/job-enums';
+import { Combobox } from '@comitium/ui/combobox';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@comitium/ui/select';
 import { useCallback } from 'react';
 import type { PublicJobsApi } from '../../api';
@@ -82,38 +83,39 @@ export function CareerFilterSelects({ api, orgSlug, departments, filters, onFilt
 
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-      <Select value={filters.department ?? ALL_FILTER_VALUE} onValueChange={handleDepartmentChange}>
-        <SelectTrigger className={FILTER_TRIGGER_CLASS_NAME} aria-label="Department">
-          <span className="truncate">{getDepartmentFilterLabel(departments, filters.department)}</span>
-        </SelectTrigger>
-        <SelectContent position="popper" align="start">
-          <SelectItem value={ALL_FILTER_VALUE}>All departments</SelectItem>
-          {departments.map((department) => (
-            <SelectItem key={department.id} value={department.slug} textValue={department.name}>
-              <span className="flex w-full items-center gap-3">
-                <span className="truncate">{department.name}</span>
-                <span className={countClassName} aria-hidden="true">
-                  {department.count}
-                </span>
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Combobox
+        size="lg"
+        ariaLabel="Department"
+        options={[
+          { value: ALL_FILTER_VALUE, label: 'All departments' },
+          ...departments.map((department) => ({
+            value: department.slug,
+            label: department.name,
+            trailing: <span className={countClassName}>{department.count}</span>,
+          })),
+        ]}
+        value={filters.department ?? ALL_FILTER_VALUE}
+        clearable={false}
+        onValueChange={(nextValue) => nextValue && handleDepartmentChange(nextValue)}
+        placeholder={getDepartmentFilterLabel(departments, filters.department)}
+        searchPlaceholder="Search departments…"
+        emptyMessage="No departments found."
+      />
 
-      <Select value={filters.location ?? ALL_FILTER_VALUE} onValueChange={handleLocationChange}>
-        <SelectTrigger className={FILTER_TRIGGER_CLASS_NAME} aria-label="Location">
-          <span className="truncate">{getLocationFilterLabel(filters.location)}</span>
-        </SelectTrigger>
-        <SelectContent position="popper" align="start">
-          <SelectItem value={ALL_FILTER_VALUE}>All locations</SelectItem>
-          {locations.map((location) => (
-            <SelectItem key={location.name} value={location.name}>
-              {location.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Combobox
+        size="lg"
+        ariaLabel="Location"
+        options={[
+          { value: ALL_FILTER_VALUE, label: 'All locations' },
+          ...locations.map((location) => ({ value: location.name, label: location.name })),
+        ]}
+        value={filters.location ?? ALL_FILTER_VALUE}
+        clearable={false}
+        onValueChange={(nextValue) => nextValue && handleLocationChange(nextValue)}
+        placeholder={getLocationFilterLabel(filters.location)}
+        searchPlaceholder="Search locations…"
+        emptyMessage="No locations found."
+      />
 
       <Select value={filters.locationType ?? ALL_FILTER_VALUE} onValueChange={handleLocationTypeChange}>
         <SelectTrigger className={FILTER_TRIGGER_CLASS_NAME} aria-label="Location type">

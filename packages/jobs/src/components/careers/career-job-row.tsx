@@ -25,7 +25,7 @@ export const CareerJobRow = memo(function CareerJobRow({ job, isLast }: CareerJo
     <Link
       to={job.canonicalUrl}
       className={cn(
-        'group block min-h-30 border-b border-border px-4 py-4 transition-colors duration-150 hover:bg-muted sm:px-5',
+        'group block min-h-30 border-b border-separator px-4 py-4 transition-colors duration-150 hover:bg-muted sm:px-5',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
         { 'border-b-0': isLast },
       )}

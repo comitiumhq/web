@@ -16,6 +16,7 @@ import {
   AttachmentTitle,
 } from '@comitium/ui/attachment';
 import { Badge } from '@comitium/ui/badge';
+import { ExpandableContent, ExpandableText } from '@comitium/ui/expandable-content';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { DownloadIcon, LockIcon, PaperclipIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { format } from 'date-fns';
@@ -43,6 +44,7 @@ export interface FormDisplayProps {
   onDownloadAttachment?: DownloadAttachment;
   downloadingQuestionId?: string | null;
   formattableTextDisplay?: ComponentType<FormattableTextDisplayProps>;
+  longAnswerPreviewLines?: number;
 }
 
 export function FormDisplay({
@@ -54,6 +56,7 @@ export function FormDisplay({
   onDownloadAttachment,
   downloadingQuestionId,
   formattableTextDisplay,
+  longAnswerPreviewLines,
 }: FormDisplayProps) {
   const sections = snapshot.sections
     .map((section) => ({
@@ -82,6 +85,7 @@ export function FormDisplay({
                   onDownloadAttachment={onDownloadAttachment}
                   isDownloading={downloadingQuestionId === q.id}
                   formattableTextDisplay={formattableTextDisplay}
+                  longAnswerPreviewLines={longAnswerPreviewLines}
                 />
               );
             })}
@@ -100,6 +104,7 @@ interface AnswerRowProps {
   onDownloadAttachment?: DownloadAttachment;
   isDownloading?: boolean;
   formattableTextDisplay?: ComponentType<FormattableTextDisplayProps>;
+  longAnswerPreviewLines?: number;
 }
 
 function AnswerRow({
@@ -110,6 +115,7 @@ function AnswerRow({
   onDownloadAttachment,
   isDownloading,
   formattableTextDisplay,
+  longAnswerPreviewLines,
 }: AnswerRowProps) {
   return (
     <div className="flex flex-col gap-1">
@@ -139,6 +145,7 @@ function AnswerRow({
           onDownloadAttachment={onDownloadAttachment}
           isDownloading={isDownloading}
           formattableTextDisplay={formattableTextDisplay}
+          longAnswerPreviewLines={longAnswerPreviewLines}
         />
       </div>
     </div>
@@ -153,6 +160,7 @@ function AnswerValue({
   onDownloadAttachment,
   isDownloading,
   formattableTextDisplay,
+  longAnswerPreviewLines,
 }: AnswerRowProps) {
   if (question.questionType === 'file') {
     return (
@@ -224,7 +232,14 @@ function AnswerValue({
       return (
         <div className="space-y-1.5">
           <Badge variant="secondary">{scoreAnswer.data.score} / 5</Badge>
-          {scoreAnswer.data.comment && <p className="whitespace-pre-wrap">{scoreAnswer.data.comment}</p>}
+          {scoreAnswer.data.comment &&
+            (longAnswerPreviewLines ? (
+              <ExpandableText collapsedLines={longAnswerPreviewLines} contentClassName="whitespace-pre-wrap">
+                {scoreAnswer.data.comment}
+              </ExpandableText>
+            ) : (
+              <p className="whitespace-pre-wrap">{scoreAnswer.data.comment}</p>
+            ))}
         </div>
       );
     }
@@ -242,14 +257,35 @@ function AnswerValue({
     case 'currency':
       return <span>{formatCurrencyAnswer(value)}</span>;
 
+    case 'long_unformatted':
+      return longAnswerPreviewLines ? (
+        <ExpandableText collapsedLines={longAnswerPreviewLines} contentClassName="whitespace-pre-wrap">
+          {String(value)}
+        </ExpandableText>
+      ) : (
+        <span className="whitespace-pre-wrap">{String(value)}</span>
+      );
+
     case 'long_formattable': {
       const FormattableTextDisplay = formattableTextDisplay;
 
       if (!FormattableTextDisplay) {
-        return <span className="whitespace-pre-wrap">{String(value)}</span>;
+        return longAnswerPreviewLines ? (
+          <ExpandableText collapsedLines={longAnswerPreviewLines} contentClassName="whitespace-pre-wrap">
+            {String(value)}
+          </ExpandableText>
+        ) : (
+          <span className="whitespace-pre-wrap">{String(value)}</span>
+        );
       }
 
-      return <FormattableTextDisplay value={String(value)} />;
+      const display = <FormattableTextDisplay value={String(value)} />;
+
+      return longAnswerPreviewLines ? (
+        <ExpandableContent collapsedLines={longAnswerPreviewLines}>{display}</ExpandableContent>
+      ) : (
+        display
+      );
     }
 
     default:

@@ -160,9 +160,12 @@ const orgJobListItemSchema = z.object({
   location: z.array(locationEntrySchema).nullable(),
   category: z.string().nullable(),
   employmentType: z.string().nullable(),
+  interviewPlanId: uuidSchema.nullable().default(null),
+  interviewPlanName: z.string().nullable().default(null),
   stake: z.string().nullable(),
   status: jobStatusSchema,
   createdAt: z.string(),
+  updatedAt: z.string(),
   candidateCount: z.number(),
   hiringTeam: hiringTeamSummarySchema,
 });
@@ -208,8 +211,13 @@ const jobDraftListItemSchema = z.object({
   location: z.array(locationEntrySchema).nullable(),
   category: z.string().nullable(),
   employmentType: z.string().nullable(),
+  interviewPlanId: uuidSchema.nullable().default(null),
+  interviewPlanName: z.string().nullable().default(null),
+  postingStatus: jobPostingStatusSchema.nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  candidateCount: z.number(),
+  hiringTeam: hiringTeamSummarySchema,
 });
 
 export type JobDraftListItem = z.infer<typeof jobDraftListItemSchema>;

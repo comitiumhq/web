@@ -42,11 +42,11 @@ export function AccountSettingsPage({ zkIdentityApi, zkIdentityQueryKey }: Accou
             </header>
 
             {section === 'authentication' ? (
-              <Card size="sm">
+              <Card size="sm" className="gap-2">
                 <CardHeader>
                   <CardTitle>Sign-in methods</CardTitle>
                 </CardHeader>
-                <CardContent className="divide-y divide-border p-0">
+                <CardContent className="divide-y divide-separator p-0">
                   <EmailSignInMethod email={methods.email} refreshUser={refreshUser} />
                   <GoogleSignInMethod methods={methods} refreshUser={refreshUser} />
                   <PasskeySignInMethod passkeyCount={methods.passkeys.length} refreshUser={refreshUser} />
@@ -73,7 +73,7 @@ function AccountSidebar({
     <aside className="min-w-0 lg:sticky lg:top-6 lg:self-start">
       <h1 className="text-heading-20">Account</h1>
 
-      <nav aria-label="Account" className="mt-4">
+      <nav aria-label="Account" className="mt-7">
         <Button
           type="button"
           variant="ghost"

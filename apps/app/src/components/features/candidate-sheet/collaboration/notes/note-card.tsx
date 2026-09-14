@@ -3,6 +3,7 @@ import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
+import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { LockIcon, XIcon } from '@phosphor-icons/react';
 import { memo, useCallback, useState } from 'react';
@@ -24,6 +25,7 @@ interface NoteCardProps {
   isOwnNote?: boolean;
   onDelete?: (noteId: string) => void;
   isDeleting?: boolean;
+  previewLines?: number;
 }
 
 export const NoteCard = memo(function NoteCard({
@@ -39,6 +41,7 @@ export const NoteCard = memo(function NoteCard({
   isOwnNote,
   onDelete,
   isDeleting,
+  previewLines = 6,
 }: NoteCardProps) {
   const actorName = getActorDisplayName(authorName);
 
@@ -90,6 +93,7 @@ export const NoteCard = memo(function NoteCard({
           decryptedContent={decryptedContent}
           isDecrypting={isDecrypting}
           decryptionError={decryptionError}
+          previewLines={previewLines}
         />
       </div>
 
@@ -112,13 +116,16 @@ interface NoteBodyProps {
   decryptedContent?: TipTapDoc;
   isDecrypting: boolean;
   decryptionError: boolean;
+  previewLines: number;
 }
 
-function NoteBody({ orgId, decryptedContent, isDecrypting, decryptionError }: NoteBodyProps) {
+function NoteBody({ orgId, decryptedContent, isDecrypting, decryptionError, previewLines }: NoteBodyProps) {
   if (decryptedContent) {
     return (
       <div className="text-copy-13">
-        <RichTextEditor content={decryptedContent} readOnly />
+        <ExpandableContent collapsedLines={previewLines}>
+          <RichTextEditor content={decryptedContent} readOnly />
+        </ExpandableContent>
       </div>
     );
   }

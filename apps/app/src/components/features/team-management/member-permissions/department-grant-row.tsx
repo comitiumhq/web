@@ -168,7 +168,7 @@ export const DepartmentGrantRow = memo(function DepartmentGrantRow({
                     >
                       Edit Access
                     </Button>
-                    <div className="-mx-1 h-px bg-border/50" />
+                    <div className="-mx-1 h-px bg-separator" />
                     <Button
                       type="button"
                       variant="ghost"

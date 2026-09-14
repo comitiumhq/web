@@ -21,8 +21,8 @@ export function ArchiveReasonsSettingsList({ orgId }: ArchiveReasonsSettingsList
       <EntitySettingsPage
         title="Archive Reasons"
         tab={state.tab}
-        activeCount={state.activeRows.length}
-        archivedCount={state.archivedRows.length}
+        activeCount={isLoading ? null : state.activeRows.length}
+        archivedCount={isLoading ? null : state.archivedRows.length}
         isError={Boolean(error)}
         errorDescription="We couldn't load reasons. Please try again."
         onTabChange={state.handleTabChange}

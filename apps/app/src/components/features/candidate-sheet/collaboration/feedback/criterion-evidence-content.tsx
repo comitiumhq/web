@@ -14,7 +14,7 @@ export function CriterionEvidenceContent({ evidenceState, orgId }: CriterionEvid
 
   if (!isUnlocked) {
     return (
-      <div className="border-t border-border bg-muted/30 px-4 py-3">
+      <div className="border-t border-separator bg-muted/30 px-4 py-3">
         <EncryptedPlaceholder orgId={orgId} variant="block" withBorder={false} lines={2} />
       </div>
     );
@@ -26,14 +26,14 @@ export function CriterionEvidenceContent({ evidenceState, orgId }: CriterionEvid
 
   if (evidenceState.status === 'error') {
     return (
-      <p className="border-t border-border bg-muted/30 px-4 py-3 text-label-12 text-destructive">
+      <p className="border-t border-separator bg-muted/30 px-4 py-3 text-label-12 text-destructive">
         Evidence could not be decrypted.
       </p>
     );
   }
 
   return (
-    <div className="space-y-3 border-t border-border bg-muted/30 px-4 py-3">
+    <div className="space-y-3 border-t border-separator bg-muted/30 px-4 py-3">
       <p className="text-label-12 leading-relaxed text-foreground">{evidenceState.evidence.rationale}</p>
       {evidenceState.evidence.citations.length > 0 && (
         <ul className="space-y-2">
@@ -50,7 +50,7 @@ export function CriterionEvidenceContent({ evidenceState, orgId }: CriterionEvid
 
 function CriterionEvidenceSkeleton() {
   return (
-    <div className="space-y-2 border-t border-border bg-muted/30 px-4 py-3">
+    <div className="space-y-2 border-t border-separator bg-muted/30 px-4 py-3">
       <Skeleton className="h-3 w-full" />
       <Skeleton className="h-3 w-4/5" />
       <Skeleton className="mt-3 h-8 w-full" />

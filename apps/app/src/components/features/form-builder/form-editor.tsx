@@ -373,7 +373,7 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
         </div>
       </div>
 
-      <div className="border-t border-border px-6 py-4 shrink-0 flex flex-row justify-end gap-2">
+      <div className="border-t border-separator px-6 py-4 shrink-0 flex flex-row justify-end gap-2">
         <Button type="button" variant="outline" onClick={handleClose} disabled={isSaving}>
           Cancel
         </Button>

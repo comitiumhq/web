@@ -17,6 +17,19 @@ export interface InterviewerAvailability {
 
 export type AvailabilityIndex = ReadonlyMap<string, InterviewerAvailability>;
 
+export function hasCompleteInterviewerAvailability(
+  interviewers: readonly InterviewerBusy[] | undefined,
+  interviewerIds: readonly string[],
+): boolean {
+  if (!interviewers) {
+    return false;
+  }
+
+  const returnedInterviewerIds = new Set(interviewers.map((interviewer) => interviewer.userId));
+
+  return interviewerIds.every((interviewerId) => returnedInterviewerIds.has(interviewerId));
+}
+
 function toTimeRange(range: { start: string; end: string }): TimeRange {
   return {
     start: parseISO(range.start),
@@ -25,9 +38,11 @@ function toTimeRange(range: { start: string; end: string }): TimeRange {
 }
 
 function toBusyRange(range: { start: string; end: string; title?: string | null }): BusyRange {
+  const title = range.title?.trim() || null;
+
   return {
     ...toTimeRange(range),
-    title: range.title ?? null,
+    title,
   };
 }
 

@@ -24,7 +24,7 @@ export function ScheduleSummary({
   const selectedTimeLabel = selectedSlot ? formatScheduleSlotRange(selectedSlot, timeZone) : null;
 
   return (
-    <aside className="flex min-w-0 flex-col gap-6 p-5 sm:p-6 md:row-span-2 md:min-h-[540px] md:border-r md:border-border/70 xl:row-span-1">
+    <aside className="flex min-w-0 flex-col gap-6 p-5 sm:p-6 md:row-span-2 md:min-h-[540px] md:border-r md:border-separator xl:row-span-1">
       <div className="flex items-start gap-3">
         <CompanyAvatar name={state.organization.name} logo={state.organization.logoUrl} className="size-11" />
         <div className="min-w-0">
@@ -38,7 +38,7 @@ export function ScheduleSummary({
         <p className="mt-1 text-label-14 font-medium text-foreground">{state.interview.title}</p>
       </div>
 
-      <div className="space-y-3 border-t border-border/70 pt-5">
+      <div className="space-y-3 border-t border-separator pt-5">
         {selectedTimeLabel && <SummaryMetric icon={CalendarIcon} label={selectedTimeLabel} />}
         <SummaryMetric icon={ClockIcon} label={`${state.interview.durationMinutes} minutes`} />
         <SummaryMetric icon={UsersIcon} label={`${state.interview.interviewerCount} ${interviewerLabel}`} />

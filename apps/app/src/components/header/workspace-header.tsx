@@ -10,8 +10,7 @@ import { UserMenu } from '../user/user-menu';
 import { getVisibleOrgHeaderNavItems } from './nav-items';
 import { WorkspaceNav } from './workspace-nav';
 
-const appHeaderClassName =
-  'fixed top-0 left-0 z-40 w-full border-b border-border bg-background/80 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/65';
+const appHeaderClassName = 'fixed top-0 left-0 z-40 w-full border-b border-separator bg-background px-4';
 
 export const WorkspaceHeader = () => {
   const params = useParams({ strict: false }) as { orgId?: string };

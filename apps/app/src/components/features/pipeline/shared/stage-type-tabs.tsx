@@ -71,15 +71,13 @@ const StageTypeTabTrigger = memo(function StageTypeTabTrigger({ tab, label, coun
     <TabsTrigger
       value={tab}
       aria-label={`${label} ${count}`}
-      className="group h-9 flex-none items-center rounded-3xl px-3.5 dark:data-active:border-transparent dark:data-active:bg-secondary"
+      className="group h-9 flex-none items-center rounded-3xl px-3.5"
     >
       <span className="flex items-baseline gap-1.5">
-        <span className="text-label-13 font-semibold leading-none tabular-nums text-muted-foreground group-data-[state=active]:text-foreground/70">
+        <span className="text-label-13 font-medium leading-none text-muted-foreground tabular-nums transition-colors duration-200 ease-out group-hover:text-foreground/70 group-data-[state=active]:text-foreground/70 motion-reduce:transition-none">
           {count}
         </span>
-        <span className="text-button-14 leading-none text-muted-foreground group-data-[state=active]:text-foreground">
-          {label}
-        </span>
+        <span className="text-label-14 leading-none">{label}</span>
       </span>
     </TabsTrigger>
   );
@@ -97,7 +95,10 @@ export const ArchivedPipelineButton = memo(function ArchivedPipelineButton({
       size="default"
       aria-pressed={active}
       aria-label={`Archived ${count}`}
-      className={cn('h-11 gap-2 rounded-4xl px-4 text-button-14', active && 'bg-background dark:bg-secondary')}
+      className={cn(
+        'h-11 gap-2 rounded-4xl px-4 text-button-14',
+        active && 'bg-segment shadow-[var(--segment-shadow)]',
+      )}
       onClick={onClick}
     >
       <ArchiveIcon data-icon="inline-start" />

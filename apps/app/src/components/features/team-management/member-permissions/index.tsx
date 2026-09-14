@@ -29,7 +29,7 @@ interface MemberPermissionsSheetProps {
 export function MemberPermissionsSheet({ org, userId, currentTreasury, onOpenChange }: MemberPermissionsSheetProps) {
   return (
     <Sheet open={userId !== null} onOpenChange={onOpenChange}>
-      <FeatureSheetContent width="fixed-640">
+      <FeatureSheetContent size="form">
         {userId !== null && <MemberPermissionsContent org={org} userId={userId} currentTreasury={currentTreasury} />}
       </FeatureSheetContent>
     </Sheet>
@@ -195,7 +195,7 @@ function MemberOverviewTab({ member }: MemberOverviewTabProps) {
   return (
     <div className="flex flex-col gap-6">
       <SectionCard title="Info" contentClassName="pt-3">
-        <dl className="divide-y divide-border">
+        <dl className="divide-y divide-separator">
           <OverviewField label="Name" value={name.value} muted={name.muted} />
           <OverviewField label="Email" value={email.value} muted={email.muted} />
           <OverviewField label="Job Title" value={jobTitle.value} muted={jobTitle.muted} />
@@ -204,7 +204,7 @@ function MemberOverviewTab({ member }: MemberOverviewTabProps) {
       </SectionCard>
 
       <SectionCard title="Account" contentClassName="pt-3">
-        <dl className="divide-y divide-border">
+        <dl className="divide-y divide-separator">
           <OverviewField label="Organization Role" value={ORG_ROLE_LABELS[member.role]} />
           <OverviewField label="Status" value={<Badge variant={statusVariant}>{statusLabel}</Badge>} />
         </dl>

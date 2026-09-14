@@ -46,7 +46,7 @@ export function ActivitiesCard({
     <HomeCard>
       <HomeCardHeader>
         <CardTitle className="flex items-center gap-2">
-          Needs your attention
+          Activities
           {isLoading ? (
             <Skeleton className="h-5 w-10 rounded-4xl" />
           ) : (

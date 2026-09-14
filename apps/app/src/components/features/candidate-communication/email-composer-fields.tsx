@@ -1,6 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { Label } from '@comitium/ui/label';
-import { SearchSelect, type SearchSelectOption } from '@comitium/ui/search-select';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { InfoIcon } from '@phosphor-icons/react';
@@ -9,7 +9,7 @@ import { EditorToolbar } from '@/components/tiptap-ui/editor-toolbars';
 import { RichTextEditor, type RichTextEditorHandle } from '@/components/tiptap-ui/rich-text-editor';
 
 interface EmailTemplateFieldProps {
-  options: SearchSelectOption[];
+  options: ComboboxOption[];
   value: string | null;
   onValueChange: (value: string | null) => void;
   placeholder: string;
@@ -39,7 +39,7 @@ export function EmailTemplateField({
       {loading ? (
         <Skeleton className="h-9 w-full rounded-4xl" />
       ) : (
-        <SearchSelect
+        <Combobox
           ariaLabel={label}
           options={options}
           value={value}
@@ -47,6 +47,7 @@ export function EmailTemplateField({
           placeholder={placeholder}
           searchPlaceholder="Search templates..."
           emptyMessage={emptyMessage}
+          clearLabel="Clear template"
           disabled={disabled}
           portalContainerRef={portalContainerRef}
         />
@@ -104,7 +105,7 @@ function EmailMessageHelp({ text }: { text: string }) {
 
 export function EmailDeliverySummary({ sender, recipient }: { sender: string; recipient: string }) {
   return (
-    <div className="divide-y divide-border rounded-xl border border-border bg-card">
+    <div className="divide-y divide-separator rounded-xl border border-border bg-card bg-clip-padding">
       <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-4 px-4 py-3">
         <span className="text-muted-foreground">From</span>
         <span className="min-w-0 truncate">{sender}</span>

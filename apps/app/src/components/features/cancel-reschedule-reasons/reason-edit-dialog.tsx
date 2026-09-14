@@ -76,7 +76,7 @@ export function ReasonEditorSheet({ orgId, reason, open, onOpenChange }: ReasonE
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent width="lg">
+      <FeatureSheetContent size="compact">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">{title}</SheetTitle>
           <SheetDescription>Shown when canceling or rescheduling an interview.</SheetDescription>

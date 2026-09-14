@@ -6,6 +6,7 @@ import {
   SALARY_PERIODS,
 } from '@comitium/schemas/job-enums';
 import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
+import { Combobox } from '@comitium/ui/combobox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@comitium/ui/input-group';
@@ -117,22 +118,18 @@ export function DraftDetailsTab({
                     <FormLabel className="gap-1">
                       Team <RequiredMarker show={showPublishRequiredMarkers} />
                     </FormLabel>
-                    <Select onValueChange={handleDepartmentChange} value={field.value ?? ''}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select team" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          {departmentOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Combobox
+                        ariaLabel="Team"
+                        options={departmentOptions}
+                        value={field.value ?? null}
+                        clearable={false}
+                        onValueChange={(nextValue) => nextValue && handleDepartmentChange(nextValue)}
+                        placeholder="Select team"
+                        searchPlaceholder="Search teams…"
+                        emptyMessage="No teams found."
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -146,22 +143,18 @@ export function DraftDetailsTab({
                     <FormLabel className="gap-1">
                       Location <RequiredMarker show={showPublishRequiredMarkers} />
                     </FormLabel>
-                    <Select onValueChange={handleLocationChange} value={field.value ?? ''}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select location" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          {locationOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Combobox
+                        ariaLabel="Location"
+                        options={locationOptions}
+                        value={field.value ?? null}
+                        clearable={false}
+                        onValueChange={(nextValue) => nextValue && handleLocationChange(nextValue)}
+                        placeholder="Select location"
+                        searchPlaceholder="Search locations…"
+                        emptyMessage="No locations found."
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -194,7 +187,7 @@ export function DraftDetailsTab({
                     value={field.value ?? ''}
                     onValueChange={handleEmploymentTypeChange}
                     variant="outline"
-                    className="w-fit"
+                    className="w-full flex-wrap sm:w-fit"
                   >
                     {EMPLOYMENT_TYPES.map((option) => (
                       <ToggleGroupItem key={option.value} value={option.value} className="px-4">
@@ -217,40 +210,43 @@ export function DraftDetailsTab({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap items-start gap-x-2 gap-y-3">
-            <AmountField
-              control={control}
-              name="compensationMin"
-              ariaLabel="Minimum compensation"
-              placeholder="50,000"
-              currencySymbol={currencySymbol}
-            />
-            <RangeConnector>to</RangeConnector>
-            <AmountField
-              control={control}
-              name="compensationMax"
-              ariaLabel="Maximum compensation"
-              placeholder="80,000"
-              currencySymbol={currencySymbol}
-            />
-            <CompactSelectField
-              control={control}
-              name="compensationCurrency"
-              ariaLabel="Currency"
-              placeholder="USD ($)"
-              options={COMPENSATION_CURRENCIES}
-              displayOptions={CURRENCIES}
-              className="w-32"
-            />
-            <RangeConnector>per</RangeConnector>
-            <CompactSelectField
-              control={control}
-              name="compensationPeriod"
-              ariaLabel="Period"
-              placeholder="Year"
-              options={SALARY_PERIODS}
-              className="w-28"
-            />
+          <div className="flex flex-wrap items-start gap-3">
+            <div className="grid min-w-0 flex-1 basis-72 grid-cols-[minmax(7rem,1fr)_auto_minmax(7rem,1fr)] items-start gap-2">
+              <AmountField
+                control={control}
+                name="compensationMin"
+                ariaLabel="Minimum compensation"
+                placeholder="50,000"
+                currencySymbol={currencySymbol}
+              />
+              <RangeConnector>to</RangeConnector>
+              <AmountField
+                control={control}
+                name="compensationMax"
+                ariaLabel="Maximum compensation"
+                placeholder="80,000"
+                currencySymbol={currencySymbol}
+              />
+            </div>
+            <div className="grid min-w-0 flex-1 basis-64 grid-cols-[minmax(8rem,1fr)_auto_minmax(7rem,0.8fr)] items-start gap-2">
+              <CompactSelectField
+                control={control}
+                name="compensationCurrency"
+                ariaLabel="Currency"
+                placeholder="USD ($)"
+                options={COMPENSATION_CURRENCIES}
+                displayOptions={CURRENCIES}
+                searchable
+              />
+              <RangeConnector>per</RangeConnector>
+              <CompactSelectField
+                control={control}
+                name="compensationPeriod"
+                ariaLabel="Period"
+                placeholder="Year"
+                options={SALARY_PERIODS}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -303,7 +299,7 @@ function AmountField({ control, name, ariaLabel, placeholder, currencySymbol }: 
         };
 
         return (
-          <FormItem className="w-36">
+          <FormItem className="min-w-0">
             <FormControl>
               <InputGroup>
                 <InputGroupAddon align="inline-start">{currencySymbol}</InputGroupAddon>
@@ -346,22 +342,17 @@ function SelectField({ control, name, label, placeholder, options, required }: S
             {label}
             <RequiredMarker show={required ?? false} />
           </FormLabel>
-          <Select onValueChange={field.onChange} value={field.value ?? ''}>
-            <FormControl>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectGroup>
-                {options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <FormControl>
+            <Combobox
+              ariaLabel={label}
+              options={[...options]}
+              value={field.value ?? null}
+              onValueChange={field.onChange}
+              placeholder={placeholder}
+              searchPlaceholder={`Search ${label.toLowerCase()}…`}
+              emptyMessage={`No ${label.toLowerCase()} options found.`}
+            />
+          </FormControl>
           <FormMessage />
         </FormItem>
       )}
@@ -376,6 +367,7 @@ interface CompactSelectFieldProps {
   placeholder: string;
   options: readonly { value: string; label: string }[];
   displayOptions?: readonly { value: string; label: string }[];
+  searchable?: boolean;
   className?: string;
 }
 
@@ -386,6 +378,7 @@ function CompactSelectField({
   placeholder,
   options,
   displayOptions = options,
+  searchable = false,
   className,
 }: CompactSelectFieldProps) {
   return (
@@ -394,25 +387,43 @@ function CompactSelectField({
       name={name}
       render={({ field }) => {
         const selectedLabel = displayOptions.find((option) => option.value === field.value)?.label;
+        const searchableOptions = options.map((option) => ({
+          value: option.value,
+          label: displayOptions.find((displayOption) => displayOption.value === option.value)?.label ?? option.label,
+        }));
 
         return (
           <FormItem className={className}>
-            <Select onValueChange={field.onChange} value={field.value ?? ''}>
+            {searchable ? (
               <FormControl>
-                <SelectTrigger className="w-full" aria-label={ariaLabel}>
-                  <SelectValue placeholder={placeholder}>{selectedLabel}</SelectValue>
-                </SelectTrigger>
+                <Combobox
+                  ariaLabel={ariaLabel}
+                  options={searchableOptions}
+                  value={field.value ?? null}
+                  onValueChange={field.onChange}
+                  placeholder={placeholder}
+                  searchPlaceholder={`Search ${ariaLabel.toLowerCase()}…`}
+                  emptyMessage={`No ${ariaLabel.toLowerCase()} options found.`}
+                />
               </FormControl>
-              <SelectContent>
-                <SelectGroup>
-                  {options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            ) : (
+              <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                <FormControl>
+                  <SelectTrigger className="w-full" aria-label={ariaLabel}>
+                    <SelectValue placeholder={placeholder}>{selectedLabel}</SelectValue>
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectGroup>
+                    {options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
             <FormMessage />
           </FormItem>
         );

@@ -1,7 +1,8 @@
 import { Badge } from '@comitium/ui/badge';
 import { EmptyState } from '@comitium/ui/empty-state';
+import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { CheckIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { WarningCircleIcon } from '@phosphor-icons/react';
 import { memo, type ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { useQueryInterviewPlan } from '@/hooks/queries/use-query-interview-plan';
 import { useQueryInterviewPlans } from '@/hooks/queries/use-query-interview-plans';
@@ -122,31 +123,23 @@ const TemplateOption = memo(function TemplateOption({
       type="button"
       onClick={handleClick}
       aria-pressed={isSelected}
-      className={cn('w-full cursor-pointer rounded-xl border px-4 py-3 text-left transition-colors', {
-        'border-border hover:bg-accent': !isSelected,
-        'border-primary bg-primary/5': isSelected,
-      })}
+      className={cn(
+        selectionCardVariants({ selected: isSelected }),
+        'w-full cursor-pointer px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+      )}
     >
       <span className="flex w-full items-start gap-4">
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
             <span className="text-label-14 font-medium">{name}</span>
-            {isDefault ? <Badge variant="secondary">Default</Badge> : null}
+            {isDefault ? <Badge variant="subtle">Default</Badge> : null}
           </span>
           <span className="mt-0.5 block text-label-12 text-muted-foreground">
             {stageCount} {stageCount === 1 ? 'stage' : 'stages'}
           </span>
         </span>
 
-        <span
-          className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors', {
-            'border-muted-foreground/30': !isSelected,
-            'border-primary bg-primary text-primary-foreground': isSelected,
-          })}
-          aria-hidden="true"
-        >
-          {isSelected ? <CheckIcon className="size-3" /> : null}
-        </span>
+        <SelectionCardIndicator selected={isSelected} />
       </span>
 
       {isSelected ? <PlanStagePreview stages={stages} isLoading={isPreviewLoading} /> : null}

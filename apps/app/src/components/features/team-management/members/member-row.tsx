@@ -217,7 +217,7 @@ function AccessDetails({ title, count, children }: AccessDetailsProps) {
         <h3 className="text-label-12 font-medium text-muted-foreground">{title}</h3>
         <span className="text-label-12 font-semibold text-muted-foreground tabular-nums">{count}</span>
       </div>
-      <div className="divide-y divide-border">{children}</div>
+      <div className="divide-y divide-separator">{children}</div>
     </section>
   );
 }

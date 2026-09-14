@@ -1,16 +1,7 @@
+import { Combobox } from '@comitium/ui/combobox';
 import { Label } from '@comitium/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from '@comitium/ui/select';
 import { Textarea } from '@comitium/ui/textarea';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { CATEGORY_ORDER, NOTE_MAX_LENGTH } from './constants';
 import { REASON_CATEGORY_LABELS } from './labels';
@@ -44,52 +35,35 @@ function ReasonSelectField({ state, disabled, id }: ReasonSelectFieldProps) {
   const placeholder = state.isLoading ? 'Loading…' : 'Select a reason';
   const labelText = state.reasonRequired ? 'Reason' : 'Reason (optional)';
 
-  const visibleCategories = CATEGORY_ORDER.filter((c) => state.groupedReasons[c].length > 0);
+  const options = useMemo(
+    () =>
+      CATEGORY_ORDER.flatMap((category) =>
+        state.groupedReasons[category].map((reason) => ({
+          value: reason.id,
+          label: reason.label,
+          group: REASON_CATEGORY_LABELS[category],
+        })),
+      ),
+    [state.groupedReasons],
+  );
 
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{labelText}</Label>
-      <Select value={state.reasonId} onValueChange={state.setReasonId} disabled={disabled}>
-        <SelectTrigger id={id} aria-invalid={state.reasonError} className="w-full">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent className="min-w-[var(--radix-select-trigger-width)]">
-          {visibleCategories.map((category, index) => (
-            <ReasonCategoryGroup
-              key={category}
-              category={category}
-              reasons={state.groupedReasons[category]}
-              showSeparator={index > 0}
-            />
-          ))}
-        </SelectContent>
-      </Select>
+      <Combobox
+        id={id}
+        ariaLabel={labelText}
+        aria-invalid={state.reasonError}
+        options={options}
+        value={state.reasonId || null}
+        onValueChange={(nextValue) => state.setReasonId(nextValue ?? '')}
+        placeholder={placeholder}
+        searchPlaceholder="Search reasons…"
+        emptyMessage="No matching reasons found."
+        disabled={disabled}
+      />
       {state.reasonError && <p className="text-label-12 text-destructive">Please select a reason</p>}
     </div>
-  );
-}
-
-interface ReasonCategoryGroupProps {
-  category: keyof typeof REASON_CATEGORY_LABELS;
-  reasons: { id: string; label: string }[];
-  showSeparator: boolean;
-}
-
-function ReasonCategoryGroup({ category, reasons, showSeparator }: ReasonCategoryGroupProps) {
-  return (
-    <>
-      {showSeparator && <SelectSeparator />}
-      <SelectGroup>
-        <SelectLabel className="text-label-11 font-semibold uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-1">
-          {REASON_CATEGORY_LABELS[category]}
-        </SelectLabel>
-        {reasons.map((r) => (
-          <SelectItem key={r.id} value={r.id} className="pl-2">
-            {r.label}
-          </SelectItem>
-        ))}
-      </SelectGroup>
-    </>
   );
 }
 

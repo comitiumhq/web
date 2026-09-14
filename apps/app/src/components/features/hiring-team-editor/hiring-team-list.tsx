@@ -42,7 +42,7 @@ export function HiringTeamList({
 }: HiringTeamListProps) {
   if (isLoading) {
     return (
-      <div className="overflow-hidden rounded-2xl ring-1 ring-foreground/10">
+      <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
         {SKELETON_ROWS.map((key, index) => (
           <HiringTeamRowSkeleton key={key} divided={index > 0} />
         ))}
@@ -67,7 +67,7 @@ export function HiringTeamList({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl ring-1 ring-foreground/10">
+    <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
       {members.map((member, index) => (
         <HiringTeamRow
           key={member.userId}
@@ -124,7 +124,7 @@ const HiringTeamRow = memo(function HiringTeamRow({
   const editableRole = canEditRole && (member.role === 'hiring_member' || member.role === 'hiring_manager');
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 ${divided ? 'border-t border-border' : ''}`}>
+    <div className={`flex items-center gap-3 px-4 py-3 ${divided ? 'border-t border-separator' : ''}`}>
       <MemberAvatar identity={member} size="md" />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-label-14 font-medium">{displayName}</span>
@@ -156,8 +156,9 @@ const HiringTeamRow = memo(function HiringTeamRow({
           aria-label={`Remove ${displayName}`}
           onClick={handleRemoveRequest}
           disabled={isRemoving}
+          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive-text"
         >
-          <XIcon className="text-muted-foreground" />
+          <XIcon />
         </Button>
       ) : null}
 
@@ -179,7 +180,7 @@ const HiringTeamRow = memo(function HiringTeamRow({
 
 function HiringTeamRowSkeleton({ divided }: { divided: boolean }) {
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 ${divided ? 'border-t border-border' : ''}`}>
+    <div className={`flex items-center gap-3 px-4 py-3 ${divided ? 'border-t border-separator' : ''}`}>
       <Skeleton className="size-8 rounded-full" />
       <div className="flex flex-1 flex-col gap-1.5">
         <Skeleton className="h-3.5 w-40" />

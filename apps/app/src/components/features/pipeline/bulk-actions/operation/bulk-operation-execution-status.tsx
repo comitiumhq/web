@@ -48,7 +48,7 @@ function OperationProgress({ operation }: { operation: BulkOperation }) {
   const progress = total === 0 ? 0 : (finished / total) * 100;
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+    <div className="space-y-3 rounded-xl border border-border bg-card bg-clip-padding p-4">
       <div className="flex items-center justify-between gap-3 text-sm">
         <div>
           <p className="font-medium">Processing on the server</p>

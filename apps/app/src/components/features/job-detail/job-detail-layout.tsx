@@ -1,5 +1,6 @@
 import type { JobSummary } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
+import { Skeleton } from '@comitium/ui/skeleton';
 import type { Icon } from '@phosphor-icons/react';
 import { ArrowLeftIcon, KanbanIcon } from '@phosphor-icons/react';
 import { Link, useLocation } from '@tanstack/react-router';
@@ -20,39 +21,55 @@ interface JobDetailLayoutProps {
   job: JobSummary | null;
   actions?: ReactNode;
   draftStepStatuses?: StepStatus[];
+  showNavigationSkeleton?: boolean;
   children: ReactNode;
 }
 
-export function JobDetailLayout({ orgId, jobId, job, actions, draftStepStatuses, children }: JobDetailLayoutProps) {
+export function JobDetailLayout({
+  orgId,
+  jobId,
+  job,
+  actions,
+  draftStepStatuses,
+  showNavigationSkeleton = false,
+  children,
+}: JobDetailLayoutProps) {
   const { pathname } = useLocation();
-  const showNav = job !== null;
+  const showNav = job !== null || showNavigationSkeleton;
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-background">
       <JobDetailHeaderBar orgId={orgId} job={job} actions={actions} />
 
-      {showNav && (
-        <JobNav
-          orgId={orgId}
-          jobId={jobId}
-          job={job}
-          pathname={pathname}
-          orientation="horizontal"
-          draftStepStatuses={draftStepStatuses}
-        />
-      )}
+      {showNav &&
+        (job ? (
+          <JobNav
+            orgId={orgId}
+            jobId={jobId}
+            job={job}
+            pathname={pathname}
+            orientation="horizontal"
+            draftStepStatuses={draftStepStatuses}
+          />
+        ) : (
+          <JobNavSkeleton orientation="horizontal" />
+        ))}
 
       <div className="flex min-h-0 flex-1">
         {showNav && (
-          <aside className="hidden w-56 shrink-0 border-r border-border p-3 md:block">
-            <JobNav
-              orgId={orgId}
-              jobId={jobId}
-              job={job}
-              pathname={pathname}
-              orientation="vertical"
-              draftStepStatuses={draftStepStatuses}
-            />
+          <aside className="hidden w-56 shrink-0 border-r border-separator p-3 md:block">
+            {job ? (
+              <JobNav
+                orgId={orgId}
+                jobId={jobId}
+                job={job}
+                pathname={pathname}
+                orientation="vertical"
+                draftStepStatuses={draftStepStatuses}
+              />
+            ) : (
+              <JobNavSkeleton orientation="vertical" />
+            )}
           </aside>
         )}
 
@@ -65,6 +82,26 @@ export function JobDetailLayout({ orgId, jobId, job, actions, draftStepStatuses,
   );
 }
 
+const JOB_NAV_SKELETON_KEYS = ['nav-1', 'nav-2', 'nav-3', 'nav-4', 'nav-5', 'nav-6'];
+
+function JobNavSkeleton({ orientation }: { orientation: 'vertical' | 'horizontal' }) {
+  const containerClassName =
+    orientation === 'vertical'
+      ? 'flex flex-col gap-1'
+      : 'flex items-center gap-1 overflow-hidden border-b border-separator px-4 py-2 md:hidden';
+
+  return (
+    <div aria-hidden="true" className={containerClassName}>
+      {JOB_NAV_SKELETON_KEYS.map((key) => (
+        <div key={key} className="flex h-9 shrink-0 items-center gap-2.5 px-3">
+          <Skeleton className="size-4 shrink-0 rounded-md" />
+          <Skeleton className="h-3.5 w-24 rounded-md" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 interface JobDetailHeaderBarProps {
   orgId: string;
   job: JobSummary | null;
@@ -73,7 +110,7 @@ interface JobDetailHeaderBarProps {
 
 function JobDetailHeaderBar({ orgId, job, actions }: JobDetailHeaderBarProps) {
   return (
-    <header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-2 sm:px-6">
+    <header className="flex shrink-0 items-center gap-3 border-b border-separator px-4 py-2 sm:px-6">
       <Button asChild variant="ghost" size="icon-sm" className="shrink-0">
         <Link to="/org/$orgId/jobs" params={{ orgId }} search={{ status: 'all' }} aria-label="Back to jobs">
           <ArrowLeftIcon />
@@ -125,7 +162,7 @@ function JobNav({ orgId, jobId, job, pathname, orientation, draftStepStatuses }:
   const containerClassName =
     orientation === 'vertical'
       ? 'flex flex-col gap-1'
-      : 'flex items-center gap-1 overflow-x-auto border-b border-border px-4 py-2 scrollbar-hide md:hidden';
+      : 'flex items-center gap-1 overflow-x-auto border-b border-separator px-4 py-2 scrollbar-hide md:hidden';
 
   return (
     <nav className={containerClassName}>

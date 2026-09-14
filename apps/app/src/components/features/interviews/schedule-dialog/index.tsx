@@ -1,13 +1,16 @@
 import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
 import { Button } from '@comitium/ui/button';
-import { BROWSER_TZ } from '@comitium/ui/date';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
+import { BROWSER_TZ, formatInTimezone } from '@comitium/ui/date';
+import { FeatureSheetContent, FeatureSheetFooter, FeatureSheetHeader } from '@comitium/ui/feature-sheet';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@comitium/ui/sheet';
+import { Separator } from '@comitium/ui/separator';
+import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { CalendarBlankIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { addMinutes, parseISO } from 'date-fns';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { type Control, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useScheduleInterview } from '@/hooks/mutations/use-interview-mutations';
 import { useQueryInterviewTemplates } from '@/hooks/queries/use-query-interview-templates';
@@ -30,6 +33,40 @@ interface ScheduleInterviewDialogProps {
   candidateEmail?: string | null;
   prefillInterviewId?: string | null;
   prefillDefaultInterviewers?: DefaultInterviewer[] | null;
+}
+
+interface InterviewTypePickerProps {
+  control: Control<FormData>;
+  options: readonly ComboboxOption[];
+  onValueChange: (value: string | null) => void;
+}
+
+function InterviewTypePicker({ control, options, onValueChange }: InterviewTypePickerProps) {
+  return (
+    <FormField
+      control={control}
+      name="interviewId"
+      render={({ field }) => (
+        <FormItem className="calendar-interview-type-picker shrink-0 gap-0">
+          <FormLabel className="sr-only">Interview type</FormLabel>
+          <FormControl>
+            <Combobox
+              size="sm"
+              ariaLabel="Interview type"
+              options={options}
+              value={field.value || null}
+              onValueChange={onValueChange}
+              placeholder="Interview type"
+              searchPlaceholder="Search interview types…"
+              emptyMessage="No interview types found."
+              clearLabel="Clear interview type"
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
 }
 
 export function ScheduleInterviewDialog({
@@ -58,6 +95,17 @@ export function ScheduleInterviewDialog({
 
   const selectedInterviewId = useWatch({ control: form.control, name: 'interviewId' });
   const scheduledAt = useWatch({ control: form.control, name: 'scheduledAt' });
+  const durationMinutes = useWatch({ control: form.control, name: 'durationMinutes' });
+  const selectedTimeZone = useWatch({ control: form.control, name: 'timeZone' });
+
+  const interviewTypeOptions = useMemo<ComboboxOption[]>(
+    () =>
+      templates.map((template) => ({
+        value: template.id,
+        label: `${template.title} (${template.durationMinutes} min)`,
+      })),
+    [templates],
+  );
 
   const draftEventTitle = useMemo(() => {
     const template = templates.find((t) => t.id === selectedInterviewId);
@@ -65,9 +113,31 @@ export function ScheduleInterviewDialog({
     return template?.title ?? 'New interview';
   }, [templates, selectedInterviewId]);
 
+  const slotSummary = useMemo(() => {
+    if (!scheduledAt) {
+      return null;
+    }
+
+    const start = parseISO(scheduledAt);
+    const end = addMinutes(start, durationMinutes);
+    const interviewerLabel = interviewers.length === 1 ? 'interviewer' : 'interviewers';
+
+    return {
+      date: formatInTimezone(start, selectedTimeZone, 'EEE, MMM d'),
+      time: `${formatInTimezone(start, selectedTimeZone, 'h:mm')}–${formatInTimezone(end, selectedTimeZone, 'h:mm a')}`,
+      interviewers: `${interviewers.length} ${interviewerLabel}`,
+    };
+  }, [durationMinutes, interviewers.length, scheduledAt, selectedTimeZone]);
+
   const handleTemplateChange = useCallback(
-    (templateId: string) => {
-      form.setValue('interviewId', templateId);
+    (templateId: string | null) => {
+      form.setValue('interviewId', templateId ?? '');
+
+      if (!templateId) {
+        form.setValue('durationMinutes', DEFAULT_VALUES.durationMinutes);
+
+        return;
+      }
 
       const template = templates.find((t) => t.id === templateId);
 
@@ -179,46 +249,28 @@ export function ScheduleInterviewDialog({
     [form],
   );
 
+  const interviewTypeControl = useMemo(
+    () => (
+      <InterviewTypePicker control={form.control} options={interviewTypeOptions} onValueChange={handleTemplateChange} />
+    ),
+    [form.control, handleTemplateChange, interviewTypeOptions],
+  );
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
+        <FeatureSheetContent
           side="right"
-          className="flex flex-col p-0 [&>[data-slot=sheet-close]]:top-2 [&>[data-slot=sheet-close]]:right-2 data-[side=right]:w-full data-[side=right]:sm:w-[calc(100vw-5rem)] data-[side=right]:sm:max-w-[1800px]"
+          size="workspace"
+          className="[&>[data-slot=sheet-close]]:top-2 [&>[data-slot=sheet-close]]:right-2"
         >
-          <SheetHeader className="shrink-0 border-b px-4 py-3">
+          <FeatureSheetHeader className="px-4 py-3">
             <SheetTitle>Schedule Interview</SheetTitle>
             <SheetDescription className="sr-only">Set up an interview for this candidate.</SheetDescription>
-          </SheetHeader>
+          </FeatureSheetHeader>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col flex-1 min-h-0">
-              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-4">
-                <FormField
-                  control={form.control}
-                  name="interviewId"
-                  render={({ field }) => (
-                    <FormItem className="shrink-0">
-                      <FormLabel>Interview type</FormLabel>
-                      <Select value={field.value} onValueChange={handleTemplateChange}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select interview type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {templates.map((t) => (
-                            <SelectItem key={t.id} value={t.id}>
-                              {t.title} ({t.durationMinutes} min)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4">
                 <FormField
                   control={form.control}
                   name="scheduledAt"
@@ -229,6 +281,7 @@ export function ScheduleInterviewDialog({
                           control={form.control}
                           applicationId={applicationId}
                           orgId={orgId}
+                          interviewTypeControl={interviewTypeControl}
                           interviewers={interviewers}
                           onInterviewersChange={setInterviewers}
                           value={field.value || null}
@@ -244,7 +297,19 @@ export function ScheduleInterviewDialog({
                 />
               </div>
 
-              <SheetFooter className="shrink-0 flex-row justify-end gap-2 border-t px-4 py-3">
+              <FeatureSheetFooter className="flex-wrap px-4 py-3">
+                {slotSummary && (
+                  <div className="mr-auto flex w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground sm:w-auto">
+                    <span className="inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap text-foreground/80">
+                      <CalendarBlankIcon className="size-3.5 opacity-70" />
+                      <span className="truncate">
+                        {slotSummary.date} <span aria-hidden="true">·</span> {slotSummary.time}
+                      </span>
+                    </span>
+                    <Separator orientation="vertical" className="hidden h-4 sm:block data-vertical:self-center" />
+                    <span className="whitespace-nowrap">{slotSummary.interviewers}</span>
+                  </div>
+                )}
                 <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>
@@ -255,10 +320,10 @@ export function ScheduleInterviewDialog({
                   {isPending && <SpinnerGapIcon data-icon="inline-start" className="animate-spin" />}
                   Schedule
                 </Button>
-              </SheetFooter>
+              </FeatureSheetFooter>
             </form>
           </Form>
-        </SheetContent>
+        </FeatureSheetContent>
       </Sheet>
       <AvailabilityConflictDialog
         open={conflictingBody !== null}

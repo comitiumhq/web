@@ -38,14 +38,14 @@ export function JobsCard({ className, isLoading, jobs, orgId, totalCount }: Jobs
           {isLoading ? <Skeleton className="h-5 w-10 rounded-4xl" /> : <Badge variant="secondary">{count}</Badge>}
         </CardTitle>
         <CardAction>
-          <Button variant="ghost" size="icon-xs" aria-label="Open jobs" asChild>
+          <Button variant="ghost" size="icon-sm" aria-label="Open jobs" asChild>
             <Link to="/org/$orgId/jobs" params={{ orgId }} search={{ status: 'all' }}>
               <CaretRightIcon className="size-3.5" />
             </Link>
           </Button>
         </CardAction>
       </HomeCardHeader>
-      <CardContent className="flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+      <CardContent className="flex flex-col lg:max-h-[28rem] lg:overflow-y-auto">
         {isLoading && <HomeSkeletonRows count={7} />}
 
         {!isLoading && jobs.length > 0 && <HomeList>{rows}</HomeList>}

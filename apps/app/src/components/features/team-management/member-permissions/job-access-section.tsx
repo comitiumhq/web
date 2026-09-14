@@ -67,7 +67,7 @@ const JobAccessContent = memo(function JobAccessContent({
   }
 
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-y divide-separator">
       {assignments.map((assignment) => (
         <JobAccessRow key={assignment.id} orgId={orgId} assignment={assignment} />
       ))}
@@ -95,7 +95,7 @@ function JobAccessEmpty() {
 
 function JobAccessSkeleton() {
   return (
-    <div className="divide-y divide-border" aria-hidden="true">
+    <div className="divide-y divide-separator" aria-hidden="true">
       {[0, 1, 2].map((item) => (
         <div key={item} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3">
           <div className="flex min-w-0 flex-col gap-1.5">

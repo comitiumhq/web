@@ -1,5 +1,4 @@
 import { Button } from '@comitium/ui/button';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import type { DragDropEventHandlers } from '@dnd-kit/react';
 import { DragDropProvider } from '@dnd-kit/react';
 import { PlusIcon } from '@phosphor-icons/react';
@@ -91,23 +90,21 @@ export function StageSection({
 
   return (
     <>
-      <Card size="sm" className="gap-0 py-0">
-        <CardHeader className="items-center border-b py-3">
-          <CardTitle className="text-label-14 font-medium">{stage.name}</CardTitle>
+      <section className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
+        <header className="flex items-center justify-between gap-3 px-4 pt-3 pb-1">
+          <h3 className="truncate text-label-14 font-medium">{stage.name}</h3>
           {canManage && canAddAnyActivity ? (
-            <CardAction className="self-center">
-              <Button variant="ghost" size="sm" onClick={handleOpenAdd} aria-label={`Add activity to ${stage.name}`}>
-                <PlusIcon data-icon="inline-start" />
-                Add
-              </Button>
-            </CardAction>
+            <Button variant="ghost" size="sm" onClick={handleOpenAdd} aria-label={`Add activity to ${stage.name}`}>
+              <PlusIcon data-icon="inline-start" />
+              Add
+            </Button>
           ) : null}
-        </CardHeader>
+        </header>
 
-        <CardContent className="py-2">
+        <div className="px-2 pb-2">
           {activities.length > 0 ? (
             <DragDropProvider onDragEnd={handleDragEnd}>
-              <div className="divide-y divide-border">
+              <div className="flex flex-col gap-1">
                 {activities.map((activity, index) => (
                   <ActivityRow
                     key={activity.id}
@@ -123,10 +120,10 @@ export function StageSection({
               </div>
             </DragDropProvider>
           ) : (
-            <p className="py-4 text-copy-14 text-muted-foreground">No activities</p>
+            <p className="px-2 py-3 text-copy-14 text-muted-foreground">No activities</p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <ActivityDialog
         open={dialogOpen}

@@ -1,4 +1,9 @@
-import type { CriteriaAssessment, CriterionSummary, ReviewStatus } from '@comitium/schemas/applications';
+import type {
+  ApplicationProcessingStatus,
+  CriteriaAssessment,
+  CriterionSummary,
+  ReviewStatus,
+} from '@comitium/schemas/applications';
 import type { WrappedKey } from '@comitium/schemas/common';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
 import type { ReactNode } from 'react';
@@ -15,6 +20,7 @@ import { type ProjectableFormSubmission, useProjectFormSubmissions } from '../..
 
 import { CriteriaEvaluation } from './criteria-evaluation';
 import { Empty, ErrorState, GatedEmpty, LoadingState } from './empty-states';
+import { EvaluationStatus } from './evaluation-status';
 import { buildGroups } from './group-builder';
 import { GroupCard } from './group-card';
 import type { FeedbackAccessState, SourceGroup } from './types';
@@ -33,6 +39,7 @@ interface FeedbackTabProps {
   currentUserId: string;
   criterionSummary: CriterionSummary | null;
   criterionAssessments: CriteriaAssessment[];
+  processing: ApplicationProcessingStatus | null;
   reviewStatus: ReviewStatus;
   access: FeedbackTabAccess;
   wrappedVaultKey: WrappedKey | undefined;
@@ -49,6 +56,7 @@ export function FeedbackTab({
   currentUserId,
   criterionSummary,
   criterionAssessments,
+  processing,
   reviewStatus,
   access,
   wrappedVaultKey,
@@ -121,6 +129,7 @@ export function FeedbackTab({
 
   return (
     <div className="flex flex-col gap-4">
+      {processing && <EvaluationStatus processing={processing} />}
       {criterionSummary && criterionAssessments.length > 0 && (
         <CriteriaEvaluation
           assessment={criterionAssessments}

@@ -63,21 +63,28 @@ export const KanbanColumn = memo(function KanbanColumn({
   return (
     <div
       ref={ref}
-      className={cn('flex w-72 shrink-0 flex-col rounded-xl p-1.5 transition-colors', {
-        'bg-primary/5': isDropTarget,
+      className={cn('flex w-72 shrink-0 flex-col rounded-xl p-1.5 transition-[background-color,box-shadow]', {
+        'bg-primary/[0.05] ring-1 ring-primary/20 ring-inset': isDropTarget,
         'h-full': scrollable,
       })}
     >
       <span ref={handleRef} aria-hidden="true" className="sr-only" />
 
       <div className="mb-2.5 flex items-center gap-2 px-1.5 pt-0.5">
-        <h3 className="truncate text-label-14 font-medium text-muted-foreground">{name}</h3>
-        <Badge variant="secondary" className="h-5 shrink-0 px-1.5 text-xs tabular-nums">
+        <h3 className="truncate text-label-14 font-medium text-foreground/75">{name}</h3>
+        <Badge
+          variant="secondary"
+          className="h-5 shrink-0 bg-foreground/5 px-1.5 text-xs text-muted-foreground tabular-nums"
+        >
           {total}
         </Badge>
       </div>
 
-      <div className={cn('flex min-h-0 flex-1 flex-col gap-2 px-0.5 pb-4', { 'overflow-y-auto': scrollable })}>
+      <div
+        className={cn('flex min-h-0 flex-1 flex-col gap-2 rounded-xl bg-kanban-column p-2 pb-4', {
+          'overflow-y-auto': scrollable,
+        })}
+      >
         {applications.length === 0 ? (
           <div className="flex h-30 shrink-0 items-center justify-center rounded-xl border border-dashed border-border/70">
             <p className="text-xs text-muted-foreground">No candidates</p>
@@ -93,7 +100,6 @@ export const KanbanColumn = memo(function KanbanColumn({
                 index={appIndex}
                 column={id}
                 decryptedName={formatCandidateName(profile)}
-                currentTitle={profile?.currentTitle?.trim() || null}
                 company={profile?.currentCompany?.trim() || null}
                 onCardClick={onCardClick}
               />

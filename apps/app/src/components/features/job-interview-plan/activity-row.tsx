@@ -71,9 +71,12 @@ export const ActivityRow = memo(function ActivityRow({
   return (
     <div
       ref={ref}
-      className={cn('flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 px-1 py-3 transition-all', {
-        'relative z-50 rounded-xl bg-card px-3 opacity-90 shadow-lg ring-1 ring-primary/50': isDragging,
-      })}
+      className={cn(
+        'group/activity flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 rounded-xl px-2 py-2.5 transition-[background-color,box-shadow,opacity] hover:bg-foreground/[0.025]',
+        {
+          'relative z-50 bg-popover opacity-95 shadow-xl ring-1 ring-primary/40': isDragging,
+        },
+      )}
     >
       {canManage && (
         <Button
@@ -105,7 +108,7 @@ export const ActivityRow = memo(function ActivityRow({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="shrink-0 text-muted-foreground"
+              className="shrink-0 text-muted-foreground transition-[color,background-color,opacity] focus-visible:opacity-100 md:opacity-0 md:group-hover/activity:opacity-100 md:group-focus-within/activity:opacity-100"
               aria-label={`Actions for ${accessibleName}`}
             >
               <DotsThreeVerticalIcon />
@@ -222,24 +225,10 @@ function ApplicationReviewBody({ activity, memberMap, isRequired }: ApplicationR
 
 function RequiredReviewIndicator() {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            className="shrink-0 text-muted-foreground"
-            aria-label="Required activity"
-          >
-            <LockIcon />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>This review is required for the Application Review stage and cannot be deleted.</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Badge variant="subtle" title="This review is required for the Application Review stage and cannot be deleted.">
+      <LockIcon data-icon="inline-start" />
+      Required
+    </Badge>
   );
 }
 
@@ -272,7 +261,7 @@ function MemberAvatarStack({ members, memberMap }: MemberAvatarStackProps) {
           return (
             <Tooltip key={entry.userId}>
               <TooltipTrigger asChild>
-                <div className="ring-2 ring-background rounded-full">
+                <div className="rounded-full ring-2 ring-card">
                   <MemberAvatar identity={identity} size="sm" />
                 </div>
               </TooltipTrigger>
@@ -284,7 +273,7 @@ function MemberAvatarStack({ members, memberMap }: MemberAvatarStackProps) {
         })}
 
         {overflowCount > 0 && (
-          <div className="size-6 rounded-full bg-muted ring-2 ring-background flex items-center justify-center text-[10px] text-muted-foreground">
+          <div className="flex size-6 items-center justify-center rounded-full bg-muted text-[10px] text-muted-foreground ring-2 ring-card">
             +{overflowCount}
           </div>
         )}

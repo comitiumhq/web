@@ -39,12 +39,12 @@ export function GroupCard({
 
   return (
     <Card size="sm" className="gap-0 py-0">
-      <header className="border-b border-border px-4 py-2.5">
+      <header className="border-b border-separator px-4 py-2.5">
         <p className="text-label-13 font-medium">{group.title}</p>
         {group.subtitle && <p className="text-label-12 text-muted-foreground mt-0.5">{group.subtitle}</p>}
       </header>
 
-      <ul className="divide-y divide-border">
+      <ul className="divide-y divide-separator">
         {group.items.map((item, idx) => (
           <li key={itemKey(item, idx)}>
             <GroupItem

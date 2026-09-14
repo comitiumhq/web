@@ -185,7 +185,7 @@ function DataPrivacySettingsForm({ orgId, settings }: DataPrivacySettingsFormPro
             <CardHeader>
               <CardTitle>AI-assisted evaluation</CardTitle>
               <CardDescription>
-                Compare resumes with job criteria. Candidates can opt out. Changes apply to new applications only.
+                Compare resumes with job criteria. Changes apply to new applications only.
               </CardDescription>
               <CardAction>
                 <FormField

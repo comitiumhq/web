@@ -3,13 +3,17 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
 import { useMediaQuery } from '@comitium/ui/use-media-query';
 import { useNavigate } from '@tanstack/react-router';
-import type { Row, SortingState, VisibilityState } from '@tanstack/react-table';
+import type { Row, SortingState } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDeleteDraft } from '@/hooks/mutations/use-delete-draft';
 
 import { getJobsColumns, type JobsRow } from './jobs-columns';
 import { JobsMobileList } from './jobs-mobile-list';
+import { JobsTableSkeleton } from './jobs-table-skeleton';
+
+const ADMIN_GRID_MIN_WIDTH = '93rem';
+const MEMBER_GRID_MIN_WIDTH = '85rem';
 
 interface JobsTableProps {
   orgId: string;
@@ -29,36 +33,8 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
   const [draftToDelete, setDraftToDelete] = useState<JobDraftListItem | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const hideCreated = useMediaQuery('(max-width: 1279px)');
-  const hideStake = useMediaQuery('(max-width: 1099px)');
-  const hideTeam = useMediaQuery('(max-width: 959px)');
   const isMobile = useMediaQuery('(max-width: 639px)');
-
-  const defaultVisibility = useMemo<VisibilityState>(
-    () => ({ created: !hideCreated, stake: !hideStake, team: !hideTeam }),
-    [hideCreated, hideStake, hideTeam],
-  );
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(defaultVisibility);
-
-  useEffect(() => {
-    setColumnVisibility(defaultVisibility);
-  }, [defaultVisibility]);
-
-  const gridMinWidth = useMemo(() => {
-    if (hideTeam) {
-      return '560px';
-    }
-
-    if (hideStake) {
-      return '660px';
-    }
-
-    if (hideCreated) {
-      return '760px';
-    }
-
-    return '880px';
-  }, [hideCreated, hideStake, hideTeam]);
+  const gridMinWidth = isAdmin ? ADMIN_GRID_MIN_WIDTH : MEMBER_GRID_MIN_WIDTH;
 
   const columns = useMemo(
     () => getJobsColumns({ orgId, isAdmin, onRequestDelete: setDraftToDelete }),
@@ -98,40 +74,48 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
     setDraftToDelete(null);
   }, [draftToDelete, deleteDraftMutate]);
 
+  let tableContent: ReactNode;
+
+  if (isMobile) {
+    tableContent = (
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <JobsMobileList
+          orgId={orgId}
+          rows={rows}
+          isAdmin={isAdmin}
+          loading={loading}
+          emptyState={emptyState}
+          onRowClick={navigateToRow}
+          onRequestDelete={setDraftToDelete}
+        />
+      </div>
+    );
+  } else if (loading && rows.length === 0) {
+    tableContent = <JobsTableSkeleton columns={columns} gridMinWidth={gridMinWidth} />;
+  } else {
+    tableContent = (
+      <DataTableVirtual
+        ariaLabel="Jobs"
+        size="sm"
+        className={rows.length === 0 && !loading ? 'min-h-0 border-0 bg-transparent' : 'min-h-0'}
+        maxHeightClassName="max-h-full"
+        columns={columns}
+        data={rows}
+        emptyState={emptyState}
+        getRowId={getJobsRowId}
+        gridMinWidth={gridMinWidth}
+        loadingMore={loading}
+        loadingMoreRowCount={rows.length === 0 ? 8 : 3}
+        onRowClick={handleRowClick}
+        onSortingChange={setSorting}
+        sorting={sorting}
+      />
+    );
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {isMobile ? (
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <JobsMobileList
-            orgId={orgId}
-            rows={rows}
-            isAdmin={isAdmin}
-            loading={loading}
-            emptyState={emptyState}
-            onRowClick={navigateToRow}
-            onRequestDelete={setDraftToDelete}
-          />
-        </div>
-      ) : (
-        <DataTableVirtual
-          ariaLabel="Jobs"
-          size="sm"
-          className={rows.length === 0 && !loading ? 'min-h-0 border-0 bg-transparent' : 'min-h-0'}
-          maxHeightClassName="max-h-full"
-          columns={columns}
-          columnVisibility={columnVisibility}
-          data={rows}
-          emptyState={emptyState}
-          getRowId={getJobsRowId}
-          gridMinWidth={gridMinWidth}
-          loadingMore={loading}
-          loadingMoreRowCount={rows.length === 0 ? 8 : 3}
-          onColumnVisibilityChange={setColumnVisibility}
-          onRowClick={handleRowClick}
-          onSortingChange={setSorting}
-          sorting={sorting}
-        />
-      )}
+      {tableContent}
 
       <ConfirmDialog
         open={draftToDelete !== null}

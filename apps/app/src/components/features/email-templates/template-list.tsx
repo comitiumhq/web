@@ -118,8 +118,8 @@ export function EmailTemplateList({ orgId }: EmailTemplateListProps) {
       <EntitySettingsPage
         title="Email Templates"
         tab={tab}
-        activeCount={activeTemplates.length}
-        archivedCount={archivedTemplates.length}
+        activeCount={isLoading ? null : activeTemplates.length}
+        archivedCount={isLoading ? null : archivedTemplates.length}
         isError={false}
         errorDescription=""
         onTabChange={handleTabChange}

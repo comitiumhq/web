@@ -81,7 +81,8 @@ export const CustomFieldTableRow = memo(function CustomFieldTableRow({
           'opacity-40': isDragging,
           'opacity-50': isArchived,
         })}
-        onClick={handleRowClick}
+        aria-label={!isArchived ? `Edit ${field.title}` : undefined}
+        onClick={!isArchived ? handleRowClick : undefined}
       >
         <TableCell className="w-8 p-0 pl-3">
           {canReorder && (
@@ -108,7 +109,7 @@ export const CustomFieldTableRow = memo(function CustomFieldTableRow({
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
                 <DotsThreeIcon />
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Actions for {field.title}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>

@@ -112,7 +112,7 @@ export function CurrentActivitiesSection({
 
       {hasActivityRows && (
         <Card size="sm" className="gap-0 py-0">
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-separator">
             {primaryInterviewFeedback && (
               <InterviewFeedbackActivityRow
                 event={primaryInterviewFeedback}

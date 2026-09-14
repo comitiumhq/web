@@ -2,13 +2,15 @@ import type { OrgJobListItem } from '@comitium/schemas/jobs';
 import { memo } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 
+import { EmptyJobCellValue } from './job-list-cell-values';
+
 interface HiringTeamAvatarsProps {
   team: OrgJobListItem['hiringTeam'];
 }
 
 export const HiringTeamAvatars = memo(function HiringTeamAvatars({ team }: HiringTeamAvatarsProps) {
   if (team.total === 0) {
-    return <span className="text-muted-foreground">-</span>;
+    return <EmptyJobCellValue>Unassigned</EmptyJobCellValue>;
   }
 
   const overflow = team.total - team.members.length;

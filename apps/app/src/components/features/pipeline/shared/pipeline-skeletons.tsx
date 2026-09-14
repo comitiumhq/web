@@ -6,7 +6,11 @@ import { CaretRightIcon } from '@phosphor-icons/react';
 import { type CSSProperties, Fragment, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { PipelineTab } from '../types';
-import { getCandidateColumns } from './candidate-table/columns';
+import {
+  getArchivedTableGridMinWidth,
+  getCandidateColumns,
+  getCandidateTableGridMinWidth,
+} from './candidate-table/columns';
 
 const TAB_SKELETONS = [
   { key: 'review', widthClassName: 'w-28' },
@@ -78,14 +82,17 @@ export function PipelineStageControlsSkeleton({
       )}
     >
       <div className="min-w-0 overflow-hidden">
-        <div className="flex min-w-max items-center rounded-4xl border border-input bg-input/30 p-1">
+        <div className="flex min-w-max items-center rounded-4xl border border-control-border bg-segment-track bg-clip-padding p-1">
           {TAB_SKELETONS.map(({ key, widthClassName }, index) => (
             <Fragment key={key}>
               {index > 0 && (
                 <CaretRightIcon aria-hidden weight="bold" className="mx-0.5 size-4 shrink-0 text-muted-foreground/25" />
               )}
               <div
-                className={cn('flex h-9 items-center gap-1.5 rounded-3xl px-3.5', activeTab === key && 'bg-secondary')}
+                className={cn(
+                  'flex h-9 items-center gap-1.5 rounded-3xl px-3.5',
+                  activeTab === key && 'bg-segment shadow-[var(--segment-shadow)]',
+                )}
               >
                 <Skeleton className="h-4 w-6" />
                 <Skeleton className={cn('h-3', widthClassName)} />
@@ -97,7 +104,7 @@ export function PipelineStageControlsSkeleton({
 
       <div className={cn('flex shrink-0 items-center gap-2', showSearch && 'min-w-0')}>
         {showSearch && <Skeleton className="h-11 min-w-0 flex-1 rounded-4xl xl:w-64 xl:flex-none" />}
-        <div className="flex h-11 shrink-0 items-center gap-2 rounded-4xl border border-input px-4">
+        <div className="flex h-11 shrink-0 items-center gap-2 rounded-4xl border border-control-border bg-control bg-clip-padding px-4">
           <Skeleton className="size-4 rounded-md" />
           <Skeleton className="h-3.5 w-14" />
           <Skeleton className="size-5 rounded-full" />
@@ -129,9 +136,11 @@ export function GlobalPipelineContentSkeleton({ activeTab }: GlobalPipelineConte
 
   return (
     <PageContainer className="flex flex-col gap-3 pb-6">
-      <JobAccordionSkeleton expanded />
-      <JobAccordionSkeleton />
-      <JobAccordionSkeleton />
+      <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
+        <JobAccordionSkeleton expanded />
+        <JobAccordionSkeleton />
+        <JobAccordionSkeleton />
+      </div>
     </PageContainer>
   );
 }
@@ -155,15 +164,15 @@ export function PipelineContentSkeleton({ activeTab, className }: PipelineConten
   );
 }
 
-export function KanbanBoardSkeleton() {
+export function KanbanBoardSkeleton({ className }: { className?: string } = {}) {
   const columns = KANBAN_COLUMN_SKELETONS.map((column, index) => (
-    <div key={column.titleWidth} className="w-72 shrink-0 p-2">
+    <div key={column.titleWidth} className="flex h-full w-72 shrink-0 flex-col p-2">
       <div className="mb-3 flex items-center gap-2">
         <Skeleton className={cn('h-5', column.titleWidth)} />
         <Skeleton className="size-6 rounded-full" />
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2 rounded-xl bg-kanban-column p-2">
         {Array.from({ length: column.cards }).map((_, cardIndex) => (
           <PipelineCandidateCardSkeleton key={`${index}-${cardIndex}`} />
         ))}
@@ -171,7 +180,11 @@ export function KanbanBoardSkeleton() {
     </div>
   ));
 
-  return <div className="flex h-full w-full min-w-0 max-w-full overflow-x-auto p-4">{columns}</div>;
+  return (
+    <div className={cn('flex h-full w-full min-w-0 max-w-full overflow-x-auto bg-kanban-canvas p-4', className)}>
+      {columns}
+    </div>
+  );
 }
 
 export function PipelineTableSkeleton({
@@ -184,6 +197,8 @@ export function PipelineTableSkeleton({
   const columns = useMemo(() => getTableSkeletonLayout(activeTab, scope), [activeTab, scope]);
   const gridTemplateColumns = useMemo(() => columns.map((column) => column.gridSize).join(' '), [columns]);
   const gridStyle = useMemo<CSSProperties>(() => ({ gridTemplateColumns }), [gridTemplateColumns]);
+  const gridMinWidth =
+    activeTab === 'archived' ? getArchivedTableGridMinWidth(scope) : getCandidateTableGridMinWidth(activeTab, scope);
 
   return (
     <div className={cn('flex min-h-0 flex-col gap-3', className)}>
@@ -194,28 +209,32 @@ export function PipelineTableSkeleton({
       )}
 
       <Card size="sm" className="min-h-0 overflow-hidden py-0">
-        <div className="grid min-h-11 items-center bg-muted" style={gridStyle}>
-          {columns.map((column, index) => (
-            <div key={column.id} className={cn('min-w-0 overflow-hidden px-3', index === 0 && 'pl-4')}>
-              <Skeleton className={cn('h-3.5 max-w-full bg-foreground/10', getTableSkeletonHeaderWidth(column.type))} />
-            </div>
-          ))}
-        </div>
-
-        <div>
-          {Array.from({ length: rows }).map((_, index) => (
-            <div
-              key={index}
-              className="grid min-h-[68px] items-center border-b border-border last:border-b-0"
-              style={gridStyle}
-            >
-              {columns.map((column, cellIndex) => (
-                <div key={column.id} className={cn('min-w-0 overflow-hidden px-3 py-3', cellIndex === 0 && 'pl-4')}>
-                  <TableSkeletonCell column={column.type} rowIndex={index} />
+        <div className="overflow-x-auto">
+          <div style={{ minWidth: gridMinWidth }}>
+            <div className="grid min-h-11 items-center bg-table-header" style={gridStyle}>
+              {columns.map((column, index) => (
+                <div key={column.id} className={cn('min-w-0 overflow-hidden px-3', index === 0 && 'pl-4')}>
+                  <Skeleton className={cn('h-3.5 max-w-full', getTableSkeletonHeaderWidth(column.type))} />
                 </div>
               ))}
             </div>
-          ))}
+
+            <div>
+              {Array.from({ length: rows }).map((_, index) => (
+                <div
+                  key={index}
+                  className="grid min-h-[68px] items-center border-b border-separator last:border-b-0"
+                  style={gridStyle}
+                >
+                  {columns.map((column, cellIndex) => (
+                    <div key={column.id} className={cn('min-w-0 overflow-hidden px-3 py-3', cellIndex === 0 && 'pl-4')}>
+                      <TableSkeletonCell column={column.type} rowIndex={index} />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </Card>
     </div>
@@ -283,7 +302,7 @@ function getTableSkeletonLayout(
     scope,
   }).map((column, index) => ({
     id: column.id ?? `column-${index}`,
-    gridSize: column.meta?.gridSize ?? 'minmax(0,1fr)',
+    gridSize: column.meta?.gridSize ?? '150px',
     type: getCandidateSkeletonColumnType(column.id),
   }));
 }
@@ -320,7 +339,7 @@ function getCandidateSkeletonColumnType(columnId?: string): TableSkeletonColumn 
 
 function JobAccordionSkeleton({ expanded = false }: JobAccordionSkeletonProps) {
   return (
-    <Card size="sm" className="gap-0 border border-border py-0 ring-0">
+    <div className="border-b border-separator last:border-b-0">
       <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 p-3">
         <Skeleton className="size-8 rounded-full" />
 
@@ -335,21 +354,17 @@ function JobAccordionSkeleton({ expanded = false }: JobAccordionSkeletonProps) {
         <Skeleton className="size-8 rounded-4xl" />
       </div>
 
-      {expanded && (
-        <div className="border-t border-border bg-muted/50">
-          <KanbanBoardSkeleton />
-        </div>
-      )}
-    </Card>
+      {expanded && <KanbanBoardSkeleton />}
+    </div>
   );
 }
 
 function PipelineCandidateCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
+    <div className="rounded-xl border border-transparent bg-card bg-clip-padding p-3">
       <Skeleton className="h-5 w-36" />
       <Skeleton className="mt-2 h-4 w-24" />
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex gap-2">
         <Skeleton className="h-6 w-32 rounded-4xl" />
         <Skeleton className="h-6 w-24 rounded-4xl" />
       </div>

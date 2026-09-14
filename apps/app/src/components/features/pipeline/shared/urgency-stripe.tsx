@@ -22,7 +22,7 @@ export function UrgencyStripe({ level, reason, side = 'right' }: UrgencyStripePr
 
   const stripe = (
     <span data-slot="urgency-stripe" className="absolute -inset-y-px -left-px w-3 cursor-help">
-      <span className={cn('block h-full w-1', URGENCY_ACCENT[level])} />
+      <span className={cn('block h-full w-0.5 opacity-80', URGENCY_ACCENT[level])} />
     </span>
   );
 

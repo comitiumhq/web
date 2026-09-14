@@ -1,5 +1,6 @@
 import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/candidates';
 import { Card } from '@comitium/ui/card';
+import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { EnvelopeSimpleIcon } from '@phosphor-icons/react';
 import { memo } from 'react';
@@ -37,7 +38,7 @@ export const EmailFeedCard = memo(function EmailFeedCard({
 
   return (
     <Card size="sm" className="gap-0 py-0">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+      <div className="flex items-center gap-2 border-b border-separator px-4 py-2.5">
         <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground">
           {sender.initials}
         </div>
@@ -83,7 +84,9 @@ function EmailBody({ orgId, decryptedEmail, isDecrypting, decryptionError }: Ema
       <>
         <p className="mb-1.5 text-label-13 font-medium">{decryptedEmail.content.subject}</p>
         <div className="text-copy-13 text-muted-foreground">
-          <RichTextEditor content={decryptedEmail.content.body} readOnly />
+          <ExpandableContent collapsedLines={4}>
+            <RichTextEditor content={decryptedEmail.content.body} readOnly />
+          </ExpandableContent>
         </div>
       </>
     );

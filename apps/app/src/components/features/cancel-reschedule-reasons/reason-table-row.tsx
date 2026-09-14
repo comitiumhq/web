@@ -55,7 +55,11 @@ export const ReasonTableRow = memo(function ReasonTableRow({ orgId, reason, onEd
 
   return (
     <>
-      <TableRow className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })} onClick={handleRowClick}>
+      <TableRow
+        className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })}
+        aria-label={!isArchived ? `Edit ${reason.label}` : undefined}
+        onClick={!isArchived ? handleRowClick : undefined}
+      >
         <TableCell>
           <span className="text-label-14 truncate block">{reason.label}</span>
         </TableCell>
@@ -71,7 +75,7 @@ export const ReasonTableRow = memo(function ReasonTableRow({ orgId, reason, onEd
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon-sm" disabled={anyPending} onClick={stopRowClick}>
                 <DotsThreeIcon />
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Actions for {reason.label}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>

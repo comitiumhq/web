@@ -1,4 +1,4 @@
-import type { SearchSelectOption } from '@comitium/ui/search-select';
+import type { ComboboxOption } from '@comitium/ui/combobox';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { invalidateCandidateTagSurfaces } from '@/hooks/mutations/use-candidate-tag';
@@ -40,7 +40,7 @@ export function useBulkAssignCandidateTag(props: PipelineBulkActionSheetProps) {
     [bulk.operation, props.namesMap, props.pipelineApplications],
   );
 
-  const tagOptions = useMemo<SearchSelectOption[]>(
+  const tagOptions = useMemo<ComboboxOption[]>(
     () =>
       tagsQuery.tags
         .filter((tag) => !tag.isArchived)

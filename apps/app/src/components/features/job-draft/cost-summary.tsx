@@ -36,7 +36,7 @@ export function CostSummary({
         <SummaryRow label="Refundable stake" value={formatUsdWhole(employerStake)} />
         <SummaryRow label={feeLabel} value={feeValue} />
 
-        <div className="flex items-center justify-between border-t border-border pt-2">
+        <div className="flex items-center justify-between border-t border-separator pt-2">
           <span className="text-heading-14">Due now</span>
           <span className="text-heading-16 tabular-nums">{totalValue}</span>
         </div>

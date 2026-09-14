@@ -148,10 +148,10 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent side="right" width="2xl" className="w-full">
+      <FeatureSheetContent side="right" size="editor">
         <FeatureSheetHeader>
           <SheetTitle className="pr-8 text-heading-20">
-            {candidateName ?? (candidateProfileError ? 'Candidate name unavailable' : 'Candidate')}
+            {candidateName ?? (candidateProfileError ? 'Candidate name unavailable' : 'Interview briefing')}
           </SheetTitle>
           <SheetDescription>
             {briefing?.interview.title ?? interview.title} · {briefing?.jobTitle ?? interview.jobTitle}
@@ -180,8 +180,8 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
 
         {!isLoading && !error && !candidateProfileError && briefing && (
           <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-0 flex-1 gap-0">
-            <div className="shrink-0 overflow-x-auto px-6 pt-4">
-              <TabsList className="min-w-max">
+            <div className="shrink-0 overflow-x-auto px-6 pt-4 pb-2">
+              <TabsList variant="line" className="min-w-max">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="briefing">Briefing</TabsTrigger>
                 <TabsTrigger value="resume">Resume</TabsTrigger>
@@ -228,17 +228,19 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
               forceMount
               className="min-h-0 flex-1 overflow-hidden data-[state=inactive]:hidden"
             >
-              <FeedbackSubmissionPanel
-                active={open && isFeedbackInitialized}
-                applicationId={briefing.applicationId}
-                orgId={orgId}
-                source={feedbackSource}
-                currentUserId={user?.id}
-                vaultPublicKey={vaultKey?.vaultPublicKey ?? null}
-                vaultKeyVersion={vaultKey?.keyVersion ?? null}
-                wrappedVaultKey={wrappedVaultKey}
-                onComplete={handleFeedbackComplete}
-              />
+              <FeatureSheetBody className="h-full">
+                <FeedbackSubmissionPanel
+                  active={open && isFeedbackInitialized}
+                  applicationId={briefing.applicationId}
+                  orgId={orgId}
+                  source={feedbackSource}
+                  currentUserId={user?.id}
+                  vaultPublicKey={vaultKey?.vaultPublicKey ?? null}
+                  vaultKeyVersion={vaultKey?.keyVersion ?? null}
+                  wrappedVaultKey={wrappedVaultKey}
+                  onComplete={handleFeedbackComplete}
+                />
+              </FeatureSheetBody>
             </TabsContent>
           </Tabs>
         )}
@@ -251,17 +253,23 @@ function InterviewBriefingSkeleton({ feedbackDue }: { feedbackDue: boolean }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <BriefingTabsSkeleton />
-      {feedbackDue ? <FeedbackSubmissionSkeleton /> : <InterviewOverviewSkeleton />}
+      {feedbackDue ? (
+        <FeatureSheetBody className="h-full">
+          <FeedbackSubmissionSkeleton contained />
+        </FeatureSheetBody>
+      ) : (
+        <InterviewOverviewSkeleton />
+      )}
     </div>
   );
 }
 
 function BriefingTabsSkeleton() {
   return (
-    <div className="shrink-0 overflow-hidden px-6 pt-4">
-      <div className="flex h-10 w-fit items-center gap-1 rounded-4xl border border-input bg-input/30 p-1">
+    <div className="shrink-0 overflow-hidden px-6 pt-4 pb-2">
+      <div className="relative flex h-9 w-fit items-center gap-1 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-separator">
         {BRIEFING_TAB_SKELETONS.map((tab) => (
-          <Skeleton key={tab.key} className={cn('h-7 rounded-3xl', tab.width)} />
+          <Skeleton key={tab.key} className={cn('h-5 rounded-md', tab.width)} />
         ))}
       </div>
     </div>

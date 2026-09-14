@@ -2,9 +2,10 @@ import type { JobDraft } from '@comitium/schemas/jobs';
 import { Badge } from '@comitium/ui/badge';
 import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { EmptyState } from '@comitium/ui/empty-state';
+import { FeatureSheetContent } from '@comitium/ui/feature-sheet';
 import { MarkdownRenderer } from '@comitium/ui/markdown-renderer';
 import { ScrollArea } from '@comitium/ui/scroll-area';
-import { Sheet, SheetContent, SheetTitle } from '@comitium/ui/sheet';
+import { Sheet, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { FileTextIcon } from '@phosphor-icons/react';
 import { useQueryOrg } from '@/hooks/queries/use-query-org';
@@ -31,11 +32,8 @@ export function DraftPreviewDialog({ orgId, draft, descriptionMarkdown, open, on
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="w-full data-[side=right]:sm:max-w-[56rem] p-0 flex flex-col overflow-hidden"
-      >
-        <div className="shrink-0 px-6 pt-6 pb-4 border-b border-border">
+      <FeatureSheetContent side="right" size="wide" className="overflow-hidden">
+        <div className="shrink-0 px-6 pt-6 pb-4">
           <div className="mb-3">
             <Badge variant="secondary">Draft preview</Badge>
           </div>
@@ -96,7 +94,7 @@ export function DraftPreviewDialog({ orgId, draft, descriptionMarkdown, open, on
             )}
           </div>
         </ScrollArea>
-      </SheetContent>
+      </FeatureSheetContent>
     </Sheet>
   );
 }

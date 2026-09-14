@@ -63,7 +63,7 @@ export function ConsiderationRail({
   onDuplicateAttemptClick,
 }: ConsiderationRailProps) {
   return (
-    <div className="flex h-full flex-col overflow-hidden border-r border-border bg-background">
+    <div className="flex h-full flex-col overflow-hidden border-r border-separator bg-background">
       <div className="shrink-0 px-3 pb-2 pt-3">
         <p className="text-xs font-medium text-muted-foreground">Applications ({totalConsiderations})</p>
       </div>

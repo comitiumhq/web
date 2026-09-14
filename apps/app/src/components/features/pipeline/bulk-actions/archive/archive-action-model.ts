@@ -1,4 +1,4 @@
-import type { SearchSelectOption } from '@comitium/ui/search-select';
+import type { ComboboxOption } from '@comitium/ui/combobox';
 import { ARCHIVE_REASON_OUTCOME_LABELS } from '@/components/features/archive-reasons/labels';
 import type { ArchiveReasonOutcome, ArchiveReasonRow } from '@/lib/schemas/archive-reasons';
 import type { EmailTemplateUseCase } from '@/lib/schemas/emails';
@@ -15,7 +15,7 @@ export function getArchiveTemplateUseCase(reason: ArchiveReasonRow | undefined) 
   return OUTCOME_TEMPLATE_USE_CASE[reason.outcome];
 }
 
-export function buildArchiveReasonOptions(reasons: readonly ArchiveReasonRow[]): SearchSelectOption[] {
+export function buildArchiveReasonOptions(reasons: readonly ArchiveReasonRow[]): ComboboxOption[] {
   return reasons.map((reason) => ({
     value: reason.id,
     label: reason.label,

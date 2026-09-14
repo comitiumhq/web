@@ -1,13 +1,14 @@
 :root {
   --tt-input-placeholder: var(--tt-gray-light-a-400);
-  --tt-input-border: var(--tt-gray-light-a-200);
-  --tt-input-border-focus: var(--tt-gray-light-a-300);
+  --tt-input-border: var(--control-border);
+  --tt-input-border-hover: var(--control-border-hover);
+  --tt-input-border-focus: var(--ring);
+  --tt-input-background: var(--control);
+  --tt-input-background-hover: var(--control-hover);
 }
 
 .dark {
   --tt-input-placeholder: var(--tt-gray-dark-a-400);
-  --tt-input-border: var(--tt-gray-dark-a-200);
-  --tt-input-border-focus: var(--tt-gray-dark-a-300);
 }
 
 .tiptap-input {
@@ -17,7 +18,8 @@
   padding: 0.25rem 0.625rem;
   border-radius: var(--tt-radius-md);
   border: 1px solid var(--tt-input-border);
-  background: transparent;
+  background: var(--tt-input-background);
+  background-clip: padding-box;
   font-size: 1rem;
   outline: none;
   transition:
@@ -29,8 +31,14 @@
   color: var(--tt-input-placeholder);
 }
 
+.tiptap-input:hover {
+  border-color: var(--tt-input-border-hover);
+  background: var(--tt-input-background-hover);
+}
+
 .tiptap-input:focus-visible {
   border-color: var(--tt-input-border-focus);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ring) 50%, transparent);
 }
 
 @media (min-width: 768px) {

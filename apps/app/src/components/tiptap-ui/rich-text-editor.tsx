@@ -136,7 +136,8 @@ export const RichTextEditor = memo(function RichTextEditor({
     <EditorContext.Provider value={{ editor }}>
       <div
         className={cn({
-          'rounded-xl border border-input bg-input/30 transition-colors duration-150': !readOnly,
+          'rounded-xl border border-control-border bg-control bg-clip-padding transition-colors duration-150 hover:border-control-border-hover hover:bg-control-hover':
+            !readOnly,
           'focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50': !readOnly && !disabled,
           'opacity-50 pointer-events-none': disabled,
         })}

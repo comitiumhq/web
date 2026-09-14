@@ -1,9 +1,8 @@
 import { getMemberDisplayName } from '@comitium/ui/display-name';
-import type { BusinessHours, IlamyCalendarProps, Resource } from '@ilamy/calendar';
-import { addMinutes } from 'date-fns';
+import type { BusinessHours, Resource } from '@ilamy/calendar';
 
 import type { SelectedInterviewer } from '../../types';
-import { CALENDAR_END_HOUR, CALENDAR_SLOT_MINUTES, CALENDAR_START_HOUR, getCalendarDate } from '../calendar-range';
+import { CALENDAR_END_HOUR, CALENDAR_START_HOUR } from '../calendar-range';
 import type { AvailabilityIndex } from './availability';
 
 export interface CalendarResourceData extends Record<string, unknown> {
@@ -11,9 +10,19 @@ export interface CalendarResourceData extends Record<string, unknown> {
   timeZone: string | null;
 }
 
-export type CalendarEventData = { type: 'busy'; titleHidden: boolean } | { type: 'draft' };
+export interface CalendarEventData {
+  type: 'busy';
+  titleHidden: boolean;
+}
 
-type CalendarEvent = NonNullable<IlamyCalendarProps['events']>[number];
+export interface CalendarProviderEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  resourceId: string;
+  data: CalendarEventData;
+}
 
 export const BUSINESS_HOURS: BusinessHours = {
   daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
@@ -38,37 +47,13 @@ export function createCalendarResources(interviewers: readonly SelectedInterview
   });
 }
 
-export function createCalendarEvents(params: {
-  availability: AvailabilityIndex;
-  interviewers: readonly SelectedInterviewer[];
-  visibleDay: string;
-  timeZone: string;
-}): CalendarEvent[] {
-  const events = createBusyEvents(params.availability);
-  const draftStart = getCalendarDate(params.visibleDay, params.timeZone);
-  draftStart.setHours(CALENDAR_START_HOUR, 0, 0, 0);
-
-  for (const interviewer of params.interviewers) {
-    events.push({
-      id: `draft-${interviewer.userId}`,
-      title: '',
-      start: draftStart,
-      end: addMinutes(draftStart, CALENDAR_SLOT_MINUTES),
-      resourceId: interviewer.userId,
-      data: { type: 'draft' } satisfies CalendarEventData,
-    });
-  }
-
-  return events;
-}
-
-function createBusyEvents(availability: AvailabilityIndex): CalendarEvent[] {
-  const events: CalendarEvent[] = [];
+export function createCalendarEvents(availability: AvailabilityIndex): CalendarProviderEvent[] {
+  const events: CalendarProviderEvent[] = [];
 
   for (const [interviewerId, interviewer] of availability) {
-    for (const busyTime of interviewer.busy) {
+    for (const [busyTimeIndex, busyTime] of interviewer.busy.entries()) {
       events.push({
-        id: `busy-${interviewerId}-${busyTime.start.toISOString()}`,
+        id: `busy-${interviewerId}-${busyTime.start.toISOString()}-${busyTimeIndex}`,
         title: busyTime.title ?? '',
         start: busyTime.start,
         end: busyTime.end,

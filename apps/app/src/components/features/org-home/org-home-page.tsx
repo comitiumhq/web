@@ -133,7 +133,7 @@ export function OrgHomePage({ org }: OrgHomePageProps) {
         <section className="flex min-w-0 flex-col gap-4 lg:min-h-0">
           <ApplicationReviewCard
             candidates={applicationReviewQueue}
-            className="lg:min-h-0 lg:flex-1 lg:max-h-[28rem]"
+            className="lg:min-h-0 lg:max-h-[28rem] lg:flex-1"
             isLoading={isReviewQueueLoading || isSummaryLoading}
             namesMap={candidateNames}
             onCandidateOpen={handleApplicationReviewOpen}

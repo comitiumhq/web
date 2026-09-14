@@ -4,9 +4,12 @@ import { feedbackAnswerBucketContext } from '@comitium/crypto/context';
 import type { WrappedKey } from '@comitium/schemas/common';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { splitAnswersByVisibility } from '@comitium/schemas/forms/visibility';
+import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
+import { FeatureSheetContent, FeatureSheetHeader } from '@comitium/ui/feature-sheet';
 import { Form } from '@comitium/ui/form';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@comitium/ui/sheet';
+import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -82,14 +85,19 @@ export function FeedbackSubmissionSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-[720px] flex flex-col p-0">
-        <SheetHeader className="border-b shrink-0 px-6 py-4 gap-1">
+      <FeatureSheetContent side="right" size="form">
+        <FeatureSheetHeader className="gap-1">
           <SheetTitle>{getSheetTitle(flow.mode, source)}</SheetTitle>
           <SheetDescription className="flex flex-col items-start gap-0.5">
             <span>{sheetDescription}</span>
-            {formTitle && <span className="text-label-12">{formTitle}</span>}
+            {formTitle && (
+              <span className="mt-1 inline-flex items-center gap-2">
+                <Badge variant="subtle">Feedback form</Badge>
+                <span className="text-label-12">{formTitle}</span>
+              </span>
+            )}
           </SheetDescription>
-        </SheetHeader>
+        </FeatureSheetHeader>
         <FeedbackSubmissionView
           flow={flow}
           applicationId={applicationId}
@@ -101,7 +109,7 @@ export function FeedbackSubmissionSheet({
           onComplete={handleClose}
           onCancel={handleClose}
         />
-      </SheetContent>
+      </FeatureSheetContent>
     </Sheet>
   );
 }
@@ -171,7 +179,7 @@ function FeedbackSubmissionView({
   const formTitle = getFormTitle(source, flow.snapshot?.title);
 
   if (flow.isLoading) {
-    return <FeedbackSubmissionSkeleton />;
+    return <FeedbackSubmissionSkeleton contained={showFormContext} />;
   }
 
   if (flow.error) {
@@ -186,41 +194,71 @@ function FeedbackSubmissionView({
     return null;
   }
 
-  return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      {showFormContext && <p className="shrink-0 px-6 pt-6 text-label-12 text-muted-foreground">{formTitle}</p>}
-      <FeedbackForm
-        applicationId={applicationId}
-        orgId={orgId}
-        source={source}
-        snapshot={flow.snapshot}
-        defaultValues={flow.defaultValues}
-        mode={flow.mode ?? 'create'}
-        formId={flow.formId}
-        previousSubmissionId={flow.previousSubmissionId}
-        vaultPublicKey={vaultPublicKey}
-        vaultKeyVersion={vaultKeyVersion}
-        wrappedVaultKey={wrappedVaultKey}
-        onComplete={onComplete}
-        onCancel={onCancel}
-      />
-    </div>
+  const feedbackForm = (
+    <FeedbackForm
+      applicationId={applicationId}
+      orgId={orgId}
+      source={source}
+      snapshot={flow.snapshot}
+      defaultValues={flow.defaultValues}
+      mode={flow.mode ?? 'create'}
+      formId={flow.formId}
+      previousSubmissionId={flow.previousSubmissionId}
+      vaultPublicKey={vaultPublicKey}
+      vaultKeyVersion={vaultKeyVersion}
+      wrappedVaultKey={wrappedVaultKey}
+      onComplete={onComplete}
+      onCancel={onCancel}
+      contained={showFormContext}
+    />
   );
+
+  if (showFormContext) {
+    return (
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle className="flex flex-wrap items-center gap-2">
+            <span>{formTitle}</span>
+            <Badge variant="subtle">Feedback form</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>{feedbackForm}</CardContent>
+      </Card>
+    );
+  }
+
+  return <div className="flex min-h-0 flex-1 flex-col">{feedbackForm}</div>;
 }
 
-export function FeedbackSubmissionSkeleton() {
-  return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 space-y-7 overflow-hidden p-6">
-        <Skeleton className="h-4 w-48" />
+export function FeedbackSubmissionSkeleton({ contained = false }: { contained?: boolean } = {}) {
+  const fields = (
+    <div className="space-y-6">
+      <FeedbackFieldSkeleton labelWidth="w-36" fieldClassName="h-10" />
+      <FeedbackFieldSkeleton labelWidth="w-44" fieldClassName="h-24" />
+      <FeedbackFieldSkeleton labelWidth="w-28" fieldClassName="h-10" />
 
-        <FeedbackFieldSkeleton labelWidth="w-36" fieldClassName="h-10" />
-        <FeedbackFieldSkeleton labelWidth="w-44" fieldClassName="h-24" />
-        <FeedbackFieldSkeleton labelWidth="w-28" fieldClassName="h-10" />
-      </div>
-
-      <div className="flex shrink-0 justify-end px-6 py-4">
+      <div className="flex justify-end pt-1">
         <Skeleton className="h-9 w-32 rounded-xl" />
+      </div>
+    </div>
+  );
+
+  if (contained) {
+    return (
+      <Card size="sm">
+        <CardHeader>
+          <Skeleton className="h-5 w-48" />
+        </CardHeader>
+        <CardContent>{fields}</CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="min-h-0 flex-1 overflow-hidden p-6">
+      <div className="space-y-6">
+        <Skeleton className="h-4 w-48" />
+        {fields}
       </div>
     </div>
   );
@@ -249,6 +287,7 @@ interface FeedbackFormProps {
   wrappedVaultKey: WrappedKey | undefined;
   onComplete: () => void;
   onCancel?: () => void;
+  contained?: boolean;
 }
 
 function FeedbackForm(props: FeedbackFormProps) {
@@ -263,6 +302,7 @@ function FeedbackForm(props: FeedbackFormProps) {
     previousSubmissionId,
     onComplete,
     onCancel,
+    contained = false,
   } = props;
   const { mutate: createSubmission, isPending: isCreating } = useCreateFeedbackSubmission();
   const { mutate: updateSubmission, isPending: isUpdating } = useUpdateFeedbackSubmission();
@@ -339,26 +379,28 @@ function FeedbackForm(props: FeedbackFormProps) {
   const submitLabel = mode === 'edit' ? 'Save changes' : 'Submit feedback';
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto">
-        <Form {...form}>
-          <form id={htmlFormId} onSubmit={form.handleSubmit(handleSubmit)} className="p-6">
-            <FormRenderer form={snapshot} control={form.control} />
-          </form>
-        </Form>
-      </div>
+    <div className={cn('min-h-0 flex-1', !contained && 'overflow-y-auto')}>
+      <Form {...form}>
+        <form
+          id={htmlFormId}
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className={cn('flex flex-col gap-6', !contained && 'px-6 pt-6 pb-6')}
+        >
+          <FormRenderer form={snapshot} control={form.control} variant="feedback" />
 
-      <SheetFooter className="shrink-0 flex-row justify-end gap-2">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
-            Cancel
-          </Button>
-        )}
-        <Button type="submit" form={htmlFormId} disabled={isPending || !isDefined(encryptionContext)}>
-          {isPending && <Spinner data-icon="inline-start" />}
-          {submitLabel}
-        </Button>
-      </SheetFooter>
+          <div className="flex shrink-0 flex-row justify-end gap-2 pt-1">
+            {onCancel && (
+              <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+                Cancel
+              </Button>
+            )}
+            <Button type="submit" disabled={isPending || !isDefined(encryptionContext)}>
+              {isPending && <Spinner data-icon="inline-start" />}
+              {submitLabel}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }

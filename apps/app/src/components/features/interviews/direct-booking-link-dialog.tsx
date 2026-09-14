@@ -1,12 +1,17 @@
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
+import { Combobox } from '@comitium/ui/combobox';
+import {
+  FeatureSheetBody,
+  FeatureSheetContent,
+  FeatureSheetFooter,
+  FeatureSheetHeader,
+} from '@comitium/ui/feature-sheet';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@comitium/ui/sheet';
+import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { EnvelopeIcon, SpinnerGapIcon, WarningIcon } from '@phosphor-icons/react';
-import { useCallback } from 'react';
 import { EditorToolbar } from '@/components/tiptap-ui/editor-toolbars';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
 import { DirectBookingInterviewerPicker } from './direct-booking-interviewer-picker';
@@ -41,34 +46,17 @@ export function DirectBookingLinkDialog({
     prefillDefaultInterviewers,
   });
 
-  const renderTemplateOption = useCallback(
-    (template: (typeof dialog.templates)[number]) => (
-      <SelectItem key={template.id} value={template.id}>
-        {template.title} ({template.durationMinutes} min)
-      </SelectItem>
-    ),
-    [],
-  );
-  const renderEmailTemplateOption = useCallback(
-    (template: (typeof dialog.emailTemplates)[number]) => (
-      <SelectItem key={template.id} value={template.id}>
-        {template.name}
-      </SelectItem>
-    ),
-    [],
-  );
-
   return (
     <Sheet open={open} onOpenChange={dialog.handleOpenChange}>
-      <SheetContent side="right" className="flex flex-col p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-3xl">
-        <SheetHeader className="border-b shrink-0">
+      <FeatureSheetContent side="right" size="editor">
+        <FeatureSheetHeader>
           <SheetTitle>Send scheduling link</SheetTitle>
           <SheetDescription>Configure the interview and email the candidate a link to choose a time.</SheetDescription>
-        </SheetHeader>
+        </FeatureSheetHeader>
 
         <Form {...dialog.form}>
           <form onSubmit={dialog.form.handleSubmit(dialog.handleSubmit)} className="flex flex-col flex-1 min-h-0">
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <FeatureSheetBody className="space-y-4">
               {!candidateEmail && (
                 <Alert variant="warning">
                   <WarningIcon />
@@ -83,14 +71,21 @@ export function DirectBookingLinkDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Interview type</FormLabel>
-                    <Select value={field.value} onValueChange={dialog.handleTemplateChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select interview type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>{dialog.templates.map(renderTemplateOption)}</SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Combobox
+                        ariaLabel="Interview type"
+                        options={dialog.templates.map((template) => ({
+                          value: template.id,
+                          label: `${template.title} (${template.durationMinutes} min)`,
+                        }))}
+                        value={field.value || null}
+                        onValueChange={dialog.handleTemplateChange}
+                        placeholder="Select interview type"
+                        searchPlaceholder="Search interview types…"
+                        emptyMessage="No interview types found."
+                        clearLabel="Clear interview type"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -101,23 +96,23 @@ export function DirectBookingLinkDialog({
                 calendarStatusMap={dialog.calendarStatusMap}
                 interviewers={dialog.interviewers}
                 disabled={!dialog.selectedInterviewId}
-                onAdd={dialog.handleAddInterviewer}
-                onRemove={dialog.handleRemoveInterviewer}
+                onChange={dialog.handleInterviewersChange}
               />
 
               {dialog.emailTemplates.length > 0 && (
                 <div className="space-y-2">
                   <Label>Email template</Label>
-                  <Select
-                    value={dialog.selectedTemplateId}
-                    onValueChange={dialog.handleEmailTemplateChange}
+                  <Combobox
+                    ariaLabel="Email template"
+                    options={dialog.emailTemplates.map((template) => ({ value: template.id, label: template.name }))}
+                    value={dialog.selectedTemplateId || null}
+                    onValueChange={(nextValue) => dialog.handleEmailTemplateChange(nextValue ?? '')}
+                    placeholder="Select a template (optional)"
+                    searchPlaceholder="Search email templates…"
+                    emptyMessage="No email templates found."
+                    clearLabel="Clear email template"
                     disabled={dialog.isPending}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a template (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>{dialog.emailTemplates.map(renderEmailTemplateOption)}</SelectContent>
-                  </Select>
+                  />
                 </div>
               )}
 
@@ -146,9 +141,9 @@ export function DirectBookingLinkDialog({
                 />
                 <p className="text-copy-14 text-muted-foreground">The scheduling link is added below your message.</p>
               </div>
-            </div>
+            </FeatureSheetBody>
 
-            <SheetFooter className="border-t shrink-0 flex-row justify-end gap-2">
+            <FeatureSheetFooter>
               <Button type="button" variant="outline" onClick={dialog.handleCancel}>
                 Cancel
               </Button>
@@ -160,10 +155,10 @@ export function DirectBookingLinkDialog({
                 )}
                 Send scheduling link
               </Button>
-            </SheetFooter>
+            </FeatureSheetFooter>
           </form>
         </Form>
-      </SheetContent>
+      </FeatureSheetContent>
     </Sheet>
   );
 }

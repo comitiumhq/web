@@ -1,8 +1,14 @@
 import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
 import { Button } from '@comitium/ui/button';
 import { BROWSER_TZ, formatInTimezone } from '@comitium/ui/date';
+import {
+  FeatureSheetBody,
+  FeatureSheetContent,
+  FeatureSheetFooter,
+  FeatureSheetHeader,
+} from '@comitium/ui/feature-sheet';
 import { Label } from '@comitium/ui/label';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@comitium/ui/sheet';
+import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { CalendarDotsIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
@@ -160,16 +166,13 @@ export function RescheduleInterviewDialog({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="right"
-          className="flex flex-col p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-6xl"
-        >
-          <SheetHeader className="border-b shrink-0">
+        <FeatureSheetContent side="right" size="wide">
+          <FeatureSheetHeader>
             <SheetTitle>Reschedule Interview</SheetTitle>
             <SheetDescription>Pick a new time slot. Interviewers and meeting details stay the same.</SheetDescription>
-          </SheetHeader>
+          </FeatureSheetHeader>
 
-          <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+          <FeatureSheetBody className="flex flex-col gap-4">
             <div className="flex flex-col gap-1 rounded-md border bg-muted p-3">
               <div className="flex items-center gap-2 text-label-14">
                 <CalendarDotsIcon className="size-4 text-muted-foreground" />
@@ -205,9 +208,9 @@ export function RescheduleInterviewDialog({
             </div>
 
             <ReasonPicker state={picker} disabled={isPending} idPrefix="reschedule" />
-          </div>
+          </FeatureSheetBody>
 
-          <SheetFooter className="border-t shrink-0 flex-row justify-end gap-2">
+          <FeatureSheetFooter>
             <Button type="button" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
@@ -215,8 +218,8 @@ export function RescheduleInterviewDialog({
               {isPending && <SpinnerGapIcon data-icon="inline-start" className="animate-spin" />}
               Reschedule
             </Button>
-          </SheetFooter>
-        </SheetContent>
+          </FeatureSheetFooter>
+        </FeatureSheetContent>
       </Sheet>
       <AvailabilityConflictDialog
         open={conflictingBody !== null}
