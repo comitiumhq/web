@@ -1,10 +1,19 @@
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { EmptyState } from '@comitium/ui/empty-state';
-import { Skeleton } from '@comitium/ui/skeleton';
 import { type CellInfo, IlamyCalendar, type IlamyCalendarProps, type Resource } from '@ilamy/calendar';
 import { CalendarDotsIcon, SpinnerGapIcon, UserPlusIcon } from '@phosphor-icons/react';
 import { parseISO } from 'date-fns';
-import { type CSSProperties, memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  type CSSProperties,
+  memo,
+  type PointerEventHandler,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 import { useQueryInterviewBusy } from '@/hooks/queries/use-query-interview-busy';
 import { useQueryOrgTeam, useQueryTeamCalendarStatusMap } from '@/hooks/queries/use-query-org-team';
@@ -12,7 +21,7 @@ import { cn } from '@/lib/utils';
 
 import type { SelectedInterviewer } from '../../types';
 import {
-  CALENDAR_SLOT_MINUTES,
+  CALENDAR_GRID_SLOT_MINUTES,
   CALENDAR_START_MINUTES,
   getAvailabilityRange,
   getCalendarDate,
@@ -22,25 +31,36 @@ import {
   areInterviewersWorkingDuring,
   createAvailabilityIndex,
   getConflictingInterviewerIds,
+  hasCompleteInterviewerAvailability,
   isInterviewerWorkingDuring,
 } from './availability';
 import { ResourceColumn } from './column';
-import { getDraftHeightPercent, getDraftTopPercent, getZonedMinutes, isFutureSlot } from './draft-slot';
-import { CalendarEventProvider, renderEvent } from './event';
-import { type AvailableMember, CalendarHeader, CalendarHeaderEmpty } from './header';
+import {
+  getDraftHeightPercent,
+  getDraftTopPercent,
+  getPointerSlotStart,
+  getZonedMinutes,
+  isFutureSlot,
+} from './draft-slot';
+import { DraftSlotOverlay } from './draft-slot-overlay';
+import { CalendarHeader, CalendarHeaderEmpty } from './header';
 import {
   BUSINESS_HOURS,
   type CalendarResourceData,
   createCalendarEvents,
   createCalendarResources,
 } from './ilamy-adapter';
+import { CALENDAR_DRAFT_HEIGHT_PROPERTY, CALENDAR_DRAFT_TOP_PROPERTY, ILAMY_VERTICAL_CELL_SELECTOR } from './ilamy-dom';
+import { ProviderEventsOverlay } from './provider-events-overlay';
 import { useDraftSlotDrag } from './use-draft-slot-drag';
+import './interviewer-calendar.css';
 
 const CALENDAR_CLASSES: NonNullable<IlamyCalendarProps['classesOverride']> = {
-  disabledCell: 'bg-muted/40 text-muted-foreground pointer-events-none',
+  disabledCell: 'bg-muted/20 text-muted-foreground pointer-events-none',
 };
 
 const StaticIlamyCalendar = memo(IlamyCalendar);
+const EMPTY_CALENDAR_EVENTS: NonNullable<IlamyCalendarProps['events']> = [];
 const EMPTY_RESOURCE_IDS: ReadonlySet<string> = new Set();
 
 function showPastSlotError() {
@@ -51,23 +71,33 @@ function showOutsideWorkingHoursError() {
   toast.error("Pick a time within every interviewer's working hours");
 }
 
-function AvailabilityUnavailable({ className, description }: { className: string; description: string }) {
+interface AvailabilityUnavailableProps {
+  className: string;
+  description: string;
+  header: ReactNode;
+}
+
+function AvailabilityUnavailable({ className, description, header }: AvailabilityUnavailableProps) {
   return (
-    <div className={cn('interviewer-calendar flex items-center justify-center rounded-md border bg-card', className)}>
-      <EmptyState icon={CalendarDotsIcon} title="Availability unavailable" description={description} />
+    <div className={cn('interviewer-calendar flex flex-col overflow-hidden', className)}>
+      {header}
+      <div className="flex flex-1 items-center justify-center overflow-hidden rounded-xl border bg-card">
+        <EmptyState icon={CalendarDotsIcon} title="Availability unavailable" description={description} />
+      </div>
     </div>
   );
 }
 
 type VisibleDate = Parameters<NonNullable<IlamyCalendarProps['onDateChange']>>[0];
 type CalendarStyle = CSSProperties & {
-  '--calendar-draft-height': string;
-  '--calendar-draft-top': string;
+  [CALENDAR_DRAFT_HEIGHT_PROPERTY]: string;
+  [CALENDAR_DRAFT_TOP_PROPERTY]: string;
 };
 
 interface InterviewerCalendarProps {
   applicationId: string;
   orgId: string;
+  interviewTypeControl?: ReactNode;
   interviewers: SelectedInterviewer[];
   onInterviewersChange?: (next: SelectedInterviewer[]) => void;
   timeZone: string;
@@ -79,12 +109,13 @@ interface InterviewerCalendarProps {
   hasInterviewType: boolean;
   visibleDay: string;
   onVisibleDayChange: (day: string) => void;
-  className?: string;
+  className: string;
 }
 
 function InterviewerCalendarImpl({
   applicationId,
   orgId,
+  interviewTypeControl,
   interviewers,
   onInterviewersChange,
   timeZone,
@@ -96,14 +127,19 @@ function InterviewerCalendarImpl({
   hasInterviewType,
   visibleDay,
   onVisibleDayChange,
-  className = 'h-[640px]',
+  className,
 }: InterviewerCalendarProps) {
   const lockInterviewers = !onInterviewersChange;
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const pointerSlotRef = useRef<Date | null>(null);
+  const [interviewerPickerOpen, setInterviewerPickerOpen] = useState(false);
+
   const { data: orgMembers } = useQueryOrgTeam(orgId);
   const calendarStatusMap = useQueryTeamCalendarStatusMap(orgId);
-  const calendarRef = useRef<HTMLDivElement>(null);
+
   const interviewerUserIds = useMemo(() => interviewers.map((interviewer) => interviewer.userId), [interviewers]);
   const availabilityRange = useMemo(() => getAvailabilityRange(visibleDay, timeZone), [timeZone, visibleDay]);
+
   const availabilityQuery = useQueryInterviewBusy({
     applicationId,
     interviewerUserIds,
@@ -111,42 +147,10 @@ function InterviewerCalendarImpl({
     endTime: availabilityRange.end,
     timeZone,
   });
+
   const interviewerAvailability = availabilityQuery.data?.data.interviewers;
-
-  const availableMembers = useMemo<AvailableMember[]>(() => {
-    const selected = new Set(interviewerUserIds);
-
-    return (orgMembers ?? [])
-      .filter((member) => member.isActive && !selected.has(member.userId))
-      .map((member) => ({
-        member,
-        hasCalendar: calendarStatusMap.get(member.userId) ?? false,
-      }));
-  }, [calendarStatusMap, interviewerUserIds, orgMembers]);
-
-  const handleAdd = useCallback(
-    (userId: string) => {
-      if (!onInterviewersChange) {
-        return;
-      }
-
-      const entry = availableMembers.find((available) => available.member.userId === userId);
-
-      if (!entry?.hasCalendar) {
-        return;
-      }
-
-      onInterviewersChange([
-        ...interviewers,
-        {
-          userId: entry.member.userId,
-          member: entry.member,
-          role: 'interviewer',
-        },
-      ]);
-    },
-    [availableMembers, interviewers, onInterviewersChange],
-  );
+  const availabilityIsPending = availabilityQuery.isPending || availabilityQuery.isPlaceholderData;
+  const hasCompleteAvailability = hasCompleteInterviewerAvailability(interviewerAvailability, interviewerUserIds);
 
   const handleRemove = useCallback(
     (userId: string) => {
@@ -162,15 +166,15 @@ function InterviewerCalendarImpl({
   const resources = useMemo(() => createCalendarResources(interviewers), [interviewers]);
 
   const availabilityIndex = useMemo(() => createAvailabilityIndex(interviewerAvailability), [interviewerAvailability]);
-  const events = useMemo(
-    () => createCalendarEvents({ availability: availabilityIndex, interviewers, timeZone, visibleDay }),
-    [availabilityIndex, interviewers, timeZone, visibleDay],
-  );
+
+  const events = useMemo(() => createCalendarEvents(availabilityIndex), [availabilityIndex]);
 
   const calendarInitialDate = useMemo(() => getCalendarDate(visibleDay, timeZone), [timeZone, visibleDay]);
 
   const unavailableInterviewers =
     interviewerAvailability?.filter((interviewer) => interviewer.status === 'unavailable') ?? [];
+  const availabilityFailed = !availabilityIsPending && (availabilityQuery.isError || !hasCompleteAvailability);
+  const availabilityUnavailable = !availabilityIsPending && unavailableInterviewers.length > 0;
 
   const isSlotWithinWorkingHours = useCallback(
     (start: Date) => areInterviewersWorkingDuring(availabilityIndex, interviewerUserIds, start, durationMinutes),
@@ -195,22 +199,52 @@ function InterviewerCalendarImpl({
 
   const handleCellClick = useCallback(
     (info: CellInfo) => {
-      if (!isFutureSlot(info.start.toDate())) {
+      const pointerSlot = pointerSlotRef.current;
+      const start = pointerSlot ?? info.start.toDate();
+
+      pointerSlotRef.current = null;
+
+      if (!isFutureSlot(start)) {
         showPastSlotError();
 
         return;
       }
 
-      if (!isSlotWithinWorkingHours(info.start.toDate())) {
+      if (!isSlotWithinWorkingHours(start)) {
         showOutsideWorkingHoursError();
 
         return;
       }
 
-      onValueChange(info.start.toISOString());
+      onValueChange(start.toISOString());
     },
     [isSlotWithinWorkingHours, onValueChange],
   );
+
+  const handlePointerDownCapture = useCallback<PointerEventHandler<HTMLDivElement>>((event) => {
+    if (event.button !== 0 || !(event.target instanceof Element)) {
+      pointerSlotRef.current = null;
+
+      return;
+    }
+
+    const cell = event.target.closest<HTMLElement>(ILAMY_VERTICAL_CELL_SELECTOR);
+    const cellStart = cell?.dataset.start;
+
+    if (!cell || !cellStart || cell.dataset.disabled === 'true') {
+      pointerSlotRef.current = null;
+
+      return;
+    }
+
+    const cellBounds = cell.getBoundingClientRect();
+
+    pointerSlotRef.current = getPointerSlotStart(
+      new Date(cellStart),
+      event.clientY - cellBounds.top,
+      cellBounds.height,
+    );
+  }, []);
 
   const handleDateChange = useCallback(
     (date: VisibleDate) => {
@@ -239,14 +273,42 @@ function InterviewerCalendarImpl({
   const calendarHeader = useMemo(
     () => (
       <CalendarHeader
-        availableMembers={availableMembers}
-        onAdd={handleAdd}
+        interviewTypeControl={interviewTypeControl}
+        members={orgMembers ?? []}
+        calendarStatusMap={calendarStatusMap}
+        interviewers={interviewers}
+        onInterviewersChange={onInterviewersChange}
+        interviewerPickerOpen={interviewerPickerOpen}
+        onInterviewerPickerOpenChange={setInterviewerPickerOpen}
         timeZone={timeZone}
         onTimeZoneChange={onTimeZoneChange}
-        lockInterviewers={lockInterviewers}
       />
     ),
-    [availableMembers, handleAdd, lockInterviewers, onTimeZoneChange, timeZone],
+    [
+      calendarStatusMap,
+      interviewTypeControl,
+      interviewerPickerOpen,
+      interviewers,
+      onInterviewersChange,
+      onTimeZoneChange,
+      orgMembers,
+      timeZone,
+    ],
+  );
+
+  const fallbackHeader = (
+    <CalendarHeaderEmpty
+      interviewTypeControl={interviewTypeControl}
+      members={orgMembers ?? []}
+      calendarStatusMap={calendarStatusMap}
+      interviewers={interviewers}
+      onInterviewersChange={onInterviewersChange}
+      interviewerPickerOpen={interviewerPickerOpen}
+      onInterviewerPickerOpenChange={setInterviewerPickerOpen}
+      timeZone={timeZone}
+      onTimeZoneChange={onTimeZoneChange}
+      canAddInterviewer={hasInterviewType}
+    />
   );
 
   const draftStart = useMemo(() => (value ? parseISO(value) : null), [value]);
@@ -261,16 +323,32 @@ function InterviewerCalendarImpl({
   const draftVisible = value ? isCalendarSlotVisible({ value, availabilityRange, timeZone, durationMinutes }) : false;
 
   useEffect(() => {
-    if (value && !draftVisible) {
+    if (
+      value &&
+      (!draftVisible ||
+        availabilityFailed ||
+        availabilityUnavailable ||
+        (draftStart && !availabilityIsPending && !isSlotWithinWorkingHours(draftStart)))
+    ) {
       onValueChange(null);
     }
-  }, [draftVisible, onValueChange, value]);
+  }, [
+    availabilityFailed,
+    availabilityIsPending,
+    availabilityUnavailable,
+    draftStart,
+    draftVisible,
+    isSlotWithinWorkingHours,
+    onValueChange,
+    value,
+  ]);
 
   const draftMinutes = value ? getZonedMinutes(value, timeZone) : CALENDAR_START_MINUTES;
   const calendarStyle: CalendarStyle = {
-    '--calendar-draft-height': `${getDraftHeightPercent(durationMinutes)}%`,
-    '--calendar-draft-top': `${getDraftTopPercent(draftMinutes)}%`,
+    [CALENDAR_DRAFT_HEIGHT_PROPERTY]: `${getDraftHeightPercent(durationMinutes)}%`,
+    [CALENDAR_DRAFT_TOP_PROPERTY]: `${getDraftTopPercent(draftMinutes)}%`,
   };
+
   const draftPointerHandlers = useDraftSlotDrag({
     calendarRef,
     value,
@@ -281,39 +359,12 @@ function InterviewerCalendarImpl({
     isDropAllowed: isSlotWithinWorkingHours,
     onDisallowedDrop: showOutsideWorkingHoursError,
   });
-  const calendarEventContext = useMemo(
-    () => ({
-      title: draftEventTitle,
-      draftStart,
-      durationMinutes,
-      timeZone,
-      conflictingResourceIds,
-      visible: draftVisible,
-      ...draftPointerHandlers,
-    }),
-    [
-      conflictingResourceIds,
-      draftEventTitle,
-      draftPointerHandlers,
-      draftStart,
-      draftVisible,
-      durationMinutes,
-      timeZone,
-    ],
-  );
 
   if (interviewers.length === 0) {
     return (
-      <div className={cn('interviewer-calendar flex flex-col overflow-hidden rounded-md border bg-card', className)}>
-        <CalendarHeaderEmpty
-          availableMembers={availableMembers}
-          onAdd={handleAdd}
-          timeZone={timeZone}
-          onTimeZoneChange={onTimeZoneChange}
-          canAddInterviewer={hasInterviewType}
-          lockInterviewers={lockInterviewers}
-        />
-        <div className="flex flex-1 items-center justify-center">
+      <div className={cn('interviewer-calendar flex flex-col overflow-hidden', className)}>
+        {fallbackHeader}
+        <div className="flex flex-1 items-center justify-center overflow-hidden rounded-xl border bg-card">
           {hasInterviewType ? (
             <EmptyState
               icon={UserPlusIcon}
@@ -332,67 +383,89 @@ function InterviewerCalendarImpl({
     );
   }
 
-  if (availabilityQuery.isLoading) {
-    return <Skeleton className={cn('w-full rounded-md', className)} />;
-  }
-
-  if (availabilityQuery.isError || !interviewerAvailability) {
+  if (availabilityFailed) {
     return (
       <AvailabilityUnavailable
         className={className}
+        header={fallbackHeader}
         description="Calendar availability could not be loaded. Try again before choosing a time."
       />
     );
   }
 
-  if (unavailableInterviewers.length > 0) {
+  if (availabilityUnavailable) {
     const unavailableUserIds = new Set(unavailableInterviewers.map((interviewer) => interviewer.userId));
+
     const unavailableNames = interviewers
       .filter((interviewer) => unavailableUserIds.has(interviewer.userId))
       .map((interviewer) => getMemberDisplayName(interviewer.member))
       .join(', ');
+
     const unavailableDescription = unavailableNames
       ? `Calendar availability is missing for: ${unavailableNames}. Check their connection and try again.`
       : 'One or more interviewer calendars are unavailable. Check their connection and try again.';
 
-    return <AvailabilityUnavailable className={className} description={unavailableDescription} />;
+    return (
+      <AvailabilityUnavailable className={className} header={fallbackHeader} description={unavailableDescription} />
+    );
   }
 
   return (
     <div
       ref={calendarRef}
-      className={cn('interviewer-calendar relative overflow-hidden rounded-md border bg-card', className)}
+      className={cn('interviewer-calendar relative overflow-hidden', className)}
       data-draft-visible={draftVisible ? 'true' : 'false'}
+      onPointerDownCapture={handlePointerDownCapture}
       style={calendarStyle}
     >
-      <CalendarEventProvider value={calendarEventContext}>
-        <StaticIlamyCalendar
-          orientation="vertical"
-          initialView="day"
-          initialDate={calendarInitialDate}
-          resources={resources}
-          events={events}
-          businessHours={BUSINESS_HOURS}
-          hideNonBusinessHours
-          slotDuration={CALENDAR_SLOT_MINUTES}
-          timeFormat="12-hour"
-          timezone={timeZone}
-          headerComponent={calendarHeader}
-          renderResource={renderResource}
-          renderEvent={renderEvent}
-          isCellDisabled={isCellOutsideWorkingHours}
-          classesOverride={CALENDAR_CLASSES}
-          eventSpacing={0}
-          onCellClick={handleCellClick}
-          onDateChange={handleDateChange}
-          disableEventClick
-          disableDragAndDrop
-        />
-      </CalendarEventProvider>
-      {availabilityQuery.isFetching && !availabilityQuery.isLoading && (
+      <StaticIlamyCalendar
+        orientation="vertical"
+        initialView="day"
+        initialDate={calendarInitialDate}
+        resources={resources}
+        events={EMPTY_CALENDAR_EVENTS}
+        businessHours={BUSINESS_HOURS}
+        hideNonBusinessHours
+        slotDuration={CALENDAR_GRID_SLOT_MINUTES}
+        timeFormat="12-hour"
+        timezone={timeZone}
+        headerComponent={calendarHeader}
+        renderResource={renderResource}
+        isCellDisabled={isCellOutsideWorkingHours}
+        classesOverride={CALENDAR_CLASSES}
+        eventSpacing={0}
+        onCellClick={handleCellClick}
+        onDateChange={handleDateChange}
+        disableEventClick
+        disableDragAndDrop
+      />
+      <ProviderEventsOverlay
+        calendarRef={calendarRef}
+        events={events}
+        resourceIds={interviewerUserIds}
+        timeZone={timeZone}
+        visibleDay={visibleDay}
+      />
+      <DraftSlotOverlay
+        calendarRef={calendarRef}
+        interviewers={interviewers}
+        conflictingResourceIds={conflictingResourceIds}
+        draftStart={draftStart}
+        durationMinutes={durationMinutes}
+        timeZone={timeZone}
+        title={draftEventTitle}
+        visible={draftVisible}
+        {...draftPointerHandlers}
+      />
+      <output className="sr-only" aria-live="polite">
+        {draftStart ? `Selected ${draftEventTitle} at ${draftStart.toISOString()}.` : 'No interview time selected.'}
+      </output>
+      {(availabilityIsPending || availabilityQuery.isFetching) && (
         <output
-          className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 backdrop-blur-[1px]"
-          aria-label="Refreshing interviewer availability"
+          className="calendar-availability-loading absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[1px]"
+          aria-label={
+            availabilityIsPending ? 'Loading interviewer availability' : 'Refreshing interviewer availability'
+          }
         >
           <SpinnerGapIcon className="size-5 animate-spin text-muted-foreground" />
         </output>

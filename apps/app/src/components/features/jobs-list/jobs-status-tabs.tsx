@@ -34,10 +34,10 @@ const StatusTabTrigger = memo(function StatusTabTrigger({ value, label, count, l
       value={value}
       aria-label={loading ? `${label} loading` : `${label} ${count}`}
       aria-busy={loading}
-      className="group gap-1.5 rounded-3xl px-3 text-button-14 dark:data-active:border-transparent dark:data-active:bg-secondary"
+      className="group gap-1.5 rounded-3xl px-3 text-label-14"
     >
       {label}
-      <span className="inline-flex h-5 min-w-3 items-center justify-center text-label-12 font-semibold leading-none text-muted-foreground tabular-nums group-data-[state=active]:text-foreground/70">
+      <span className="inline-flex h-5 min-w-3 items-center justify-center text-label-12 font-medium leading-none text-muted-foreground tabular-nums transition-colors duration-200 ease-out group-hover:text-foreground/70 group-data-[state=active]:text-foreground/70 motion-reduce:transition-none">
         {loading ? <Skeleton className="h-2.5 w-3 rounded-sm" /> : count}
       </span>
     </TabsTrigger>

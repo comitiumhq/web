@@ -62,7 +62,11 @@ export const TemplateTableRow = memo(function TemplateTableRow({
 
   return (
     <>
-      <TableRow className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })} onClick={handleRowClick}>
+      <TableRow
+        className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })}
+        aria-label={!isArchived ? `Open ${template.name}` : undefined}
+        onClick={!isArchived ? handleRowClick : undefined}
+      >
         <TableCell className="w-52 max-w-52">
           <span className="text-label-14 truncate block">{template.name}</span>
         </TableCell>
@@ -91,7 +95,7 @@ export const TemplateTableRow = memo(function TemplateTableRow({
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
                   <DotsThreeIcon />
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">Actions for {template.name}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>

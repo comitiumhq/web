@@ -73,12 +73,12 @@ function SignedInPublicUserMenu({ user }: { user: User }) {
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full shrink-0 p-0 overflow-hidden"
+          variant="ghost"
+          size="icon-lg"
+          className="shrink-0 overflow-hidden rounded-full p-0"
           aria-label="Open account menu"
         >
-          <UserAvatar identity={identity} />
+          <UserAvatar identity={identity} className="size-9 text-sm" />
         </Button>
       </DropdownMenuTrigger>
 

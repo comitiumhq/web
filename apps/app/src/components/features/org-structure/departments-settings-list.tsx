@@ -78,8 +78,8 @@ export function DepartmentsSettingsList({ orgId }: DepartmentsSettingsListProps)
       <EntitySettingsPage
         title="Departments & Teams"
         tab={tab}
-        activeCount={activeDepartments.length}
-        archivedCount={archivedDepartments.length}
+        activeCount={isLoading ? null : activeDepartments.length}
+        archivedCount={isLoading ? null : archivedDepartments.length}
         isError={Boolean(error)}
         errorDescription="We couldn't load departments. Please try again."
         onTabChange={handleTabChange}

@@ -17,15 +17,16 @@ import { ConnectWalletButton } from './connect-wallet-button';
 
 interface OrgGuardProps {
   orgId: string;
+  loadingFallback?: ReactNode;
   children: (org: MyOrg) => ReactNode;
 }
 
-export function OrgGuard({ orgId, children }: OrgGuardProps) {
+export function OrgGuard({ orgId, loadingFallback, children }: OrgGuardProps) {
   const { isSignedIn, isSessionLoading, needsSessionRecovery } = useSession();
   const { org, hasSessionExpired, isWaitingForOrganization } = useOrgGuardState(orgId, isSignedIn);
 
   if (isSessionLoading && !org) {
-    return <PageLoader />;
+    return loadingFallback ?? <PageLoader />;
   }
 
   if (needsSessionRecovery) {
@@ -41,7 +42,7 @@ export function OrgGuard({ orgId, children }: OrgGuardProps) {
   }
 
   if (isWaitingForOrganization) {
-    return <PageLoader />;
+    return loadingFallback ?? <PageLoader />;
   }
 
   if (!org) {

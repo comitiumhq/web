@@ -1,14 +1,8 @@
 import { Button } from '@comitium/ui/button';
-import {
-  FeatureSheetBody,
-  FeatureSheetContent,
-  FeatureSheetFooter,
-  FeatureSheetHeader,
-} from '@comitium/ui/feature-sheet';
+import { Combobox } from '@comitium/ui/combobox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
-import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -124,64 +118,59 @@ export function DepartmentSheet({ orgId, department, departments, open, onOpenCh
   const title = isEdit ? 'Edit department' : 'New department';
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent width="lg">
-        <FeatureSheetHeader>
-          <SheetTitle className="text-heading-20">{title}</SheetTitle>
-          <SheetDescription>Organize jobs and control team access by department.</SheetDescription>
-        </FeatureSheetHeader>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-heading-20">{title}</DialogTitle>
+          <DialogDescription>Organize jobs and control team access by department.</DialogDescription>
+        </DialogHeader>
 
-        <FeatureSheetBody>
-          <Form {...form}>
-            <form id="department-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input autoFocus placeholder="Engineering" disabled={isPending} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <Form {...form}>
+          <form id="department-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input autoFocus placeholder="Engineering" disabled={isPending} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="parentDepartmentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Is under</FormLabel>
-                    <Select
-                      value={field.value ?? 'none'}
-                      onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
+            <FormField
+              control={form.control}
+              name="parentDepartmentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Is under</FormLabel>
+                  <FormControl>
+                    <Combobox
+                      ariaLabel="Parent department"
+                      options={parentOptions.map((option) => ({
+                        value: option.id,
+                        label: departmentParentLabel(option),
+                      }))}
+                      value={field.value ?? null}
+                      onValueChange={field.onChange}
+                      placeholder="None"
+                      searchPlaceholder="Search departments…"
+                      emptyMessage="No departments found."
+                      clearLabel="No parent department"
                       disabled={isPending}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {parentOptions.map((option) => (
-                          <SelectItem key={option.id} value={option.id}>
-                            {departmentParentLabel(option)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
-        </FeatureSheetBody>
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
 
-        <FeatureSheetFooter>
+        <DialogFooter>
           <Button type="button" variant="outline" onClick={handleCancel} disabled={isPending}>
             Cancel
           </Button>
@@ -189,8 +178,8 @@ export function DepartmentSheet({ orgId, department, departments, open, onOpenCh
             {isPending && <Spinner data-icon="inline-start" />}
             {isPending ? 'Saving...' : submitLabel}
           </Button>
-        </FeatureSheetFooter>
-      </FeatureSheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

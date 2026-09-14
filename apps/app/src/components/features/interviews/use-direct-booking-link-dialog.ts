@@ -12,7 +12,6 @@ import { useQueryOrgTeam, useQueryTeamCalendarStatusMap } from '@/hooks/queries/
 import { useEmailTemplateSelector } from '@/hooks/use-email-template-selector';
 import { useQueryOrgMe } from '@/hooks/use-permissions';
 import { createSchedulingEmailDoc } from '@/lib/applications/communication/direct-booking-link-email';
-import type { OrgTeamMember } from '@/lib/schemas/org';
 import type { DefaultInterviewer } from '@/lib/schemas/stage-activities';
 import { appendSignature } from '@/lib/utils/email-tokens';
 
@@ -69,13 +68,16 @@ export function useDirectBookingLinkDialog({
 }: UseDirectBookingLinkDialogParams) {
   const editorRef = useRef<RichTextEditorHandle>(null);
   const [interviewers, setInterviewers] = useState<SelectedInterviewer[]>([]);
+
   const { data: templatesData } = useQueryInterviewTemplates(orgId);
   const templates = useMemo(() => templatesData?.data ?? [], [templatesData]);
+
   const { data: meData } = useQueryOrgMe(orgId);
   const { data: calStatus } = useQueryCalendarStatus(orgId);
   const { data: orgMembers } = useQueryOrgTeam(orgId);
   const calendarStatusMap = useQueryTeamCalendarStatusMap(orgId);
   const initialTimeZone = meData?.timezone ?? BROWSER_TZ;
+
   const {
     templates: emailTemplates,
     selectedTemplateId,
@@ -92,7 +94,9 @@ export function useDirectBookingLinkDialog({
     jobTitle,
     useCase: 'interview_confirmation',
   });
+
   const defaultMessageDoc = useMemo(() => createSchedulingEmailDoc(candidateFirstName), [candidateFirstName]);
+
   const editorContent = useMemo(
     () => appendSignature(messageDoc ?? defaultMessageDoc, emailSignature),
     [defaultMessageDoc, emailSignature, messageDoc],
@@ -105,6 +109,7 @@ export function useDirectBookingLinkDialog({
 
   const selectedInterviewId = useWatch({ control: form.control, name: 'interviewId' });
   const organizerCalendarConnected = calStatus?.calendarConnected === true;
+
   const canSubmit =
     Boolean(candidateEmail) &&
     Boolean(currentStageId) &&
@@ -125,8 +130,14 @@ export function useDirectBookingLinkDialog({
   });
 
   const handleTemplateChange = useCallback(
-    (templateId: string) => {
-      form.setValue('interviewId', templateId);
+    (templateId: string | null) => {
+      form.setValue('interviewId', templateId ?? '');
+
+      if (!templateId) {
+        form.setValue('durationMinutes', DEFAULT_FORM_VALUES.durationMinutes);
+
+        return;
+      }
 
       const template = templates.find((entry) => entry.id === templateId);
 
@@ -179,19 +190,8 @@ export function useDirectBookingLinkDialog({
     setInterviewers,
   });
 
-  const handleAddInterviewer = useCallback((member: OrgTeamMember) => {
-    setInterviewers((current) => [
-      ...current,
-      {
-        userId: member.userId,
-        member,
-        role: 'interviewer',
-      },
-    ]);
-  }, []);
-
-  const handleRemoveInterviewer = useCallback((userId: string) => {
-    setInterviewers((current) => current.filter((interviewer) => interviewer.userId !== userId));
+  const handleInterviewersChange = useCallback((nextInterviewers: SelectedInterviewer[]) => {
+    setInterviewers(nextInterviewers);
   }, []);
 
   const handleOpenChange = useCallback(
@@ -258,8 +258,7 @@ export function useDirectBookingLinkDialog({
     canSubmit,
     handleEmailTemplateChange,
     handleTemplateChange,
-    handleAddInterviewer,
-    handleRemoveInterviewer,
+    handleInterviewersChange,
     handleOpenChange,
     handleCancel,
     handleSubmit,

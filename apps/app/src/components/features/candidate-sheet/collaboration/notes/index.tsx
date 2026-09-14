@@ -76,7 +76,7 @@ export function NotesTab({
     <div className="h-full min-h-0 overflow-y-auto">
       <div className="flex flex-col gap-3 px-4 pb-4 pt-20">
         {canManageNotes && candidateId && vaultPublicKey && (
-          <div className="border-b pb-3">
+          <div className="border-b border-separator pb-3">
             <NoteForm
               orgId={orgId}
               candidateId={candidateId}

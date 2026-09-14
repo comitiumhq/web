@@ -54,7 +54,7 @@ export function PublicScheduleSlotSelectionStep({
           />
 
           {availabilityPanel ? (
-            <section className="min-w-0 border-t border-border/70 p-5 sm:p-6 md:col-start-2 md:border-t-0 lg:p-6 xl:col-span-2">
+            <section className="min-w-0 border-t border-separator p-5 sm:p-6 md:col-start-2 md:border-t-0 lg:p-6 xl:col-span-2">
               <AvailabilityStatePanel {...availabilityPanel} />
             </section>
           ) : (
@@ -96,7 +96,7 @@ function ScheduleSlotSelectionPanels({
 }) {
   return (
     <>
-      <section className="min-w-0 border-t border-border/70 p-5 sm:p-6 md:border-t-0 lg:p-6">
+      <section className="min-w-0 border-t border-separator p-5 sm:p-6 md:border-t-0 lg:p-6">
         <MemoizedScheduleDatePicker
           groups={slotGroups}
           selectedDayKey={selectedDayKey}
@@ -105,7 +105,7 @@ function ScheduleSlotSelectionPanels({
         />
       </section>
 
-      <section className="min-w-0 border-t border-border/70 p-5 sm:p-6 md:col-start-2 xl:col-start-auto xl:border-t-0 xl:border-l">
+      <section className="min-w-0 border-t border-separator p-5 sm:p-6 md:col-start-2 xl:col-start-auto xl:border-t-0 xl:border-l">
         <div className="space-y-5">
           <SlotPicker
             group={selectedDayGroup}

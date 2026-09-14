@@ -38,15 +38,16 @@ export function UserMenuDropdown({ state }: UserMenuDropdownProps) {
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full shrink-0 p-0 overflow-hidden"
+          variant="ghost"
+          size="icon-lg"
+          className="shrink-0 overflow-hidden rounded-full p-0"
           aria-label="Open account menu"
         >
           <UserAvatar
             identity={state.identity}
             imageSrc={avatarImageSrc}
             imageAlt={avatarImageSrc && state.identity?.name ? state.identity.name : ''}
+            className="size-9 text-sm"
           />
         </Button>
       </DropdownMenuTrigger>

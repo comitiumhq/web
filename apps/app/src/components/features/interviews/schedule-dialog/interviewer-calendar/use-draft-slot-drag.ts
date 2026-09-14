@@ -14,9 +14,7 @@ import {
   getMinimumDraftMinutes,
   getZonedMinutes,
 } from './draft-slot';
-
-const EVENT_LAYER_SELECTOR = '[data-testid^="vertical-events-day-col-"]';
-const DRAFT_TOP_PROPERTY = '--calendar-draft-top';
+import { CALENDAR_DRAFT_TOP_PROPERTY, ILAMY_GRID_BODY_SELECTOR } from './ilamy-dom';
 
 interface DraftSlotDragOptions {
   calendarRef: RefObject<HTMLDivElement | null>;
@@ -39,14 +37,14 @@ interface DragState {
 }
 
 export interface DraftSlotPointerHandlers {
-  onPointerDown: PointerEventHandler<HTMLDivElement>;
-  onPointerMove: PointerEventHandler<HTMLDivElement>;
-  onPointerUp: PointerEventHandler<HTMLDivElement>;
-  onPointerCancel: PointerEventHandler<HTMLDivElement>;
+  onPointerDown: PointerEventHandler<HTMLElement>;
+  onPointerMove: PointerEventHandler<HTMLElement>;
+  onPointerUp: PointerEventHandler<HTMLElement>;
+  onPointerCancel: PointerEventHandler<HTMLElement>;
 }
 
 function setDraftTop(calendar: HTMLDivElement | null, minutes: number) {
-  calendar?.style.setProperty(DRAFT_TOP_PROPERTY, `${getDraftTopPercent(minutes)}%`);
+  calendar?.style.setProperty(CALENDAR_DRAFT_TOP_PROPERTY, `${getDraftTopPercent(minutes)}%`);
 }
 
 function restoreDraftTop(calendar: HTMLDivElement | null, value: string, timeZone: string) {
@@ -65,7 +63,7 @@ function rejectDraftDrop(calendar: HTMLDivElement | null, value: string, timeZon
   notify?.();
 }
 
-function releasePointer(element: HTMLDivElement, pointerId: number) {
+function releasePointer(element: HTMLElement, pointerId: number) {
   try {
     if (element.hasPointerCapture(pointerId)) {
       element.releasePointerCapture(pointerId);
@@ -75,7 +73,7 @@ function releasePointer(element: HTMLDivElement, pointerId: number) {
   }
 }
 
-function capturePointer(element: HTMLDivElement, pointerId: number) {
+function capturePointer(element: HTMLElement, pointerId: number) {
   try {
     element.setPointerCapture(pointerId);
   } catch {
@@ -112,7 +110,7 @@ export function useDraftSlotDrag({
   }, []);
 
   const finishDrag = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>, shouldCommit: boolean) => {
+    (event: ReactPointerEvent<HTMLElement>, shouldCommit: boolean) => {
       const drag = dragRef.current;
 
       if (!drag || drag.pointerId !== event.pointerId || !value) {
@@ -154,14 +152,14 @@ export function useDraftSlotDrag({
   );
 
   const onPointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
+    (event: ReactPointerEvent<HTMLElement>) => {
       if (!value || event.button !== 0) {
         return;
       }
 
-      const eventLayer = event.currentTarget.closest<HTMLElement>(EVENT_LAYER_SELECTOR);
+      const calendarGrid = event.currentTarget.closest<HTMLElement>(ILAMY_GRID_BODY_SELECTOR);
 
-      if (!eventLayer) {
+      if (!calendarGrid) {
         return;
       }
 
@@ -186,14 +184,14 @@ export function useDraftSlotDrag({
         originMinutes,
         currentMinutes: originMinutes,
         minimumMinutes,
-        gridHeight: eventLayer.getBoundingClientRect().height,
+        gridHeight: calendarGrid.getBoundingClientRect().height,
       };
     },
     [calendarRef, durationMinutes, onPastSlot, timeZone, value],
   );
 
   const onPointerMove = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
+    (event: ReactPointerEvent<HTMLElement>) => {
       const drag = dragRef.current;
 
       if (!drag || drag.pointerId !== event.pointerId) {
@@ -215,9 +213,9 @@ export function useDraftSlotDrag({
     [durationMinutes, updateDraftTop],
   );
 
-  const onPointerUp = useCallback((event: ReactPointerEvent<HTMLDivElement>) => finishDrag(event, true), [finishDrag]);
+  const onPointerUp = useCallback((event: ReactPointerEvent<HTMLElement>) => finishDrag(event, true), [finishDrag]);
   const onPointerCancel = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => finishDrag(event, false),
+    (event: ReactPointerEvent<HTMLElement>) => finishDrag(event, false),
     [finishDrag],
   );
 

@@ -2,6 +2,7 @@ import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { PageHeader } from '@comitium/ui/page-header';
+import { Skeleton } from '@comitium/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import { type ReactNode, useCallback } from 'react';
@@ -11,8 +12,8 @@ import type { EntityTabValue } from './types';
 interface EntitySettingsPageProps {
   title: string;
   tab: EntityTabValue;
-  activeCount: number;
-  archivedCount: number;
+  activeCount: number | null;
+  archivedCount: number | null;
   isError: boolean;
   errorDescription: string;
   onTabChange: (tab: EntityTabValue) => void;
@@ -61,10 +62,10 @@ export function EntitySettingsPage({
           <Tabs value={tab} onValueChange={handleTabValueChange}>
             <TabsList variant="line">
               <TabsTrigger value="active">
-                Active <Badge variant="secondary">{activeCount}</Badge>
+                Active <EntityCount value={activeCount} />
               </TabsTrigger>
               <TabsTrigger value="archived">
-                Archived <Badge variant="secondary">{archivedCount}</Badge>
+                Archived <EntityCount value={archivedCount} />
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -80,6 +81,14 @@ export function EntitySettingsPage({
       </section>
     </div>
   );
+}
+
+function EntityCount({ value }: { value: number | null }) {
+  if (value === null) {
+    return <Skeleton className="size-5 rounded-full" aria-label="Loading count" />;
+  }
+
+  return <Badge variant="secondary">{value}</Badge>;
 }
 
 function EntitySettingsError({ description }: { description: string }) {

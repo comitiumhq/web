@@ -52,7 +52,7 @@ function CommandDialog({
 function CommandInput({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
-      <InputGroup className="h-9 bg-input/30">
+      <InputGroup className="h-9">
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn('w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50', className)}
@@ -103,7 +103,7 @@ function CommandSeparator({ className, ...props }: React.ComponentProps<typeof C
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
-      className={cn('my-1 h-px bg-border/50', className)}
+      className={cn('my-1 h-px bg-separator', className)}
       {...props}
     />
   );

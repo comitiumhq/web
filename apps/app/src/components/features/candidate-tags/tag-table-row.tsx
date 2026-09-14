@@ -51,7 +51,11 @@ export const TagTableRow = memo(function TagTableRow({ orgId, tag, onEdit }: Tag
 
   return (
     <>
-      <TableRow className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })} onClick={handleRowClick}>
+      <TableRow
+        className={cn({ 'cursor-pointer': !isArchived, 'opacity-50': isArchived })}
+        aria-label={!isArchived ? `Edit ${tag.label}` : undefined}
+        onClick={!isArchived ? handleRowClick : undefined}
+      >
         <TableCell>
           <TagChip label={tag.label} />
         </TableCell>
@@ -63,7 +67,7 @@ export const TagTableRow = memo(function TagTableRow({ orgId, tag, onEdit }: Tag
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
                 <DotsThreeIcon />
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Actions for {tag.label}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>

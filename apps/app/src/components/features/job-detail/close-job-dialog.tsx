@@ -1,8 +1,8 @@
 import { ActionConfirmationNotice, getActionConfirmationPresentation } from '@comitium/ui/action-confirmation';
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
+import { Combobox } from '@comitium/ui/combobox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { useCallback, useState } from 'react';
 import { useCloseJob } from '@/hooks/mutations/use-close-job';
 import { useQueryCloseReasonsList } from '@/hooks/queries/use-query-close-reasons-list';
@@ -110,20 +110,16 @@ export function CloseJobDialog({
             <p className="text-label-14 font-medium">
               Reason for closing <span className="text-destructive">*</span>
             </p>
-            <Select value={reasonId} onValueChange={setReasonId} disabled={isLoadingReasons || isActionPending}>
-              <SelectTrigger>
-                <SelectValue placeholder={isLoadingReasons ? 'Loading reasons...' : 'Select reason'} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {reasons?.map((reason) => (
-                    <SelectItem key={reason.id} value={reason.id}>
-                      {reason.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <Combobox
+              ariaLabel="Reason for closing"
+              options={(reasons ?? []).map((reason) => ({ value: reason.id, label: reason.label }))}
+              value={reasonId || null}
+              onValueChange={(nextValue) => setReasonId(nextValue ?? '')}
+              placeholder={isLoadingReasons ? 'Loading reasons…' : 'Select reason'}
+              searchPlaceholder="Search reasons…"
+              emptyMessage="No reasons found."
+              disabled={isLoadingReasons || isActionPending}
+            />
           </div>
 
           <p className="text-copy-14 text-muted-foreground">

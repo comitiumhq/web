@@ -125,7 +125,11 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
         icon={XCircleIcon}
         title="Invitation revoked"
         description="This invitation was revoked by the workspace admin. Ask for a new invite if you still need access."
-      />
+      >
+        <Button variant="outline" size="lg" className="w-full" onClick={handleGoJobs}>
+          Go to job board
+        </Button>
+      </InviteStatusCard>
     );
   }
 
@@ -135,7 +139,11 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
         icon={ClockIcon}
         title="Invitation expired"
         description="This invitation has expired. Ask the workspace admin to send a new one."
-      />
+      >
+        <Button variant="outline" size="lg" className="w-full" onClick={handleGoJobs}>
+          Go to job board
+        </Button>
+      </InviteStatusCard>
     );
   }
 
@@ -155,7 +163,7 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
     return (
       <InviteCard
         invite={invite}
-        title={invite.isAccepted ? 'Invitation already used' : 'Join this workspace'}
+        title={invite.isAccepted ? 'Invitation already accepted' : 'Join this workspace'}
         description={
           invite.isAccepted
             ? 'Sign in with the same Comitium account to continue to the workspace.'
@@ -198,10 +206,10 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
   return (
     <InviteCard
       invite={invite}
-      title={invite.isAccepted ? 'Invitation already used' : 'Join this workspace'}
+      title={invite.isAccepted ? 'Invitation already accepted' : 'Join this workspace'}
       description={
         invite.isAccepted
-          ? 'This invitation has already been used. You can continue if this account still has access to the workspace.'
+          ? 'This invitation has already been accepted. You can continue if this account still has access to the workspace.'
           : 'The account below will join this workspace.'
       }
     >
@@ -222,7 +230,7 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
           type="button"
           variant="ghost"
           size="sm"
-          className="w-full text-muted-foreground"
+          className="w-full text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
           onClick={switchAccount}
           disabled={isAccepting || isSwitchingAccount}
         >

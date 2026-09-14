@@ -134,8 +134,8 @@ describe('FormRenderer', () => {
     const screen = await render(<Harness />);
 
     const nameInputs = screen.getByPlaceholder('Type your answer...');
-    await nameInputs.nth(0).fill('Illia');
-    await nameInputs.nth(1).fill('Yablonski');
+    await nameInputs.nth(0).fill('Alex');
+    await nameInputs.nth(1).fill('Morgan');
     await screen.getByPlaceholder('name@example.com').fill('candidate@example.com');
     await screen.getByPlaceholder('+1 555 000 0000').fill('++48 abc 123');
     await screen.getByText('Yes').click();
@@ -145,8 +145,8 @@ describe('FormRenderer', () => {
     await screen.getByRole('button', { name: 'Submit' }).click();
 
     const output = screen.getByRole('status');
-    await expect.element(output).toHaveTextContent(`"${ids.firstName}":"Illia"`);
-    await expect.element(output).toHaveTextContent(`"${ids.lastName}":"Yablonski"`);
+    await expect.element(output).toHaveTextContent(`"${ids.firstName}":"Alex"`);
+    await expect.element(output).toHaveTextContent(`"${ids.lastName}":"Morgan"`);
     await expect.element(output).toHaveTextContent(`"${ids.email}":"candidate@example.com"`);
     await expect.element(output).toHaveTextContent(`"${ids.phone}":"+48 123"`);
     await expect.element(output).toHaveTextContent(`"${ids.consent}":true`);

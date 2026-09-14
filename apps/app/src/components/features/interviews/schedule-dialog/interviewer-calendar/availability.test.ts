@@ -5,6 +5,7 @@ import {
   areInterviewersWorkingDuring,
   createAvailabilityIndex,
   getConflictingInterviewerIds,
+  hasCompleteInterviewerAvailability,
   isInterviewerWorkingDuring,
 } from './availability';
 
@@ -19,6 +20,25 @@ const AVAILABLE_INTERVIEWER: InterviewerBusy = {
 };
 
 describe('availability index', () => {
+  it('requires one availability result for every requested interviewer', () => {
+    const unavailableInterviewer: InterviewerBusy = {
+      userId: SECOND_INTERVIEWER_ID,
+      status: 'unavailable',
+      reason: 'provider_unavailable',
+    };
+
+    expect(hasCompleteInterviewerAvailability(undefined, [FIRST_INTERVIEWER_ID])).toBe(false);
+    expect(
+      hasCompleteInterviewerAvailability([AVAILABLE_INTERVIEWER], [FIRST_INTERVIEWER_ID, SECOND_INTERVIEWER_ID]),
+    ).toBe(false);
+    expect(
+      hasCompleteInterviewerAvailability(
+        [AVAILABLE_INTERVIEWER, unavailableInterviewer],
+        [FIRST_INTERVIEWER_ID, SECOND_INTERVIEWER_ID],
+      ),
+    ).toBe(true);
+  });
+
   it('requires the complete slot to fit inside working hours', () => {
     const availability = createAvailabilityIndex([AVAILABLE_INTERVIEWER]);
 

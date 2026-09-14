@@ -46,8 +46,8 @@ const StatCard = memo(function StatCard({
   return (
     <Card
       className={cn('min-h-[5.5rem] gap-0 py-0 transition-colors', {
-        'hover:bg-muted/30 hover:ring-foreground/20': !isActive,
-        'bg-muted/50 ring-foreground/25': isActive,
+        'hover:bg-muted': !isActive,
+        'bg-muted ring-1 ring-inset ring-foreground/20': isActive,
       })}
     >
       <button

@@ -142,7 +142,9 @@ export function PipelineContent({
 
     return (
       <PageContainer className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pb-6">
-        {jobAccordionItems}
+        <div className="shrink-0 overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
+          {jobAccordionItems}
+        </div>
         <InfiniteCollectionStatus
           hasNextPage={!isSearching && hasNextJobPage}
           isFetchingNextPage={isFetchingNextJobPage}

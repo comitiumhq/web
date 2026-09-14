@@ -66,7 +66,7 @@ export function FormEditSheet({ orgId, formClass, isCreating, selectedFormId, on
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent width="2xl">
+      <FeatureSheetContent size="editor">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">{displayMode === 'new' ? copy.newTitle : copy.editTitle}</SheetTitle>
           <SheetDescription>{copy.description}</SheetDescription>

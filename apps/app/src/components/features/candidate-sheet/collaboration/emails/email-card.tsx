@@ -1,5 +1,6 @@
 import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/candidates';
 import { Card } from '@comitium/ui/card';
+import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { EnvelopeSimpleIcon } from '@phosphor-icons/react';
 import { memo } from 'react';
@@ -17,7 +18,7 @@ export const EmailCard = memo(function EmailCard({ email, candidateProfile }: Em
 
   return (
     <Card size="sm" className="gap-0 py-0">
-      <div className="flex items-center gap-2.5 border-b border-border px-4 py-2.5">
+      <div className="flex items-center gap-2.5 border-b border-separator px-4 py-2.5">
         <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
           {sender.initials}
         </div>
@@ -36,7 +37,9 @@ export const EmailCard = memo(function EmailCard({ email, candidateProfile }: Em
       <div className="px-4 py-3">
         <p className="text-label-14 font-medium mb-2">{email.content.subject}</p>
         <div className="text-copy-14">
-          <RichTextEditor content={email.content.body} readOnly />
+          <ExpandableContent collapsedLines={6}>
+            <RichTextEditor content={email.content.body} readOnly />
+          </ExpandableContent>
         </div>
       </div>
     </Card>
@@ -46,7 +49,7 @@ export const EmailCard = memo(function EmailCard({ email, candidateProfile }: Em
 export function EmailCardSkeleton() {
   return (
     <Card aria-hidden size="sm" className="gap-0 py-0">
-      <div className="flex items-center gap-2.5 border-b border-border px-4 py-2.5">
+      <div className="flex items-center gap-2.5 border-b border-separator px-4 py-2.5">
         <Skeleton className="size-7 shrink-0 rounded-full" />
         <div className="min-w-0 flex-1">
           <Skeleton className="h-3.5 w-28 rounded-md" />

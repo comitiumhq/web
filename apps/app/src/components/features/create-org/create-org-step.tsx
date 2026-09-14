@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
+import { Card, CardContent } from '@comitium/ui/card';
 import { PageHeader } from '@comitium/ui/page-header';
 import { Spinner } from '@comitium/ui/spinner';
 import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react';
@@ -44,24 +45,26 @@ export function CreateOrgStep({ domain, email, isCreating, creationFailed = fals
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
           <p className="text-label-14">Verified domain</p>
-          <div className="flex h-12 items-center justify-between gap-3 rounded-xl border border-border bg-background px-4">
-            <span className="min-w-0 truncate text-copy-14 text-foreground">{domain}</span>
-            <span className="flex shrink-0 items-center gap-1.5 text-label-12 text-success-text">
-              <CheckCircleIcon className="size-4" weight="fill" />
-              Verified
-            </span>
-          </div>
+          <Card size="sm" className="h-12 justify-center rounded-xl py-0">
+            <CardContent className="flex items-center justify-between gap-3">
+              <span className="min-w-0 truncate text-copy-14 text-foreground">{domain}</span>
+              <span className="flex shrink-0 items-center gap-1.5 text-label-12 text-success-text">
+                <CheckCircleIcon className="size-4" weight="fill" />
+                Verified
+              </span>
+            </CardContent>
+          </Card>
           {email ? <p className="text-copy-12 text-muted-foreground">Verified with {email}</p> : null}
         </div>
 
         {hasCreationError ? (
           <Alert variant="destructive">
             <WarningCircleIcon />
-            <AlertTitle>Organization wasn’t created</AlertTitle>
+            <AlertTitle>Couldn’t create organization</AlertTitle>
             <AlertDescription>
               {error
-                ? 'We couldn’t complete the setup. Please try again.'
-                : 'Your work email is still verified. Try creating the organization again.'}
+                ? 'We couldn’t finish the setup. Try again.'
+                : 'Your work email is still verified. You can try again.'}
             </AlertDescription>
           </Alert>
         ) : null}

@@ -9,7 +9,7 @@ type InterviewStatusDisplay = {
 
 export const INTERVIEW_STATUS_DISPLAY: Record<InterviewStatusValue, InterviewStatusDisplay> = {
   [InterviewStatus.NEEDS_SCHEDULING]: { label: 'Needs scheduling', variant: 'warning' },
-  [InterviewStatus.LINK_SENT]: { label: 'Booking link sent', variant: 'info' },
+  [InterviewStatus.LINK_SENT]: { label: 'Booking link sent', variant: 'warning' },
   [InterviewStatus.SCHEDULED]: { label: 'Scheduled', variant: 'success' },
   [InterviewStatus.IN_PROGRESS]: { label: 'In progress', variant: 'warning' },
   [InterviewStatus.COMPLETED]: { label: 'Completed', variant: 'success' },

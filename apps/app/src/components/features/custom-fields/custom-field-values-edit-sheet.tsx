@@ -112,7 +112,7 @@ export function CustomFieldValuesEditSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <FeatureSheetContent width="md">
+      <FeatureSheetContent size="compact">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Edit custom fields</SheetTitle>
         </FeatureSheetHeader>

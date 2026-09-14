@@ -66,7 +66,7 @@ export function CompanyAvatar({ name, logo, size = 'md', className, decorative =
     <Avatar
       aria-hidden={decorative ? true : undefined}
       className={cn(
-        'shrink-0 rounded-lg bg-muted after:border-0',
+        'shrink-0 rounded-lg bg-control after:rounded-lg',
         {
           'size-10': size !== 'sm',
           'size-9': size === 'sm',

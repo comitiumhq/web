@@ -1,5 +1,5 @@
 import { Skeleton } from '@comitium/ui/skeleton';
-import { lazy, Suspense, useCallback, useState } from 'react';
+import { lazy, type ReactNode, Suspense, useCallback, useState } from 'react';
 import { type Control, useWatch } from 'react-hook-form';
 
 import type { SelectedInterviewer } from '../types';
@@ -14,6 +14,7 @@ interface SlotPickerFieldProps {
   control: Control<FormData>;
   applicationId: string;
   orgId: string;
+  interviewTypeControl: ReactNode;
   interviewers: SelectedInterviewer[];
   onInterviewersChange: (next: SelectedInterviewer[]) => void;
   value: string | null;
@@ -27,6 +28,7 @@ export function SlotPickerField({
   control,
   applicationId,
   orgId,
+  interviewTypeControl,
   interviewers,
   onInterviewersChange,
   value,
@@ -46,6 +48,7 @@ export function SlotPickerField({
       <InterviewerCalendar
         applicationId={applicationId}
         orgId={orgId}
+        interviewTypeControl={interviewTypeControl}
         interviewers={interviewers}
         onInterviewersChange={onInterviewersChange}
         timeZone={timeZone}

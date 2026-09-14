@@ -17,19 +17,36 @@ function Harness() {
 }
 
 describe('CandidateTagMultiSelect', () => {
-  it('adds multiple tags and removes an individual tag', async () => {
+  it('keeps search in the popup and resets the filter after selection', async () => {
+    const screen = await render(<Harness />);
+    const trigger = screen.getByRole('combobox', { name: 'Tags' });
+
+    await trigger.click();
+
+    const searchInput = screen.getByPlaceholder('Search tags…');
+
+    expect(searchInput.element().closest('[role="dialog"]')).not.toBeNull();
+
+    await searchInput.fill('Priority');
+    await screen.getByRole('option', { name: 'Priority' }).click();
+
+    await expect.element(searchInput).toHaveValue('');
+    await expect.element(screen.getByRole('option', { name: 'Referral' })).toBeVisible();
+  });
+
+  it('summarizes multiple tags and removes the visible tag', async () => {
     const screen = await render(<Harness />);
 
-    await screen.getByRole('combobox', { name: 'Add tag' }).click();
+    await screen.getByRole('combobox', { name: 'Tags' }).click();
     await screen.getByText('Priority').click();
-    await expect.element(screen.getByRole('button', { name: 'Remove tag Priority' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Remove Priority' })).toBeInTheDocument();
 
-    await screen.getByRole('combobox', { name: 'Add tag' }).click();
     await screen.getByText('Referral').click();
-    await expect.element(screen.getByRole('button', { name: 'Remove tag Referral' })).toBeInTheDocument();
+    await expect.element(screen.getByText('+1')).toBeInTheDocument();
 
-    await screen.getByRole('button', { name: 'Remove tag Priority' }).click();
-    await expect.element(screen.getByRole('button', { name: 'Remove tag Priority' })).not.toBeInTheDocument();
-    await expect.element(screen.getByRole('button', { name: 'Remove tag Referral' })).toBeInTheDocument();
+    await screen.getByRole('button', { name: 'Remove Priority' }).click();
+    await expect.element(screen.getByRole('button', { name: 'Remove Priority' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Remove Referral' })).toBeInTheDocument();
+    await expect.element(screen.getByText('+1')).not.toBeInTheDocument();
   });
 });

@@ -1,14 +1,12 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
 import { BROWSER_TZ } from '@comitium/ui/date';
-import { useMediaQuery } from '@comitium/ui/use-media-query';
 import {
   functionalUpdate,
   type OnChangeFn,
   type Row,
   type RowSelectionState,
   type SortingState,
-  type VisibilityState,
 } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryOrgMe } from '@/hooks/use-permissions';
@@ -19,7 +17,7 @@ import {
   type CandidateTableScope,
   type CandidateTableVariant,
   getCandidateColumns,
-  getResponsiveColumnVisibility,
+  getCandidateTableGridMinWidth,
 } from './columns';
 
 export { ArchivedCandidateTable } from './archived-candidate-table';
@@ -74,25 +72,13 @@ export function CandidateTable({
   const { data: me } = useQueryOrgMe(orgId);
   const timezone = me?.timezone ?? BROWSER_TZ;
   const isJobScope = scope === 'job';
-  const isTabletTable = useMediaQuery('(max-width: 900px)');
-  const isMobileTable = useMediaQuery('(max-width: 680px)');
-  const defaultColumnVisibility = useMemo(
-    () => getResponsiveColumnVisibility(variant, { isMobileTable, isTabletTable }),
-    [variant, isMobileTable, isTabletTable],
-  );
   const defaultJobSorting = useMemo(() => getJobDefaultSorting(variant), [variant]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(defaultColumnVisibility);
   const [jobSorting, setJobSorting] = useState<SortingState>(defaultJobSorting);
   const sorting = isJobScope ? jobSorting : getCandidateSortingState(candidateSorting);
-  const showJobInCandidate = !isJobScope && columnVisibility.job === false;
   const columns = useMemo(
-    () => getCandidateColumns(variant, { namesMap, orgId, showJob: showJobInCandidate, timezone, scope }),
-    [variant, namesMap, orgId, showJobInCandidate, timezone, scope],
+    () => getCandidateColumns(variant, { namesMap, orgId, showJob: false, timezone, scope }),
+    [variant, namesMap, orgId, timezone, scope],
   );
-
-  useEffect(() => {
-    setColumnVisibility(defaultColumnVisibility);
-  }, [defaultColumnVisibility]);
 
   useEffect(() => {
     if (isJobScope) {
@@ -154,15 +140,14 @@ export function CandidateTable({
       enableSortingRemoval={false}
       manualSorting={!isJobScope}
       maxHeightClassName={maxHeightClassName}
-      columnVisibility={columnVisibility}
       columns={columns}
       data={candidates}
       enableRowSelection={Boolean(onRowSelectionChange && maxSelectedRows)}
       getRowId={getCandidateRowId}
+      gridMinWidth={getCandidateTableGridMinWidth(variant, scope)}
       hasNextPage={hasNextPage}
       loadingMore={loadingMore}
       maxSelectedRows={maxSelectedRows}
-      onColumnVisibilityChange={setColumnVisibility}
       onLoadMore={onLoadMore}
       onRowClick={onCandidateClick ? handleCandidateClick : undefined}
       onRowSelectionChange={onRowSelectionChange}

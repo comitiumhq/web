@@ -9,7 +9,7 @@ const GITHUB_URL = 'https://github.com/comitiumhq';
 
 export function PublicFooter() {
   return (
-    <footer className="relative z-10 border-t border-border bg-muted/20">
+    <footer className="relative z-10 border-t border-separator bg-muted/20">
       <PageContainer className="py-6 sm:py-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <Link to="/" className="inline-flex" aria-label="Comitium home">

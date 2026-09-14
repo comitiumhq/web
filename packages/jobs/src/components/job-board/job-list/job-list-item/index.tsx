@@ -30,7 +30,7 @@ export function JobListItem({ job, isSelected, isLast, onClick }: JobListItemPro
       onClick={onClick}
       aria-pressed={isSelected}
       className={cn(
-        'block min-h-[9.25rem] w-full border-b border-border px-4 py-4 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        'block min-h-[9.25rem] w-full border-b border-separator px-4 py-4 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         {
           'bg-muted': isSelected,
           'border-b-0': isLast,

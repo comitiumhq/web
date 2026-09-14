@@ -131,7 +131,7 @@ function ScheduleDatePickerMessage({
   description: string;
 }) {
   return (
-    <div className="flex min-h-[260px] items-center justify-center rounded-xl bg-muted/30 p-5 text-center ring-1 ring-foreground/10">
+    <div className="flex min-h-[260px] items-center justify-center rounded-xl bg-muted/30 p-5 text-center ring-1 ring-border">
       <div>
         <Icon className="mx-auto size-5 text-muted-foreground" />
         <p className="mt-3 text-heading-14">{title}</p>

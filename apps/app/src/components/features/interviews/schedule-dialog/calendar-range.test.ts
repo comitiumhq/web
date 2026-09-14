@@ -3,6 +3,7 @@ import {
   getAvailabilityRange,
   getCalendarDate,
   getCalendarDay,
+  getCalendarDisplayRange,
   getInitialCalendarDay,
   isCalendarSlotVisible,
 } from './calendar-range';
@@ -22,6 +23,13 @@ describe('calendar range', () => {
       start: '2026-09-01T04:00:00.000Z',
       end: '2026-09-02T03:59:59.999Z',
     });
+  });
+
+  it('keeps display hours in local time across a daylight-saving transition', () => {
+    const range = getCalendarDisplayRange('2026-03-29', 'Europe/Warsaw');
+
+    expect(range.start.toISOString()).toBe('2026-03-29T06:00:00.000Z');
+    expect(range.end.toISOString()).toBe('2026-03-29T18:00:00.000Z');
   });
 
   it('derives the initial visible day from an existing slot', () => {

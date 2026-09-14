@@ -47,7 +47,7 @@ export const InterviewProgressEventRow = memo(function InterviewProgressEventRow
             href={event.meetingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-label-12 text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-label-12 text-link hover:underline"
           >
             Join
             <ArrowSquareOutIcon className="size-3.5" />

@@ -21,8 +21,8 @@ vi.mock('@comitium/ui/theme-menu', () => ({ ThemeMenuSub: () => null }));
 
 const identity: DisplayIdentity = {
   walletAddress: '0x1234567890abcdef1234567890abcdef12345678',
-  name: 'Illia Yablonski',
-  email: 'illia@example.com',
+  name: 'Alex Morgan',
+  email: 'alex@example.com',
 };
 
 const state: ReadyUserMenuState = {

@@ -1,5 +1,6 @@
 import type { JobAccessRole } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
+import { Combobox } from '@comitium/ui/combobox';
 import { Label } from '@comitium/ui/label';
 import { PopoverHeader, PopoverTitle } from '@comitium/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
@@ -58,25 +59,11 @@ export function DepartmentAccessForm({
 
   const handleRoleChange = useCallback((value: string) => onRoleChange(value as JobAccessRole), [onRoleChange]);
 
-  const departmentItems = departmentOptions.map((option) => (
-    <SelectItem key={option.id} value={option.id}>
-      {option.name}
-      {option.subtitle && <span className="text-muted-foreground">{option.subtitle}</span>}
-    </SelectItem>
-  ));
-
   const roleItems = JOB_ACCESS_ROLES.map((option) => (
     <SelectItem key={option.value} value={option.value}>
       {option.label}
     </SelectItem>
   ));
-  const departmentSelectContent =
-    departmentItems.length === 0 ? (
-      <div className="text-copy-13 text-muted-foreground px-2 py-1.5">No more teams</div>
-    ) : (
-      departmentItems
-    );
-
   return (
     <>
       <PopoverHeader>
@@ -94,12 +81,21 @@ export function DepartmentAccessForm({
               )}
             </div>
           ) : (
-            <Select value={departmentId} onValueChange={handleDepartmentChange} disabled={disabled}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select team" />
-              </SelectTrigger>
-              <SelectContent>{departmentSelectContent}</SelectContent>
-            </Select>
+            <Combobox
+              ariaLabel="Team"
+              options={departmentOptions.map((option) => ({
+                value: option.id,
+                label: option.name,
+                description: option.subtitle ?? undefined,
+              }))}
+              value={departmentId || null}
+              clearable={false}
+              onValueChange={(nextValue) => nextValue && handleDepartmentChange(nextValue)}
+              placeholder="Select team"
+              searchPlaceholder="Search teams…"
+              emptyMessage="No more teams."
+              disabled={disabled}
+            />
           )}
         </div>
 

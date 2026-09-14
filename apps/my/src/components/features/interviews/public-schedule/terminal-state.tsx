@@ -56,7 +56,7 @@ export function PublicScheduleTerminalState({ status }: { status: Exclude<Public
               'flex size-12 items-center justify-center rounded-full ring-1',
               copy.tone === 'success' && 'bg-success/10 text-success-text ring-success/20',
               copy.tone === 'warning' && 'bg-warning/10 text-warning-text ring-warning/20',
-              copy.tone === 'muted' && 'bg-muted text-muted-foreground ring-foreground/10',
+              copy.tone === 'muted' && 'bg-muted text-muted-foreground ring-border',
             )}
           >
             <Icon className="size-6" aria-hidden="true" />

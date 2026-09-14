@@ -1,5 +1,10 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
-import type { CriteriaAssessment, CriterionSummary, ReviewStatus } from '@comitium/schemas/applications';
+import type {
+  ApplicationProcessingStatus,
+  CriteriaAssessment,
+  CriterionSummary,
+  ReviewStatus,
+} from '@comitium/schemas/applications';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { useCallback } from 'react';
@@ -36,6 +41,7 @@ export interface CandidateCollaborationProps {
   currentUserId: string;
   criterionSummary: CriterionSummary | null;
   criterionAssessments: CriteriaAssessment[];
+  processing: ApplicationProcessingStatus | null;
   reviewStatus: ReviewStatus;
   emails: EmailCollectionState;
   form: ApplicationFormState;
@@ -59,6 +65,7 @@ export function CandidateCollaboration({
   currentUserId,
   criterionSummary,
   criterionAssessments,
+  processing,
   reviewStatus,
   emails,
   form,
@@ -108,7 +115,7 @@ export function CandidateCollaboration({
   return (
     <div
       className={cn('flex h-full flex-col overflow-hidden bg-background', {
-        'border-l border-border': variant === 'panel',
+        'border-l border-separator': variant === 'panel',
       })}
     >
       <Tabs value={activeTab} onValueChange={handleTabChange} className="relative flex h-full flex-col">
@@ -191,6 +198,7 @@ export function CandidateCollaboration({
                 currentUserId={currentUserId}
                 criterionSummary={criterionSummary}
                 criterionAssessments={criterionAssessments}
+                processing={processing}
                 reviewStatus={reviewStatus}
                 access={access}
                 wrappedVaultKey={wrappedVaultKey}

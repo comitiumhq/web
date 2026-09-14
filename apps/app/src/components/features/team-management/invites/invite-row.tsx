@@ -81,6 +81,7 @@ export const InviteRow = memo(function InviteRow({ orgId, invite }: InviteRowPro
         </TableCell>
         <TableCell>
           <InviteActionsMenu
+            inviteName={displayName}
             isPending={anyPending}
             isResending={isResending}
             onResend={handleResend}
@@ -122,20 +123,21 @@ function StatusTooltip({ label, children }: StatusTooltipProps) {
 }
 
 interface InviteActionsMenuProps {
+  inviteName: string;
   isPending: boolean;
   isResending: boolean;
   onResend: () => void;
   onRevoke: () => void;
 }
 
-function InviteActionsMenu({ isPending, isResending, onResend, onRevoke }: InviteActionsMenuProps) {
+function InviteActionsMenu({ inviteName, isPending, isResending, onResend, onRevoke }: InviteActionsMenuProps) {
   return (
     <div className="flex justify-end">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button type="button" variant="ghost" size="sm" className="size-8 p-0" disabled={isPending}>
             <DotsThreeIcon />
-            <span className="sr-only">Actions</span>
+            <span className="sr-only">Actions for {inviteName}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[160px]">

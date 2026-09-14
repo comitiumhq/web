@@ -221,7 +221,7 @@ function ProfileLink({ icon, href, children }: { icon: ReactNode; href: string; 
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="min-w-0 break-words text-copy-14 text-primary underline-offset-4 hover:underline"
+        className="min-w-0 break-words text-copy-14 text-link underline-offset-4 hover:underline"
       >
         {children}
       </a>

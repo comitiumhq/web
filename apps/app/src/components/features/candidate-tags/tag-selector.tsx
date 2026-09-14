@@ -1,5 +1,6 @@
 import { Button } from '@comitium/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@comitium/ui/command';
+import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { PlusIcon } from '@phosphor-icons/react';
 import { memo, useCallback, useMemo, useState } from 'react';
@@ -42,10 +43,11 @@ export function TagSelector({
 
   const { mutateAsync: createTagAsync, isPending: isCreating } = useCreateCandidateTag();
   const { mutate: assign, mutateAsync: assignAsync, isPending: isAssigning } = useAssignTagToCandidate();
-  const { mutate: unassign } = useUnassignTagFromCandidate();
+  const { mutate: unassign, isPending: isUnassigning } = useUnassignTagFromCandidate();
 
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [tagPendingRemoval, setTagPendingRemoval] = useState<DecryptedCandidateTag | null>(null);
 
   const assignedTagIds = useMemo(() => new Set(tagIds), [tagIds]);
   const activeTags = useMemo(() => tags.filter((t) => !t.isArchived), [tags]);
@@ -88,10 +90,15 @@ export function TagSelector({
   const trimmedInputValue = inputValue.trim();
   const canCreateNewTag = canManage && !!trimmedInputValue && !hasActiveMatch && !hasArchivedMatch && !labelValidation;
 
-  const closePopover = useCallback(() => {
-    setOpen(false);
-    setInputValue('');
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    setOpen(nextOpen);
+
+    if (!nextOpen) {
+      setInputValue('');
+    }
   }, []);
+
+  const closePopover = useCallback(() => handleOpenChange(false), [handleOpenChange]);
 
   const handleAssign = useCallback(
     (tagId: string) => {
@@ -101,19 +108,33 @@ export function TagSelector({
 
       assign({ candidateId, tagId, orgId }, { onSuccess: closePopover });
     },
-    [assign, candidateId, orgId, closePopover],
+    [assign, candidateId, closePopover, orgId],
   );
 
-  const handleRemove = useCallback(
+  const requestRemove = useCallback(
     (tagId: string) => {
-      if (!candidateId) {
-        return;
-      }
+      const tag = tagMap.get(tagId);
 
-      unassign({ candidateId, tagId, orgId });
+      if (tag) {
+        setTagPendingRemoval(tag);
+      }
     },
-    [unassign, candidateId, orgId],
+    [tagMap],
   );
+
+  const confirmRemove = () => {
+    if (!candidateId || !tagPendingRemoval) {
+      return;
+    }
+
+    unassign({ candidateId, tagId: tagPendingRemoval.id, orgId }, { onSuccess: () => setTagPendingRemoval(null) });
+  };
+
+  const handleRemoveDialogOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setTagPendingRemoval(null);
+    }
+  };
 
   const handleCreateAndAssign = useCallback(async () => {
     if (!vaultKey?.vaultPublicKey || !wrappedVaultKey || !candidateId) {
@@ -145,12 +166,12 @@ export function TagSelector({
   }, [
     assignAsync,
     candidateId,
+    closePopover,
     createTagAsync,
     inputValue,
     orgId,
     vaultKey?.vaultPublicKey,
     wrappedVaultKey,
-    closePopover,
   ]);
 
   if (!canAssign && assignedTags.length === 0) {
@@ -162,16 +183,18 @@ export function TagSelector({
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {canAssign && candidateId && (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-6 px-2 text-label-12">
               <PlusIcon data-icon="inline-start" />
               Add tag
             </Button>
           </PopoverTrigger>
+
           <PopoverContent className="w-64 p-0" align="start">
             <Command>
               <CommandInput placeholder="Search or create..." value={inputValue} onValueChange={setInputValue} />
+
               <CommandList>
                 <CommandEmpty>
                   <EmptyStateMessage
@@ -185,7 +208,7 @@ export function TagSelector({
                 </CommandEmpty>
 
                 {availableTags.length > 0 && (
-                  <CommandGroup heading="Existing tags">
+                  <CommandGroup>
                     {availableTags.map((tag) => (
                       <AvailableTagItem key={tag.id} tag={tag} onSelect={handleAssign} />
                     ))}
@@ -211,10 +234,26 @@ export function TagSelector({
       )}
 
       {visibleTags.map((tag) => (
-        <TagChip key={tag.id} tagId={tag.id} label={tag.label} onRemove={canAssign ? handleRemove : undefined} />
+        <TagChip key={tag.id} tagId={tag.id} label={tag.label} onRemove={canAssign ? requestRemove : undefined} />
       ))}
 
-      <TagOverflow tags={hiddenTags} onRemove={canAssign ? handleRemove : undefined} />
+      <TagOverflow tags={hiddenTags} onRemove={canAssign ? requestRemove : undefined} />
+
+      <ConfirmDialog
+        open={tagPendingRemoval !== null}
+        onOpenChange={handleRemoveDialogOpenChange}
+        title="Remove this tag?"
+        description={
+          <>
+            <span className="font-medium">&ldquo;{tagPendingRemoval?.label}&rdquo;</span> will be removed from this
+            candidate.
+          </>
+        }
+        actionLabel="Remove"
+        onConfirm={confirmRemove}
+        isPending={isUnassigning}
+        pendingLabel="Removing…"
+      />
     </div>
   );
 }

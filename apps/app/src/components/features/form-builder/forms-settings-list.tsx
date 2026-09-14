@@ -149,8 +149,8 @@ export function FormsSettingsList({ orgId, formClass, selectedFormId, onSelected
       <EntitySettingsPage
         title={copy.pageTitle}
         tab={tab}
-        activeCount={activeForms.length}
-        archivedCount={archivedForms.length}
+        activeCount={isLoading ? null : activeForms.length}
+        archivedCount={isLoading ? null : archivedForms.length}
         isError={false}
         errorDescription=""
         onTabChange={handleTabChange}

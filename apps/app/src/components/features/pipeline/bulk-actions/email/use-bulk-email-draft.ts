@@ -1,5 +1,5 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
-import type { SearchSelectOption } from '@comitium/ui/search-select';
+import type { ComboboxOption } from '@comitium/ui/combobox';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { z } from 'zod';
 import { EMPTY_DOC, type RichTextEditorHandle } from '@/components/tiptap-ui/rich-text-editor';
@@ -48,7 +48,7 @@ export function useBulkEmailDraft({ applicationId, orgId, open, useCase }: UseBu
     [templatesQuery.data],
   );
 
-  const templateOptions = useMemo<SearchSelectOption[]>(
+  const templateOptions = useMemo<ComboboxOption[]>(
     () => templates.map((template) => ({ value: template.id, label: template.name, searchValue: template.name })),
     [templates],
   );

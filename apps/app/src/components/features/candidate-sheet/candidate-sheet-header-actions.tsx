@@ -76,7 +76,7 @@ export function CandidateSheetHeaderActions({
       )}
 
       {consideration.canArchive && (
-        <Button variant="outline" size="sm" onClick={onArchive} disabled={terminalActionPending}>
+        <Button variant="destructive" size="sm" onClick={onArchive} disabled={terminalActionPending}>
           <ArchiveIcon data-icon="inline-start" />
           Archive
         </Button>

@@ -3,6 +3,7 @@ import { isNonEmptyString, isRecord } from '@comitium/schemas/guards';
 import { Badge } from '@comitium/ui/badge';
 import { formatDate } from '@comitium/ui/date';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
+import { ExpandableText } from '@comitium/ui/expandable-content';
 import { useCallback } from 'react';
 import type { SelectableValue } from '@/lib/schemas/custom-fields';
 import type { OrgTeamMember } from '@/lib/schemas/org';
@@ -17,9 +18,10 @@ interface CustomFieldValueDisplayProps {
 export function CustomFieldValueDisplay({ fieldType, value, selectableValues, teamMap }: CustomFieldValueDisplayProps) {
   switch (fieldType) {
     case 'short_answer':
-    case 'long_unformatted':
     case 'phone':
       return <TextValue value={value} />;
+    case 'long_unformatted':
+      return <LongTextValue value={value} />;
     case 'url':
       return <UrlValue value={value} />;
     case 'email':
@@ -55,6 +57,18 @@ function TextValue({ value }: { value: unknown }) {
   return <p className="text-sm whitespace-pre-wrap break-words">{value}</p>;
 }
 
+function LongTextValue({ value }: { value: unknown }) {
+  if (!isNonEmptyString(value)) {
+    return <EmptyValue />;
+  }
+
+  return (
+    <ExpandableText collapsedLines={4} contentClassName="text-sm whitespace-pre-wrap break-words">
+      {value}
+    </ExpandableText>
+  );
+}
+
 function UrlValue({ value }: { value: unknown }) {
   const handleClick = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
 
@@ -68,7 +82,7 @@ function UrlValue({ value }: { value: unknown }) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
-      className="text-sm text-primary underline break-all"
+      className="text-sm text-link underline break-all"
     >
       {value}
     </a>
@@ -83,7 +97,7 @@ function EmailValue({ value }: { value: unknown }) {
   }
 
   return (
-    <a href={`mailto:${value}`} onClick={handleClick} className="text-sm text-primary underline break-all">
+    <a href={`mailto:${value}`} onClick={handleClick} className="text-sm text-link underline break-all">
       {value}
     </a>
   );

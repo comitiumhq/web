@@ -1,4 +1,4 @@
-import { Card, CardDescription, CardHeader, CardTitle } from '@comitium/ui/card';
+import { Badge } from '@comitium/ui/badge';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { useCallback, useMemo, useState } from 'react';
@@ -48,10 +48,10 @@ function isDefaultReviewActivity(activity: StageActivity, stages: InterviewStage
 
 function scopeDescription(scope: InterviewPlanEditorViewProps['scope']): string {
   if (scope === 'template') {
-    return 'Stages come from the shared plan. Activities are copied to jobs created from this template.';
+    return 'Stages stay synced with this plan. Activities are copied to new jobs.';
   }
 
-  return 'Stages come from the shared plan. Activities apply only to this job.';
+  return 'Stages stay synced with this plan. Activities apply only to this job.';
 }
 
 export function InterviewPlanEditorView({
@@ -133,30 +133,26 @@ export function InterviewPlanEditorView({
 
   return (
     <div className="flex flex-col gap-4">
-      <Card size="sm" className="gap-0 py-0">
-        <CardHeader className="gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-          <div className="min-w-0">
-            <div className="flex min-w-0 items-center gap-2">
-              {selectedPlanName ? (
-                <span className="shrink-0 text-label-12 text-muted-foreground">Shared plan</span>
-              ) : null}
-              <CardTitle className="truncate">{selectedPlanName ?? 'No interview plan selected'}</CardTitle>
-            </div>
-            <CardDescription className="mt-1">{scopeDescription(scope)}</CardDescription>
+      <div className="flex flex-col gap-3 py-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <h3 className="truncate text-heading-16">{selectedPlanName ?? 'No interview plan selected'}</h3>
+            {selectedPlanName ? <Badge variant="subtle">Shared plan</Badge> : null}
           </div>
-          <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-self-end">
-            {plansUnavailable ? <span className="text-copy-13 text-destructive-text">Plans unavailable</span> : null}
-            {canSelectPlan && !plansUnavailable ? (
-              <PlanPickerDialog
-                plans={plans}
-                selectedPlanId={selectedPlanId}
-                disabled={planControlDisabled}
-                onSelect={handlePlanChange}
-              />
-            ) : null}
-          </div>
-        </CardHeader>
-      </Card>
+          <p className="mt-1 text-copy-13 text-muted-foreground">{scopeDescription(scope)}</p>
+        </div>
+        <div className="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+          {plansUnavailable ? <span className="text-copy-13 text-destructive-text">Plans unavailable</span> : null}
+          {canSelectPlan && !plansUnavailable ? (
+            <PlanPickerDialog
+              plans={plans}
+              selectedPlanId={selectedPlanId}
+              disabled={planControlDisabled}
+              onSelect={handlePlanChange}
+            />
+          ) : null}
+        </div>
+      </div>
 
       {isRefreshingPlan ? (
         <div className="flex flex-col gap-4">

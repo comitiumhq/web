@@ -62,7 +62,7 @@ export function BulkOperationSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <FeatureSheetContent width="xl">
+      <FeatureSheetContent size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">{title}</SheetTitle>
           <SheetDescription className="sr-only">

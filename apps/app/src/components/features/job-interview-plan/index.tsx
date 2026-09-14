@@ -1,5 +1,4 @@
 import { EmptyState } from '@comitium/ui/empty-state';
-import { Skeleton } from '@comitium/ui/skeleton';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useCallback, useMemo } from 'react';
 import { useQueryInterviewPlan } from '@/hooks/queries/use-query-interview-plan';
@@ -15,6 +14,7 @@ import { Permission } from '@/lib/schemas/org';
 import type { StageActivityOwner } from '@/lib/schemas/stage-activities';
 
 import { InterviewPlanEditorView } from './editor-view';
+import { InterviewPlanSkeleton } from './skeleton';
 
 interface DraftPlanControl {
   selectedPlanId: string | null;
@@ -26,17 +26,6 @@ interface JobInterviewPlanProps {
   org: MyOrg;
   jobId: string;
   draftPlan?: DraftPlanControl;
-}
-
-function InterviewPlanSkeleton() {
-  return (
-    <div className="flex flex-col gap-6">
-      <Skeleton className="h-28 w-full rounded-2xl" />
-      {Array.from({ length: 3 }, (_, index) => (
-        <Skeleton key={index} className="h-32 w-full rounded-2xl" />
-      ))}
-    </div>
-  );
 }
 
 export function JobInterviewPlan({ org, jobId, draftPlan }: JobInterviewPlanProps) {

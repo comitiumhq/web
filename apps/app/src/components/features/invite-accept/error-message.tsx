@@ -8,7 +8,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
   }
 
   return (
-    <div className="rounded-xl bg-destructive/10 p-3 text-center">
+    <div role="alert" className="rounded-xl bg-destructive/10 p-3 text-center">
       <p className="text-copy-13 text-destructive-text">{message}</p>
     </div>
   );

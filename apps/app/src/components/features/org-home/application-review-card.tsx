@@ -64,14 +64,14 @@ export function ApplicationReviewCard({
           {isLoading ? <Skeleton className="h-5 w-10 rounded-4xl" /> : <Badge variant="secondary">{count}</Badge>}
         </CardTitle>
         <CardAction>
-          <Button variant="ghost" size="icon-xs" aria-label="Open application review" asChild>
+          <Button variant="ghost" size="icon-sm" aria-label="Open application review" asChild>
             <Link to="/org/$orgId/pipeline" params={{ orgId }} search={{ tab: 'review' }}>
               <CaretRightIcon className="size-3.5" />
             </Link>
           </Button>
         </CardAction>
       </HomeCardHeader>
-      <CardContent className="flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+      <CardContent className="flex flex-col lg:max-h-80 lg:overflow-y-auto">
         {isLoading && <HomeSkeletonRows count={6} />}
 
         {!isLoading && candidates.length > 0 && <HomeList>{rows}</HomeList>}

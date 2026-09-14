@@ -8,12 +8,12 @@ export function LoadingState() {
     <div aria-busy>
       <span className="sr-only">Loading feedback</span>
       <Card aria-hidden size="sm" className="gap-0 py-0">
-        <header className="border-b border-border px-4 py-2.5">
+        <header className="border-b border-separator px-4 py-2.5">
           <Skeleton className="h-3.5 w-32 rounded-md" />
           <Skeleton className="mt-2 h-3 w-44 rounded-md" />
         </header>
 
-        <div className="divide-y divide-border">
+        <div className="divide-y divide-separator">
           <FeedbackRowSkeleton withAction />
           <FeedbackRowSkeleton />
         </div>

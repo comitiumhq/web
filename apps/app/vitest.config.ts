@@ -14,6 +14,7 @@ export default defineConfig({
 		include: [
 			'@dnd-kit/react',
 			'@dnd-kit/react/sortable',
+			'cmdk',
 			'react/jsx-dev-runtime',
 			'vitest-browser-react',
 			'@hookform/resolvers/zod',

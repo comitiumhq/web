@@ -9,7 +9,8 @@ import {
   DialogTrigger,
 } from '@comitium/ui/dialog';
 import { Input } from '@comitium/ui/input';
-import { CheckIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
+import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { type ChangeEvent, memo, useCallback, useMemo, useState } from 'react';
 import type { InterviewPlanSummary } from '@/lib/schemas/pipeline';
 import { cn } from '@/lib/utils';
@@ -63,17 +64,17 @@ export const PlanPickerDialog = memo(function PlanPickerDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm" disabled={disabled}>
+        <Button type="button" variant={selectedPlanId === null ? 'default' : 'ghost'} size="sm" disabled={disabled}>
           {selectedPlanId === null ? 'Select plan' : 'Change plan'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden sm:max-w-xl">
+        <DialogHeader className="shrink-0">
           <DialogTitle>Select interview plan</DialogTitle>
           <DialogDescription className="sr-only">Available interview plans</DialogDescription>
         </DialogHeader>
 
-        <div className="relative">
+        <div className="relative shrink-0">
           <MagnifyingGlassIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
@@ -84,7 +85,7 @@ export const PlanPickerDialog = memo(function PlanPickerDialog({
           />
         </div>
 
-        <div className="max-h-[min(28rem,55vh)] overflow-y-auto pr-1">
+        <div className="-m-1 min-h-0 max-h-[min(28rem,55dvh)] flex-1 overflow-y-auto p-1">
           {filteredPlans.length > 0 ? (
             <div className="flex flex-col gap-2">
               {filteredPlans.map((plan) => (
@@ -117,14 +118,14 @@ const PlanOption = memo(function PlanOption({ plan, selected, onSelect }: PlanOp
       aria-pressed={selected}
       onClick={handleClick}
       className={cn(
-        'flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-        { 'border-primary bg-primary/5': selected },
+        selectionCardVariants({ selected }),
+        'flex w-full items-center gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
       )}
     >
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
           <span className="truncate text-label-14 font-medium">{plan.name}</span>
-          {plan.isDefault ? <Badge variant="secondary">Default</Badge> : null}
+          {plan.isDefault ? <Badge variant="subtle">Default</Badge> : null}
         </span>
         <span className="mt-0.5 block text-label-12 text-muted-foreground">
           {plan.stageCount} {plan.stageCount === 1 ? 'stage' : 'stages'}
@@ -133,15 +134,7 @@ const PlanOption = memo(function PlanOption({ plan, selected, onSelect }: PlanOp
           <span className="mt-2 block truncate text-copy-13 text-muted-foreground">{plan.stageNames.join(' · ')}</span>
         ) : null}
       </span>
-      <span
-        className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2', {
-          'border-muted-foreground/30': !selected,
-          'border-primary bg-primary text-primary-foreground': selected,
-        })}
-        aria-hidden="true"
-      >
-        {selected ? <CheckIcon className="size-3" /> : null}
-      </span>
+      <SelectionCardIndicator selected={selected} />
     </button>
   );
 });

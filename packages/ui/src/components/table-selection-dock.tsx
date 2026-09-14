@@ -45,7 +45,7 @@ export function TableSelectionDock({
         {selectedLabel ?? `${selectedCount} selected`}
       </span>
 
-      <div className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
+      <div className="h-5 w-px shrink-0 bg-separator" aria-hidden="true" />
 
       <div className="flex min-w-0 items-center gap-1 overflow-x-auto scrollbar-hide">
         {actions.map((action) => {
@@ -67,7 +67,7 @@ export function TableSelectionDock({
         })}
       </div>
 
-      <div className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
+      <div className="h-5 w-px shrink-0 bg-separator" aria-hidden="true" />
 
       <Button type="button" size="icon-sm" variant="ghost" aria-label="Clear selection" onClick={onClear}>
         <XIcon />

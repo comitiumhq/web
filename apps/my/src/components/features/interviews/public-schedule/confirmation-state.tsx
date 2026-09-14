@@ -38,7 +38,7 @@ export function PublicScheduleConfirmation({
             selectedSlot={confirmedSlot}
           />
 
-          <section className="min-w-0 border-t border-border/70 p-5 sm:p-6 md:border-t-0 lg:p-8">
+          <section className="min-w-0 border-t border-separator p-5 sm:p-6 md:border-t-0 lg:p-8">
             <div className="mx-auto flex max-w-sm flex-col items-center gap-5 text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-success/10 text-success-text ring-1 ring-success/20">
                 <CheckIcon className="size-6" aria-hidden="true" />
@@ -51,7 +51,7 @@ export function PublicScheduleConfirmation({
                 </p>
               </div>
 
-              <div className="w-full rounded-xl bg-muted/50 px-4 py-3 ring-1 ring-foreground/10">
+              <div className="w-full rounded-xl bg-muted/50 px-4 py-3 ring-1 ring-border">
                 <p className="text-heading-14">{formatInTimezone(confirmation.scheduledAt, timeZone, 'EEE, MMM d')}</p>
                 <p className="mt-1 text-copy-14 text-muted-foreground">
                   {formatInTimezone(confirmation.scheduledAt, timeZone, 'h:mm a')} ({timeZone})

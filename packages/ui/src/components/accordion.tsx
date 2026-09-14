@@ -19,7 +19,7 @@ function AccordionItem({ className, ...props }: React.ComponentProps<typeof Acco
   return (
     <AccordionPrimitive.Item
       data-slot="accordion-item"
-      className={cn('not-last:border-b data-open:bg-muted/50', className)}
+      className={cn('not-last:border-b not-last:border-separator data-open:bg-muted/50', className)}
       {...props}
     />
   );

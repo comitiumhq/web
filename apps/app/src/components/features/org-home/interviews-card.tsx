@@ -37,11 +37,11 @@ export function InterviewsCard({ className, interviews, isLoading, onInterviewOp
           )}
         </CardTitle>
       </HomeCardHeader>
-      <CardContent className="flex flex-col lg:min-h-0 lg:flex-1">
+      <CardContent className="flex flex-col">
         {isLoading && <HomeSkeletonRows count={4} />}
 
         {!isLoading && interviews.length > 0 && (
-          <div className="lg:h-full lg:overflow-y-auto">
+          <div className="lg:max-h-80 lg:overflow-y-auto">
             <HomeList>{interviewRows}</HomeList>
           </div>
         )}

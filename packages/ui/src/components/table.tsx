@@ -15,7 +15,7 @@ function Table({
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
-  return <thead data-slot="table-header" className={cn('[&_tr]:border-b', className)} {...props} />;
+  return <thead data-slot="table-header" className={cn('bg-table-header [&_tr]:border-b', className)} {...props} />;
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<'tbody'>) {
@@ -26,20 +26,38 @@ function TableFooter({ className, ...props }: React.ComponentProps<'tfoot'>) {
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn('border-t bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
+      className={cn('border-t border-separator bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
       {...props}
     />
   );
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
+function TableRow({ className, onClick, onKeyDown, tabIndex, ...props }: React.ComponentProps<'tr'>) {
+  const isInteractive = typeof onClick === 'function';
+
+  const handleKeyDown: React.KeyboardEventHandler<HTMLTableRowElement> = (event) => {
+    onKeyDown?.(event);
+
+    if (event.defaultPrevented || !isInteractive || event.target !== event.currentTarget) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.currentTarget.click();
+    }
+  };
+
   return (
     <tr
       data-slot="table-row"
       className={cn(
-        'border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted',
+        'border-b border-separator transition-colors hover:bg-table-row-hover has-aria-expanded:bg-table-row-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-inset data-[state=selected]:bg-primary/[0.06] data-[state=selected]:hover:bg-primary/[0.09]',
         className,
       )}
+      tabIndex={isInteractive ? (tabIndex ?? 0) : tabIndex}
+      onClick={onClick}
+      onKeyDown={isInteractive || onKeyDown ? handleKeyDown : undefined}
       {...props}
     />
   );
@@ -50,7 +68,7 @@ function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
     <th
       data-slot="table-head"
       className={cn(
-        'h-12 px-3 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0',
+        'h-12 px-3 text-left align-middle font-medium whitespace-nowrap text-muted-foreground [&:has([role=checkbox])]:pr-0',
         className,
       )}
       {...props}

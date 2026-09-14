@@ -97,7 +97,7 @@ export function CustomFieldValuesSection({ candidateId, orgId, canEdit }: Custom
         </CardHeader>
 
         <CardContent>
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-separator">
             {definitions.map((def) => {
               const valueRow = valueByFieldId.get(def.id);
               const decryptedValue = valueRow ? decrypted[valueRow.id] : undefined;
@@ -193,7 +193,7 @@ function CustomFieldValuesSkeleton({ canEdit }: { canEdit: boolean }) {
         </CardHeader>
 
         <CardContent>
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-separator">
             {Array.from({ length: 3 }, (_, index) => (
               <div
                 key={index}

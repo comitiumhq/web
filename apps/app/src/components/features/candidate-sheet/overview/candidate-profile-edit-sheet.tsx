@@ -43,22 +43,41 @@ type CandidateProfileFieldName = keyof CandidateProfileFormValues;
 interface CandidateProfileField {
   name: CandidateProfileFieldName;
   label: string;
+  placeholder: string;
   type?: 'email' | 'tel' | 'url';
   autoComplete?: string;
   fullWidth?: boolean;
 }
 
 const PROFILE_FIELDS: CandidateProfileField[] = [
-  { name: 'firstName', label: 'First name', autoComplete: 'given-name' },
-  { name: 'lastName', label: 'Last name', autoComplete: 'family-name' },
-  { name: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
-  { name: 'phone', label: 'Phone', type: 'tel', autoComplete: 'tel' },
-  { name: 'location', label: 'Location', autoComplete: 'address-level2', fullWidth: true },
-  { name: 'currentTitle', label: 'Current title' },
-  { name: 'currentCompany', label: 'Current company' },
-  { name: 'linkedIn', label: 'LinkedIn URL', type: 'url', fullWidth: true },
-  { name: 'github', label: 'GitHub URL', type: 'url', fullWidth: true },
-  { name: 'website', label: 'Website', type: 'url', fullWidth: true },
+  { name: 'firstName', label: 'First name', placeholder: 'First name', autoComplete: 'given-name' },
+  { name: 'lastName', label: 'Last name', placeholder: 'Last name', autoComplete: 'family-name' },
+  { name: 'email', label: 'Email', placeholder: 'name@example.com', type: 'email', autoComplete: 'email' },
+  { name: 'phone', label: 'Phone', placeholder: 'Phone number', type: 'tel', autoComplete: 'tel' },
+  {
+    name: 'location',
+    label: 'Location',
+    placeholder: 'City, country',
+    autoComplete: 'address-level2',
+    fullWidth: true,
+  },
+  { name: 'currentTitle', label: 'Current title', placeholder: 'Role or title' },
+  { name: 'currentCompany', label: 'Current company', placeholder: 'Company name' },
+  {
+    name: 'linkedIn',
+    label: 'LinkedIn URL',
+    placeholder: 'https://linkedin.com/in/...',
+    type: 'url',
+    fullWidth: true,
+  },
+  {
+    name: 'github',
+    label: 'GitHub URL',
+    placeholder: 'https://github.com/...',
+    type: 'url',
+    fullWidth: true,
+  },
+  { name: 'website', label: 'Website', placeholder: 'https://example.com', type: 'url', fullWidth: true },
 ];
 
 const EMPTY_PROFILE_FORM: CandidateProfileFormValues = {
@@ -136,7 +155,7 @@ export function CandidateProfileEditSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent width="fixed-640">
+      <FeatureSheetContent size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Edit candidate profile</SheetTitle>
           <SheetDescription>Update candidate-wide contact and profile details.</SheetDescription>
@@ -162,6 +181,7 @@ export function CandidateProfileEditSheet({
                           {...field}
                           type={profileField.type}
                           autoComplete={profileField.autoComplete}
+                          placeholder={profileField.placeholder}
                           disabled={isPending}
                         />
                       </FormControl>

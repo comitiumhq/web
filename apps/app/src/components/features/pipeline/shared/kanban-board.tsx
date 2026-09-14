@@ -72,7 +72,11 @@ export function KanbanBoard({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={cn('flex w-full min-w-0 max-w-full overflow-x-auto p-4', { 'h-full': scrollable })}>
+      <div
+        className={cn('flex w-full min-w-0 max-w-full overflow-x-auto bg-kanban-canvas p-4', {
+          'h-full': scrollable,
+        })}
+      >
         {stages
           .filter((s) => !hideEmpty || s.total > 0)
           .map((stage, colIndex) => {

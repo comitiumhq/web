@@ -1,19 +1,10 @@
 import type { DuplicateApplicationAttempt, OtherApplicationSummary } from '@comitium/schemas/applications';
 import { APPLICATION_TERMINAL_OUTCOME_LABEL } from '@comitium/ui/application-outcome-labels';
 import { Button } from '@comitium/ui/button';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from '@comitium/ui/select';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 interface ConsiderationSelectorProps {
   currentApplicationId: string;
@@ -79,50 +70,58 @@ export function ConsiderationSelector({
     [duplicateAttempts, onConsiderationChange, onDuplicateAttemptChange],
   );
 
+  const options = useMemo<ComboboxOption[]>(
+    () => [
+      ...considerations.map((consideration) => ({
+        value: consideration.id,
+        label: getConsiderationLabel(consideration),
+        group: 'Applications',
+      })),
+      ...duplicateAttempts.map((attempt) => ({
+        value: attempt.id,
+        label: `Application attempt · ${getDuplicateAttemptLabel(attempt)}`,
+        group: `Additional attempts (${totalDuplicateAttempts})`,
+      })),
+    ],
+    [considerations, duplicateAttempts, totalDuplicateAttempts],
+  );
+
+  const hasConsiderationCollectionStatus =
+    hasNextConsiderationsPage || isFetchingNextConsiderationsPage || isFetchNextConsiderationsPageError;
+  const hasDuplicateAttemptCollectionStatus =
+    totalDuplicateAttempts > 0 &&
+    (hasNextDuplicateAttemptsPage || isFetchingNextDuplicateAttemptsPage || isFetchNextDuplicateAttemptsPageError);
+  const hasCollectionStatus = hasConsiderationCollectionStatus || hasDuplicateAttemptCollectionStatus;
+
   return (
-    <div className="shrink-0 border-b border-border bg-background px-4 py-3">
+    <div className="shrink-0 border-b border-separator bg-background px-4 py-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <span className="shrink-0 text-xs font-medium text-muted-foreground">Applications</span>
-        <Select value={currentApplicationId} onValueChange={handleValueChange}>
-          <SelectTrigger className="w-full sm:max-w-sm">
-            <SelectValue placeholder="Select application" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Applications</SelectLabel>
-              {considerations.map((consideration) => (
-                <SelectItem key={consideration.id} value={consideration.id}>
-                  <span className="truncate">{getConsiderationLabel(consideration)}</span>
-                </SelectItem>
-              ))}
-            </SelectGroup>
+        <Combobox
+          ariaLabel="Application"
+          options={options}
+          value={currentApplicationId}
+          clearable={false}
+          onValueChange={(applicationId) => applicationId && handleValueChange(applicationId)}
+          placeholder="Select application"
+          searchPlaceholder="Search applications…"
+          emptyMessage="No matching applications found."
+          className="w-full sm:max-w-sm"
+          listFooter={
+            hasCollectionStatus ? (
+              <div className="flex flex-col">
+                {hasConsiderationCollectionStatus && (
+                  <InfiniteCollectionStatus
+                    hasNextPage={hasNextConsiderationsPage}
+                    isFetchingNextPage={isFetchingNextConsiderationsPage}
+                    isFetchNextPageError={isFetchNextConsiderationsPageError}
+                    loadingLabel="Loading applications..."
+                    errorLabel="Could not load more applications."
+                    onLoadMore={onLoadMoreConsiderations}
+                  />
+                )}
 
-            {(hasNextConsiderationsPage || isFetchingNextConsiderationsPage || isFetchNextConsiderationsPageError) && (
-              <InfiniteCollectionStatus
-                hasNextPage={hasNextConsiderationsPage}
-                isFetchingNextPage={isFetchingNextConsiderationsPage}
-                isFetchNextPageError={isFetchNextConsiderationsPageError}
-                loadingLabel="Loading applications..."
-                errorLabel="Could not load more applications."
-                onLoadMore={onLoadMoreConsiderations}
-              />
-            )}
-
-            {totalDuplicateAttempts > 0 && (
-              <>
-                <SelectSeparator />
-                <SelectGroup>
-                  <SelectLabel>Additional attempts ({totalDuplicateAttempts})</SelectLabel>
-                  {duplicateAttempts.map((attempt) => (
-                    <SelectItem key={attempt.id} value={attempt.id}>
-                      Application attempt · {getDuplicateAttemptLabel(attempt)}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-
-                {(hasNextDuplicateAttemptsPage ||
-                  isFetchingNextDuplicateAttemptsPage ||
-                  isFetchNextDuplicateAttemptsPageError) && (
+                {hasDuplicateAttemptCollectionStatus && (
                   <InfiniteCollectionStatus
                     hasNextPage={hasNextDuplicateAttemptsPage}
                     isFetchingNextPage={isFetchingNextDuplicateAttemptsPage}
@@ -132,10 +131,10 @@ export function ConsiderationSelector({
                     onLoadMore={onLoadMoreDuplicateAttempts}
                   />
                 )}
-              </>
-            )}
-          </SelectContent>
-        </Select>
+              </div>
+            ) : null
+          }
+        />
         {isInitialLoading && (
           <div aria-busy>
             <span className="sr-only">Loading other applications</span>

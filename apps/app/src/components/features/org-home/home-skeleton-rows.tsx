@@ -22,7 +22,7 @@ export function HomeSkeletonRows({ count }: HomeSkeletonRowsProps) {
           className={cn(
             'grid min-h-12 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3',
             index < rows.length - 1 &&
-              'relative after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:bg-border',
+              'relative after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:bg-separator',
           )}
         >
           <div className="flex min-w-0 flex-col gap-1.5">

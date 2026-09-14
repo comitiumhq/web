@@ -4,13 +4,19 @@ import { addMinutes, endOfDay, parseISO, startOfDay } from 'date-fns';
 
 export const CALENDAR_START_HOUR = 8;
 export const CALENDAR_END_HOUR = 20;
-export const CALENDAR_SLOT_MINUTES = 15;
+export const CALENDAR_GRID_SLOT_MINUTES = 15;
+export const CALENDAR_SNAP_MINUTES = 5;
 export const CALENDAR_START_MINUTES = CALENDAR_START_HOUR * 60;
 export const CALENDAR_END_MINUTES = CALENDAR_END_HOUR * 60;
 
 interface CalendarRange {
   start: string;
   end: string;
+}
+
+interface CalendarDisplayRange {
+  start: Date;
+  end: Date;
 }
 
 export function getCalendarDay(date: Date, timeZone: string): string {
@@ -33,6 +39,19 @@ export function getAvailabilityRange(day: string, timeZone: string): CalendarRan
   return {
     start: new Date(startOfDay(date).getTime()).toISOString(),
     end: new Date(endOfDay(date).getTime()).toISOString(),
+  };
+}
+
+export function getCalendarDisplayRange(day: string, timeZone: string): CalendarDisplayRange {
+  const start = getCalendarDate(day, timeZone);
+  const end = getCalendarDate(day, timeZone);
+
+  start.setHours(CALENDAR_START_HOUR, 0, 0, 0);
+  end.setHours(CALENDAR_END_HOUR, 0, 0, 0);
+
+  return {
+    start: new Date(start.getTime()),
+    end: new Date(end.getTime()),
   };
 }
 

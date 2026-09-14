@@ -1,7 +1,9 @@
 import type { HiringTeamRole } from '@comitium/schemas/jobs';
+import { Button } from '@comitium/ui/button';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
-import { SearchSelect, type SearchSelectOption } from '@comitium/ui/search-select';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
+import { PlusIcon } from '@phosphor-icons/react';
 import { useCallback, useMemo, useState } from 'react';
 import type { OrgTeamMember } from '@/lib/schemas/org';
 
@@ -15,7 +17,8 @@ interface HiringTeamComposerProps {
 
 export function HiringTeamComposer({ availableMembers, isAdding, onAdd }: HiringTeamComposerProps) {
   const [role, setRole] = useState<HiringTeamRole>('hiring_manager');
-  const memberOptions = useMemo<SearchSelectOption[]>(
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const memberOptions = useMemo<ComboboxOption[]>(
     () =>
       availableMembers.map((member) => ({
         value: member.userId,
@@ -27,46 +30,56 @@ export function HiringTeamComposer({ availableMembers, isAdding, onAdd }: Hiring
       })),
     [availableMembers],
   );
-
-  const handleRoleChange = useCallback((value: string) => setRole(value as HiringTeamRole), []);
-  const handleSelectMember = useCallback(
-    (userId: string | null) => {
-      const member = availableMembers.find((candidate) => candidate.userId === userId);
-
-      if (!member) {
-        return;
-      }
-
-      onAdd(member, role);
-    },
-    [availableMembers, onAdd, role],
+  const selectedMember = useMemo(
+    () => availableMembers.find((member) => member.userId === selectedMemberId) ?? null,
+    [availableMembers, selectedMemberId],
   );
 
-  return (
-    <div className="flex w-full flex-col justify-end gap-2 sm:flex-row sm:items-center">
-      <Select value={role} onValueChange={handleRoleChange} disabled={isAdding}>
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {HIRING_TEAM_ROLE_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+  const handleRoleChange = useCallback((value: string) => setRole(value as HiringTeamRole), []);
+  const handleSelectMember = useCallback((userId: string | null) => setSelectedMemberId(userId), []);
+  const handleAdd = useCallback(() => {
+    if (!selectedMember) {
+      return;
+    }
 
-      <SearchSelect
-        options={memberOptions}
-        value={null}
-        onValueChange={handleSelectMember}
-        placeholder="Search members..."
-        searchPlaceholder="Search members..."
-        emptyMessage="No members to add."
-        disabled={isAdding}
-        className="w-full sm:w-80"
-      />
+    onAdd(selectedMember, role);
+    setSelectedMemberId(null);
+  }, [onAdd, role, selectedMember]);
+
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <span className="text-label-13 font-medium">Add member</span>
+      <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+        <Combobox
+          options={memberOptions}
+          value={selectedMemberId}
+          onValueChange={handleSelectMember}
+          placeholder="Search members..."
+          searchPlaceholder="Search members..."
+          emptyMessage="No members to add."
+          disabled={isAdding}
+          ariaLabel="Member"
+          className="w-full sm:max-w-sm sm:flex-1"
+        />
+
+        <Select value={role} onValueChange={handleRoleChange} disabled={isAdding}>
+          <SelectTrigger aria-label="Role" className="w-full sm:w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {HIRING_TEAM_ROLE_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button type="button" onClick={handleAdd} disabled={!selectedMember || isAdding} className="w-full sm:w-auto">
+          <PlusIcon data-icon="inline-start" />
+          {isAdding ? 'Adding...' : 'Add'}
+        </Button>
+      </div>
     </div>
   );
 }

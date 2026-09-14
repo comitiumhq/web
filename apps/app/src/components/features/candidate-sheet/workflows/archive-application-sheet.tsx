@@ -301,8 +301,8 @@ export function ArchiveApplicationSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
-      <FeatureSheetContent ref={sheetContentRef} width="2xl">
-        <FeatureSheetHeader className="border-b-0">
+      <FeatureSheetContent ref={sheetContentRef} size="editor">
+        <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Archive application</SheetTitle>
           <SheetDescription>{description}</SheetDescription>
         </FeatureSheetHeader>
@@ -418,11 +418,11 @@ export function ArchiveApplicationSheet({
               )}
             </FeatureSheetBody>
 
-            <FeatureSheetFooter className="border-t-0">
+            <FeatureSheetFooter>
               <Button variant="outline" onClick={handleCancel} disabled={isPending} type="button">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending || !canSubmit}>
+              <Button type="submit" variant="destructive" disabled={isPending || !canSubmit}>
                 {isPending ? <Spinner data-icon="inline-start" /> : <ArchiveIcon data-icon="inline-start" />}
                 {submitLabel}
               </Button>

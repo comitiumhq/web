@@ -71,6 +71,7 @@ export const FeedEventCard = memo(function FeedEventCard({
           isOwnNote={isOwnNote}
           onDelete={onDeleteNote && isOwnNote ? onDeleteNote : undefined}
           isDeleting={isDeleting}
+          previewLines={4}
         />
       );
     }

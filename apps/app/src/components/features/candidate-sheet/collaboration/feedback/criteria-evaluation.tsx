@@ -36,7 +36,7 @@ export function CriteriaEvaluation({ assessment, summary, orgId, wrappedVaultKey
 
   return (
     <Card size="sm" className="gap-0 py-0">
-      <header className="border-b border-border px-4 py-2.5">
+      <header className="border-b border-separator px-4 py-2.5">
         <div className="flex items-center justify-between gap-3">
           <p className="text-label-13 font-medium">AI evaluation</p>
           <span className="shrink-0 text-label-12 tabular-nums text-muted-foreground">
@@ -74,7 +74,7 @@ function CriteriaEvaluationItem({ item, orgId, wrappedVaultKey }: CriteriaEvalua
 
   if (!item.evidence) {
     return (
-      <div className="flex min-h-11 items-center justify-between gap-3 border-b border-border px-4 py-2 last:border-b-0">
+      <div className="flex min-h-11 items-center justify-between gap-3 border-b border-separator px-4 py-2 last:border-b-0">
         <span className="min-w-0 flex-1 break-words text-sm">{item.titleSnapshot}</span>
         <Badge variant={verdict.variant} className="shrink-0">
           {verdict.label}

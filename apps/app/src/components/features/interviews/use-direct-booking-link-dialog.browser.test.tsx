@@ -1,8 +1,11 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
 import type { TipTapDoc } from '@comitium/schemas/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderHook } from 'vitest-browser-react';
+import { userEvent } from 'vitest/browser';
+import { render, renderHook } from 'vitest-browser-react';
 import type { OrgTeamMember } from '@/lib/schemas/org';
+import { DirectBookingLinkDialog } from './direct-booking-link-dialog';
+import type { SelectedInterviewer } from './types';
 import { type UseDirectBookingLinkDialogParams, useDirectBookingLinkDialog } from './use-direct-booking-link-dialog';
 
 const mocks = vi.hoisted(() => ({
@@ -36,6 +39,12 @@ const member = {
   invitedBy: null,
   createdAt: '2026-08-28T08:00:00.000Z',
 } as OrgTeamMember;
+
+const selectedInterviewer: SelectedInterviewer = {
+  userId: MEMBER_ID,
+  member,
+  role: 'interviewer',
+};
 
 vi.mock('@/hooks/queries/use-query-interview-templates', () => ({
   useQueryInterviewTemplates: () => ({
@@ -96,6 +105,18 @@ vi.mock('./use-send-scheduling-link', () => ({
   }),
 }));
 
+vi.mock('@/components/tiptap-ui/editor-toolbars', () => ({
+  EditorToolbar: () => null,
+}));
+
+vi.mock('@/components/tiptap-ui/rich-text-editor', () => ({
+  RichTextEditor: () => <div data-testid="message-editor" />,
+}));
+
+vi.mock('@/components/user/member-avatar', () => ({
+  MemberAvatar: ({ identity }: { identity: OrgTeamMember }) => <span>{identity.name}</span>,
+}));
+
 vi.mock('sonner', () => ({
   toast: { error: mocks.toastError },
 }));
@@ -124,6 +145,28 @@ beforeEach(() => {
 });
 
 describe('useDirectBookingLinkDialog', () => {
+  it('allows an optional interview type selection to be cleared', async () => {
+    const screen = await render(<DirectBookingLinkDialog {...params()} />);
+
+    await screen.getByRole('button', { name: 'Show interview type options' }).click();
+    await screen.getByRole('option', { name: 'Technical interview (45 min)' }).click();
+
+    await expect
+      .element(screen.getByRole('combobox', { name: 'Interview type' }))
+      .toHaveValue('Technical interview (45 min)');
+
+    await screen.getByRole('combobox', { name: 'Interviewers' }).click();
+    await screen.getByRole('option', { name: 'Interviewer' }).click();
+    await userEvent.keyboard('{Escape}');
+
+    await expect.element(screen.getByRole('button', { name: 'Send scheduling link' })).toBeEnabled();
+
+    await screen.getByRole('combobox', { name: 'Interview type' }).fill('');
+
+    await expect.element(screen.getByRole('combobox', { name: 'Interview type' })).toHaveValue('');
+    await expect.element(screen.getByRole('button', { name: 'Send scheduling link' })).toBeDisabled();
+  });
+
   it('enables submission only with candidate, stage, template, interviewer, calendar, and vault access', async () => {
     const hook = await renderHook(
       (props?: UseDirectBookingLinkDialogParams) => useDirectBookingLinkDialog(props ?? params()),
@@ -133,7 +176,7 @@ describe('useDirectBookingLinkDialog', () => {
     expect(hook.result.current.canSubmit).toBe(false);
 
     hook.result.current.handleTemplateChange(TEMPLATE_ID);
-    hook.result.current.handleAddInterviewer(member);
+    hook.result.current.handleInterviewersChange([selectedInterviewer]);
     await vi.waitFor(() => expect(hook.result.current.canSubmit).toBe(true));
 
     await hook.rerender(params({ candidateEmail: null }));
@@ -148,7 +191,7 @@ describe('useDirectBookingLinkDialog', () => {
 
     mocks.calStatus = { calendarConnected: true };
     await hook.rerender(params());
-    hook.result.current.handleRemoveInterviewer(MEMBER_ID);
+    hook.result.current.handleInterviewersChange([]);
     await vi.waitFor(() => expect(hook.result.current.canSubmit).toBe(false));
   });
 
@@ -167,7 +210,7 @@ describe('useDirectBookingLinkDialog', () => {
       { initialProps: params() },
     );
     hook.result.current.handleTemplateChange(TEMPLATE_ID);
-    hook.result.current.handleAddInterviewer(member);
+    hook.result.current.handleInterviewersChange([selectedInterviewer]);
     await vi.waitFor(() => expect(hook.result.current.interviewers).toHaveLength(1));
 
     await hook.rerender(params({ open: false }));
@@ -188,7 +231,7 @@ describe('useDirectBookingLinkDialog', () => {
     };
     const hook = await renderHook(() => useDirectBookingLinkDialog(params()));
     hook.result.current.handleTemplateChange(TEMPLATE_ID);
-    hook.result.current.handleAddInterviewer(member);
+    hook.result.current.handleInterviewersChange([selectedInterviewer]);
     await vi.waitFor(() => expect(hook.result.current.interviewers).toHaveLength(1));
     hook.result.current.editorRef.current = {
       clear: vi.fn(),

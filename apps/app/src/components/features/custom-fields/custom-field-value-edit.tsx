@@ -5,12 +5,11 @@ import { Button } from '@comitium/ui/button';
 import { Calendar } from '@comitium/ui/calendar';
 import { Checkbox } from '@comitium/ui/checkbox';
 import { CitySearchInput } from '@comitium/ui/city-search-input';
+import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { SearchSelect, type SearchSelectOption } from '@comitium/ui/search-select';
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { Switch } from '@comitium/ui/switch';
 import { Textarea } from '@comitium/ui/textarea';
 import { CalendarIcon } from '@phosphor-icons/react';
@@ -41,20 +40,49 @@ export function CustomFieldValueEdit({
 }: CustomFieldValueEditProps) {
   switch (fieldType) {
     case 'short_answer':
-      return <ShortTextEdit value={value} onChange={onChange} disabled={disabled} autoFocus={autoFocus} />;
+      return (
+        <ShortTextEdit
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          placeholder="Add a value..."
+        />
+      );
     case 'long_unformatted':
       return <LongTextEdit value={value} onChange={onChange} disabled={disabled} autoFocus={autoFocus} />;
     case 'phone':
       return (
-        <ShortTextEdit value={value} onChange={onChange} disabled={disabled} inputType="tel" autoFocus={autoFocus} />
+        <ShortTextEdit
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          inputType="tel"
+          autoFocus={autoFocus}
+          placeholder="Phone number..."
+        />
       );
     case 'url':
       return (
-        <ShortTextEdit value={value} onChange={onChange} disabled={disabled} inputType="url" autoFocus={autoFocus} />
+        <ShortTextEdit
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          inputType="url"
+          autoFocus={autoFocus}
+          placeholder="https://example.com"
+        />
       );
     case 'email':
       return (
-        <ShortTextEdit value={value} onChange={onChange} disabled={disabled} inputType="email" autoFocus={autoFocus} />
+        <ShortTextEdit
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          inputType="email"
+          autoFocus={autoFocus}
+          placeholder="name@example.com"
+        />
       );
     case 'multiple_choice':
       return (
@@ -86,24 +114,27 @@ interface PrimitiveEditProps {
   autoFocus?: boolean;
 }
 
-type SelectOption = {
-  value: string;
-  label: string;
-};
-
-const EMPTY_SELECT_VALUE = '__custom_field_empty__';
-
 function ShortTextEdit({
   value,
   onChange,
   disabled,
   inputType = 'text',
   autoFocus,
-}: PrimitiveEditProps & { inputType?: string }) {
+  placeholder,
+}: PrimitiveEditProps & { inputType?: string; placeholder: string }) {
   const display = isNonEmptyString(value) ? value : '';
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value), [onChange]);
 
-  return <Input type={inputType} value={display} onChange={handleChange} disabled={disabled} autoFocus={autoFocus} />;
+  return (
+    <Input
+      type={inputType}
+      value={display}
+      onChange={handleChange}
+      disabled={disabled}
+      autoFocus={autoFocus}
+      placeholder={placeholder}
+    />
+  );
 }
 
 function LongTextEdit({ value, onChange, disabled, autoFocus }: PrimitiveEditProps) {
@@ -118,6 +149,7 @@ function LongTextEdit({ value, onChange, disabled, autoFocus }: PrimitiveEditPro
       rows={8}
       className="max-h-[65vh]"
       autoFocus={autoFocus}
+      placeholder="Add details..."
     />
   );
 }
@@ -143,7 +175,16 @@ function NumberEdit({ value, onChange, disabled, autoFocus }: PrimitiveEditProps
     [onChange],
   );
 
-  return <Input type="number" value={display} onChange={handleChange} disabled={disabled} autoFocus={autoFocus} />;
+  return (
+    <Input
+      type="number"
+      value={display}
+      onChange={handleChange}
+      disabled={disabled}
+      autoFocus={autoFocus}
+      placeholder="Enter a number..."
+    />
+  );
 }
 
 function YesNoEdit({ value, onChange, disabled }: PrimitiveEditProps) {
@@ -172,7 +213,7 @@ function MultipleChoiceEdit({
   disabled,
 }: PrimitiveEditProps & { selectableValues: SelectableValue[] | null }) {
   const current = isNonEmptyString(value) ? value : '';
-  const options = useMemo<SelectOption[]>(
+  const options = useMemo<ComboboxOption[]>(
     () =>
       visibleOptions(selectableValues, (sv) => sv.value === current).map((sv) => ({
         value: sv.value,
@@ -180,28 +221,20 @@ function MultipleChoiceEdit({
       })),
     [selectableValues, current],
   );
-  const handleChange = useCallback(
-    (next: string) => {
-      onChange(next === EMPTY_SELECT_VALUE ? null : next);
-    },
-    [onChange],
-  );
+  const handleChange = useCallback((next: string | null) => onChange(next), [onChange]);
 
   return (
-    <Select value={current} onValueChange={handleChange} disabled={disabled}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select option..." />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={EMPTY_SELECT_VALUE}>No value</SelectItem>
-        {options.length > 0 && <SelectSeparator />}
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Combobox
+      ariaLabel="Custom field option"
+      options={options}
+      value={current || null}
+      onValueChange={handleChange}
+      placeholder="Select option…"
+      searchPlaceholder="Search options…"
+      emptyMessage="No options found."
+      clearLabel="No value"
+      disabled={disabled}
+    />
   );
 }
 
@@ -326,7 +359,7 @@ function DateEdit({ value, onChange, disabled }: PrimitiveEditProps) {
 
 function EmployeeEdit({ value, team, onChange, disabled }: PrimitiveEditProps & { team: OrgTeamMember[] }) {
   const current = isNonEmptyString(value) ? value : '';
-  const options = useMemo<SearchSelectOption[]>(
+  const options = useMemo<ComboboxOption[]>(
     () =>
       team
         .filter((member) => member.isActive || member.userId === current)
@@ -342,7 +375,7 @@ function EmployeeEdit({ value, team, onChange, disabled }: PrimitiveEditProps & 
   const handleChange = useCallback((next: string | null) => onChange(next), [onChange]);
 
   return (
-    <SearchSelect
+    <Combobox
       options={options}
       value={current || null}
       onValueChange={handleChange}

@@ -29,14 +29,18 @@ function DataTable({
   ...props
 }: DataTableProps) {
   return (
-    <Card {...props} data-slot="data-table" className={cn('min-h-0 border border-border py-0 ring-0', className)}>
+    <Card
+      {...props}
+      data-slot="data-table"
+      className={cn('min-h-0 border border-surface-border py-0 ring-0', className)}
+    >
       <div
         data-slot="data-table-scroll-area"
         className={cn('min-h-0 overflow-auto [&_[data-slot=table-container]]:overflow-visible', scrollAreaClassName)}
       >
         <Table>
-          <TableHeader className="sticky top-0 z-10 bg-muted [&_th]:bg-muted">
-            <TableRow className={cn('bg-muted hover:bg-muted', headerRowClassName)}>
+          <TableHeader className="sticky top-0 z-10">
+            <TableRow className={cn('hover:bg-transparent', headerRowClassName)}>
               {columns.map((column) => (
                 <TableHead key={column.id} className={column.className}>
                   {column.header}
