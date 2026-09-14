@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
+import type { ComboboxOption } from '@comitium/ui/combobox';
 import {
   FeatureSheetBody,
   FeatureSheetContent,
@@ -8,7 +9,6 @@ import {
 } from '@comitium/ui/feature-sheet';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
-import type { ComboboxOption } from '@comitium/ui/combobox';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';

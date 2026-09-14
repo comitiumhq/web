@@ -1,7 +1,7 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
 import type { TipTapDoc } from '@comitium/schemas/common';
-import { userEvent } from 'vitest/browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { render, renderHook } from 'vitest-browser-react';
 import type { OrgTeamMember } from '@/lib/schemas/org';
 import { DirectBookingLinkDialog } from './direct-booking-link-dialog';
@@ -155,7 +155,7 @@ describe('useDirectBookingLinkDialog', () => {
       .element(screen.getByRole('combobox', { name: 'Interview type' }))
       .toHaveValue('Technical interview (45 min)');
 
-    await screen.getByRole('button', { name: 'Show interviewers options' }).click();
+    await screen.getByRole('combobox', { name: 'Interviewers' }).click();
     await screen.getByRole('option', { name: 'Interviewer' }).click();
     await userEvent.keyboard('{Escape}');
 

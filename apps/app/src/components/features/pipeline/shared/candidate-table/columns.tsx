@@ -203,10 +203,7 @@ export function getCandidateColumns(
   return [...lead, appliedColumn(), dateColumn('terminal', 'Hired', (candidate) => candidate.terminalOutcomeAt)];
 }
 
-export function getCandidateTableGridMinWidth(
-  variant: CandidateTableVariant,
-  scope: CandidateTableScope,
-): string {
+export function getCandidateTableGridMinWidth(variant: CandidateTableVariant, scope: CandidateTableScope): string {
   return CANDIDATE_TABLE_GRID_MIN_WIDTH[variant][scope];
 }
 

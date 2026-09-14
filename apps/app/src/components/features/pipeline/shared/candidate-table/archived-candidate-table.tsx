@@ -1,7 +1,14 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { APPLICATION_TERMINAL_OUTCOME_LABEL } from '@comitium/ui/application-outcome-labels';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
-import { type ColumnDef, functionalUpdate, type OnChangeFn, type Row, type RowSelectionState, type SortingState } from '@tanstack/react-table';
+import {
+  type ColumnDef,
+  functionalUpdate,
+  type OnChangeFn,
+  type Row,
+  type RowSelectionState,
+  type SortingState,
+} from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import type { PipelineCandidate, PipelineCandidateSorting } from '@/lib/schemas/pipeline';
 
@@ -49,10 +56,7 @@ export function ArchivedCandidateTable({
     },
     [onCandidateClick],
   );
-  const columns = useMemo(
-    () => getArchivedColumns({ namesMap, orgId, showJob: false }),
-    [namesMap, orgId],
-  );
+  const columns = useMemo(() => getArchivedColumns({ namesMap, orgId, showJob: false }), [namesMap, orgId]);
 
   const tableSorting = useMemo<SortingState>(
     () => [{ id: 'terminal', desc: sorting.direction === 'desc' }],

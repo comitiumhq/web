@@ -422,7 +422,7 @@ export function ArchiveApplicationSheet({
               <Button variant="outline" onClick={handleCancel} disabled={isPending} type="button">
                 Cancel
               </Button>
-				<Button type="submit" variant="destructive" disabled={isPending || !canSubmit}>
+              <Button type="submit" variant="destructive" disabled={isPending || !canSubmit}>
                 {isPending ? <Spinner data-icon="inline-start" /> : <ArchiveIcon data-icon="inline-start" />}
                 {submitLabel}
               </Button>

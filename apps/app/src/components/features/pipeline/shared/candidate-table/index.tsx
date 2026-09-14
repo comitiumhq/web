@@ -1,7 +1,13 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
 import { BROWSER_TZ } from '@comitium/ui/date';
-import { functionalUpdate, type OnChangeFn, type Row, type RowSelectionState, type SortingState } from '@tanstack/react-table';
+import {
+  functionalUpdate,
+  type OnChangeFn,
+  type Row,
+  type RowSelectionState,
+  type SortingState,
+} from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryOrgMe } from '@/hooks/use-permissions';
 import type { PipelineCandidate, PipelineCandidateSort, PipelineCandidateSorting } from '@/lib/schemas/pipeline';
