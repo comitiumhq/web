@@ -12,7 +12,12 @@ export function useFinalizeCalendarConnect(orgId: string) {
     mutationFn: () => connectCalendar(orgId),
     onSuccess: (result) => {
       invalidateStatus();
-      toast.success(result.connected ? 'Calendar connected' : "Calendar didn't connect — try again");
+
+      if (result.connected) {
+        toast.success('Calendar connected');
+      } else {
+        toast.error("Calendar didn't connect - try again");
+      }
     },
     onError: () => {
       invalidateStatus();
