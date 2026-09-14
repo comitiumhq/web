@@ -1,11 +1,6 @@
-import { createAuthAccountApi } from '@comitium/auth/account-api';
-import { AccountSettingsPage } from '@comitium/auth/account-settings';
-import { createFileRoute } from '@tanstack/react-router';
+import { AccountSettingsLayout } from '@comitium/auth/account-settings-layout';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { AuthGuard } from '@/components/auth/auth-guard';
-import { qk } from '@/hooks/query-keys';
-import { api } from '@/lib/api/client';
-
-const accountApi = createAuthAccountApi(api);
 
 export const Route = createFileRoute('/account')({
   ssr: false,
@@ -22,7 +17,9 @@ export const Route = createFileRoute('/account')({
 function AccountRoute() {
   return (
     <AuthGuard>
-      <AccountSettingsPage zkIdentityApi={accountApi} zkIdentityQueryKey={qk.account.zkIdentity} />
+      <AccountSettingsLayout>
+        <Outlet />
+      </AccountSettingsLayout>
     </AuthGuard>
   );
 }

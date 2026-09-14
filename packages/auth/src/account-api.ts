@@ -3,7 +3,12 @@ import { type User, type UserKeyShare, userKeyShareSchema, userSchema } from '@c
 import { successSchema } from '@comitium/schemas/public';
 import type { z } from 'zod';
 
-import { type ZkIdentityApi, zkIdentityAttemptSchema, zkIdentityStatusSchema } from './zk-identity';
+import {
+  type ZkIdentityApi,
+  zkIdentityAttemptSchema,
+  zkIdentityCompletionResultSchema,
+  zkIdentityStatusSchema,
+} from './zk-identity';
 
 interface AuthApiTransport {
   get<T>(url: string, schema: z.ZodType<T>): Promise<T>;
@@ -24,7 +29,7 @@ export interface AuthAccountApi extends ZkIdentityApi {
 export function createAuthAccountApi(transport: AuthApiTransport): AuthAccountApi {
   return {
     completeZkIdentityAttempt: (attemptId, input) =>
-      transport.post(`/users/zk-identity/attempts/${attemptId}/complete`, input, zkIdentityStatusSchema),
+      transport.post(`/users/zk-identity/attempts/${attemptId}/complete`, input, zkIdentityCompletionResultSchema),
     createZkIdentityAttempt: () => transport.post('/users/zk-identity/attempts', undefined, zkIdentityAttemptSchema),
     getSession: () => transport.post('/auth/session', undefined, userSchema),
     getUserKeyShare: () => transport.get('/users/key-share', userKeyShareSchema),

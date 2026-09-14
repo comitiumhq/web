@@ -16,8 +16,10 @@ import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JobsIndexRouteImport } from './routes/jobs/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ScheduleTokenRouteImport } from './routes/schedule/$token'
 import { Route as CareersOrgSlugRouteImport } from './routes/careers/$orgSlug'
+import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
 import { Route as CareersOrgSlugIndexRouteImport } from './routes/careers/$orgSlug/index'
 import { Route as CareersOrgSlugJobsPostingSlugRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug'
 import { Route as CareersOrgSlugJobsPostingSlugIndexRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/index'
@@ -58,6 +60,11 @@ const JobsIndexRoute = JobsIndexRouteImport.update({
   path: '/jobs/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountRoute,
+} as any)
 const ScheduleTokenRoute = ScheduleTokenRouteImport.update({
   id: '/schedule/$token',
   path: '/schedule/$token',
@@ -67,6 +74,11 @@ const CareersOrgSlugRoute = CareersOrgSlugRouteImport.update({
   id: '/careers/$orgSlug',
   path: '/careers/$orgSlug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AccountZkIdentityRoute = AccountZkIdentityRouteImport.update({
+  id: '/zk-identity',
+  path: '/zk-identity',
+  getParentRoute: () => AccountRoute,
 } as any)
 const CareersOrgSlugIndexRoute = CareersOrgSlugIndexRouteImport.update({
   id: '/',
@@ -94,13 +106,15 @@ const CareersOrgSlugJobsPostingSlugApplyRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
+  '/account': typeof AccountRouteWithChildren
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/account/zk-identity': typeof AccountZkIdentityRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
   '/schedule/$token': typeof ScheduleTokenRoute
+  '/account/': typeof AccountIndexRoute
   '/jobs': typeof JobsIndexRoute
   '/careers/$orgSlug/': typeof CareersOrgSlugIndexRoute
   '/careers/$orgSlug/jobs/$postingSlug': typeof CareersOrgSlugJobsPostingSlugRouteWithChildren
@@ -109,12 +123,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/account/zk-identity': typeof AccountZkIdentityRoute
   '/schedule/$token': typeof ScheduleTokenRoute
+  '/account': typeof AccountIndexRoute
   '/jobs': typeof JobsIndexRoute
   '/careers/$orgSlug': typeof CareersOrgSlugIndexRoute
   '/careers/$orgSlug/jobs/$postingSlug/apply': typeof CareersOrgSlugJobsPostingSlugApplyRoute
@@ -123,13 +138,15 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
+  '/account': typeof AccountRouteWithChildren
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/account/zk-identity': typeof AccountZkIdentityRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
   '/schedule/$token': typeof ScheduleTokenRoute
+  '/account/': typeof AccountIndexRoute
   '/jobs/': typeof JobsIndexRoute
   '/careers/$orgSlug/': typeof CareersOrgSlugIndexRoute
   '/careers/$orgSlug/jobs/$postingSlug': typeof CareersOrgSlugJobsPostingSlugRouteWithChildren
@@ -145,8 +162,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/robots.txt'
     | '/signup'
+    | '/account/zk-identity'
     | '/careers/$orgSlug'
     | '/schedule/$token'
+    | '/account/'
     | '/jobs'
     | '/careers/$orgSlug/'
     | '/careers/$orgSlug/jobs/$postingSlug'
@@ -155,12 +174,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/account'
     | '/applications'
     | '/login'
     | '/robots.txt'
     | '/signup'
+    | '/account/zk-identity'
     | '/schedule/$token'
+    | '/account'
     | '/jobs'
     | '/careers/$orgSlug'
     | '/careers/$orgSlug/jobs/$postingSlug/apply'
@@ -173,8 +193,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/robots.txt'
     | '/signup'
+    | '/account/zk-identity'
     | '/careers/$orgSlug'
     | '/schedule/$token'
+    | '/account/'
     | '/jobs/'
     | '/careers/$orgSlug/'
     | '/careers/$orgSlug/jobs/$postingSlug'
@@ -184,7 +206,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AccountRoute: typeof AccountRoute
+  AccountRoute: typeof AccountRouteWithChildren
   ApplicationsRoute: typeof ApplicationsRoute
   LoginRoute: typeof LoginRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
@@ -245,6 +267,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JobsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/': {
+      id: '/account/'
+      path: '/'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/schedule/$token': {
       id: '/schedule/$token'
       path: '/schedule/$token'
@@ -258,6 +287,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/careers/$orgSlug'
       preLoaderRoute: typeof CareersOrgSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/account/zk-identity': {
+      id: '/account/zk-identity'
+      path: '/zk-identity'
+      fullPath: '/account/zk-identity'
+      preLoaderRoute: typeof AccountZkIdentityRouteImport
+      parentRoute: typeof AccountRoute
     }
     '/careers/$orgSlug/': {
       id: '/careers/$orgSlug/'
@@ -289,6 +325,19 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AccountRouteChildren {
+  AccountZkIdentityRoute: typeof AccountZkIdentityRoute
+  AccountIndexRoute: typeof AccountIndexRoute
+}
+
+const AccountRouteChildren: AccountRouteChildren = {
+  AccountZkIdentityRoute: AccountZkIdentityRoute,
+  AccountIndexRoute: AccountIndexRoute,
+}
+
+const AccountRouteWithChildren =
+  AccountRoute._addFileChildren(AccountRouteChildren)
 
 interface CareersOrgSlugJobsPostingSlugRouteChildren {
   CareersOrgSlugJobsPostingSlugApplyRoute: typeof CareersOrgSlugJobsPostingSlugApplyRoute
@@ -325,7 +374,7 @@ const CareersOrgSlugRouteWithChildren = CareersOrgSlugRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AccountRoute: AccountRoute,
+  AccountRoute: AccountRouteWithChildren,
   ApplicationsRoute: ApplicationsRoute,
   LoginRoute: LoginRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,

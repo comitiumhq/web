@@ -1,9 +1,9 @@
 import { PageContainer } from '@comitium/ui/page-container';
+import { SettingsNavLink } from '@comitium/ui/settings-nav-link';
 import { CalendarIcon, type Icon as PhosphorIcon, UserIcon } from '@phosphor-icons/react';
-import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { useCallback } from 'react';
 import { OrgGuard } from '@/components/auth/org-guard';
-import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/org/$orgId/settings')({
   ssr: false,
@@ -14,7 +14,6 @@ interface PersonalSettingsNavItem {
   label: string;
   path: string;
   icon: PhosphorIcon;
-  match: (pathname: string) => boolean;
 }
 
 function PersonalSettingsLayout() {
@@ -25,16 +24,14 @@ function PersonalSettingsLayout() {
 }
 
 function PersonalSettingsLayoutContent({ orgId }: { orgId: string }) {
-  const { pathname } = useLocation();
   const basePath = `/org/${orgId}/settings`;
 
   const items: PersonalSettingsNavItem[] = [
-    { label: 'Profile', path: basePath, icon: UserIcon, match: (p) => p === basePath || p === `${basePath}/` },
+    { label: 'Profile', path: basePath, icon: UserIcon },
     {
       label: 'Calendar',
       path: `${basePath}/calendar`,
       icon: CalendarIcon,
-      match: (p) => p.startsWith(`${basePath}/calendar`),
     },
   ];
 
@@ -42,17 +39,20 @@ function PersonalSettingsLayoutContent({ orgId }: { orgId: string }) {
     <PageContainer size="settings" className="h-full sm:px-4 lg:px-4">
       <div className="flex h-full min-h-0 gap-8 overflow-hidden">
         <aside className="hidden w-68 shrink-0 py-6 lg:block">
-          <nav className="sticky top-6 flex flex-col gap-1">
-            {items.map((item) => (
-              <PersonalSettingsNavLink key={item.path} item={item} active={item.match(pathname)} />
-            ))}
-          </nav>
+          <div className="sticky top-6">
+            <p className="text-heading-20">Settings</p>
+            <nav aria-label="Settings" className="mt-7 flex flex-col gap-1">
+              {items.map((item) => (
+                <SettingsNavLink key={item.path} icon={item.icon} label={item.label} to={item.path} />
+              ))}
+            </nav>
+          </div>
         </aside>
 
         <main className="flex min-h-0 min-w-0 flex-1 flex-col py-6">
-          <nav className="mb-6 flex gap-1 lg:hidden">
+          <nav aria-label="Settings" className="mb-6 flex gap-1 lg:hidden">
             {items.map((item) => (
-              <PersonalSettingsNavLink key={item.path} item={item} active={item.match(pathname)} />
+              <SettingsNavLink key={item.path} icon={item.icon} label={item.label} to={item.path} />
             ))}
           </nav>
 
@@ -62,25 +62,5 @@ function PersonalSettingsLayoutContent({ orgId }: { orgId: string }) {
         </main>
       </div>
     </PageContainer>
-  );
-}
-
-function PersonalSettingsNavLink({ item, active }: { item: PersonalSettingsNavItem; active: boolean }) {
-  const Icon = item.icon;
-
-  return (
-    <Link
-      to={item.path}
-      className={cn(
-        'flex h-9 min-w-0 items-center gap-3 rounded-xl px-3 text-label-14 text-foreground transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-        {
-          'bg-accent text-accent-foreground': active,
-          'hover:bg-accent hover:text-accent-foreground': !active,
-        },
-      )}
-    >
-      <Icon className="size-4 shrink-0" />
-      <span className="min-w-0 truncate">{item.label}</span>
-    </Link>
   );
 }

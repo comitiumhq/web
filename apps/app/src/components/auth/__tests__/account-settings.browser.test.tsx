@@ -1,5 +1,4 @@
-import { AccountSettingsPage } from '@comitium/auth/account-settings';
-import type { ZkIdentityApi } from '@comitium/auth/zk-identity';
+import { AuthenticationSettingsPage } from '@comitium/auth/authentication-settings-page';
 import type { LinkedAccountWithMetadata, User } from '@privy-io/react-auth';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
@@ -65,19 +64,8 @@ const wallet = account({
   walletIndex: 0,
 });
 
-const zkIdentityApi: ZkIdentityApi = {
-  completeZkIdentityAttempt: vi.fn(),
-  createZkIdentityAttempt: vi.fn(),
-  getZkIdentityStatus: vi.fn(),
-};
-
 function renderAccountSettings() {
-  return render(
-    <AccountSettingsPage
-      zkIdentityApi={zkIdentityApi}
-      zkIdentityQueryKey={(userId) => ['account', 'zk-identity', userId]}
-    />,
-  );
+  return render(<AuthenticationSettingsPage />);
 }
 
 beforeEach(() => {
@@ -100,12 +88,11 @@ beforeEach(() => {
   mocks.verifyUpdateCode.mockResolvedValue({ user: {} });
 });
 
-describe('AccountSettingsPage linked-method controls', () => {
-  it('keeps the account sidebar focused on personal account navigation', async () => {
+describe('AuthenticationSettingsPage linked-method controls', () => {
+  it('keeps the authentication page focused on personal sign-in methods', async () => {
     mocks.user = user(email, wallet);
     const screen = await renderAccountSettings();
 
-    await expect.element(screen.getByRole('heading', { name: 'Account' })).toBeInTheDocument();
     await expect.element(screen.getByRole('heading', { name: 'Authentication' })).toBeInTheDocument();
     await expect.element(screen.getByText('Manage how you sign in to Comitium.')).not.toBeInTheDocument();
     await expect.element(screen.getByText('Wallet address')).not.toBeInTheDocument();

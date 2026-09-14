@@ -1,11 +1,15 @@
-import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
+import { isDefined } from '@comitium/schemas/guards';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@comitium/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { Spinner } from '@comitium/ui/spinner';
-import { CheckCircleIcon, ShieldCheckIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { XIcon } from '@phosphor-icons/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { type ReactNode, useCallback, useState } from 'react';
+import { NullifierType, type ProofResult, type QueryBuilder } from '@zkpassport/sdk';
+import { ZKPassportQRCode } from '@zkpassport/ui/react';
+import { useTheme } from 'next-themes';
+import { type ReactNode, useCallback, useRef, useState } from 'react';
 
 import type {
   CompleteZkIdentityAttemptInput,
@@ -13,24 +17,11 @@ import type {
   ZkIdentityAttempt,
   ZkIdentityStatus,
 } from '../zk-identity';
-import { useZkPassportRequest } from './use-zkpassport-request';
-
-type IdentityVerificationMode = 'unknown' | 'live' | 'mock';
-
-const PRIVACY_EXPLANATIONS: Record<IdentityVerificationMode, string> = {
-  unknown:
-    'Live ZK Identity uses zero-knowledge cryptography to prove that you are 18+, match the photo on a supported ID, and have not used the same ID for another Comitium account—without revealing who you are.',
-  live: 'ZK Identity uses zero-knowledge cryptography to prove that you are 18+, match the photo on a supported ID, and have not used the same ID for another Comitium account—without revealing who you are.',
-  mock: 'Development mode uses mock data to test the integration. It does not verify a real person.',
-};
-
-const PRIVACY_STORAGE_EXPLANATION =
-  'Your identity document and personal details never leave your phone and are never stored by Comitium.';
+import { ZkPassportMark } from './zkpassport-mark';
 
 const FAILURE_MESSAGES = {
-  proof_invalid: 'The submitted proofs did not satisfy the ZK Identity request.',
-  identity_already_linked: 'This identity is already connected to another Comitium account.',
-  verifier_unavailable: 'The verifier was temporarily unavailable. Start again when you are ready.',
+  proof_invalid: 'The proof did not satisfy this verification request.',
+  identity_already_linked: 'This document has already been used to verify another Comitium account.',
 } as const;
 
 export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; queryKey: readonly unknown[] }) {
@@ -44,41 +35,27 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
     refetchOnWindowFocus: false,
   });
 
-  const createAttempt = useMutation({
-    mutationFn: api.createZkIdentityAttempt,
-    onSuccess: (created) => {
-      setAttempt(created);
-      queryClient.setQueryData<ZkIdentityStatus>(queryKey, {
-        status: 'pending',
-        expiresAt: created.expiresAt,
-      });
-    },
-  });
-
   const completeAttempt = useMutation({
     mutationFn: ({ attemptId, input }: { attemptId: string; input: CompleteZkIdentityAttemptInput }) =>
       api.completeZkIdentityAttempt(attemptId, input),
     onSuccess: (status) => {
       setAttempt(null);
-      queryClient.setQueryData(queryKey, status);
+
+      if (status.status === 'verified') {
+        queryClient.setQueryData(queryKey, status);
+      }
     },
     onError: async () => {
+      setAttempt(null);
       await queryClient.invalidateQueries({ queryKey });
     },
   });
 
-  const submitAttempt = completeAttempt.mutateAsync;
-
-  const submitProof = useCallback(
-    (input: CompleteZkIdentityAttemptInput) => {
-      if (!attempt) {
-        throw new Error('ZK identity attempt is no longer active');
-      }
-
-      return submitAttempt({ attemptId: attempt.attemptId, input });
-    },
-    [attempt, submitAttempt],
-  );
+  const createAttempt = useMutation({
+    mutationFn: api.createZkIdentityAttempt,
+    onMutate: () => completeAttempt.reset(),
+    onSuccess: setAttempt,
+  });
 
   if (statusQuery.isPending) {
     return <ZkIdentityLoading />;
@@ -86,13 +63,11 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
 
   if (statusQuery.isError) {
     return (
-      <ZkIdentityCard>
-        <Alert variant="destructive">
-          <WarningCircleIcon />
-          <AlertTitle>Could not load ZK Identity</AlertTitle>
-          <AlertDescription>Try loading the account page again.</AlertDescription>
-        </Alert>
-      </ZkIdentityCard>
+      <ZkIdentityCard
+        title="Verification unavailable"
+        description="The verification status could not be loaded. Refresh the page to try again."
+        status={<Badge variant="destructive">Unavailable</Badge>}
+      />
     );
   }
 
@@ -100,200 +75,262 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
     return <VerifiedIdentity status={statusQuery.data} />;
   }
 
-  if (attempt) {
+  if (
+    completeAttempt.data?.status === 'failed' &&
+    completeAttempt.data.failureCode === 'identity_already_linked'
+  ) {
     return (
-      <ZkIdentityCard>
-        <ZkPassportFlow
-          attempt={attempt}
-          isRestarting={createAttempt.isPending}
-          onComplete={submitProof}
-          onRestart={() => createAttempt.mutate()}
-          restartFailed={createAttempt.isError}
-        />
-      </ZkIdentityCard>
+      <ZkIdentityCard
+        title="Identity already verified"
+        description="This ID is linked to another Comitium account. Sign in to that account or recover access."
+      />
     );
   }
 
+  let completionFailure: string | null = null;
+  if (completeAttempt.data?.status === 'failed') {
+    completionFailure = FAILURE_MESSAGES[completeAttempt.data.failureCode];
+  } else if (completeAttempt.isError) {
+    completionFailure = 'Could not finish verification. Try again when you are ready.';
+  }
+  const prompt = isDefined(completionFailure)
+    ? {
+        action: 'Try again',
+        description: completionFailure,
+        title: 'Verification failed',
+      }
+    : {
+        action: 'Verify',
+        description:
+          'Verify your identity privately without sharing your personal information. Your document details stay on your device.',
+        title: (
+          <span className="flex items-center gap-2">
+            <ZkPassportMark className="size-6 shrink-0" />
+            <span>Verify with zkPassport</span>
+          </span>
+        ),
+      };
+
   return (
-    <ZkIdentityCard>
-      <div className="space-y-5">
-        <IdentityPrivacySummary verificationMode="unknown" />
-        {statusQuery.data.status === 'failed' ? <FailedIdentity status={statusQuery.data} /> : null}
-        {statusQuery.data.status === 'pending' ? (
-          <Alert variant="info">
-            <AlertTitle>Verification in progress</AlertTitle>
-            <AlertDescription>
-              This browser no longer has the private verification session. Start again to replace it.
-            </AlertDescription>
-          </Alert>
-        ) : null}
-        <Button onClick={() => createAttempt.mutate()} disabled={createAttempt.isPending}>
-          {createAttempt.isPending ? <Spinner /> : <ShieldCheckIcon />}
-          Verify with zkPassport
-        </Button>
-        {createAttempt.isError ? (
-          <p role="alert" className="text-sm text-destructive-text">
-            Could not start verification. Please try again.
-          </p>
-        ) : null}
-      </div>
-    </ZkIdentityCard>
+    <>
+      <StartIdentity
+        title={prompt.title}
+        description={prompt.description}
+        action={prompt.action}
+        isStarting={createAttempt.isPending}
+        startFailed={createAttempt.isError}
+        onStart={() => createAttempt.mutate()}
+      />
+      {isDefined(attempt) ? (
+        <ZkPassportDialog
+          key={attempt.attemptId}
+          attempt={attempt}
+          onClose={() => setAttempt(null)}
+          onComplete={(input) => completeAttempt.mutate({ attemptId: attempt.attemptId, input })}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function ZkPassportDialog({
+  attempt,
+  onClose,
+  onComplete,
+}: {
+  attempt: ZkIdentityAttempt;
+  onClose: () => void;
+  onComplete: (input: CompleteZkIdentityAttemptInput) => void;
+}) {
+  const [open, setOpen] = useState(true);
+
+  const handleOpenChange = (open: boolean) => {
+    setOpen(open);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[calc(100dvh-1rem)] w-[380px] max-w-[calc(100%-1rem)] gap-0 overflow-y-auto rounded-[14px] bg-transparent p-0 ring-0 sm:max-w-[380px]"
+        onCloseAutoFocus={onClose}
+      >
+        <DialogHeader className="sr-only">
+          <DialogTitle>ZKPassport verification</DialogTitle>
+          <DialogDescription>Complete the verification request in the ZKPassport app.</DialogDescription>
+        </DialogHeader>
+        <DialogClose asChild>
+          <Button className="absolute top-1.5 left-2 z-10" variant="ghost" size="icon-xs">
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </Button>
+        </DialogClose>
+        <ZkPassportFlow attempt={attempt} onComplete={onComplete} />
+      </DialogContent>
+    </Dialog>
   );
 }
 
 function ZkPassportFlow({
   attempt,
-  isRestarting,
   onComplete,
-  onRestart,
-  restartFailed,
 }: {
   attempt: ZkIdentityAttempt;
-  isRestarting: boolean;
-  onComplete: (input: CompleteZkIdentityAttemptInput) => Promise<ZkIdentityStatus>;
-  onRestart: () => void;
-  restartFailed: boolean;
+  onComplete: (input: CompleteZkIdentityAttemptInput) => void;
 }) {
-  const flow = useZkPassportRequest(attempt, onComplete);
+  const { resolvedTheme } = useTheme();
+  const proofsByIndex = useRef(new Map<number, ProofResult>());
+  const submitted = useRef(false);
+  const theme = resolvedTheme === 'dark' ? 'dark' : 'light';
 
-  if (flow.stage === 'waiting') {
-    return (
-      <div className="space-y-5">
-        <IdentityPrivacySummary verificationMode={attempt.request.devMode ? 'mock' : 'live'} />
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-muted/20 p-4">
-          <img
-            src={flow.qrCode}
-            alt="QR code to continue ZK Identity verification in the zkPassport app"
-            className="size-[min(17.5rem,100%)] rounded-lg bg-white p-2"
-          />
-          <p className="max-w-md text-center text-sm text-muted-foreground">
-            Scan with the zkPassport mobile app, or open the request on this device.
-          </p>
-          <Button asChild variant="outline">
-            <a href={flow.url} target="_blank" rel="noreferrer">
-              Open zkPassport
-            </a>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const buildQuery = useCallback(
+    (builder: QueryBuilder) => builder.policy(attempt.request.policyId).bind('custom_data', attempt.challenge).done(),
+    [attempt],
+  );
 
-  if (flow.stage === 'error' || flow.stage === 'rejected') {
-    return (
-      <div className="space-y-4">
-        <Alert variant={flow.stage === 'error' ? 'destructive' : 'default'}>
-          <AlertTitle>{flow.stage === 'error' ? 'Verification could not finish' : 'Verification declined'}</AlertTitle>
-          <AlertDescription>
-            {flow.stage === 'error'
-              ? 'No ZK Identity status was granted. You can safely start again.'
-              : 'No verification result was submitted to Comitium. You can return later or start again now.'}
-          </AlertDescription>
-        </Alert>
-        <Button variant="outline" onClick={onRestart} disabled={isRestarting}>
-          {isRestarting ? <Spinner /> : null}
-          {isRestarting ? 'Starting…' : 'Start again'}
-        </Button>
-        {restartFailed ? (
-          <p role="alert" className="text-sm text-destructive-text">
-            Could not start a new verification. Please try again.
-          </p>
-        ) : null}
-      </div>
-    );
-  }
+  const submitProofs = useCallback(
+    (proof: ProofResult) => {
+      if (submitted.current) {
+        return;
+      }
 
-  const progressLabel = {
-    preparing: 'Preparing a private verification request…',
-    scanned: 'Request opened in zkPassport…',
-    generating: 'Generating privacy-preserving proofs…',
-    submitting: 'Confirming proofs with the verifier…',
-  }[flow.stage];
+      const proofs = collectCompleteProofSet(proofsByIndex.current, proof);
+
+      if (!isDefined(proofs)) {
+        return;
+      }
+
+      submitted.current = true;
+      onComplete({
+        challenge: attempt.challenge,
+        proofs,
+      });
+    },
+    [attempt.challenge, onComplete],
+  );
+
+  const resetProofs = useCallback(() => {
+    if (!submitted.current) {
+      proofsByIndex.current.clear();
+    }
+  }, []);
 
   return (
-    <div className="flex min-h-56 flex-col items-center justify-center gap-3 text-center">
-      <Spinner className="size-5" />
-      <p className="text-sm text-muted-foreground">{progressLabel}</p>
+    <div className="flex min-w-0 justify-center">
+      <ZKPassportQRCode
+        name="Comitium"
+        domain={attempt.request.domain}
+        mode={attempt.request.proofMode}
+        oprfKeyId={attempt.request.oprfKeyId}
+        uniqueIdentifierType={NullifierType.SALTED}
+        theme={theme}
+        query={buildQuery}
+        onProofGenerated={submitProofs}
+        onRetryClicked={resetProofs}
+      />
     </div>
   );
 }
 
-function IdentityPrivacySummary({ verificationMode }: { verificationMode: IdentityVerificationMode }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="info">18+</Badge>
-        <Badge variant="info">Private face match</Badge>
-        {verificationMode === 'live' ? <Badge variant="info">One ID per account</Badge> : null}
-        {verificationMode === 'mock' ? <Badge variant="warning">Development mode</Badge> : null}
-      </div>
-      <div className="space-y-2 text-sm text-muted-foreground">
-        <p>{PRIVACY_EXPLANATIONS[verificationMode]}</p>
-        <p>{PRIVACY_STORAGE_EXPLANATION}</p>
-      </div>
-    </div>
-  );
-}
+function collectCompleteProofSet(proofsByIndex: Map<number, ProofResult>, proof: ProofResult): ProofResult[] | null {
+  const { index, total } = proof;
 
-function VerifiedIdentity({ status }: { status: Extract<ZkIdentityStatus, { status: 'verified' }> }) {
-  if (status.verificationMode === 'mock') {
-    return (
-      <ZkIdentityCard>
-        <Alert variant="info">
-          <WarningCircleIcon />
-          <AlertTitle>ZK Identity verified in development mode</AlertTitle>
-          <AlertDescription>
-            The development flow completed on{' '}
-            <time dateTime={status.verifiedAt}>{new Date(status.verifiedAt).toLocaleDateString()}</time> using mock
-            data. This does not verify a real person and cannot be treated as a production verification.
-          </AlertDescription>
-        </Alert>
-      </ZkIdentityCard>
-    );
+  if (!isDefined(index) || !isDefined(total) || index < 0 || total < 1 || index >= total) {
+    return null;
   }
 
+  proofsByIndex.set(index, proof);
+
+  if (proofsByIndex.size !== total) {
+    return null;
+  }
+
+  const proofs: ProofResult[] = [];
+
+  for (let proofIndex = 0; proofIndex < total; proofIndex += 1) {
+    const candidate = proofsByIndex.get(proofIndex);
+
+    if (!isDefined(candidate) || candidate.total !== total) {
+      return null;
+    }
+
+    proofs.push(candidate);
+  }
+
+  return proofs;
+}
+
+function StartIdentity({
+  action,
+  description,
+  isStarting,
+  onStart,
+  startFailed,
+  title,
+}: {
+  action: string;
+  description: string;
+  isStarting: boolean;
+  onStart: () => void;
+  startFailed: boolean;
+  title: ReactNode;
+}) {
   return (
-    <ZkIdentityCard>
-      <Alert variant="success">
-        <CheckCircleIcon />
-        <AlertTitle>ZK Identity verified</AlertTitle>
-        <AlertDescription>
-          Verified with zero-knowledge proofs on{' '}
-          <time dateTime={status.verifiedAt}>{new Date(status.verifiedAt).toLocaleDateString()}</time>: age 18+, private
-          face match, and one ID per account—without revealing or storing your personal details.
-        </AlertDescription>
-      </Alert>
+    <ZkIdentityCard title={title} description={description}>
+      <Button onClick={onStart} disabled={isStarting}>
+        {isStarting ? <Spinner /> : null}
+        {isStarting ? 'Preparing…' : action}
+      </Button>
+      {startFailed ? (
+        <p role="alert" className="text-sm text-destructive-text">
+          Could not create a verification request. Try again.
+        </p>
+      ) : null}
     </ZkIdentityCard>
   );
 }
 
-function FailedIdentity({ status }: { status: Extract<ZkIdentityStatus, { status: 'failed' }> }) {
+function VerifiedIdentity({ status }: { status: Extract<ZkIdentityStatus, { status: 'verified' }> }) {
+  const verifiedDate = new Date(status.verifiedAt).toLocaleDateString();
+
   return (
-    <Alert variant="destructive">
-      <WarningCircleIcon />
-      <AlertTitle>ZK Identity not verified</AlertTitle>
-      <AlertDescription>{FAILURE_MESSAGES[status.failureCode]}</AlertDescription>
-    </Alert>
+    <ZkIdentityCard
+      title="Verification complete"
+      description={`Verified privately with ZKPassport on ${verifiedDate}.`}
+      status={<Badge variant="success">Verified</Badge>}
+    />
   );
 }
 
 function ZkIdentityLoading() {
   return (
-    <ZkIdentityCard>
-      <div className="flex min-h-32 items-center justify-center">
+    <Card size="sm" className="w-full max-w-3xl">
+      <CardContent className="flex min-h-24 items-center justify-center">
         <Spinner />
-      </div>
-    </ZkIdentityCard>
+      </CardContent>
+    </Card>
   );
 }
 
-function ZkIdentityCard({ children }: { children: ReactNode }) {
+function ZkIdentityCard({
+  children,
+  description,
+  status,
+  title,
+}: {
+  children?: ReactNode;
+  description: string;
+  status?: ReactNode;
+  title: ReactNode;
+}) {
   return (
-    <Card size="sm">
+    <Card size="sm" className="w-full max-w-3xl">
       <CardHeader>
-        <CardTitle>Identity verification</CardTitle>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription className="max-w-2xl leading-6">{description}</CardDescription>
+        {isDefined(status) ? <CardAction>{status}</CardAction> : null}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      {isDefined(children) ? <CardContent className="space-y-3">{children}</CardContent> : null}
     </Card>
   );
 }
