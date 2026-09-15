@@ -75,10 +75,7 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
     return <VerifiedIdentity status={statusQuery.data} />;
   }
 
-  if (
-    completeAttempt.data?.status === 'failed' &&
-    completeAttempt.data.failureCode === 'identity_already_linked'
-  ) {
+  if (completeAttempt.data?.status === 'failed' && completeAttempt.data.failureCode === 'identity_already_linked') {
     return (
       <ZkIdentityCard
         title="Identity already verified"

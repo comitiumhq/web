@@ -1,6 +1,6 @@
 import { createAuthAccountApi } from '@comitium/auth/account-api';
-import { createFileRoute } from '@tanstack/react-router';
 import { ZkIdentitySettingsPage } from '@comitium/auth/zk-identity-settings-page';
+import { createFileRoute } from '@tanstack/react-router';
 import { qk } from '@/hooks/query-keys';
 import { api } from '@/lib/api/client';
 

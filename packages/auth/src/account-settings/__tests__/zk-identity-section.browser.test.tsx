@@ -194,7 +194,9 @@ describe('ZK Identity account integration', () => {
 
     await expect.element(screen.getByText('Identity already verified')).toBeInTheDocument();
     await expect
-      .element(screen.getByText('This ID is linked to another Comitium account. Sign in to that account or recover access.'))
+      .element(
+        screen.getByText('This ID is linked to another Comitium account. Sign in to that account or recover access.'),
+      )
       .toBeInTheDocument();
     await expect.element(screen.getByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
     await expect.element(screen.getByRole('button', { name: 'Verify' })).not.toBeInTheDocument();
