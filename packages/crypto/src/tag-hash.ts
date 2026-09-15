@@ -1,23 +1,13 @@
-import { hkdf } from '@noble/hashes/hkdf.js';
-import { hmac } from '@noble/hashes/hmac.js';
-import { sha256 } from '@noble/hashes/sha2.js';
-import { bytesToHex } from '@noble/hashes/utils.js';
+import { createBlindIndexDigest } from './blind-index';
 
-const textEncoder = new TextEncoder();
+const TAG_HASH_NAMESPACE = 'comitium-tag-hash-v1';
+const EMPTY_SALT = new Uint8Array(0);
 
 /**
- * HMAC key for tag blind indexes, derived from the vault private key (HKDF).
- * `comitium-tag-hash-v1` info wire-frozen — changing it orphans every stored hash.
+ * `TAG_HASH_NAMESPACE` is wire-frozen — changing it orphans every stored hash.
  */
-export function deriveTagHashKey(vaultPrivateKey: Uint8Array): Uint8Array {
-  return hkdf(sha256, vaultPrivateKey, new Uint8Array(0), textEncoder.encode('comitium-tag-hash-v1'), 32);
-}
-
-/**
- * HMAC-SHA256 blind index for a tag label; label MUST be pre-normalized via `normalizeTagLabel`.
- */
-export function hmacTagLabel(tagHashKey: Uint8Array, normalizedLabel: string): string {
-  return bytesToHex(hmac(sha256, tagHashKey, textEncoder.encode(normalizedLabel)));
+export function hashTagLabel(vaultPrivateKey: Uint8Array, label: string): string {
+  return createBlindIndexDigest(vaultPrivateKey, EMPTY_SALT, TAG_HASH_NAMESPACE, normalizeTagLabel(label));
 }
 
 /**

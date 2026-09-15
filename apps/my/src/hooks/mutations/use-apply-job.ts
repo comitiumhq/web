@@ -8,7 +8,6 @@ import { assertEncryptionKeyBundle } from '@comitium/crypto/key-bundle';
 import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
 import { getErrorMessage } from '@comitium/schemas/error';
 import type { CandidateProfileInputValue } from '@comitium/schemas/forms/application-required-fields';
-import type { FormSubmissionFieldValue } from '@comitium/schemas/forms/form-submission';
 import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { isJobError } from '@comitium/schemas/product-errors';
 import { BACKGROUND_CONFIRMATION_COPY } from '@comitium/ui/action-confirmation';
@@ -33,7 +32,6 @@ interface SubmitApplicationParams {
   stakeAmount: bigint;
   formId: string;
   answerBuckets: ApplyAnswerBucket[];
-  fieldValues: FormSubmissionFieldValue[];
   resumeUpload: { fileId: string; questionId: string; file: File } | null;
   fileUploads: ApplyFileUpload[];
   candidateIdentityInputs: CandidateIdentityInputValue[];
@@ -92,7 +90,6 @@ export function useApplyJob({ onCompleted }: { onCompleted: () => void }) {
       stakeAmount,
       formId,
       answerBuckets,
-      fieldValues,
       resumeUpload,
       fileUploads,
       candidateIdentityInputs,
@@ -125,7 +122,6 @@ export function useApplyJob({ onCompleted }: { onCompleted: () => void }) {
         stakeAmount,
         formId,
         answerBuckets,
-        fieldValues,
         resumeUpload,
         fileUploads,
         candidateIdentityInputs,

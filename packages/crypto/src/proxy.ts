@@ -1,11 +1,14 @@
 import * as Comlink from 'comlink';
 import { type Address, type Hex, hashMessage, sha256 } from 'viem';
 
+import type { CandidateProfileSearchField } from './candidate-profile-search-hash';
 import type { CryptoContextInput } from './context';
-import type { SearchableCustomFieldType } from './custom-field-hash';
+import type { SearchableCustomFieldType } from './custom-field-search';
 import type { WrappedKey } from './envelope-key';
+import type { CategoricalFormFieldKind } from './form-field-search-hash';
 import { canonicalizeEvmSignature, type WrappedPersonalKey } from './personal-key';
 import type { RecipientDescriptor } from './recipients';
+import { isDefined } from './runtime-guards';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from './schemas';
 import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from './session';
 import type { CryptoWorkerApi } from './worker/crypto-api';
@@ -82,11 +85,13 @@ function ensureWorker(): void {
     return;
   }
 
-  if (typeof Worker === 'undefined') {
+  const WorkerConstructor = globalThis.Worker;
+
+  if (!isDefined(WorkerConstructor)) {
     throw new Error('CryptoProxy requires a browser environment (Web Workers not available)');
   }
 
-  worker = new Worker(new URL('./worker/crypto.worker.ts', import.meta.url), {
+  worker = new WorkerConstructor(new URL('./worker/crypto.worker.ts', import.meta.url), {
     type: 'module',
   });
 
@@ -430,8 +435,8 @@ export const CryptoProxy = {
 
   // --- Tag Hash ---
 
-  async hashTagLabel(orgId: string, wrappedVaultKey: WrappedKey, normalizedLabel: string): Promise<string> {
-    return getProxy().hashTagLabel(orgId, wrappedVaultKey, normalizedLabel);
+  async hashTagLabel(orgId: string, wrappedVaultKey: WrappedKey, label: string): Promise<string> {
+    return getProxy().hashTagLabel(orgId, wrappedVaultKey, label);
   },
 
   // --- Custom Field Hash ---
@@ -444,5 +449,24 @@ export const CryptoProxy = {
     plaintext: unknown,
   ): Promise<string> {
     return getProxy().hashCustomFieldValue(orgId, wrappedVaultKey, fieldId, fieldType, plaintext);
+  },
+
+  async hashCandidateProfileSearchValue(
+    orgId: string,
+    wrappedVaultKey: WrappedKey,
+    field: CandidateProfileSearchField,
+    value: string | number,
+  ): Promise<string> {
+    return getProxy().hashCandidateProfileSearchValue(orgId, wrappedVaultKey, field, value);
+  },
+
+  async hashCategoricalFormFieldValue(
+    orgId: string,
+    wrappedVaultKey: WrappedKey,
+    fieldId: string,
+    kind: CategoricalFormFieldKind,
+    value: boolean | string,
+  ): Promise<string> {
+    return getProxy().hashCategoricalFormFieldValue(orgId, wrappedVaultKey, fieldId, kind, value);
   },
 };

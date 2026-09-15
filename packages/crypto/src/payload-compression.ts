@@ -1,3 +1,5 @@
+import { isDefined } from './runtime-guards';
+
 export type PayloadCompression = 'none' | 'gzip';
 
 export const PAYLOAD_COMPRESSION_NONE = 'none' satisfies PayloadCompression;
@@ -65,7 +67,7 @@ function isCompressionWorthIt(plaintextBytes: number, compressedBytes: number): 
 function encodeJsonPayload(data: unknown): Uint8Array {
   const json = JSON.stringify(data);
 
-  if (typeof json !== 'string') {
+  if (!isDefined(json)) {
     throw new Error('Encrypted payload must be JSON-serializable');
   }
 

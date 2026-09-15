@@ -1,5 +1,5 @@
 import { z } from 'zod';
-
+import { candidateLocationValueSchema } from './field-types/candidate-location';
 import type { NestedForm } from './form-definitions';
 
 import { readNonEmptyText } from './text-value';
@@ -69,6 +69,7 @@ export const candidateProfileInputValueSchema = z
   .object({
     firstName: z.string().trim().min(1),
     lastName: z.string().trim().min(1),
+    location: candidateLocationValueSchema.nullable(),
   })
   .strict();
 
@@ -96,10 +97,17 @@ export function extractCandidateProfileInput(
 ): CandidateProfileInputValue {
   const firstName = readApplicationProfileField(form, values, 'first_name');
   const lastName = readApplicationProfileField(form, values, 'last_name');
+  const locationQuestion = form.sections
+    .flatMap((section) => section.questions)
+    .find((question) => question.questionType === 'candidate_location');
 
   if (!firstName || !lastName) {
     throw new Error('The required candidate name is missing.');
   }
 
-  return { firstName, lastName };
+  const location = locationQuestion
+    ? candidateLocationValueSchema.nullable().parse(values[locationQuestion.id] ?? null)
+    : null;
+
+  return { firstName, lastName, location };
 }

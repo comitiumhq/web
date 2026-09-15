@@ -72,6 +72,7 @@ export function useDecryptProfile(candidateId: string | null | undefined, orgId:
     hasEncryptedProfile: hasCurrentEncryptedProfile,
     queryError: isError && !hasCurrentCandidateData,
     decryptionError: currentDecryptionState?.status === 'error',
+    searchProjectionVersion: hasCurrentCandidateData ? (candidateData?.profileSearchProjectionVersion ?? null) : null,
     retryQuery,
   };
 }

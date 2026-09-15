@@ -374,6 +374,7 @@ export function CandidateSheet({
       onRetryProfile={retryProfileQuery}
       vaultPublicKey={vaultKeyData?.vaultPublicKey ?? null}
       vaultKeyVersion={vaultKeyData?.keyVersion ?? null}
+      wrappedVaultKey={wrappedVaultKey}
     />
   );
 

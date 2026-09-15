@@ -1,4 +1,4 @@
-import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/candidates';
+import { type CandidateProfile, formatCandidateLocation, formatCandidateName } from '@comitium/schemas/candidates';
 import type { PipelineCandidate, PipelineJob } from '@/lib/schemas/pipeline';
 
 export type PipelineCandidateSearchScope = 'global' | 'job';
@@ -32,7 +32,7 @@ export function filterPipelineCandidates(
       profile?.email,
       profile?.currentTitle,
       profile?.currentCompany,
-      profile?.location,
+      formatCandidateLocation(profile?.location ?? null),
       scope === 'global' ? candidate.jobTitle : null,
     ];
 

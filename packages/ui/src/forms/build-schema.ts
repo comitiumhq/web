@@ -114,6 +114,7 @@ function buildQuestionSchema(question: RenderableFormQuestion): z.ZodTypeAny {
     case 'candidate_location':
     case 'location': {
       const location = z.object({
+        cityId: z.number().int().positive(),
         city: z.string().trim().min(1),
         region: z.string().trim().min(1).optional(),
         country: z.string().trim().length(2),

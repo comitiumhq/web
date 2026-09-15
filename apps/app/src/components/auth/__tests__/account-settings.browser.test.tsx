@@ -1,4 +1,4 @@
-import { AccountSettingsPage } from '@comitium/auth/account-settings';
+import { AuthenticationSettingsPage } from '@comitium/auth/authentication-settings-page';
 import type { LinkedAccountWithMetadata, User } from '@privy-io/react-auth';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
@@ -64,6 +64,10 @@ const wallet = account({
   walletIndex: 0,
 });
 
+function renderAccountSettings() {
+  return render(<AuthenticationSettingsPage />);
+}
+
 beforeEach(() => {
   mocks.googleCallbacks = undefined;
   mocks.linkGoogle.mockReset();
@@ -84,19 +88,18 @@ beforeEach(() => {
   mocks.verifyUpdateCode.mockResolvedValue({ user: {} });
 });
 
-describe('AccountSettingsPage linked-method controls', () => {
-  it('keeps the account sidebar focused on personal account navigation', async () => {
+describe('AuthenticationSettingsPage linked-method controls', () => {
+  it('keeps the authentication page focused on personal sign-in methods', async () => {
     mocks.user = user(email, wallet);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
-    await expect.element(screen.getByRole('heading', { name: 'Account' })).toBeInTheDocument();
     await expect.element(screen.getByRole('heading', { name: 'Authentication' })).toBeInTheDocument();
     await expect.element(screen.getByText('Manage how you sign in to Comitium.')).not.toBeInTheDocument();
     await expect.element(screen.getByText('Wallet address')).not.toBeInTheDocument();
   });
 
   it('shows email access guidance on hover', async () => {
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Email access guidance' }).hover();
 
@@ -106,7 +109,7 @@ describe('AccountSettingsPage linked-method controls', () => {
   });
 
   it('does not toggle email access guidance on click', async () => {
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Email access guidance' }).click();
 
@@ -114,7 +117,7 @@ describe('AccountSettingsPage linked-method controls', () => {
   });
 
   it('makes adding another linked passkey explicit', async () => {
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await expect.element(screen.getByText('1 passkey')).toBeInTheDocument();
     await expect.element(screen.getByRole('button', { name: 'Add another' })).toBeEnabled();
@@ -122,7 +125,7 @@ describe('AccountSettingsPage linked-method controls', () => {
 
   it('requires email OTP as the fallback login method for Google removal', async () => {
     mocks.user = user(google, passkey, wallet);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await expect.element(screen.getByRole('button', { name: 'Remove' })).toBeDisabled();
     await expect.element(screen.getByText('Add an email before removing Google.')).toBeInTheDocument();
@@ -130,7 +133,7 @@ describe('AccountSettingsPage linked-method controls', () => {
 
   it('links a passkey to the current account and refreshes the user', async () => {
     mocks.user = user(email);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Add passkey' }).click();
 
@@ -140,7 +143,7 @@ describe('AccountSettingsPage linked-method controls', () => {
 
   it('adds and verifies an email for a passkey-only account', async () => {
     mocks.user = user(passkey);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Add email' }).click();
     await screen.getByLabelText('Email address').fill('personal@example.com');
@@ -153,7 +156,7 @@ describe('AccountSettingsPage linked-method controls', () => {
 
   it('updates an existing email instead of creating a second account', async () => {
     mocks.user = user(email, passkey);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Change' }).click();
     await screen.getByLabelText('Email address').fill('new@example.com');
@@ -167,7 +170,7 @@ describe('AccountSettingsPage linked-method controls', () => {
   it('clears a failed verification attempt before retrying an email change', async () => {
     mocks.verifyUpdateCode.mockRejectedValueOnce(new Error('Invalid code'));
     mocks.user = user(email, passkey);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Change' }).click();
     await screen.getByLabelText('Email address').fill('new@example.com');
@@ -183,7 +186,7 @@ describe('AccountSettingsPage linked-method controls', () => {
 
   it('shows an occupied Google account as a product conflict', async () => {
     mocks.user = user(email);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Add Google' }).click();
     mocks.googleCallbacks?.onError?.('linked_to_another_user', { linkMethod: 'google' });
@@ -195,7 +198,7 @@ describe('AccountSettingsPage linked-method controls', () => {
 
   it('ignores account-link callbacks from other sign-in methods', async () => {
     mocks.user = user(email);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     mocks.googleCallbacks?.onError?.('unknown', { linkMethod: 'passkey' });
     mocks.googleCallbacks?.onSuccess?.({ linkMethod: 'passkey' });
@@ -206,7 +209,7 @@ describe('AccountSettingsPage linked-method controls', () => {
 
   it('confirms Google removal and unlinks the exact linked subject', async () => {
     mocks.user = user(google, email);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Remove' }).click();
     await screen.getByRole('button', { name: 'Remove Google' }).click();
@@ -217,7 +220,7 @@ describe('AccountSettingsPage linked-method controls', () => {
   it('keeps a failed Google removal actionable inside the confirmation dialog', async () => {
     mocks.unlinkGoogle.mockRejectedValueOnce(new Error('Provider unavailable'));
     mocks.user = user(google, email);
-    const screen = await render(<AccountSettingsPage />);
+    const screen = await renderAccountSettings();
 
     await screen.getByRole('button', { name: 'Remove' }).click();
     await screen.getByRole('button', { name: 'Remove Google' }).click();

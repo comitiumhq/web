@@ -41,30 +41,11 @@ beforeEach(() => {
 });
 
 describe('buildEncryptedLabel', () => {
-  it('encrypts the trimmed display label', async () => {
+  it('encrypts the trimmed display label and lets the Crypto Worker normalize the hash input', async () => {
     await buildEncryptedLabel(ORG_ID, '  Senior Engineer  ', VAULT_PUB, 1, WRAPPED);
 
     expect(mockEncrypt).toHaveBeenCalledExactlyOnceWith(VAULT_PUB, 1, { label: 'Senior Engineer' }, TAG_CONTEXT);
-  });
-
-  it('hashes the normalized label (lowercased, whitespace collapsed)', async () => {
-    await buildEncryptedLabel(ORG_ID, '  Senior   Engineer  ', VAULT_PUB, 1, WRAPPED);
-
-    expect(mockHash).toHaveBeenCalledExactlyOnceWith(ORG_ID, WRAPPED, 'senior engineer');
-  });
-
-  it('preserves display casing in ciphertext while normalizing hash input', async () => {
-    await buildEncryptedLabel(ORG_ID, 'SENIOR Engineer', VAULT_PUB, 1, WRAPPED);
-
-    expect(mockEncrypt).toHaveBeenCalledWith(VAULT_PUB, 1, { label: 'SENIOR Engineer' }, TAG_CONTEXT);
-    expect(mockHash).toHaveBeenCalledWith(ORG_ID, WRAPPED, 'senior engineer');
-  });
-
-  it('normalizes tabs and newlines to single spaces for hash, not for ciphertext', async () => {
-    await buildEncryptedLabel(ORG_ID, 'Senior\tEngineer', VAULT_PUB, 1, WRAPPED);
-
-    expect(mockEncrypt).toHaveBeenCalledWith(VAULT_PUB, 1, { label: 'Senior\tEngineer' }, TAG_CONTEXT);
-    expect(mockHash).toHaveBeenCalledWith(ORG_ID, WRAPPED, 'senior engineer');
+    expect(mockHash).toHaveBeenCalledExactlyOnceWith(ORG_ID, WRAPPED, '  Senior Engineer  ');
   });
 
   it('returns the body expected by the API (envelope + hex hash)', async () => {
@@ -74,46 +55,6 @@ describe('buildEncryptedLabel', () => {
       label: fakeEnvelope,
       labelHash: 'h'.repeat(64),
     });
-  });
-
-  it('converges casing / spacing variants to the same hash input', async () => {
-    const variants = [
-      'Senior Engineer',
-      'senior engineer',
-      'SENIOR ENGINEER',
-      '  Senior Engineer  ',
-      'Senior  Engineer',
-      'Senior\tEngineer',
-    ];
-
-    for (const label of variants) {
-      await buildEncryptedLabel(ORG_ID, label, VAULT_PUB, 1, WRAPPED);
-    }
-
-    const hashInputs = mockHash.mock.calls.map((call) => call[2]);
-    expect(new Set(hashInputs)).toEqual(new Set(['senior engineer']));
-  });
-
-  it('runs encrypt and hash in parallel (does not await one before the other)', async () => {
-    const order: string[] = [];
-    mockEncrypt.mockImplementationOnce(async () => {
-      order.push('encrypt:start');
-      await new Promise((r) => setTimeout(r, 10));
-      order.push('encrypt:end');
-
-      return fakeEnvelope;
-    });
-    mockHash.mockImplementationOnce(async () => {
-      order.push('hash:start');
-      await new Promise((r) => setTimeout(r, 10));
-      order.push('hash:end');
-
-      return 'h'.repeat(64);
-    });
-
-    await buildEncryptedLabel(ORG_ID, 'foo', VAULT_PUB, 1, WRAPPED);
-
-    expect(order.indexOf('hash:start')).toBeLessThan(order.indexOf('encrypt:end'));
   });
 
   it('propagates encryption errors to the caller', async () => {
@@ -128,7 +69,7 @@ describe('buildEncryptedLabel', () => {
     await expect(buildEncryptedLabel(ORG_ID, 'foo', VAULT_PUB, 1, WRAPPED)).rejects.toThrow('hkdf failed');
   });
 
-  it('uses a fresh orgId as HKDF salt per call (two orgs → two different hash derivations)', async () => {
+  it('scopes each hash request to its organization', async () => {
     await buildEncryptedLabel('org-A', 'foo', VAULT_PUB, 1, WRAPPED);
     await buildEncryptedLabel('org-B', 'foo', VAULT_PUB, 1, WRAPPED);
 

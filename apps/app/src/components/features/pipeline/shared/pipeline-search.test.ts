@@ -12,7 +12,7 @@ const PROFILE: CandidateProfile = {
   linkedIn: null,
   github: null,
   website: null,
-  location: 'London',
+  location: { cityId: 2_643_743, city: 'London', country: 'GB' },
   currentTitle: 'Staff Engineer',
   currentCompany: 'Analytical Engines',
 };

@@ -22,7 +22,6 @@ import type {
 } from '@comitium/schemas/applications';
 import { getErrorMessage } from '@comitium/schemas/error';
 import type { CandidateProfileInputValue } from '@comitium/schemas/forms/application-required-fields';
-import type { FormSubmissionFieldValue } from '@comitium/schemas/forms/form-submission';
 import type { AnswerVisibility } from '@comitium/schemas/forms/visibility';
 import { isDefined } from '@comitium/schemas/guards';
 import type { JobApplicationData } from '@comitium/schemas/jobs';
@@ -69,7 +68,6 @@ export interface ApplyJobWorkflowParams {
   stakeAmount: bigint;
   formId: string;
   answerBuckets: ApplyAnswerBucket[];
-  fieldValues: FormSubmissionFieldValue[];
   candidateIdentityInputs: CandidateIdentityInputValue[];
   candidateProfileInput: CandidateProfileInputValue;
   aiCriteriaEvaluation: {
@@ -354,7 +352,6 @@ async function prepareApplicationFinalization(
     jobData: JobApplicationData;
     formId: string;
     answerBuckets: ApplyAnswerBucket[];
-    fieldValues: FormSubmissionFieldValue[];
     candidateIdentityInputs: CandidateIdentityInputValue[];
     candidateProfileInput: CandidateProfileInputValue;
     aiCriteriaEvaluation: ApplyJobWorkflowParams['aiCriteriaEvaluation'];
@@ -396,7 +393,6 @@ async function prepareApplicationFinalization(
     })),
     candidateProfileInput: encryptedProfile.envelope,
     answerEnvelopes: encryptedAnswers,
-    fieldValues: params.fieldValues,
     uploadedFileIds,
     aiCriteriaEvaluation: params.aiCriteriaEvaluation,
     processingGrantId: prepared.processingGrant.id,
@@ -499,7 +495,6 @@ export function applyJobWorkflow(params: ApplyJobWorkflowParams): ResultAsync<Ap
     stakeAmount,
     formId,
     answerBuckets,
-    fieldValues,
     candidateIdentityInputs,
     candidateProfileInput,
     aiCriteriaEvaluation,
@@ -534,7 +529,6 @@ export function applyJobWorkflow(params: ApplyJobWorkflowParams): ResultAsync<Ap
           jobData,
           formId,
           answerBuckets,
-          fieldValues,
           candidateIdentityInputs,
           candidateProfileInput,
           aiCriteriaEvaluation,

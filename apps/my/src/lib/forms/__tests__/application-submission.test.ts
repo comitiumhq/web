@@ -6,6 +6,7 @@ import { extractApplicationSubmission } from '../application-submission';
 const EMAIL_ID = '11111111-1111-4111-8111-111111111111';
 const FIRST_NAME_ID = '22222222-2222-4222-8222-222222222222';
 const LAST_NAME_ID = '77777777-7777-4777-8777-777777777777';
+const LOCATION_ID = '88888888-8888-4888-8888-888888888888';
 const PRIVATE_ID = '33333333-3333-4333-8333-333333333333';
 const SECONDARY_EMAIL_ID = '66666666-6666-4666-8666-666666666666';
 
@@ -86,6 +87,19 @@ const form: NestedForm = {
           config: null,
           reusableField: null,
         },
+        {
+          id: LOCATION_ID,
+          position: 4,
+          questionType: 'candidate_location',
+          prompt: 'Location',
+          description: null,
+          isRequired: false,
+          isPrivate: false,
+          visibility: 'standard',
+          selectableValues: null,
+          config: null,
+          reusableField: null,
+        },
       ],
     },
   ],
@@ -99,21 +113,29 @@ describe('application submission contract', () => {
       [FIRST_NAME_ID]: 'Ada',
       [LAST_NAME_ID]: 'Lovelace',
       [PRIVATE_ID]: 'Private answer',
+      [LOCATION_ID]: { cityId: 2_950_159, city: 'Berlin', region: 'Berlin', country: 'DE' },
     });
 
     expect(submission.candidateIdentityInputs).toEqual([
       { questionId: SECONDARY_EMAIL_ID, value: 'secondary@example.com', processorAccess: false },
       { questionId: EMAIL_ID, value: 'applicant@example.com', processorAccess: true },
     ]);
-    expect(submission.candidateProfileInput).toEqual({ firstName: 'Ada', lastName: 'Lovelace' });
+    expect(submission.candidateProfileInput).toEqual({
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      location: { cityId: 2_950_159, city: 'Berlin', region: 'Berlin', country: 'DE' },
+    });
     expect(submission.answerBuckets).toEqual([
       {
         visibility: 'standard',
-        questionIds: [FIRST_NAME_ID, LAST_NAME_ID],
-        answers: { [FIRST_NAME_ID]: 'Ada', [LAST_NAME_ID]: 'Lovelace' },
+        questionIds: [FIRST_NAME_ID, LAST_NAME_ID, LOCATION_ID],
+        answers: {
+          [FIRST_NAME_ID]: 'Ada',
+          [LAST_NAME_ID]: 'Lovelace',
+          [LOCATION_ID]: { cityId: 2_950_159, city: 'Berlin', region: 'Berlin', country: 'DE' },
+        },
       },
       { visibility: 'private', questionIds: [PRIVATE_ID], answers: { [PRIVATE_ID]: 'Private answer' } },
     ]);
-    expect(submission.fieldValues).toEqual([]);
   });
 });

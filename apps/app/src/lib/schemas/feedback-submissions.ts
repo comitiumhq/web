@@ -1,7 +1,7 @@
 import {
   answerEnvelopeSchema,
   formSnapshotSchema,
-  formSubmissionFieldValueSchema,
+  formSubmissionFieldProjectionSchema,
 } from '@comitium/schemas/forms/form-submission';
 import { uuidSchema } from '@comitium/schemas/public';
 import { z } from 'zod';
@@ -55,7 +55,7 @@ const createFeedbackSubmissionBodySchema = z
     ...sourceShape,
     formId: uuidSchema,
     answerEnvelopes: z.array(answerEnvelopeSchema),
-    fieldValues: z.array(formSubmissionFieldValueSchema).max(500),
+    fieldValues: z.array(formSubmissionFieldProjectionSchema).max(500),
   })
   .refine(sourceRefine, sourceRefineMessage);
 
@@ -63,7 +63,7 @@ export type CreateFeedbackSubmissionBody = z.infer<typeof createFeedbackSubmissi
 
 const updateFeedbackSubmissionBodySchema = z.object({
   answerEnvelopes: z.array(answerEnvelopeSchema),
-  fieldValues: z.array(formSubmissionFieldValueSchema).max(500),
+  fieldValues: z.array(formSubmissionFieldProjectionSchema).max(500),
 });
 
 export type UpdateFeedbackSubmissionBody = z.infer<typeof updateFeedbackSubmissionBodySchema>;

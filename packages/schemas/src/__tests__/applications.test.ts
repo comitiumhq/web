@@ -250,7 +250,6 @@ describe('application submission contracts', () => {
       candidateIdentityInputs: [{ questionId: UUID, envelope }],
       candidateProfileInput: profileEnvelope,
       answerEnvelopes: [],
-      fieldValues: [],
       uploadedFileIds: [],
       aiCriteriaEvaluation: { policyEnabled: true, optOut: false },
       processingGrantId: UUID,

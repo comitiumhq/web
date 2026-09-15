@@ -14,8 +14,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as OrgCreateRouteImport } from './routes/org/create'
 import { Route as OrgOrgIdRouteImport } from './routes/org/$orgId'
+import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
 import { Route as OrgOrgIdIndexRouteImport } from './routes/org/$orgId/index'
 import { Route as OrgOrgIdSettingsRouteImport } from './routes/org/$orgId/settings'
 import { Route as OrgOrgIdPipelineRouteImport } from './routes/org/$orgId/pipeline'
@@ -78,6 +80,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountRoute,
+} as any)
 const OrgCreateRoute = OrgCreateRouteImport.update({
   id: '/org/create',
   path: '/org/create',
@@ -87,6 +94,11 @@ const OrgOrgIdRoute = OrgOrgIdRouteImport.update({
   id: '/org/$orgId',
   path: '/org/$orgId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AccountZkIdentityRoute = AccountZkIdentityRouteImport.update({
+  id: '/zk-identity',
+  path: '/zk-identity',
+  getParentRoute: () => AccountRoute,
 } as any)
 const OrgOrgIdIndexRoute = OrgOrgIdIndexRouteImport.update({
   id: '/',
@@ -300,12 +312,14 @@ const OrgOrgIdJobsJobIdApplicationFormRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
+  '/account': typeof AccountRouteWithChildren
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
   '/org/create': typeof OrgCreateRoute
+  '/account/': typeof AccountIndexRoute
   '/org/$orgId/organization': typeof OrgOrgIdOrganizationRouteWithChildren
   '/org/$orgId/pipeline': typeof OrgOrgIdPipelineRoute
   '/org/$orgId/settings': typeof OrgOrgIdSettingsRouteWithChildren
@@ -345,11 +359,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/create': typeof OrgCreateRoute
+  '/account': typeof AccountIndexRoute
   '/org/$orgId/pipeline': typeof OrgOrgIdPipelineRoute
   '/org/$orgId': typeof OrgOrgIdIndexRoute
   '/org/$orgId/jobs/$jobId': typeof OrgOrgIdJobsJobIdRouteWithChildren
@@ -385,12 +400,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
+  '/account': typeof AccountRouteWithChildren
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
   '/org/create': typeof OrgCreateRoute
+  '/account/': typeof AccountIndexRoute
   '/org/$orgId/organization': typeof OrgOrgIdOrganizationRouteWithChildren
   '/org/$orgId/pipeline': typeof OrgOrgIdPipelineRoute
   '/org/$orgId/settings': typeof OrgOrgIdSettingsRouteWithChildren
@@ -436,8 +453,10 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/signup'
+    | '/account/zk-identity'
     | '/org/$orgId'
     | '/org/create'
+    | '/account/'
     | '/org/$orgId/organization'
     | '/org/$orgId/pipeline'
     | '/org/$orgId/settings'
@@ -477,11 +496,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/account'
     | '/invite'
     | '/login'
     | '/signup'
+    | '/account/zk-identity'
     | '/org/create'
+    | '/account'
     | '/org/$orgId/pipeline'
     | '/org/$orgId'
     | '/org/$orgId/jobs/$jobId'
@@ -520,8 +540,10 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/signup'
+    | '/account/zk-identity'
     | '/org/$orgId'
     | '/org/create'
+    | '/account/'
     | '/org/$orgId/organization'
     | '/org/$orgId/pipeline'
     | '/org/$orgId/settings'
@@ -562,7 +584,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AccountRoute: typeof AccountRoute
+  AccountRoute: typeof AccountRouteWithChildren
   InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
@@ -607,6 +629,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/': {
+      id: '/account/'
+      path: '/'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/org/create': {
       id: '/org/create'
       path: '/org/create'
@@ -620,6 +649,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/org/$orgId'
       preLoaderRoute: typeof OrgOrgIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/account/zk-identity': {
+      id: '/account/zk-identity'
+      path: '/zk-identity'
+      fullPath: '/account/zk-identity'
+      preLoaderRoute: typeof AccountZkIdentityRouteImport
+      parentRoute: typeof AccountRoute
     }
     '/org/$orgId/': {
       id: '/org/$orgId/'
@@ -876,6 +912,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AccountRouteChildren {
+  AccountZkIdentityRoute: typeof AccountZkIdentityRoute
+  AccountIndexRoute: typeof AccountIndexRoute
+}
+
+const AccountRouteChildren: AccountRouteChildren = {
+  AccountZkIdentityRoute: AccountZkIdentityRoute,
+  AccountIndexRoute: AccountIndexRoute,
+}
+
+const AccountRouteWithChildren =
+  AccountRoute._addFileChildren(AccountRouteChildren)
+
 interface OrgOrgIdOrganizationInterviewPlansRouteChildren {
   OrgOrgIdOrganizationInterviewPlansIndexRoute: typeof OrgOrgIdOrganizationInterviewPlansIndexRoute
 }
@@ -1034,7 +1083,7 @@ const OrgOrgIdRouteWithChildren = OrgOrgIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AccountRoute: AccountRoute,
+  AccountRoute: AccountRouteWithChildren,
   InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,

@@ -3,13 +3,16 @@ import { z } from 'zod';
 import { applyRequirement } from './helpers';
 import { APPLICATION_LIKE_CLASSES, type FieldTypeDef } from './types';
 
-const candidateLocationValue = z.object({
-  city: z.string().min(1).max(120),
-  region: z.string().min(1).max(120).optional(),
-  country: z.string().min(2).max(2),
-  lat: z.number().optional(),
-  lng: z.number().optional(),
-});
+export const candidateLocationValueSchema = z
+  .object({
+    cityId: z.number().int().positive(),
+    city: z.string().min(1).max(120),
+    region: z.string().min(1).max(120).optional(),
+    country: z.string().length(2).toUpperCase(),
+  })
+  .strict();
+
+export type CandidateLocationValue = z.infer<typeof candidateLocationValueSchema>;
 
 export const candidateLocationDef: FieldTypeDef = {
   id: 'candidate_location',
@@ -27,8 +30,7 @@ export const candidateLocationDef: FieldTypeDef = {
     canBeFormConnectorTarget: false,
     requiresSingletonPerForm: true,
     requiresSelectableValues: false,
-    triggersWorkflow: 'set_candidate_location',
   },
-  valueSchema: (ctx) => applyRequirement(candidateLocationValue, ctx),
+  valueSchema: (ctx) => applyRequirement(candidateLocationValueSchema, ctx),
   connectorCompat: () => 'unsupported',
 };

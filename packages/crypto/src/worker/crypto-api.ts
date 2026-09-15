@@ -5,14 +5,11 @@ import {
   encryptApplicationWithVaultKey,
   encryptApplicationWithVaultKeyAndOverlays,
 } from '../application-encryption';
+import { type CandidateProfileSearchField, hashCandidateProfileSearchValue } from '../candidate-profile-search-hash';
 import type { CryptoContextInput } from '../context';
 import { keyWrapAad } from '../context';
-import {
-  deriveCustomFieldHashKey,
-  hmacCustomFieldValue,
-  normalizeCustomFieldValue,
-  type SearchableCustomFieldType,
-} from '../custom-field-hash';
+import { hashCustomFieldValue } from '../custom-field-hash';
+import type { SearchableCustomFieldType } from '../custom-field-search';
 import {
   decryptEmailContentWithPersonalKey,
   decryptEmailContentWithVaultKey,
@@ -26,6 +23,7 @@ import {
   encryptFileWithVaultKey,
   encryptFileWithVaultKeyAndOverlays,
 } from '../file-encryption';
+import { type CategoricalFormFieldKind, hashCategoricalFormFieldValue } from '../form-field-search-hash';
 import {
   decryptPersonalKeyWithWrappingKey,
   generatePersonalKeyPair,
@@ -36,7 +34,7 @@ import {
 import type { RecipientDescriptor } from '../recipients';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from '../schemas';
 import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from '../session';
-import { deriveTagHashKey, hmacTagLabel } from '../tag-hash';
+import { hashTagLabel } from '../tag-hash';
 import {
   generateVaultKeyPair,
   grantVaultAccess as grantVaultAccessFn,
@@ -338,15 +336,10 @@ export class CryptoWorkerApi {
 
   // --- Tag Hash ---
 
-  async hashTagLabel(orgId: string, wrappedVaultKey: WrappedKey, normalizedLabel: string): Promise<string> {
+  async hashTagLabel(orgId: string, wrappedVaultKey: WrappedKey, label: string): Promise<string> {
     const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
-    const tagHashKey = deriveTagHashKey(vaultKey);
 
-    try {
-      return hmacTagLabel(tagHashKey, normalizedLabel);
-    } finally {
-      tagHashKey.fill(0);
-    }
+    return hashTagLabel(vaultKey, label);
   }
 
   // --- Custom Field Hash ---
@@ -359,15 +352,31 @@ export class CryptoWorkerApi {
     plaintext: unknown,
   ): Promise<string> {
     const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
-    const hashKey = deriveCustomFieldHashKey(vaultKey, orgId, fieldId, fieldType);
 
-    try {
-      const normalized = normalizeCustomFieldValue(plaintext, fieldType);
+    return hashCustomFieldValue(vaultKey, orgId, fieldId, fieldType, plaintext);
+  }
 
-      return hmacCustomFieldValue(hashKey, normalized);
-    } finally {
-      hashKey.fill(0);
-    }
+  async hashCandidateProfileSearchValue(
+    orgId: string,
+    wrappedVaultKey: WrappedKey,
+    field: CandidateProfileSearchField,
+    value: string | number,
+  ): Promise<string> {
+    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+
+    return hashCandidateProfileSearchValue(vaultKey, orgId, field, value);
+  }
+
+  async hashCategoricalFormFieldValue(
+    orgId: string,
+    wrappedVaultKey: WrappedKey,
+    fieldId: string,
+    kind: CategoricalFormFieldKind,
+    value: boolean | string,
+  ): Promise<string> {
+    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+
+    return hashCategoricalFormFieldValue(vaultKey, orgId, fieldId, kind, value);
   }
 
   // --- Internal ---

@@ -12,6 +12,8 @@ import { getCandidateDisplayName } from '@/lib/utils';
 
 import { useApplicationDetail } from '../hooks/use-application-detail';
 import { useDecryptProfile } from '../hooks/use-decrypt-profile';
+import { useProjectApplicationFormSearch } from '../hooks/use-project-application-form-search';
+import { useProjectCandidateProfileSearch } from '../hooks/use-project-candidate-profile-search';
 import { useProjectFormSubmission } from '../hooks/use-project-form-submission';
 
 interface UseCandidateSheetModelParams {
@@ -39,6 +41,7 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     hasEncryptedProfile,
     queryError: profileQueryError,
     decryptionError: profileDecryptionError,
+    searchProjectionVersion,
     retryQuery: retryProfileQuery,
   } = useDecryptProfile(application?.candidateId, orgId, detail.wrappedVaultKey);
 
@@ -51,6 +54,7 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     wrappedVaultKey: detail.wrappedVaultKey,
     enabled: open && canReadCandidateIdentityInputs,
   });
+
   const decryptedData = useMemo(
     () => mergeApplicationAnswers(detail.decryptedData, candidateIdentityInputsQuery.data),
     [candidateIdentityInputsQuery.data, detail.decryptedData],
@@ -60,6 +64,7 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     detail.formDecryptionError ??
     detail.fileMetadataDecryptionError ??
     (candidateIdentityInputsQuery.isError ? 'Failed to decrypt form answers.' : null);
+
   const isDecryptingForm =
     detail.isDecryptingForm || detail.isDecryptingFileMetadata || candidateIdentityInputsQuery.isLoading;
 
@@ -76,8 +81,10 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     form: detail.formSubmission?.formSnapshot ?? null,
     values: decryptedData,
   });
+
   const candidateFirstName = decryptedProfile?.firstName ?? null;
   const candidateName = formatCandidateName(decryptedProfile);
+  const canEditCandidate = application?.considerationContext.capabilities.candidate.canEditProfile === true;
 
   useProjectFormSubmission({
     orgId,
@@ -85,7 +92,26 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     formId: detail.formSubmission?.formId ?? null,
     submissionId: detail.formSubmission?.id ?? null,
     decryptedAnswers: decryptedData,
-    enabled: application?.considerationContext.capabilities.candidate.canEditProfile === true,
+    enabled: canEditCandidate,
+  });
+
+  useProjectCandidateProfileSearch({
+    candidateId: application?.candidateId ?? null,
+    orgId,
+    profile: decryptedProfile,
+    storedVersion: searchProjectionVersion,
+    wrappedVaultKey: detail.wrappedVaultKey,
+    enabled: canEditCandidate,
+  });
+
+  useProjectApplicationFormSearch({
+    applicationId: application?.id ?? null,
+    orgId,
+    form: detail.formSubmission?.formSnapshot ?? null,
+    answers: decryptedData,
+    storedVersion: detail.formSubmission?.fieldProjectionVersion ?? null,
+    wrappedVaultKey: detail.wrappedVaultKey,
+    enabled: canEditCandidate && detail.formSubmission?.canReadPrivate === true,
   });
 
   const canUseProvidedStages = effectiveJobId === jobId && Boolean(stages?.length);

@@ -1,5 +1,5 @@
-import { AccountSettingsPage } from '@comitium/auth/account-settings';
-import { createFileRoute } from '@tanstack/react-router';
+import { AccountSettingsLayout } from '@comitium/auth/account-settings-layout';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { AuthGuard } from '@/components/auth/auth-guard';
 
 export const Route = createFileRoute('/account')({
@@ -17,7 +17,9 @@ export const Route = createFileRoute('/account')({
 function AccountRoute() {
   return (
     <AuthGuard>
-      <AccountSettingsPage />
+      <AccountSettingsLayout>
+        <Outlet />
+      </AccountSettingsLayout>
     </AuthGuard>
   );
 }
