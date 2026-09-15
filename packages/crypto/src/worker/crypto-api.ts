@@ -55,6 +55,10 @@ export class CryptoWorkerApi {
 
   // --- Lifecycle ---
 
+  ready(): true {
+    return true;
+  }
+
   async unlock(
     signature: Hex,
     wrappedPersonalKey: WrappedPersonalKey,

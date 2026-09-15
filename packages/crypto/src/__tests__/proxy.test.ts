@@ -10,8 +10,6 @@ type CryptoProxyFacade = typeof import('../proxy').CryptoProxy;
 type MockFunction = ReturnType<typeof vi.fn>;
 type MockProxy = Record<string | symbol, MockFunction>;
 
-// ---- Mock comlink ----
-
 vi.mock('comlink', () => {
   const releaseProxy = Symbol('releaseProxy');
 
@@ -22,15 +20,11 @@ vi.mock('comlink', () => {
   };
 });
 
-// ---- Worker mock (class-based, constructable) ----
-
 interface MockWorkerInstance {
   terminate: ReturnType<typeof vi.fn>;
 }
 
 let workerInstances: MockWorkerInstance[] = [];
-
-// ---- Helpers ----
 
 function mockSignMessage(sig = '0xsig'): SignMessageFn {
   return vi.fn().mockResolvedValue(sig);
@@ -69,8 +63,6 @@ const TEST_UNLOCK_MESSAGE = [
   'It does not authorize a blockchain transaction or server action.',
 ].join('\n');
 
-// ---- Tests ----
-
 describe('CryptoProxy', () => {
   describe('browser environment', () => {
     let CryptoProxy: CryptoProxyFacade;
@@ -83,10 +75,13 @@ describe('CryptoProxy', () => {
 
       workerInstances = [];
 
-      // Use a class-based Worker mock (arrow functions are not constructable)
       vi.stubGlobal(
         'Worker',
         class MockWorker {
+          addEventListener() {}
+
+          removeEventListener() {}
+
           terminate = vi.fn();
 
           constructor(..._args: unknown[]) {
@@ -95,10 +90,10 @@ describe('CryptoProxy', () => {
         },
       );
 
-      // Re-import comlink to get fresh mock after resetModules
       Comlink = await import('comlink');
 
       mockProxy = {
+        ready: vi.fn().mockResolvedValue(true),
         unlock: vi.fn(),
         tryUnlockWithRememberedDevice: vi.fn().mockResolvedValue(false),
         isActive: vi.fn(),
@@ -122,7 +117,6 @@ describe('CryptoProxy', () => {
 
       (Comlink.wrap as ReturnType<typeof vi.fn>).mockReturnValue(mockProxy);
 
-      // Re-import proxy module for fresh state
       const mod = await import('../proxy');
       CryptoProxy = mod.CryptoProxy;
     });
@@ -130,8 +124,6 @@ describe('CryptoProxy', () => {
     afterEach(() => {
       vi.unstubAllGlobals();
     });
-
-    // --- Worker lifecycle ---
 
     describe('init', () => {
       it('creates Worker and wraps with Comlink', () => {
@@ -171,8 +163,6 @@ describe('CryptoProxy', () => {
         expect(workerInstances).toHaveLength(1);
       });
     });
-
-    // --- Signature management ---
 
     describe('ensureSignature', () => {
       it('calls signMessage with address-bound encryption unlock message', async () => {
@@ -277,8 +267,6 @@ describe('CryptoProxy', () => {
       });
     });
 
-    // --- Unlock ---
-
     describe('unlock', () => {
       it('gets signature and delegates to Worker', async () => {
         mockProxy.unlock.mockResolvedValue(undefined);
@@ -375,7 +363,6 @@ describe('CryptoProxy', () => {
       });
 
       it('deduplicates concurrent unlock calls', async () => {
-        // Pre-create the promise so resolveWorkerUnlock is assigned immediately
         let resolveWorkerUnlock!: () => void;
         const workerUnlockPromise = new Promise<void>((resolve) => {
           resolveWorkerUnlock = resolve;
@@ -391,7 +378,6 @@ describe('CryptoProxy', () => {
         resolveWorkerUnlock();
         await Promise.all([p1, p2]);
 
-        // p2 reuses unlockPromise, so Worker unlock is only called once
         expect(mockProxy.unlock).toHaveBeenCalledTimes(1);
       });
 
@@ -453,8 +439,6 @@ describe('CryptoProxy', () => {
       });
     });
 
-    // --- isActive ---
-
     describe('isActive', () => {
       it('is synchronous and returns false initially', () => {
         expect(CryptoProxy.isActive()).toBe(false);
@@ -473,8 +457,6 @@ describe('CryptoProxy', () => {
         expect(CryptoProxy.isActive()).toBe(true);
       });
     });
-
-    // --- Clear ---
 
     describe('clear', () => {
       it('delegates to Worker and resets isActive', async () => {
@@ -533,8 +515,6 @@ describe('CryptoProxy', () => {
       });
     });
 
-    // --- Destroy ---
-
     describe('destroy', () => {
       it('releases proxy and terminates the Worker', async () => {
         CryptoProxy.init();
@@ -574,8 +554,6 @@ describe('CryptoProxy', () => {
       });
     });
 
-    // --- Subscribe ---
-
     describe('subscribe', () => {
       it('returns unsubscribe function', () => {
         const unsub = CryptoProxy.subscribe(vi.fn());
@@ -600,8 +578,6 @@ describe('CryptoProxy', () => {
         expect(listener).not.toHaveBeenCalled();
       });
     });
-
-    // --- Delegated crypto methods ---
 
     describe('delegated methods (main-thread transfer decisions)', () => {
       it('encryptFile uses Comlink.transfer for zero-copy', async () => {
@@ -653,10 +629,8 @@ describe('CryptoProxy', () => {
       });
     });
 
-    // --- Error propagation from Worker ---
-
-    describe('Worker error propagation', () => {
-      it('Worker clear error propagates through CryptoProxy.clear', async () => {
+    describe('error propagation', () => {
+      it('propagates Worker clear errors', async () => {
         CryptoProxy.init();
         mockProxy.clear.mockRejectedValue(new Error('clear failed'));
 
@@ -673,7 +647,7 @@ describe('CryptoProxy', () => {
     beforeEach(async () => {
       vi.clearAllMocks();
       vi.resetModules();
-      vi.unstubAllGlobals(); // Ensure Worker is NOT available
+      vi.unstubAllGlobals();
 
       const mod = await import('../proxy');
       CryptoProxy = mod.CryptoProxy;

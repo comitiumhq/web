@@ -12,9 +12,11 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		include: [
+			'@noble/hashes/hmac.js',
 			'@dnd-kit/react',
 			'@dnd-kit/react/sortable',
 			'cmdk',
+			'idb-keyval',
 			'react/jsx-dev-runtime',
 			'vitest-browser-react',
 			'@hookform/resolvers/zod',
