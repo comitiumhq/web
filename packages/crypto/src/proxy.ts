@@ -8,10 +8,10 @@ import type { WrappedKey } from './envelope-key';
 import type { CategoricalFormFieldKind } from './form-field-search-hash';
 import { canonicalizeEvmSignature, type WrappedPersonalKey } from './personal-key';
 import type { RecipientDescriptor } from './recipients';
-import { isDefined } from './runtime-guards';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from './schemas';
 import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from './session';
 import type { CryptoWorkerApi } from './worker/crypto-api';
+import { CryptoWorkerClient } from './worker/crypto-worker-client';
 
 export type SignMessageFn = (message: string) => Promise<Hex>;
 export type GetUserKeyShareFn = () => Promise<{ keyShare: string; version: number }>;
@@ -41,8 +41,7 @@ export function createEncryptionUnlockMessage(address: string): string {
   ].join('\n');
 }
 
-let worker: Worker | null = null;
-let proxy: Comlink.Remote<CryptoWorkerApi> | null = null;
+let workerClient: CryptoWorkerClient | null = null;
 let _isActive = false;
 let activeSession: CryptoSessionIdentity | null = null;
 let isResetting = false;
@@ -58,17 +57,7 @@ function notify(): void {
   }
 }
 
-function terminateWorker(): void {
-  if (proxy) {
-    proxy[Comlink.releaseProxy]();
-    proxy = null;
-  }
-
-  if (worker) {
-    worker.terminate();
-    worker = null;
-  }
-
+function resetRuntimeState(): void {
   _isActive = false;
   activeSession = null;
   pendingSignature = null;
@@ -76,36 +65,36 @@ function terminateWorker(): void {
   unlockSession = null;
 }
 
-function ensureWorker(): void {
+function terminateWorker(): void {
+  const currentClient = workerClient;
+  workerClient = null;
+  currentClient?.dispose();
+  resetRuntimeState();
+}
+
+function ensureWorker(): CryptoWorkerClient {
   if (isResetting) {
     throw new Error('Crypto runtime was reset; reload the page');
   }
 
-  if (worker) {
-    return;
+  if (workerClient) {
+    return workerClient;
   }
 
-  const WorkerConstructor = globalThis.Worker;
-
-  if (!isDefined(WorkerConstructor)) {
-    throw new Error('CryptoProxy requires a browser environment (Web Workers not available)');
-  }
-
-  worker = new WorkerConstructor(new URL('./worker/crypto.worker.ts', import.meta.url), {
-    type: 'module',
+  const client = new CryptoWorkerClient(() => {
+    if (workerClient === client) {
+      workerClient = null;
+      resetRuntimeState();
+      notify();
+    }
   });
+  workerClient = client;
 
-  proxy = Comlink.wrap<CryptoWorkerApi>(worker);
+  return client;
 }
 
-function getProxy(): Comlink.Remote<CryptoWorkerApi> {
-  ensureWorker();
-
-  if (!proxy) {
-    throw new Error('Crypto worker proxy not available');
-  }
-
-  return proxy;
+function runOnWorker<Result>(operation: (api: Comlink.Remote<CryptoWorkerApi>) => Promise<Result>): Promise<Result> {
+  return ensureWorker().run(operation);
 }
 
 /**
@@ -208,25 +197,26 @@ export const CryptoProxy = {
 
     unlockSession = targetSession;
     unlockPromise = (async () => {
-      const api = getProxy();
-      const didUnlockWithRememberedDevice = await api
-        .tryUnlockWithRememberedDevice(wrappedPersonalKey, address, personalPublicKey)
-        .catch(() => false);
+      await runOnWorker(async (api) => {
+        const didUnlockWithRememberedDevice = await api
+          .tryUnlockWithRememberedDevice(wrappedPersonalKey, address, personalPublicKey)
+          .catch(() => false);
 
-      if (isResetting) {
-        throw new Error('Crypto runtime was reset while unlocking');
-      }
+        if (isResetting) {
+          throw new Error('Crypto runtime was reset while unlocking');
+        }
 
-      if (!didUnlockWithRememberedDevice) {
-        const signature = await this.ensureSignature(signMessage, address);
-        const { keyShare } = await getUserKeyShare();
+        if (!didUnlockWithRememberedDevice) {
+          const signature = await this.ensureSignature(signMessage, address);
+          const { keyShare } = await getUserKeyShare();
 
-        await api.unlock(signature, wrappedPersonalKey, address, personalPublicKey, keyShare);
-      }
+          await api.unlock(signature, wrappedPersonalKey, address, personalPublicKey, keyShare);
+        }
 
-      if (isResetting) {
-        throw new Error('Crypto runtime was reset while unlocking');
-      }
+        if (isResetting) {
+          throw new Error('Crypto runtime was reset while unlocking');
+        }
+      });
 
       activeSession = targetSession;
       _isActive = true;
@@ -260,8 +250,8 @@ export const CryptoProxy = {
    */
   async clear(): Promise<void> {
     try {
-      if (proxy) {
-        await proxy.clear();
+      if (workerClient) {
+        await workerClient.run((api) => api.clear());
       }
     } catch (error) {
       terminateWorker();
@@ -270,11 +260,7 @@ export const CryptoProxy = {
       throw error;
     }
 
-    _isActive = false;
-    activeSession = null;
-    pendingSignature = null;
-    unlockPromise = null;
-    unlockSession = null;
+    resetRuntimeState();
     notify();
   },
 
@@ -311,7 +297,7 @@ export const CryptoProxy = {
     data: unknown,
     context: CryptoContextInput,
   ): Promise<EncryptedEnvelope> {
-    return getProxy().encryptApplication(vaultPublicKey, vaultKeyVersion, data, context);
+    return runOnWorker((api) => api.encryptApplication(vaultPublicKey, vaultKeyVersion, data, context));
   },
 
   async encryptApplicationWithOverlays(
@@ -321,7 +307,9 @@ export const CryptoProxy = {
     context: CryptoContextInput,
     overlayRecipients: RecipientDescriptor[],
   ) {
-    return getProxy().encryptApplicationWithOverlays(vaultPublicKey, vaultKeyVersion, data, context, overlayRecipients);
+    return runOnWorker((api) =>
+      api.encryptApplicationWithOverlays(vaultPublicKey, vaultKeyVersion, data, context, overlayRecipients),
+    );
   },
 
   async decryptApplication(
@@ -330,7 +318,7 @@ export const CryptoProxy = {
     wrappedVaultKey: WrappedKey,
     context: CryptoContextInput,
   ): Promise<Record<string, unknown>> {
-    return getProxy().decryptApplication(envelope, orgId, wrappedVaultKey, context);
+    return runOnWorker((api) => api.decryptApplication(envelope, orgId, wrappedVaultKey, context));
   },
 
   async rewrapEnvelopeKey(
@@ -340,7 +328,7 @@ export const CryptoProxy = {
     context: CryptoContextInput,
     recipient: RecipientDescriptor,
   ): Promise<EnvelopeKey> {
-    return getProxy().rewrapEnvelopeKey(orgId, wrappedVaultKey, sourceKey, context, recipient);
+    return runOnWorker((api) => api.rewrapEnvelopeKey(orgId, wrappedVaultKey, sourceKey, context, recipient));
   },
 
   // --- File Encryption (Resume PDF) ---
@@ -351,7 +339,9 @@ export const CryptoProxy = {
     data: Uint8Array,
     context: CryptoContextInput,
   ): Promise<Uint8Array> {
-    return getProxy().encryptFile(vaultPublicKey, vaultKeyVersion, Comlink.transfer(data, [data.buffer]), context);
+    return runOnWorker((api) =>
+      api.encryptFile(vaultPublicKey, vaultKeyVersion, Comlink.transfer(data, [data.buffer]), context),
+    );
   },
 
   async encryptFileWithOverlays(
@@ -361,12 +351,14 @@ export const CryptoProxy = {
     context: CryptoContextInput,
     overlayRecipients: RecipientDescriptor[],
   ): Promise<{ blob: Uint8Array; overlayKeys: EnvelopeKey[] }> {
-    return getProxy().encryptFileWithOverlays(
-      vaultPublicKey,
-      vaultKeyVersion,
-      Comlink.transfer(data, [data.buffer]),
-      context,
-      overlayRecipients,
+    return runOnWorker((api) =>
+      api.encryptFileWithOverlays(
+        vaultPublicKey,
+        vaultKeyVersion,
+        Comlink.transfer(data, [data.buffer]),
+        context,
+        overlayRecipients,
+      ),
     );
   },
 
@@ -376,7 +368,9 @@ export const CryptoProxy = {
     wrappedVaultKey: WrappedKey,
     context: CryptoContextInput,
   ): Promise<Uint8Array> {
-    return getProxy().decryptFile(Comlink.transfer(blob, [blob.buffer]), orgId, wrappedVaultKey, context);
+    return runOnWorker((api) =>
+      api.decryptFile(Comlink.transfer(blob, [blob.buffer]), orgId, wrappedVaultKey, context),
+    );
   },
 
   // --- Email Content Encryption ---
@@ -386,7 +380,7 @@ export const CryptoProxy = {
     context: CryptoContextInput,
     recipients: RecipientDescriptor[],
   ): Promise<EncryptedEnvelope> {
-    return getProxy().encryptEmailContent(data, context, recipients);
+    return runOnWorker((api) => api.encryptEmailContent(data, context, recipients));
   },
 
   async encryptEmailContentWithOverlays(
@@ -395,7 +389,9 @@ export const CryptoProxy = {
     storedRecipients: RecipientDescriptor[],
     overlayRecipients: RecipientDescriptor[],
   ): Promise<{ envelope: EncryptedEnvelope; overlayKeys: EnvelopeKey[] }> {
-    return getProxy().encryptEmailContentWithOverlays(data, context, storedRecipients, overlayRecipients);
+    return runOnWorker((api) =>
+      api.encryptEmailContentWithOverlays(data, context, storedRecipients, overlayRecipients),
+    );
   },
 
   async decryptEmailContentForOrganization(
@@ -404,11 +400,11 @@ export const CryptoProxy = {
     wrappedVaultKey: WrappedKey,
     context: CryptoContextInput,
   ): Promise<unknown> {
-    return getProxy().decryptEmailContentForOrganization(envelope, orgId, wrappedVaultKey, context);
+    return runOnWorker((api) => api.decryptEmailContentForOrganization(envelope, orgId, wrappedVaultKey, context));
   },
 
   async decryptEmailContentForApplicant(envelope: EncryptedEnvelope, context: CryptoContextInput): Promise<unknown> {
-    return getProxy().decryptEmailContentForApplicant(envelope, context);
+    return runOnWorker((api) => api.decryptEmailContentForApplicant(envelope, context));
   },
 
   // --- Key Generation ---
@@ -418,25 +414,25 @@ export const CryptoProxy = {
     address: Address,
     keyShare: string,
   ): Promise<{ publicKey: PublicEncryptionKey; encryptedPersonalKey: WrappedPersonalKey }> {
-    return getProxy().generateAndWrapPersonalKey(signature, address, keyShare);
+    return runOnWorker((api) => api.generateAndWrapPersonalKey(signature, address, keyShare));
   },
 
   async generateAndWrapVaultKey(
     ownerPublicKey: PublicEncryptionKey,
   ): Promise<{ vaultPublicKey: PublicEncryptionKey; wrappedVaultKey: WrappedKey }> {
-    return getProxy().generateAndWrapVaultKey(ownerPublicKey);
+    return runOnWorker((api) => api.generateAndWrapVaultKey(ownerPublicKey));
   },
 
   // --- Vault Access ---
 
   async grantVaultAccess(ownWrappedVaultKey: WrappedKey, memberPublicKey: PublicEncryptionKey): Promise<WrappedKey> {
-    return getProxy().grantVaultAccess(ownWrappedVaultKey, memberPublicKey);
+    return runOnWorker((api) => api.grantVaultAccess(ownWrappedVaultKey, memberPublicKey));
   },
 
   // --- Tag Hash ---
 
   async hashTagLabel(orgId: string, wrappedVaultKey: WrappedKey, label: string): Promise<string> {
-    return getProxy().hashTagLabel(orgId, wrappedVaultKey, label);
+    return runOnWorker((api) => api.hashTagLabel(orgId, wrappedVaultKey, label));
   },
 
   // --- Custom Field Hash ---
@@ -448,7 +444,7 @@ export const CryptoProxy = {
     fieldType: SearchableCustomFieldType,
     plaintext: unknown,
   ): Promise<string> {
-    return getProxy().hashCustomFieldValue(orgId, wrappedVaultKey, fieldId, fieldType, plaintext);
+    return runOnWorker((api) => api.hashCustomFieldValue(orgId, wrappedVaultKey, fieldId, fieldType, plaintext));
   },
 
   async hashCandidateProfileSearchValue(
@@ -457,7 +453,7 @@ export const CryptoProxy = {
     field: CandidateProfileSearchField,
     value: string | number,
   ): Promise<string> {
-    return getProxy().hashCandidateProfileSearchValue(orgId, wrappedVaultKey, field, value);
+    return runOnWorker((api) => api.hashCandidateProfileSearchValue(orgId, wrappedVaultKey, field, value));
   },
 
   async hashCategoricalFormFieldValue(
@@ -467,6 +463,6 @@ export const CryptoProxy = {
     kind: CategoricalFormFieldKind,
     value: boolean | string,
   ): Promise<string> {
-    return getProxy().hashCategoricalFormFieldValue(orgId, wrappedVaultKey, fieldId, kind, value);
+    return runOnWorker((api) => api.hashCategoricalFormFieldValue(orgId, wrappedVaultKey, fieldId, kind, value));
   },
 };
