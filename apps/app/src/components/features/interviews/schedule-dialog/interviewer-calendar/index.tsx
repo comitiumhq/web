@@ -191,10 +191,10 @@ function InterviewerCalendarImpl({
         availabilityIndex,
         String(info.resource.id),
         info.start.toDate(),
-        durationMinutes,
+        CALENDAR_GRID_SLOT_MINUTES,
       );
     },
-    [availabilityIndex, durationMinutes],
+    [availabilityIndex],
   );
 
   const handleCellClick = useCallback(

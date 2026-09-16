@@ -122,7 +122,7 @@ interface NoteBodyProps {
 function NoteBody({ orgId, decryptedContent, isDecrypting, decryptionError, previewLines }: NoteBodyProps) {
   if (decryptedContent) {
     return (
-      <div className="text-copy-13">
+      <div className="text-copy-13 text-muted-foreground">
         <ExpandableContent collapsedLines={previewLines}>
           <RichTextEditor content={decryptedContent} readOnly />
         </ExpandableContent>

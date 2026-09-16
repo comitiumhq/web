@@ -97,9 +97,9 @@ export function DraftSlotOverlay({
       })}
 
       <div className="calendar-draft-slot-label pointer-events-none absolute inset-0 z-20 min-w-0 px-2 py-1 text-label-12 leading-tight">
-        <span className="calendar-draft-slot-label-content sticky flex w-fit max-w-full min-w-0 flex-col items-start text-foreground">
+        <span className="calendar-draft-slot-label-content sticky flex w-fit max-w-full min-w-0 flex-col items-start rounded-md bg-primary px-2 py-1 text-primary-foreground shadow-sm">
           <span className="min-w-0 max-w-full truncate font-medium">{title}</span>
-          <span className="calendar-draft-slot-time calendar-event-caption max-w-full truncate font-normal text-muted-foreground">
+          <span className="calendar-draft-slot-time calendar-event-caption max-w-full truncate font-normal text-primary-foreground/80">
             {timeRange}
           </span>
         </span>

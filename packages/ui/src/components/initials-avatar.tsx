@@ -40,7 +40,9 @@ export const InitialsAvatar = memo(function InitialsAvatar({
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
       {imageSrc ? <AvatarImage src={imageSrc} alt={imageAlt} /> : null}
-      <AvatarFallback>{initials ?? <UserCircleIcon size={iconSizes[size]} />}</AvatarFallback>
+      <AvatarFallback className="text-[length:inherit] leading-none">
+        {initials ?? <UserCircleIcon size={iconSizes[size]} />}
+      </AvatarFallback>
     </Avatar>
   );
 });

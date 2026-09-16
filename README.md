@@ -1,17 +1,15 @@
 <p align="center">
   <a href="https://comitium.co">
-    <img src="apps/site/public/favicon.svg" alt="Comitium" width="80" height="80">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/comitium-lockup-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/comitium-lockup-light.png">
+      <img src="docs/assets/readme/comitium-lockup-light.png" alt="Comitium" width="280">
+    </picture>
   </a>
 </p>
 
-<h1 align="center">Comitium</h1>
-
 <p align="center">
   <strong>Hiring built for privacy and accountability.</strong>
-</p>
-
-<p align="center">
-  A modern ATS for teams and candidates.
 </p>
 
 <p align="center">
@@ -22,11 +20,42 @@
   <a href="https://github.com/comitiumhq/contracts">Contracts</a>
 </p>
 
-## Built for both sides
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/hero-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/hero-light.png">
+  <img src="docs/assets/readme/hero-light.png" alt="Comitium workflow from candidate pipeline through evaluation and interview scheduling" width="100%">
+</picture>
 
-Comitium gives teams one place to manage jobs, candidates, pipelines, collaboration, and interviews.
+## Features
 
-Candidates can discover roles, apply, and follow their applications.
+- **Verified identity:** Zero-knowledge verification with [zkPassport](https://zkpassport.id/) to protect hiring from identity fraud and spam
+- **Applicant tracking:** Job postings, application forms, candidate profiles, and Kanban/table pipeline views
+- **Structured hiring:** Interview plans, stage-based activities, application reviews, scorecards, and feedback
+- **Candidate management:** Notes, candidate email, forms, activity history, tags, and bulk actions
+- **Interview scheduling:** Calendar integration, interviewer availability, booking links, time zones, and conflict detection
+- **Candidate experience:** Job discovery, application tracking, and self-scheduling
+- **Admin & access:** RBAC, team invites, custom fields, and reusable templates
+- **Privacy & security:** PQ E2EE for candidate PII, organization vaults, and open-weight AI models
+
+## Screenshots
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/pipeline-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/pipeline-light.png">
+  <img src="docs/assets/readme/pipeline-light.png" alt="Comitium pipeline showing candidates across four active hiring stages" width="100%">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/candidate-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/candidate-light.png">
+  <img src="docs/assets/readme/candidate-light.png" alt="Comitium candidate workspace showing activities, interview progress, email, and notes" width="100%">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/calendar-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/calendar-light.png">
+  <img src="docs/assets/readme/calendar-light.png" alt="Comitium interview scheduler comparing four interviewer calendars" width="100%">
+</picture>
 
 ## Repository
 

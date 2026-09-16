@@ -169,7 +169,7 @@ function FeedSkeleton() {
 
 function TimelineRowSkeleton({ compact = false }: { compact?: boolean }) {
   return (
-    <div aria-hidden className="flex items-start gap-2.5 px-1 py-2">
+    <div aria-hidden className="flex items-start gap-2 px-4 py-2">
       <Skeleton className="size-7 shrink-0 rounded-full" />
       <div className="min-w-0 flex-1">
         <Skeleton className={compact ? 'h-3.5 w-2/5 rounded-md' : 'h-3.5 w-3/5 rounded-md'} />

@@ -71,7 +71,12 @@ export function ApplicationReviewCard({
           </Button>
         </CardAction>
       </HomeCardHeader>
-      <CardContent className="flex flex-col lg:max-h-80 lg:overflow-y-auto">
+      <CardContent
+        className={cn('flex flex-col', {
+          'min-h-0 flex-1': !isLoading && candidates.length === 0,
+          'lg:max-h-80 lg:overflow-y-auto': isLoading || candidates.length > 0,
+        })}
+      >
         {isLoading && <HomeSkeletonRows count={6} />}
 
         {!isLoading && candidates.length > 0 && <HomeList>{rows}</HomeList>}

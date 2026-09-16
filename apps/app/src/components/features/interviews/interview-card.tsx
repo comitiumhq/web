@@ -1,7 +1,7 @@
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
-import { BROWSER_TZ, formatDate, formatInTimezone, formatRelativeTime } from '@comitium/ui/date';
+import { BROWSER_TZ, formatInTimezone, formatRelativeTime } from '@comitium/ui/date';
 import { getMemberDisplayName, type MemberDisplayIdentity } from '@comitium/ui/display-name';
 import {
   DropdownMenu,
@@ -50,7 +50,6 @@ interface InterviewCardProps {
   interview: InterviewEvent;
   scheduleId: string;
   scheduleCreatedAt: string;
-  availabilityRequestedAt: string | null;
   applicationId: string;
   orgId: string;
   canManage: boolean;
@@ -79,9 +78,6 @@ const RSVP_DOT_CONFIG: Record<NonNullable<RsvpStatus>, { Icon: typeof CheckCircl
   awaiting: { Icon: ClockIcon, color: 'text-muted-foreground' },
 };
 
-const DIRECT_BOOKING_LINK_TTL_DAYS = 14;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 function RsvpDot({ status }: { status: NonNullable<RsvpStatus> }) {
   const { Icon, color } = RSVP_DOT_CONFIG[status];
 
@@ -108,7 +104,6 @@ export const InterviewCard = memo(function InterviewCard({
   interview,
   scheduleId,
   scheduleCreatedAt,
-  availabilityRequestedAt,
   applicationId,
   orgId,
   canManage,
@@ -225,20 +220,6 @@ export const InterviewCard = memo(function InterviewCard({
 
   const showCompletionActions = (canComplete && timeData.canCompleteNow) || canMarkNoShow;
 
-  const linkSentData = useMemo(() => {
-    if (interview.status !== InterviewStatus.LINK_SENT) {
-      return null;
-    }
-
-    const requestedAt = availabilityRequestedAt ? new Date(availabilityRequestedAt) : new Date(scheduleCreatedAt);
-    const expiresAt = new Date(requestedAt.getTime() + DIRECT_BOOKING_LINK_TTL_DAYS * DAY_MS);
-
-    return {
-      createdLabel: formatRelativeTime(scheduleCreatedAt),
-      expiresLabel: formatDate(expiresAt, 'MMM d · h:mm a'),
-    };
-  }, [interview.status, availabilityRequestedAt, scheduleCreatedAt]);
-
   const canJoin =
     Boolean(interview.meetingUrl) &&
     (interview.status === InterviewStatus.SCHEDULED || interview.status === InterviewStatus.IN_PROGRESS);
@@ -264,12 +245,8 @@ export const InterviewCard = memo(function InterviewCard({
             <span>{interview.durationMinutes} min</span>
           </p>
 
-          {linkSentData && (
-            <p className="mt-0.5 flex flex-wrap items-center gap-1 text-copy-12 text-muted-foreground">
-              <span>Link created {linkSentData.createdLabel}</span>
-              <span aria-hidden="true">·</span>
-              <span>Expires {linkSentData.expiresLabel}</span>
-            </p>
+          {isSchedulingLink && (
+            <p className="mt-0.5 text-copy-12 text-muted-foreground">Created {formatRelativeTime(scheduleCreatedAt)}</p>
           )}
 
           {rsvpAggregate.total > 0 &&

@@ -54,7 +54,7 @@ export function ActivitiesCard({
           )}
         </CardTitle>
       </HomeCardHeader>
-      <CardContent className="flex flex-col">
+      <CardContent className={cn('flex flex-col', { 'min-h-0 flex-1': !isLoading && counts.total === 0 })}>
         {isLoading && <HomeSkeletonRows count={3} />}
 
         {!isLoading && counts.total > 0 && (

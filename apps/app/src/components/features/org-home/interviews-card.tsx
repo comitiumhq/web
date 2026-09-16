@@ -37,7 +37,7 @@ export function InterviewsCard({ className, interviews, isLoading, onInterviewOp
           )}
         </CardTitle>
       </HomeCardHeader>
-      <CardContent className="flex flex-col">
+      <CardContent className={cn('flex flex-col', { 'min-h-0 flex-1': !isLoading && interviews.length === 0 })}>
         {isLoading && <HomeSkeletonRows count={4} />}
 
         {!isLoading && interviews.length > 0 && (

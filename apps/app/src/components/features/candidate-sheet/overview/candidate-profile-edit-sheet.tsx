@@ -210,6 +210,9 @@ export function CandidateProfileEditSheet({
                         }
                         onTextChange={() => field.onChange(null)}
                         onBlur={field.onBlur}
+                        name={field.name}
+                        inputRef={field.ref}
+                        placeholder="Search city..."
                         disabled={isPending}
                       />
                     </FormControl>

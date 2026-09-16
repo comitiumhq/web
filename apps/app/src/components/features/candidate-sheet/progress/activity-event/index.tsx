@@ -32,7 +32,7 @@ export const TimelineEventRow = memo(function TimelineEventRow({
   const occurredAt = formatInTimezone(event.createdAt, timeZone, 'MMM d, yyyy · h:mm a (zzz)');
 
   return (
-    <div className="flex items-start gap-2.5 px-1 py-2">
+    <div className="flex items-start gap-2 px-4 py-2">
       <MemberAvatar identity={toDisplayIdentity(event)} size="sm" className="mt-0.5 shrink-0" />
       <EventBody event={event} selectedApplicationId={selectedApplicationId} />
       <Tooltip>

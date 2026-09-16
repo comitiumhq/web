@@ -43,7 +43,6 @@ describe('getCurrentInterviewCards', () => {
       {
         scheduleId: SCHEDULE_ID,
         scheduleCreatedAt: '2026-07-21T10:00:00.000Z',
-        availabilityRequestedAt: null,
         event: scheduled,
       },
     ]);
@@ -56,7 +55,6 @@ describe('getCurrentInterviewCards', () => {
       {
         scheduleId: SCHEDULE_ID,
         scheduleCreatedAt: '2026-07-21T10:00:00.000Z',
-        availabilityRequestedAt: null,
         event: confirming,
       },
     ]);

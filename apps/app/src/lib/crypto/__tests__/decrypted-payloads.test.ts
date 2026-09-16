@@ -10,7 +10,12 @@ const CANDIDATE_PROFILE = {
   linkedIn: null,
   github: null,
   website: null,
-  location: null,
+  location: {
+    cityId: 756135,
+    city: 'Warsaw',
+    region: 'Masovian Voivodeship',
+    country: 'PL',
+  },
   currentTitle: 'Engineer',
   currentCompany: 'Analytical Engines Inc.',
 };
