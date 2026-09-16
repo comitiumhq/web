@@ -35,7 +35,7 @@ export const InterviewProgressEventRow = memo(function InterviewProgressEventRow
 
       <div className="flex shrink-0 items-center gap-2">
         {event.interviewers.length > 0 && (
-          <div className="flex -space-x-1.5">
+          <div className="flex -space-x-1">
             {event.interviewers.map((interviewer) => (
               <InterviewerAvatar key={interviewer.userId} interviewer={interviewer} memberMap={memberMap} />
             ))}
@@ -76,12 +76,9 @@ function InterviewerAvatar({ interviewer, memberMap }: InterviewerAvatarProps) {
         <button
           type="button"
           aria-label={`${displayName}. ${rsvpLabel}. ${feedbackLabel}.`}
-          className={cn(
-            'relative rounded-full ring-2 ring-background focus-visible:outline-none focus-visible:ring-ring',
-            {
-              'opacity-60': interviewer.feedbackStatus === 'not_required',
-            },
-          )}
+          className={cn('relative rounded-full ring-2 ring-card focus-visible:outline-none focus-visible:ring-ring', {
+            'opacity-60': interviewer.feedbackStatus === 'not_required',
+          })}
         >
           <MemberAvatar identity={identity} size="sm" />
           <RsvpStatusIcon status={interviewer.rsvpStatus} />
@@ -105,7 +102,7 @@ function RsvpStatusIcon({ status }: { status: InterviewProgressInterviewer['rsvp
   const Icon = config.Icon;
 
   return (
-    <span className="absolute -right-0.5 -bottom-0.5 rounded-full bg-background ring-1 ring-background">
+    <span className="absolute -right-0.5 -bottom-0.5 rounded-full bg-card ring-1 ring-card">
       <Icon className={cn('size-3', config.className)} />
     </span>
   );

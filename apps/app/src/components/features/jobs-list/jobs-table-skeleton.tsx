@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 import type { JobsRow } from './jobs-columns';
 
-const SKELETON_ROWS = Array.from({ length: 8 }, (_, index) => index);
+const SKELETON_ROWS = Array.from({ length: 10 }, (_, index) => index);
 
 interface JobsTableSkeletonProps {
   columns: ColumnDef<JobsRow>[];
@@ -21,8 +21,8 @@ export function JobsTableSkeleton({ columns, gridMinWidth }: JobsTableSkeletonPr
   const gridStyle = useMemo<CSSProperties>(() => ({ gridTemplateColumns }), [gridTemplateColumns]);
 
   return (
-    <Card size="sm" className="min-h-0 overflow-hidden border border-surface-border py-0 ring-0">
-      <div className="overflow-x-auto">
+    <Card size="sm" className="min-h-0 flex-1 overflow-hidden border border-surface-border py-0 ring-0">
+      <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
         <div style={{ minWidth: gridMinWidth }}>
           <div className="grid min-h-11 items-center bg-table-header" style={gridStyle}>
             {columns.map((column, index) => (

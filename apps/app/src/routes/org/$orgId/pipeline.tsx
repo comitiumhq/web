@@ -4,7 +4,6 @@ import { z } from 'zod';
 
 import { OrgRouteShell } from '@/components/auth/org-route-shell';
 import { GlobalPipelineDashboard } from '@/components/features/pipeline/global';
-import { ProfileBanner } from '@/components/features/pipeline/global/profile-banner';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
 
 const pipelineSearchSchema = z.object({
@@ -31,13 +30,8 @@ function PipelineRoute() {
     [navigate],
   );
   const renderPipelineDashboard = useCallback(
-    (org: MyOrg) => (
-      <div className="flex h-full flex-col overflow-hidden">
-        <ProfileBanner orgId={orgId} />
-        <GlobalPipelineDashboard org={org} activeTab={tab} onTabChange={handleTabChange} />
-      </div>
-    ),
-    [handleTabChange, orgId, tab],
+    (org: MyOrg) => <GlobalPipelineDashboard org={org} activeTab={tab} onTabChange={handleTabChange} />,
+    [handleTabChange, tab],
   );
 
   return (

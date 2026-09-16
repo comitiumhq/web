@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
 import { Progress } from '@comitium/ui/progress';
 import { Separator } from '@comitium/ui/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { ArrowRightIcon, CaretDownIcon, CheckCircleIcon, CircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
 import { type ReactNode, useState } from 'react';
@@ -12,16 +11,16 @@ import { isJobCreationAllowedBySetup } from '@/lib/workspace-setup';
 
 interface WorkspaceSetupCardProps {
   orgId: string;
-  setup: WorkspaceSetup;
+  profileComplete: boolean;
+  setup?: WorkspaceSetup;
 }
 
 const WORKSPACE_SETUP_OPEN_STORAGE_PREFIX = 'comitium:workspace-setup:open';
 
-export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
+export function WorkspaceSetupCard({ orgId, profileComplete, setup }: WorkspaceSetupCardProps) {
   const storageKey = `${WORKSPACE_SETUP_OPEN_STORAGE_PREFIX}:${orgId}`;
-  const [open, setOpen] = useState(() => globalThis.localStorage?.getItem(storageKey) !== 'false');
-  const progress = (setup.completedRequired / setup.requiredTotal) * 100;
-  const jobCreationAvailable = isJobCreationAllowedBySetup(setup);
+  const [open, setOpen] = useState(() => getStoredOpenState(storageKey));
+  const { completedRequired, requiredTotal, progress } = getChecklistProgress(profileComplete, setup);
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
@@ -31,17 +30,14 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
   return (
     <Card
       size="sm"
-      className={cn(
-        'max-h-[calc(100dvh-2rem)] min-w-0 max-w-[calc(100vw-2rem)] gap-0 bg-popover/90 py-0 shadow-lg backdrop-blur-2xl transition-[width]! [transition-duration:200ms]! ease-[cubic-bezier(0.4,0,0.2,1)]! supports-[backdrop-filter]:bg-popover/60 motion-reduce:transition-none!',
-        open ? 'w-72' : 'w-64',
-      )}
+      className="max-h-[calc(100dvh-2rem)] w-72 min-w-0 max-w-[calc(100vw-2rem)] gap-0 overflow-hidden border-control-border bg-popover py-0 text-popover-foreground shadow-2xl"
     >
       <Collapsible open={open} onOpenChange={handleOpenChange} className="flex min-h-0 flex-1 flex-col">
         <CardHeader className="shrink-0 gap-0 px-4 py-3">
           <CollapsibleTrigger className="group grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-md text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
             <CardTitle className="truncate whitespace-nowrap text-heading-14">Getting started</CardTitle>
             <span className="whitespace-nowrap text-label-12 text-muted-foreground tabular-nums">
-              {setup.completedRequired}/{setup.requiredTotal}
+              {completedRequired}/{requiredTotal}
             </span>
             <CaretDownIcon
               aria-hidden="true"
@@ -55,97 +51,139 @@ export function WorkspaceSetupCard({ orgId, setup }: WorkspaceSetupCardProps) {
           <Progress
             value={progress}
             className="mt-2 h-1.5"
-            aria-label={`${setup.completedRequired} of ${setup.requiredTotal} getting started steps complete`}
+            aria-label={`${completedRequired} of ${requiredTotal} getting started steps complete`}
             aria-valuenow={progress}
           />
         </CardHeader>
 
-        <CollapsibleContent className="min-h-0 w-72 max-w-[calc(100vw-2rem)] overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:200ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:animate-accordion-down data-open:overflow-y-auto data-open:overscroll-contain motion-reduce:animate-none!">
-          <CardContent className="flex w-full flex-col gap-3 px-4 pt-1 pb-4">
-            <div className="flex flex-col gap-1">
-              <Link
-                to="/org/$orgId/organization/company"
-                params={{ orgId }}
-                aria-label={setupRowAriaLabel('Add company details', setup.required.companyDetails.complete)}
-                className={setupRowClassName(setup.required.companyDetails.complete)}
-              >
-                <SetupRowContent complete={setup.required.companyDetails.complete}>Add company details</SetupRowContent>
-              </Link>
-              <Link
-                to="/org/$orgId/organization/departments"
-                params={{ orgId }}
-                aria-label={setupRowAriaLabel('Add a department', setup.required.department.complete)}
-                className={setupRowClassName(setup.required.department.complete)}
-              >
-                <SetupRowContent complete={setup.required.department.complete}>Add a department</SetupRowContent>
-              </Link>
-              <Link
-                to="/org/$orgId/organization/locations"
-                params={{ orgId }}
-                aria-label={setupRowAriaLabel('Add a location', setup.required.location.complete)}
-                className={setupRowClassName(setup.required.location.complete)}
-              >
-                <SetupRowContent complete={setup.required.location.complete}>Add a location</SetupRowContent>
-              </Link>
-              <Link
-                to="/org/$orgId/organization/data-privacy"
-                params={{ orgId }}
-                aria-label={setupRowAriaLabel(
-                  'Add recruiting privacy policy',
-                  setup.required.recruitingPrivacy.complete,
-                )}
-                className={setupRowClassName(setup.required.recruitingPrivacy.complete)}
-              >
-                <SetupRowContent complete={setup.required.recruitingPrivacy.complete}>
-                  Add recruiting privacy policy
-                </SetupRowContent>
-              </Link>
-              {jobCreationAvailable ? (
-                <Link
-                  to="/org/$orgId/jobs"
-                  params={{ orgId }}
-                  search={{ status: 'all', create: true }}
-                  aria-label={setupRowAriaLabel('Create your first job', setup.required.firstJob.complete)}
-                  className={setupRowClassName(setup.required.firstJob.complete)}
-                >
-                  <SetupRowContent complete={setup.required.firstJob.complete}>Create your first job</SetupRowContent>
-                </Link>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      aria-disabled="true"
-                      aria-label="Unavailable: Create your first job. Complete the setup steps above first."
-                      className={setupRowClassName(false, true)}
-                    >
-                      <SetupRowContent complete={false} showAction={false}>
-                        Create your first job
-                      </SetupRowContent>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Complete the steps above to create a job.</TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-
-            <Separator />
-
-            <div>
-              <p className="px-2 pb-1 text-label-12 text-muted-foreground">Optional</p>
-              <Link
-                to="/org/$orgId/organization/members"
-                params={{ orgId }}
-                aria-label={setupRowAriaLabel('Invite a member', setup.recommended.inviteTeammate.complete)}
-                className={setupRowClassName(setup.recommended.inviteTeammate.complete)}
-              >
-                <SetupRowContent complete={setup.recommended.inviteTeammate.complete}>Invite a member</SetupRowContent>
-              </Link>
-            </div>
+        <CollapsibleContent className="min-h-0 w-full overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:200ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:animate-accordion-down data-open:overflow-y-auto data-open:overscroll-contain motion-reduce:animate-none!">
+          <CardContent className="flex w-full flex-col gap-3 px-2 pt-1 pb-2">
+            <ProfileSetupStep orgId={orgId} complete={profileComplete} />
+            {setup && <OrganizationSetupSteps orgId={orgId} setup={setup} />}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
     </Card>
+  );
+}
+
+function getStoredOpenState(storageKey: string): boolean {
+  return globalThis.localStorage?.getItem(storageKey) !== 'false';
+}
+
+function getChecklistProgress(profileComplete: boolean, setup?: WorkspaceSetup) {
+  const completedProfileSteps = profileComplete ? 1 : 0;
+  const completedOrgSteps = setup?.completedRequired ?? 0;
+  const requiredOrgSteps = setup?.requiredTotal ?? 0;
+  const completedRequired = completedProfileSteps + completedOrgSteps;
+  const requiredTotal = 1 + requiredOrgSteps;
+
+  return { completedRequired, requiredTotal, progress: (completedRequired / requiredTotal) * 100 };
+}
+
+function ProfileSetupStep({ orgId, complete }: { orgId: string; complete: boolean }) {
+  return (
+    <Link
+      to="/org/$orgId/settings"
+      params={{ orgId }}
+      aria-label={setupRowAriaLabel('Complete Profile', complete)}
+      className={setupRowClassName(complete)}
+    >
+      <SetupRowContent complete={complete}>Complete Profile</SetupRowContent>
+    </Link>
+  );
+}
+
+function OrganizationSetupSteps({ orgId, setup }: { orgId: string; setup: WorkspaceSetup }) {
+  return (
+    <>
+      <Separator />
+
+      <div className="flex flex-col gap-1">
+        <Link
+          to="/org/$orgId/organization/company"
+          params={{ orgId }}
+          aria-label={setupRowAriaLabel('Add company details', setup.required.companyDetails.complete)}
+          className={setupRowClassName(setup.required.companyDetails.complete)}
+        >
+          <SetupRowContent complete={setup.required.companyDetails.complete}>Add company details</SetupRowContent>
+        </Link>
+        <Link
+          to="/org/$orgId/organization/departments"
+          params={{ orgId }}
+          aria-label={setupRowAriaLabel('Add a department', setup.required.department.complete)}
+          className={setupRowClassName(setup.required.department.complete)}
+        >
+          <SetupRowContent complete={setup.required.department.complete}>Add a department</SetupRowContent>
+        </Link>
+        <Link
+          to="/org/$orgId/organization/locations"
+          params={{ orgId }}
+          aria-label={setupRowAriaLabel('Add a location', setup.required.location.complete)}
+          className={setupRowClassName(setup.required.location.complete)}
+        >
+          <SetupRowContent complete={setup.required.location.complete}>Add a location</SetupRowContent>
+        </Link>
+        <Link
+          to="/org/$orgId/organization/data-privacy"
+          params={{ orgId }}
+          aria-label={setupRowAriaLabel('Add recruiting privacy policy', setup.required.recruitingPrivacy.complete)}
+          className={setupRowClassName(setup.required.recruitingPrivacy.complete)}
+        >
+          <SetupRowContent complete={setup.required.recruitingPrivacy.complete}>
+            Add recruiting privacy policy
+          </SetupRowContent>
+        </Link>
+        <FirstJobStep
+          orgId={orgId}
+          complete={setup.required.firstJob.complete}
+          available={isJobCreationAllowedBySetup(setup)}
+        />
+      </div>
+
+      <Separator />
+
+      <div>
+        <p className="px-2 pb-1 text-label-12 text-muted-foreground">Optional</p>
+        <Link
+          to="/org/$orgId/organization/members"
+          params={{ orgId }}
+          aria-label={setupRowAriaLabel('Invite a member', setup.recommended.inviteTeammate.complete)}
+          className={setupRowClassName(setup.recommended.inviteTeammate.complete)}
+        >
+          <SetupRowContent complete={setup.recommended.inviteTeammate.complete}>Invite a member</SetupRowContent>
+        </Link>
+      </div>
+    </>
+  );
+}
+
+function FirstJobStep({ orgId, complete, available }: { orgId: string; complete: boolean; available: boolean }) {
+  if (!available) {
+    return (
+      <button
+        type="button"
+        disabled
+        aria-label="Unavailable: Create your first job. Complete the setup steps above first."
+        className={setupRowClassName(false, true)}
+      >
+        <SetupRowContent complete={false} showAction={false}>
+          Create your first job
+        </SetupRowContent>
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      to="/org/$orgId/jobs"
+      params={{ orgId }}
+      search={{ status: 'all', create: true }}
+      aria-label={setupRowAriaLabel('Create your first job', complete)}
+      className={setupRowClassName(complete)}
+    >
+      <SetupRowContent complete={complete}>Create your first job</SetupRowContent>
+    </Link>
   );
 }
 
@@ -165,7 +203,10 @@ function SetupRowContent({
       <StatusIcon
         aria-hidden="true"
         weight={complete ? 'fill' : 'regular'}
-        className={cn('size-4 shrink-0', complete ? 'text-success' : 'text-muted-foreground')}
+        className={cn('size-4 shrink-0', {
+          'text-success': complete,
+          'text-muted-foreground': !complete,
+        })}
       />
       <span className={cn('min-w-0 flex-1 leading-5', { 'text-muted-foreground': complete })}>{children}</span>
       {!complete && showAction && (

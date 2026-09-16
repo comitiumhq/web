@@ -69,7 +69,7 @@ function StageVisitRows({ visit, memberMap, timeZone }: StageVisitRowsProps) {
           {formatCompactDate(visit.enteredAt)}
         </TableCell>
         <TableCell className="px-3 py-2.5 text-right text-copy-12 tabular-nums text-muted-foreground">
-          {visit.leftAt ? formatCompactDate(visit.leftAt) : '—'}
+          {visit.leftAt ? formatCompactDate(visit.leftAt) : null}
         </TableCell>
         <TableCell className="px-3 py-2.5 text-right text-copy-12 tabular-nums text-muted-foreground">
           {formatDurationSeconds(visit.durationSeconds)}
@@ -94,7 +94,7 @@ function StageVisitRows({ visit, memberMap, timeZone }: StageVisitRowsProps) {
 function CompactStageVisit({ visit, memberMap, timeZone }: StageVisitRowsProps) {
   const metadata = [
     { label: 'Entered', value: formatCompactDate(visit.enteredAt) },
-    { label: 'Left', value: visit.leftAt ? formatCompactDate(visit.leftAt) : '—' },
+    { label: 'Left', value: visit.leftAt ? formatCompactDate(visit.leftAt) : null },
     { label: 'Duration', value: formatDurationSeconds(visit.durationSeconds) },
   ];
 

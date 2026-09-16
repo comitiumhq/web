@@ -41,7 +41,6 @@ export function CurrentInterviews({
             interview={card.event}
             scheduleId={card.scheduleId}
             scheduleCreatedAt={card.scheduleCreatedAt}
-            availabilityRequestedAt={card.availabilityRequestedAt}
             applicationId={applicationId}
             orgId={orgId}
             canManage={canManage}
@@ -68,7 +67,6 @@ export function hasCurrentInterviews(schedules: InterviewSchedule[]): boolean {
 interface CurrentInterviewCard {
   scheduleId: string;
   scheduleCreatedAt: string;
-  availabilityRequestedAt: string | null;
   event: InterviewEvent;
 }
 
@@ -77,7 +75,6 @@ export function getCurrentInterviewCards(schedules: InterviewSchedule[]): Curren
     schedule.events.filter(isCurrentInterviewEvent).map((event) => ({
       scheduleId: schedule.id,
       scheduleCreatedAt: schedule.createdAt,
-      availabilityRequestedAt: schedule.availabilityRequestedAt,
       event,
     })),
   );

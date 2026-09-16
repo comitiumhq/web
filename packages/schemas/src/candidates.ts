@@ -157,6 +157,7 @@ export function formatCandidateLocation(location: CandidateLocationValue | null)
 
   return [location.city, location.region, location.country].filter(Boolean).join(', ');
 }
+
 export const candidateProfileUpdateResponseSchema = successSchema;
 
 const candidateFileKindSchema = z.enum(['resume', 'cover_letter', 'portfolio', 'attachment', 'other']);

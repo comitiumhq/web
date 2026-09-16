@@ -94,8 +94,8 @@ export function PipelineStageControlsSkeleton({
                   activeTab === key && 'bg-segment shadow-[var(--segment-shadow)]',
                 )}
               >
-                <Skeleton className="h-4 w-6" />
-                <Skeleton className={cn('h-3', widthClassName)} />
+                <Skeleton className="h-4 w-6 bg-foreground/10" />
+                <Skeleton className={cn('h-3 bg-foreground/10', widthClassName)} />
               </div>
             </Fragment>
           ))}

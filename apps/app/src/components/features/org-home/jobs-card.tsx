@@ -45,7 +45,12 @@ export function JobsCard({ className, isLoading, jobs, orgId, totalCount }: Jobs
           </Button>
         </CardAction>
       </HomeCardHeader>
-      <CardContent className="flex flex-col lg:max-h-[28rem] lg:overflow-y-auto">
+      <CardContent
+        className={cn('flex flex-col', {
+          'min-h-0 flex-1': !isLoading && jobs.length === 0,
+          'lg:max-h-[28rem] lg:overflow-y-auto': isLoading || jobs.length > 0,
+        })}
+      >
         {isLoading && <HomeSkeletonRows count={7} />}
 
         {!isLoading && jobs.length > 0 && <HomeList>{rows}</HomeList>}
