@@ -1,3 +1,4 @@
+import type { JobSummary } from '@comitium/schemas/jobs';
 import type { JobLifecycle } from '@comitium/schemas/public-jobs';
 import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
@@ -12,6 +13,7 @@ import {
 import { CopyIcon, DotsThreeVerticalIcon, EyeIcon, TrashIcon } from '@phosphor-icons/react';
 import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
+import { PublishJobDialogV2 } from '@/components/features/job-posting/publish-job-dialog-v2';
 import { useCreateDraft } from '@/hooks/mutations/use-create-draft';
 import { useDeleteDraft } from '@/hooks/mutations/use-delete-draft';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
@@ -28,9 +30,10 @@ function getDuplicateLabel(isDuplicating: boolean) {
 
 interface DraftShellActionsProps {
   lifecycle: JobLifecycle;
+  postingApplyMode: JobSummary['postingApplyMode'];
 }
 
-export function DraftShellActions({ lifecycle }: DraftShellActionsProps) {
+export function DraftShellActions({ lifecycle, postingApplyMode }: DraftShellActionsProps) {
   const { can } = usePermissions();
   const navigate = useNavigate();
   const {
@@ -154,7 +157,17 @@ export function DraftShellActions({ lifecycle }: DraftShellActionsProps) {
             onOpenChange={setPreviewOpen}
           />
 
-          {publishVersion !== null && (
+          {publishVersion !== null && postingApplyMode === 'standard' && (
+            <PublishJobDialogV2
+              orgId={orgId}
+              jobId={jobId}
+              jobTitle={draft.title}
+              open={publishOpen}
+              onOpenChange={setPublishOpen}
+            />
+          )}
+
+          {publishVersion !== null && postingApplyMode === 'committed' && (
             <PublishJobDialog
               orgId={orgId}
               jobId={jobId}

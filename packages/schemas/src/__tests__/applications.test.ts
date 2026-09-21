@@ -278,6 +278,6 @@ describe('application submission contracts', () => {
       },
     ]);
     expect(input.candidateProfileInput.purpose).toBe('candidate_profile_input');
-    expect(input.stake).toBe('5000000');
+    expect('stake' in input ? input.stake : null).toBe('5000000');
   });
 });

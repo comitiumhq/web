@@ -108,7 +108,7 @@ describe('useCloseJob', () => {
     await expect(pending).resolves.toEqual({ kind: 'settlement', prepared, state: 'confirmed' });
   });
 
-  it('closes directly after an already-finalized Commitment', async () => {
+  it('closes a standard Job directly without wallet or settlement work', async () => {
     const directParams = { ...params, commitmentSettlementRequired: false };
     const mutation = options();
     const result = await mutation.mutationFn(directParams);

@@ -2,7 +2,7 @@ import type { JobSummary } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { Skeleton } from '@comitium/ui/skeleton';
 import type { Icon } from '@phosphor-icons/react';
-import { ArrowLeftIcon, KanbanIcon } from '@phosphor-icons/react';
+import { ArrowLeftIcon, GlobeSimpleIcon, KanbanIcon } from '@phosphor-icons/react';
 import { Link, useLocation } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { DRAFT_SECTIONS } from '@/components/features/job-draft/sections';
@@ -145,7 +145,10 @@ interface JobNavProps {
   draftStepStatuses?: StepStatus[];
 }
 
-type JobNavRoute = '/org/$orgId/jobs/$jobId/pipeline' | (typeof DRAFT_SECTIONS)[number]['route'];
+type JobNavRoute =
+  | '/org/$orgId/jobs/$jobId/pipeline'
+  | '/org/$orgId/jobs/$jobId/posting'
+  | (typeof DRAFT_SECTIONS)[number]['route'];
 
 interface JobNavItem {
   label: string;
@@ -184,7 +187,20 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
     }));
   }
 
+  const postingItems: JobNavItem[] =
+    job?.postingApplyMode === 'standard'
+      ? [
+          {
+            label: 'Posting',
+            icon: GlobeSimpleIcon,
+            to: '/org/$orgId/jobs/$jobId/posting',
+            isActive: (pathname) => pathname.endsWith('/posting'),
+          },
+        ]
+      : [];
+
   return [
+    ...postingItems,
     {
       label: 'Pipeline',
       icon: KanbanIcon,

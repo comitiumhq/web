@@ -105,6 +105,7 @@ export const qk = {
     draftsAllPages: (orgId?: string) => ['jobs', 'drafts', orgId, 'all-pages'] as const,
     draftRoot: () => ['jobs', 'draft'] as const,
     draft: (orgId: string, jobId: string) => ['jobs', 'draft', orgId, jobId] as const,
+    posting: (orgId: string, jobId: string) => ['jobs', 'posting', orgId, jobId] as const,
     pipeline: (jobId: string | null) => ['jobs', jobId, 'pipeline'] as const,
     kanbanRoot: (jobId: string) => ['jobs', jobId, 'kanban'] as const,
     kanban: (jobId: string | null, filters: unknown) => ['jobs', jobId, 'kanban', filters] as const,

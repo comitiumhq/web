@@ -110,6 +110,17 @@ function JobRouteShell({ org, jobId, pathname }: JobRouteShellProps) {
     );
   }
 
+  if (pathname.endsWith('/posting') && job.postingApplyMode !== 'standard') {
+    return (
+      <Navigate
+        to="/org/$orgId/jobs/$jobId/pipeline"
+        params={{ orgId: org.id, jobId }}
+        search={{ tab: 'active' }}
+        replace
+      />
+    );
+  }
+
   return (
     <JobDetailRouteOrgProvider org={org}>
       <JobDetailLayout orgId={org.id} jobId={jobId} job={job}>
@@ -156,7 +167,7 @@ function DraftJobShell({ org, jobId, job }: DraftJobShellProps) {
         orgId={org.id}
         jobId={jobId}
         job={job}
-        actions={<DraftShellActions lifecycle={job.lifecycle} />}
+        actions={<DraftShellActions lifecycle={job.lifecycle} postingApplyMode={job.postingApplyMode} />}
         draftStepStatuses={stepStatuses}
       >
         <Outlet />

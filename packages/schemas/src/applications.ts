@@ -338,9 +338,9 @@ export type DuplicateApplicationAttemptsResponse = z.infer<typeof duplicateAppli
 
 const myApplicationJobSchema = z.object({
   id: z.string(),
-  jobId: z.number(),
-  chainId: z.number(),
-  commitmentContract: addressSchema,
+  jobId: z.number().nullable(),
+  chainId: z.number().nullable(),
+  commitmentContract: addressSchema.nullable(),
   orgSlug: z.string().nullable(),
   postingSlug: z.string().nullable(),
   canonicalUrl: z.string().nullable(),
@@ -387,7 +387,7 @@ export type ApplicantStakeReturnAvailability = z.infer<typeof applicantStakeRetu
 
 export const myApplicationSchema = z.object({
   id: z.string(),
-  applicationId: bytes32HexSchema,
+  applicationId: bytes32HexSchema.nullable(),
   jobId: z.string(),
   archivedAt: z.string().nullable().optional().default(null),
   archiveReasonType: archiveReasonTypeSchema.nullable().optional().default(null),
@@ -488,10 +488,11 @@ const userWalletApplicationRequestSchema = userWalletAuthorizationPayloadSchema.
 
 export type UserWalletApplicationRequest = z.infer<typeof userWalletApplicationRequestSchema>;
 
-export const applicationSubmitDispositionSchema = z.discriminatedUnion('state', [
+export const applicationSubmitDispositionSchema = z.union([
   z.object({ state: z.literal('wallet_confirmation'), operation: userWalletApplicationRequestSchema }).strict(),
   z.object({ state: z.literal('confirming'), operationId: uuidSchema }).strict(),
   z.object({ state: z.literal('completed'), operationId: uuidSchema }).strict(),
+  z.object({ state: z.literal('completed'), applicationId: uuidSchema }).strict(),
   z.object({ state: z.literal('try_again'), operationId: uuidSchema }).strict(),
 ]);
 
@@ -530,11 +531,8 @@ const aiCriteriaEvaluationChoiceSchema = z
   })
   .strict();
 
-export const finalizeApplicationInputSchema = z
+const finalizeApplicationBaseSchema = z
   .object({
-    applicationId: bytes32HexSchema,
-    applicationSalt: nonZeroBytes32HexSchema,
-    stake: decimalIntegerStringSchema,
     formSnapshotHash: bytes32HexSchema,
     candidateIdentityInputs: z.array(finalizeIdentityInputSchema).min(1).max(10),
     candidateProfileInput: finalizeCandidateProfileInputSchema,
@@ -556,7 +554,22 @@ export const finalizeApplicationInputSchema = z
   })
   .strict();
 
+export const standardFinalizeApplicationInputSchema = finalizeApplicationBaseSchema;
+
+export const committedFinalizeApplicationInputSchema = finalizeApplicationBaseSchema.extend({
+  applicationId: bytes32HexSchema,
+  applicationSalt: nonZeroBytes32HexSchema,
+  stake: decimalIntegerStringSchema,
+});
+
+export const finalizeApplicationInputSchema = z.union([
+  standardFinalizeApplicationInputSchema,
+  committedFinalizeApplicationInputSchema,
+]);
+
 export type FinalizeApplicationInput = z.infer<typeof finalizeApplicationInputSchema>;
+export type StandardFinalizeApplicationInput = z.infer<typeof standardFinalizeApplicationInputSchema>;
+export type CommittedFinalizeApplicationInput = z.infer<typeof committedFinalizeApplicationInputSchema>;
 
 export const applicationFileReservationSchema = z
   .object({ fileId: uuidSchema, uploadToken: z.string(), expiresAt: z.string() })

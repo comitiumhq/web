@@ -114,17 +114,24 @@ export const hiringTeamEntrySchema = z.object({
 
 export type HiringTeamEntry = z.infer<typeof hiringTeamEntrySchema>;
 
-// --- Job application data (contract interaction — frontend-only) ---
+// --- Public application data (frontend-only) ---
 
-const jobApplicationDataSchema = z.object({
+const jobApplicationDataBaseSchema = z.object({
   id: uuidSchema,
   postingId: uuidSchema,
-  chainId: z.number(),
-  jobId: z.number(),
-  commitmentContract: addressSchema,
   orgId: z.string(),
-  creatorAddress: addressSchema,
 });
+
+const jobApplicationDataSchema = z.discriminatedUnion('applyMode', [
+  jobApplicationDataBaseSchema.extend({ applyMode: z.literal('standard') }),
+  jobApplicationDataBaseSchema.extend({
+    applyMode: z.literal('committed'),
+    chainId: z.number(),
+    jobId: z.number(),
+    commitmentContract: addressSchema,
+    creatorAddress: addressSchema,
+  }),
+]);
 
 export type JobApplicationData = z.infer<typeof jobApplicationDataSchema>;
 
@@ -237,6 +244,30 @@ export const jobCreationContextSchema = z.object({
 
 export type JobCreationContext = z.infer<typeof jobCreationContextSchema>;
 
+export const jobPostingSchema = z.object({
+  id: uuidSchema,
+  jobId: z.string(),
+  slug: z.string(),
+  status: jobPostingStatusSchema,
+  description: z.unknown().nullable(),
+  descriptionMarkdown: z.string().nullable(),
+  form: z
+    .object({
+      id: uuidSchema,
+      title: z.string(),
+      isArchived: z.boolean(),
+    })
+    .nullable(),
+  applicationCapacity: z.number().int().min(1).max(1000).nullable(),
+  completedApplicationCount: z.number().int().nonnegative(),
+  availability: z.enum(['accepting', 'capacity-reached', 'unavailable']),
+  publishedAt: z.string().nullable(),
+  unpublishedAt: z.string().nullable(),
+  version: z.number().int().min(0),
+});
+
+export type JobPosting = z.infer<typeof jobPostingSchema>;
+
 export const publishDraftResponseSchema = preparedRelayedOnchainOperationSchema;
 
 export const prepareJobContentUriUpdateResponseSchema = preparedRelayedOnchainOperationSchema;
@@ -259,6 +290,7 @@ export type UpdateDraftData = {
   expectedVersion: number;
   title?: string;
   description?: unknown;
+  descriptionMarkdown?: string;
   departmentId?: string;
   locationId?: string;
   locationType?: string | null;
@@ -270,6 +302,19 @@ export type UpdateDraftData = {
   criteria?: EvaluationCriterion[] | null;
   interviewPlanId?: string | null;
   hiringTeam?: { userId: string; role: HiringTeamRole }[];
+};
+
+export type UpdateJobPostingData = {
+  expectedVersion: number;
+  description?: unknown | null;
+  descriptionMarkdown?: string | null;
+  formId?: string | null;
+  applicationCapacity?: number | null;
+};
+
+export type PublishJobPostingData = {
+  expectedVersion: number;
+  applicationCapacity?: number | null;
 };
 
 export type PublishDraftParams = {

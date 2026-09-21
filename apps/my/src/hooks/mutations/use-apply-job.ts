@@ -18,17 +18,12 @@ import { toast } from 'sonner';
 import type { Address } from 'viem';
 import { qk } from '@/hooks/query-keys';
 import type { CandidateIdentityInputValue } from '@/lib/forms/candidate-identity-inputs';
-import {
-  type ApplyAnswerBucket,
-  type ApplyFileUpload,
-  type ApplyJobWorkflowParams,
-  applyJobWorkflow,
-  type WorkflowStep,
-} from '@/lib/jobs/workflows/apply-job';
+import type { ApplyAnswerBucket, ApplyFileUpload } from '@/lib/jobs/workflows/application-intake';
+import { type ApplyJobWorkflowParams, applyJobWorkflow, type WorkflowStep } from '@/lib/jobs/workflows/apply-job';
 
 interface SubmitApplicationParams {
   address: Address;
-  jobData: JobApplicationData;
+  jobData: Extract<JobApplicationData, { applyMode: 'committed' }>;
   stakeAmount: bigint;
   formId: string;
   answerBuckets: ApplyAnswerBucket[];

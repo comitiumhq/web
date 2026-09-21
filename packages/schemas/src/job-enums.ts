@@ -48,7 +48,7 @@ export type Category = (typeof CATEGORIES)[number]['value'];
 export const CATEGORY_VALUES = CATEGORIES.map((c) => c.value) as [Category, ...Category[]];
 
 export const PUBLIC_JOB_SORTS = [
-  { value: 'stake_desc', label: 'Stake' },
+  { value: 'stake_desc', label: 'Recommended' },
   { value: 'newest', label: 'Newest' },
 ] as const;
 

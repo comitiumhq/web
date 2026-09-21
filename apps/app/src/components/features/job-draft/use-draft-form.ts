@@ -110,7 +110,9 @@ export function useDraftForm(orgId: string, jobId: string) {
       return versionRef.current;
     }
 
-    const prepared = prepareDraftSave(currentSnapshot(), versionRef.current);
+    const snapshot = currentSnapshot();
+    const descriptionMarkdown = snapshot.description ? markdownManager.serialize(snapshot.description) : '';
+    const prepared = prepareDraftSave(snapshot, versionRef.current, descriptionMarkdown);
     const submittedRevision = editRevisionRef.current;
 
     try {

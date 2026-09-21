@@ -6,15 +6,18 @@ import {
   jobCreationContextSchema,
   jobDraftSchema,
   jobLifecycleMutationResponseSchema,
+  jobPostingSchema,
   jobSummarySchema,
   orgJobsResponseSchema,
   type PrepareJobContentUriUpdateParams,
   type PublishDraftParams,
+  type PublishJobPostingData,
   prepareJobContentUriUpdateResponseSchema,
   prepareUnpublishSchema,
   publishDraftResponseSchema,
   reopenJobAsDraftResponseSchema,
   type UpdateDraftData,
+  type UpdateJobPostingData,
   updateDraftResponseSchema,
 } from '@comitium/schemas/jobs';
 import { preparedRelayedOnchainOperationSchema } from '@comitium/schemas/onchain-operations';
@@ -141,4 +144,22 @@ export function publishDraft(orgId: string, jobId: string, data: PublishDraftPar
 
 export function prepareJobContentUriUpdate(orgId: string, jobId: string, data: PrepareJobContentUriUpdateParams) {
   return api.post(`/orgs/${orgId}/jobs/${jobId}/content/prepare`, data, prepareJobContentUriUpdateResponseSchema);
+}
+
+// --- Job Posting ---
+
+export function getJobPosting(orgId: string, jobId: string) {
+  return api.get(`/orgs/${orgId}/jobs/${jobId}/posting`, jobPostingSchema);
+}
+
+export function updateJobPosting(orgId: string, jobId: string, data: UpdateJobPostingData) {
+  return api.patch(`/orgs/${orgId}/jobs/${jobId}/posting`, data, jobPostingSchema);
+}
+
+export function publishJobPosting(orgId: string, jobId: string, data: PublishJobPostingData) {
+  return api.post(`/orgs/${orgId}/jobs/${jobId}/posting/publish`, data, jobPostingSchema);
+}
+
+export function unpublishJobPosting(orgId: string, jobId: string, expectedVersion: number) {
+  return api.post(`/orgs/${orgId}/jobs/${jobId}/posting/unpublish`, { expectedVersion }, jobPostingSchema);
 }

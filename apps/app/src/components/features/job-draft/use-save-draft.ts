@@ -11,6 +11,7 @@ async function invalidateDraftQueries(queryClient: ReturnType<typeof useQueryCli
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: qk.jobs.draftsOrg(orgId) }),
     queryClient.invalidateQueries({ queryKey: qk.jobs.draft(orgId, jobId) }),
+    queryClient.invalidateQueries({ queryKey: qk.jobs.posting(orgId, jobId) }),
     queryClient.invalidateQueries({ queryKey: qk.jobs.summary(jobId) }),
     queryClient.invalidateQueries({ queryKey: qk.jobs.pipeline(jobId) }),
     queryClient.invalidateQueries({ queryKey: qk.stageActivities.job(jobId) }),

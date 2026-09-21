@@ -49,6 +49,7 @@ describe('job draft utils', () => {
           ],
         },
         4,
+        'Build the product.',
       ).data,
     ).toEqual({
       expectedVersion: 4,
@@ -69,6 +70,7 @@ describe('job draft utils', () => {
         ],
       },
       description,
+      descriptionMarkdown: 'Build the product.',
       formId: '33333333-3333-4333-8333-333333333333',
       criteria: [
         {
@@ -99,6 +101,7 @@ describe('job draft utils', () => {
         hiringTeam: [],
       },
       2,
+      '',
     ).data;
 
     expect(update).not.toHaveProperty('locationId');
@@ -129,7 +132,7 @@ describe('job draft utils', () => {
     const state = draftToEditorState(draft);
 
     expect(state.values).toMatchObject({ compensationCurrency: 'USD', compensationPeriod: 'year' });
-    expect(prepareDraftSave(state, 0).data.compensation).toBeNull();
+    expect(prepareDraftSave(state, 0, '').data.compensation).toBeNull();
   });
 
   it('keeps section navigation inside the current editor', () => {

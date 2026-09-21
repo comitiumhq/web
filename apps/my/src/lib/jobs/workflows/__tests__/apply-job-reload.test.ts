@@ -57,6 +57,7 @@ function runWorkflow(overrides: Partial<ApplyJobWorkflowParams> = {}) {
   return applyJobWorkflow({
     address: '0x1111111111111111111111111111111111111111',
     jobData: {
+      applyMode: 'committed',
       id: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
       postingId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
       chainId: 84532,
@@ -64,7 +65,7 @@ function runWorkflow(overrides: Partial<ApplyJobWorkflowParams> = {}) {
       orgId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
       commitmentContract: '0x2222222222222222222222222222222222222222',
       creatorAddress: '0x3333333333333333333333333333333333333333',
-    } as JobApplicationData,
+    } as Extract<JobApplicationData, { applyMode: 'committed' }>,
     stakeAmount: 5_000_000n,
     formId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
     answerBuckets: [],

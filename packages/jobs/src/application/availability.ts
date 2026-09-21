@@ -9,10 +9,6 @@ export function getPublicApplicationAvailability(job: PublicApplicationJob): Pub
     return 'closed';
   }
 
-  if (job.applyMode !== 'committed') {
-    return 'unavailable';
-  }
-
   if (!job.applicationCapacityAvailable) {
     return 'capacity-reached';
   }

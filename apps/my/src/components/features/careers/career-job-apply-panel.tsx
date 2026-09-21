@@ -34,7 +34,7 @@ const UNAVAILABLE_APPLICATION_COPY: Record<
   unavailable: {
     icon: FileXIcon,
     title: 'Applications unavailable',
-    description: 'This role is not accepting committed applications right now.',
+    description: 'This role is not accepting applications right now.',
   },
 };
 
@@ -82,6 +82,15 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
   const { data: applyForm, isLoading: formLoading, error: formError } = useQueryApplyForm(applyFormTarget);
 
   const jobData = useMemo<JobApplicationData | null>(() => {
+    if (job.applyMode === 'standard') {
+      return {
+        applyMode: 'standard',
+        id: job.id,
+        postingId: job.postingId,
+        orgId: job.orgId,
+      };
+    }
+
     if (
       job.jobId === null ||
       job.chainId === null ||
@@ -93,6 +102,7 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
     }
 
     return {
+      applyMode: 'committed',
       id: job.id,
       postingId: job.postingId,
       chainId: job.chainId,
@@ -113,12 +123,12 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
     return <EmptyState icon={copy.icon} title={copy.title} description={copy.description} className="min-h-80" />;
   }
 
-  if (!jobData || job.responseDeadlineDays === null) {
+  if (!jobData) {
     return (
       <EmptyState
         icon={FileXIcon}
         title="Applications unavailable"
-        description="This role is not accepting committed applications right now."
+        description="This role is not accepting applications right now."
         className="min-h-80"
       />
     );

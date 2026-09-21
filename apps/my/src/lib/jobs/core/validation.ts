@@ -4,7 +4,7 @@ import { ResultAsync } from 'neverthrow';
 import { type Address, isAddressEqual } from 'viem';
 
 export function validateApplicationData(
-  jobData: JobApplicationData,
+  jobData: Extract<JobApplicationData, { applyMode: 'committed' }>,
   applicantAddress: Address,
   stakeAmount: bigint,
 ): ResultAsync<void, ValidationError> {
