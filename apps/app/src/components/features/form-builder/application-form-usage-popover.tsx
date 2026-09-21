@@ -47,7 +47,7 @@ function JobUsageLink({
   if (job.status === 'draft') {
     return (
       <Link
-        to="/org/$orgId/jobs/$jobId/application-form"
+        to="/org/$orgId/jobs/$jobId/posting"
         params={{ orgId, jobId: job.id }}
         className={USAGE_LINK_CLASS_NAME}
         onClick={onNavigate}

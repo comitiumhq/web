@@ -72,48 +72,48 @@ export function validateForPublish(
   const errors: PublishError[] = [];
 
   if (!values.category) {
-    errors.push({ label: 'Category', tab: 'details' });
+    errors.push({ label: 'Category', tab: 'settings' });
   }
 
   if (!values.departmentId) {
-    errors.push({ label: 'Department', tab: 'details' });
+    errors.push({ label: 'Department', tab: 'settings' });
   }
 
   if (!values.locationId) {
-    errors.push({ label: 'Location', tab: 'details' });
+    errors.push({ label: 'Location', tab: 'settings' });
   }
 
   if (!values.employmentType) {
-    errors.push({ label: 'Employment type', tab: 'details' });
+    errors.push({ label: 'Employment type', tab: 'settings' });
   }
 
   if (!values.compensationCurrency) {
-    errors.push({ label: 'Currency', tab: 'details' });
+    errors.push({ label: 'Currency', tab: 'settings' });
   }
 
   if (!values.compensationPeriod) {
-    errors.push({ label: 'Pay period', tab: 'details' });
+    errors.push({ label: 'Pay period', tab: 'settings' });
   }
 
   const hasMin = values.compensationMin != null && values.compensationMin > 0;
   const hasMax = values.compensationMax != null && values.compensationMax > 0;
 
   if (!hasMin || !hasMax) {
-    errors.push({ label: 'Compensation', tab: 'details' });
+    errors.push({ label: 'Compensation', tab: 'settings' });
   } else if (
     isDefined(values.compensationMin) &&
     isDefined(values.compensationMax) &&
     values.compensationMin > values.compensationMax
   ) {
-    errors.push({ label: 'Compensation (min must be less than max)', tab: 'details' });
+    errors.push({ label: 'Compensation (min must be less than max)', tab: 'settings' });
   }
 
   if (!descriptionHasContent(description)) {
-    errors.push({ label: 'Description', tab: 'description' });
+    errors.push({ label: 'Description', tab: 'posting' });
   }
 
   if (!formId) {
-    errors.push({ label: 'Application form', tab: 'application-form' });
+    errors.push({ label: 'Application form', tab: 'posting' });
   }
 
   const hasIncompleteCriteria = criteria.some((c) => !c.title.trim() || !c.prompt.trim());

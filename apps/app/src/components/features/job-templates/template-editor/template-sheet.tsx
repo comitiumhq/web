@@ -8,13 +8,11 @@ import { Spinner } from '@comitium/ui/spinner';
 import { FileXIcon } from '@phosphor-icons/react';
 import { useCallback, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import { HiringTeamTab } from '@/components/features/hiring-team-editor/hiring-team-tab';
 import { CriteriaTab } from '@/components/features/job-criteria';
-import { ApplicationFormPicker } from '@/components/features/job-draft/application-form-picker';
-import { DraftDescriptionTab } from '@/components/features/job-draft/draft-description-tab';
-import { DraftDetailsTab } from '@/components/features/job-draft/draft-details-tab';
+import { JobSettingsEditor } from '@/components/features/job-draft/job-settings-editor';
 import { DraftEditorSkeleton } from '@/components/features/job-draft/states';
 import { TemplateInterviewPlan } from '@/components/features/job-interview-plan/template-interview-plan';
+import { PostingEditor } from '@/components/features/job-posting/posting-editor';
 
 import { TemplateHeader } from './header';
 import { InterviewPlanTab } from './interview-plan-tab';
@@ -90,7 +88,7 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
     handleHiringTeamChange,
   } = useTemplateForm(orgId, templateId, { onSaved: onClose, onCreated });
 
-  const [activeSection, setActiveSection] = useState<TemplateSection>('details');
+  const [activeSection, setActiveSection] = useState<TemplateSection>('settings');
   const watchedValues = useWatch({ control: form.control });
 
   if (!isNew && isLoading) {
@@ -147,20 +145,25 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
           <div className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 lg:px-8">
             <SectionHeader title={getTemplateSection(activeSection).title} description={null} />
 
-            {activeSection === 'details' && (
+            {activeSection === 'settings' && (
               <Form {...form}>
-                <DraftDetailsTab orgId={orgId} form={form} showPublishRequiredMarkers={false} />
+                <JobSettingsEditor
+                  orgId={orgId}
+                  form={form}
+                  hiringTeam={hiringTeam}
+                  onChangeHiringTeam={handleHiringTeamChange}
+                  showPublishRequiredMarkers={false}
+                />
               </Form>
             )}
-            {activeSection === 'description' && (
-              <DraftDescriptionTab content={description} onChange={handleDescriptionChange} />
-            )}
-            {activeSection === 'application-form' && (
-              <ApplicationFormPicker
+            {activeSection === 'posting' && (
+              <PostingEditor
                 orgId={orgId}
                 owner={{ kind: 'job_template' }}
+                description={description}
+                onDescriptionChange={handleDescriptionChange}
                 formId={formId}
-                onChange={handleFormIdChange}
+                onFormIdChange={handleFormIdChange}
               />
             )}
             {activeSection === 'criteria' && (
@@ -181,9 +184,6 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
                   onSelectTemplate={handleInterviewPlanChange}
                 />
               ))}
-            {activeSection === 'hiring-team' && (
-              <HiringTeamTab orgId={orgId} hiringTeam={hiringTeam} onChangeHiringTeam={handleHiringTeamChange} />
-            )}
           </div>
         </div>
       </div>

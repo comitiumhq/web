@@ -30,7 +30,7 @@ export function useSaveDraft(orgId: string, jobId: string) {
     onError: (error) => {
       const isVersionConflict = getErrorStatus(error) === 409;
       const message = isVersionConflict
-        ? "We couldn't save this draft. Reload the page and try again."
+        ? "We couldn't save this Job. Reload the page and try again."
         : getErrorMessage(error);
 
       toast.error(message);

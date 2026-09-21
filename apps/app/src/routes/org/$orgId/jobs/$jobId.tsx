@@ -121,6 +121,21 @@ function JobRouteShell({ org, jobId, pathname }: JobRouteShellProps) {
     );
   }
 
+  if (pathname.endsWith('/settings') && job.postingApplyMode !== 'standard') {
+    return (
+      <Navigate
+        to="/org/$orgId/jobs/$jobId/pipeline"
+        params={{ orgId: org.id, jobId }}
+        search={{ tab: 'active' }}
+        replace
+      />
+    );
+  }
+
+  if (pathname.endsWith('/hiring-team') && job.postingApplyMode === 'standard') {
+    return <Navigate to="/org/$orgId/jobs/$jobId/settings" params={{ orgId: org.id, jobId }} replace />;
+  }
+
   return (
     <JobDetailRouteOrgProvider org={org}>
       <JobDetailLayout orgId={org.id} jobId={jobId} job={job}>

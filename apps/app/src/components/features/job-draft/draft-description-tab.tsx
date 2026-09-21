@@ -6,9 +6,14 @@ import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
 interface DraftDescriptionTabProps {
   content: TipTapDoc | null;
   onChange: (content: TipTapDoc) => void;
+  minHeightClass?: string;
 }
 
-export const DraftDescriptionTab = memo(function DraftDescriptionTab({ content, onChange }: DraftDescriptionTabProps) {
+export const DraftDescriptionTab = memo(function DraftDescriptionTab({
+  content,
+  onChange,
+  minHeightClass = 'min-h-100',
+}: DraftDescriptionTabProps) {
   return (
     <RichTextEditor
       content={content}
@@ -16,7 +21,7 @@ export const DraftDescriptionTab = memo(function DraftDescriptionTab({ content, 
       toolbar={<DescriptionToolbar />}
       placeholder=""
       debounceMs={0}
-      minHeightClass="min-h-100"
+      minHeightClass={minHeightClass}
     />
   );
 });

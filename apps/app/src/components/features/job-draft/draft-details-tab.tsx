@@ -5,7 +5,7 @@ import {
   EMPLOYMENT_TYPES,
   SALARY_PERIODS,
 } from '@comitium/schemas/job-enums';
-import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Combobox } from '@comitium/ui/combobox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
@@ -23,6 +23,7 @@ interface DraftDetailsTabProps {
   form: UseFormReturn<DraftFormData>;
   showPublishRequiredMarkers?: boolean;
   editableStructure?: boolean;
+  readOnly?: boolean;
 }
 
 export function DraftDetailsTab({
@@ -30,6 +31,7 @@ export function DraftDetailsTab({
   form,
   showPublishRequiredMarkers = true,
   editableStructure = true,
+  readOnly = false,
 }: DraftDetailsTabProps) {
   const { control, setValue } = form;
   const { data: departmentsData } = useQueryOrgDepartments(orgId);
@@ -89,8 +91,12 @@ export function DraftDetailsTab({
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <fieldset disabled={readOnly} className="flex flex-col gap-6">
       <Card>
+        <CardHeader>
+          <CardTitle className="text-heading-16">Basic information</CardTitle>
+          <CardDescription>Define how this Job is organized and presented across the hiring workspace.</CardDescription>
+        </CardHeader>
         <CardContent className="flex flex-col gap-5">
           <FormField
             control={control}
@@ -108,59 +114,59 @@ export function DraftDetailsTab({
             )}
           />
 
-          {editableStructure && (
-            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-              <FormField
-                control={control}
-                name="departmentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="gap-1">
-                      Team <RequiredMarker show={showPublishRequiredMarkers} />
-                    </FormLabel>
-                    <FormControl>
-                      <Combobox
-                        ariaLabel="Team"
-                        options={departmentOptions}
-                        value={field.value ?? null}
-                        clearable={false}
-                        onValueChange={(nextValue) => nextValue && handleDepartmentChange(nextValue)}
-                        placeholder="Select team"
-                        searchPlaceholder="Search teams…"
-                        emptyMessage="No teams found."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+            <FormField
+              control={control}
+              name="departmentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="gap-1">
+                    Team <RequiredMarker show={showPublishRequiredMarkers} />
+                  </FormLabel>
+                  <FormControl>
+                    <Combobox
+                      ariaLabel="Team"
+                      options={departmentOptions}
+                      value={field.value ?? null}
+                      clearable={false}
+                      onValueChange={(nextValue) => nextValue && handleDepartmentChange(nextValue)}
+                      placeholder="Select team"
+                      searchPlaceholder="Search teams…"
+                      emptyMessage="No teams found."
+                      disabled={!editableStructure || readOnly}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={control}
-                name="locationId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="gap-1">
-                      Location <RequiredMarker show={showPublishRequiredMarkers} />
-                    </FormLabel>
-                    <FormControl>
-                      <Combobox
-                        ariaLabel="Location"
-                        options={locationOptions}
-                        value={field.value ?? null}
-                        clearable={false}
-                        onValueChange={(nextValue) => nextValue && handleLocationChange(nextValue)}
-                        placeholder="Select location"
-                        searchPlaceholder="Search locations…"
-                        emptyMessage="No locations found."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          )}
+            <FormField
+              control={control}
+              name="locationId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="gap-1">
+                    Location <RequiredMarker show={showPublishRequiredMarkers} />
+                  </FormLabel>
+                  <FormControl>
+                    <Combobox
+                      ariaLabel="Location"
+                      options={locationOptions}
+                      value={field.value ?? null}
+                      clearable={false}
+                      onValueChange={(nextValue) => nextValue && handleLocationChange(nextValue)}
+                      placeholder="Select location"
+                      searchPlaceholder="Search locations…"
+                      emptyMessage="No locations found."
+                      disabled={!editableStructure || readOnly}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
             <SelectField
@@ -208,6 +214,7 @@ export function DraftDetailsTab({
           <CardTitle className="gap-1">
             Compensation <RequiredMarker show={showPublishRequiredMarkers} />
           </CardTitle>
+          <CardDescription>Set the candidate-facing compensation range for this role.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-start gap-3">
@@ -250,7 +257,7 @@ export function DraftDetailsTab({
           </div>
         </CardContent>
       </Card>
-    </div>
+    </fieldset>
   );
 }
 

@@ -1,9 +1,7 @@
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { PageContainer } from '@comitium/ui/page-container';
-import { SectionHeader } from '@comitium/ui/section-header';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
 import { ArrowSquareOutIcon, CopyIcon, PencilIcon } from '@phosphor-icons/react';
@@ -56,7 +54,8 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   if (!posting || !job || postingQuery.isError || summaryQuery.isError) {
     return (
       <PageContainer size="editor" className="py-8 lg:px-10">
-        <SectionHeader title="Posting" description="Posting settings could not be loaded." />
+        <h1 className="text-heading-20">Posting</h1>
+        <p className="mt-1 text-copy-14 text-muted-foreground">Posting settings could not be loaded.</p>
       </PageContainer>
     );
   }
@@ -118,26 +117,20 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   return (
     <div className="h-full overflow-y-auto">
       <PageContainer size="editor" className="space-y-6 py-8 lg:px-10">
-        <SectionHeader
-          title="Posting"
-          description="Control where candidates can find this role and how many applications it accepts."
-        />
-
-        <Card>
-          <CardHeader className="flex-row items-start justify-between gap-4">
-            <div>
-              <CardTitle className="text-heading-16">Visibility</CardTitle>
-              <CardDescription className="mt-1">
-                {isPublished
-                  ? 'Candidates can find and apply to this role.'
-                  : 'Candidates cannot find or apply to this role.'}
-              </CardDescription>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-heading-20">Posting</h1>
+              <Badge variant={isPublished ? 'success' : 'secondary'}>{isPublished ? 'Published' : 'Unpublished'}</Badge>
             </div>
-            <Badge variant={isPublished ? 'success' : 'secondary'}>{isPublished ? 'Published' : 'Unpublished'}</Badge>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
+            <p className="text-copy-14 text-muted-foreground">
+              Manage the page candidates see and when it accepts applications.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap justify-end gap-2">
             {isPublished && job.canonicalUrl && (
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" size="sm">
                 <a href={job.canonicalUrl} target="_blank" rel="noopener noreferrer">
                   <ArrowSquareOutIcon data-icon="inline-start" />
                   View posting
@@ -146,51 +139,49 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
             )}
 
             {isPublished && job.canonicalUrl && (
-              <Button variant="outline" onClick={handleCopyPostingLink}>
+              <Button variant="outline" size="sm" onClick={handleCopyPostingLink}>
                 <CopyIcon data-icon="inline-start" />
                 Copy link
               </Button>
             )}
 
             {isPublished && canUnpublishPosting ? (
-              <Button variant="outline" onClick={() => setUnpublishOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setUnpublishOpen(true)}>
                 Unpublish
               </Button>
             ) : null}
 
             {!isPublished && canPublishPosting ? (
-              <Button onClick={() => setPublishOpen(true)} disabled={!canOpenPublishDialog}>
+              <Button size="sm" onClick={() => setPublishOpen(true)} disabled={!canOpenPublishDialog}>
                 Publish
               </Button>
             ) : null}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-heading-16">Public content</CardTitle>
-            <CardDescription>The description and Application Form candidates see.</CardDescription>
-          </CardHeader>
-          <CardContent className="divide-y divide-separator">
-            <div className="flex items-center justify-between gap-4 py-4 first:pt-0">
+        <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
+          <section className="border-b border-separator p-6">
+            <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-label-14">Description</p>
-                <p className="truncate text-copy-13 text-muted-foreground">
+                <h2 className="text-heading-16">Description</h2>
+                <p className="mt-1 truncate text-copy-13 text-muted-foreground">
                   {posting.descriptionMarkdown ? 'Ready for candidates' : 'No description'}
                 </p>
               </div>
               {canEdit && (
                 <Button variant="outline" size="sm" onClick={() => setDescriptionDialogOpen(true)}>
                   <PencilIcon data-icon="inline-start" />
-                  Edit
+                  Edit description
                 </Button>
               )}
             </div>
+          </section>
 
-            <div className="flex items-center justify-between gap-4 py-4 last:pb-0">
+          <section className="border-b border-separator p-6">
+            <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-label-14">Application Form</p>
-                <p className="truncate text-copy-13 text-muted-foreground">
+                <h2 className="text-heading-16">Application form</h2>
+                <p className="mt-1 truncate text-copy-13 text-muted-foreground">
                   {posting.form?.title ?? 'No form selected'}
                 </p>
               </div>
@@ -199,35 +190,35 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
                 {canEdit && (
                   <Button variant="outline" size="sm" onClick={() => setApplicationFormDialogOpen(true)}>
                     <PencilIcon data-icon="inline-start" />
-                    Edit
+                    Change form
                   </Button>
                 )}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-heading-16">Application capacity</CardTitle>
-            <CardDescription>
-              {applicationCountLabel(posting.completedApplicationCount, posting.applicationCapacity)}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <ApplicationCapacityControl
-              value={applicationCapacity}
-              onChange={setApplicationCapacity}
-              disabled={!canEdit || updatePosting.isPending}
-            />
-            {canEdit && (
-              <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
-                {updatePosting.isPending && <Spinner data-icon="inline-start" />}
-                {updatePosting.isPending ? 'Saving...' : 'Save'}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+          <section className="p-6">
+            <div className="mb-5 space-y-1">
+              <h2 className="text-heading-16">Application capacity</h2>
+              <p className="text-copy-13 text-muted-foreground">
+                {applicationCountLabel(posting.completedApplicationCount, posting.applicationCapacity)}
+              </p>
+            </div>
+            <div className="space-y-5">
+              <ApplicationCapacityControl
+                value={applicationCapacity}
+                onChange={setApplicationCapacity}
+                disabled={!canEdit || updatePosting.isPending}
+              />
+              {canEdit && capacityChanged && (
+                <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
+                  {updatePosting.isPending && <Spinner data-icon="inline-start" />}
+                  {updatePosting.isPending ? 'Saving...' : 'Save capacity'}
+                </Button>
+              )}
+            </div>
+          </section>
+        </div>
       </PageContainer>
 
       <ConfirmDialog

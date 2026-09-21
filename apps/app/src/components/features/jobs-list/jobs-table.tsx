@@ -52,7 +52,7 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
         return;
       }
 
-      navigate({ to: '/org/$orgId/jobs/$jobId/details', params: { orgId, jobId: item.id } });
+      navigate({ to: '/org/$orgId/jobs/$jobId/settings', params: { orgId, jobId: item.id } });
     },
     [navigate, orgId],
   );

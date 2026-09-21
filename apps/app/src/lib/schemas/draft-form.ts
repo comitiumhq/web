@@ -25,6 +25,7 @@ export const DraftFormSchema = z.object({
   compensationPeriod: z.enum(SALARY_PERIOD_VALUES).optional(),
   compensationMin: z.number().int().min(1, 'Must be at least 1').optional(),
   compensationMax: z.number().int().min(1, 'Must be at least 1').optional(),
+  applicationCapacity: z.number().int().min(1).max(1000).nullable().optional(),
 });
 
 export type DraftFormData = z.infer<typeof DraftFormSchema>;

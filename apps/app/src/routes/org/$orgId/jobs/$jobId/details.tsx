@@ -1,23 +1,12 @@
-import { Form } from '@comitium/ui/form';
-import { createFileRoute } from '@tanstack/react-router';
-import { DraftDetailsTab } from '@/components/features/job-draft/draft-details-tab';
-import { useDraftFormContext } from '@/components/features/job-draft/draft-form-context';
-import { DraftSectionFrame } from '@/components/features/job-draft/draft-section-frame';
+import { createFileRoute, Navigate } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/org/$orgId/jobs/$jobId/details')({
   ssr: false,
-  component: DraftDetailsPage,
+  component: LegacyDetailsRoute,
 });
 
-function DraftDetailsPage() {
-  const { orgId, form, draft } = useDraftFormContext();
-  const editableStructure = !draft?.departmentId || !draft?.locationId;
+function LegacyDetailsRoute() {
+  const { orgId, jobId } = Route.useParams();
 
-  return (
-    <DraftSectionFrame tab="details">
-      <Form {...form}>
-        <DraftDetailsTab orgId={orgId} form={form} editableStructure={editableStructure} />
-      </Form>
-    </DraftSectionFrame>
-  );
+  return <Navigate to="/org/$orgId/jobs/$jobId/settings" params={{ orgId, jobId }} replace />;
 }

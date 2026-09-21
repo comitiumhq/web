@@ -31,6 +31,7 @@ export function draftToEditorState(draft: JobDraft): DraftEditorState {
         (draft.compensation?.tiers[0]?.period as DraftFormData['compensationPeriod']) ?? DEFAULT_COMPENSATION_PERIOD,
       compensationMin: draft.compensation?.tiers[0]?.base_min ?? undefined,
       compensationMax: draft.compensation?.tiers[0]?.base_max ?? undefined,
+      applicationCapacity: draft.applicationCapacity,
     },
     description: (draft.description as TipTapDoc) ?? null,
     formId: draft.formId ?? null,
@@ -49,25 +50,13 @@ export function prepareDraftSave(state: DraftEditorState, expectedVersion: numbe
     },
     criteria: prepareEvaluationCriteria(state.criteria),
   };
-  const departmentUpdate = normalized.values.departmentId ? { departmentId: normalized.values.departmentId } : {};
-  const locationUpdate = normalized.values.locationId
-    ? {
-        locationId: normalized.values.locationId,
-        locationType: normalized.values.locationType ?? null,
-      }
-    : {};
 
   const data: UpdateDraftData = {
-    expectedVersion,
-    title: normalized.values.title,
-    ...departmentUpdate,
-    ...locationUpdate,
-    employmentType: normalized.values.employmentType ?? null,
-    category: normalized.values.category ?? null,
-    compensation: buildCompensation(normalized.values),
+    ...prepareJobSettingsUpdate(normalized.values, expectedVersion),
     description: normalized.description,
     descriptionMarkdown,
     formId: normalized.formId,
+    applicationCapacity: normalized.values.applicationCapacity ?? null,
     criteria: normalized.criteria.length > 0 ? normalized.criteria : null,
     interviewPlanId: normalized.interviewPlanId,
     hiringTeam: normalized.hiringTeam.map((member) => ({
@@ -77,4 +66,25 @@ export function prepareDraftSave(state: DraftEditorState, expectedVersion: numbe
   };
 
   return { state: normalized, data };
+}
+
+export function prepareJobSettingsUpdate(values: DraftFormData, expectedVersion: number): UpdateDraftData {
+  const normalizedValues = { ...values, title: values.title.trim() };
+  const departmentUpdate = normalizedValues.departmentId ? { departmentId: normalizedValues.departmentId } : {};
+  const locationUpdate = normalizedValues.locationId
+    ? {
+        locationId: normalizedValues.locationId,
+        locationType: normalizedValues.locationType ?? null,
+      }
+    : {};
+
+  return {
+    expectedVersion,
+    title: normalizedValues.title,
+    ...departmentUpdate,
+    ...locationUpdate,
+    employmentType: normalizedValues.employmentType ?? null,
+    category: normalizedValues.category ?? null,
+    compensation: buildCompensation(normalizedValues),
+  };
 }

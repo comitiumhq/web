@@ -26,18 +26,19 @@ export function DraftSectionSkeleton({ tab }: DraftSectionSkeletonProps) {
 
 function getSkeletonContent(tab: DraftTab) {
   switch (tab) {
-    case 'details':
-      return <DetailsSkeleton />;
-    case 'description':
-      return <DescriptionSkeleton />;
-    case 'application-form':
-      return <ApplicationFormListSkeleton />;
-    case 'criteria':
-      return <CriteriaSkeleton />;
+    case 'settings':
+      return (
+        <div className="space-y-6">
+          <DetailsSkeleton />
+          <HiringTeamSkeleton />
+        </div>
+      );
+    case 'posting':
+      return <PostingSkeleton />;
     case 'interview-plan':
       return <InterviewPlanSkeleton />;
-    case 'hiring-team':
-      return <HiringTeamSkeleton />;
+    case 'criteria':
+      return <CriteriaSkeleton />;
   }
 }
 
@@ -61,7 +62,7 @@ function SkeletonField({ width = 'w-24' }: { width?: string }) {
   );
 }
 
-function DetailsSkeleton() {
+export function DetailsSkeleton() {
   return (
     <div className="flex flex-col gap-6">
       <SkeletonSurface className="flex flex-col gap-5">
@@ -123,6 +124,28 @@ function DescriptionSkeleton() {
         <Skeleton className="h-4 w-full rounded-md" />
         <Skeleton className="h-4 w-5/6 rounded-md" />
         <Skeleton className="h-4 w-1/2 rounded-md" />
+      </div>
+    </div>
+  );
+}
+
+function PostingSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
+      <div className="border-b border-separator p-6">
+        <Skeleton className="mb-2 h-5 w-28 rounded-md" />
+        <Skeleton className="mb-5 h-4 w-80 max-w-full rounded-md" />
+        <DescriptionSkeleton />
+      </div>
+      <div className="border-b border-separator p-6">
+        <Skeleton className="mb-2 h-5 w-36 rounded-md" />
+        <Skeleton className="mb-5 h-4 w-96 max-w-full rounded-md" />
+        <ApplicationFormListSkeleton />
+      </div>
+      <div className="space-y-3 p-6">
+        <Skeleton className="h-5 w-40 rounded-md" />
+        <Skeleton className="h-4 w-72 max-w-full rounded-md" />
+        <Skeleton className="h-9 w-full rounded-xl" />
       </div>
     </div>
   );

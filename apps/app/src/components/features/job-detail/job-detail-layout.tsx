@@ -2,7 +2,7 @@ import type { JobSummary } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { Skeleton } from '@comitium/ui/skeleton';
 import type { Icon } from '@phosphor-icons/react';
-import { ArrowLeftIcon, GlobeSimpleIcon, KanbanIcon } from '@phosphor-icons/react';
+import { ArrowLeftIcon, GearSixIcon, GlobeSimpleIcon, KanbanIcon } from '@phosphor-icons/react';
 import { Link, useLocation } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { DRAFT_SECTIONS } from '@/components/features/job-draft/sections';
@@ -82,7 +82,7 @@ export function JobDetailLayout({
   );
 }
 
-const JOB_NAV_SKELETON_KEYS = ['nav-1', 'nav-2', 'nav-3', 'nav-4', 'nav-5', 'nav-6'];
+const JOB_NAV_SKELETON_KEYS = ['nav-1', 'nav-2', 'nav-3', 'nav-4'];
 
 function JobNavSkeleton({ orientation }: { orientation: 'vertical' | 'horizontal' }) {
   const containerClassName =
@@ -148,6 +148,8 @@ interface JobNavProps {
 type JobNavRoute =
   | '/org/$orgId/jobs/$jobId/pipeline'
   | '/org/$orgId/jobs/$jobId/posting'
+  | '/org/$orgId/jobs/$jobId/settings'
+  | '/org/$orgId/jobs/$jobId/hiring-team'
   | (typeof DRAFT_SECTIONS)[number]['route'];
 
 interface JobNavItem {
@@ -187,20 +189,7 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
     }));
   }
 
-  const postingItems: JobNavItem[] =
-    job?.postingApplyMode === 'standard'
-      ? [
-          {
-            label: 'Posting',
-            icon: GlobeSimpleIcon,
-            to: '/org/$orgId/jobs/$jobId/posting',
-            isActive: (pathname) => pathname.endsWith('/posting'),
-          },
-        ]
-      : [];
-
-  return [
-    ...postingItems,
+  const commonItems: JobNavItem[] = [
     {
       label: 'Pipeline',
       icon: KanbanIcon,
@@ -208,6 +197,34 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
       search: { tab: 'active' },
       isActive: (pathname) => pathname.includes('/pipeline'),
     },
+  ];
+
+  if (job?.postingApplyMode === 'standard') {
+    return [
+      ...commonItems,
+      {
+        label: 'Settings',
+        icon: GearSixIcon,
+        to: '/org/$orgId/jobs/$jobId/settings',
+        isActive: (pathname) => pathname.endsWith('/settings'),
+      },
+      {
+        label: 'Interview plan',
+        icon: InterviewPlanIcon,
+        to: '/org/$orgId/jobs/$jobId/interview-plan',
+        isActive: (pathname) => pathname.includes('/interview-plan'),
+      },
+      {
+        label: 'Posting',
+        icon: GlobeSimpleIcon,
+        to: '/org/$orgId/jobs/$jobId/posting',
+        isActive: (pathname) => pathname.endsWith('/posting'),
+      },
+    ];
+  }
+
+  return [
+    ...commonItems,
     {
       label: 'Interview plan',
       icon: InterviewPlanIcon,

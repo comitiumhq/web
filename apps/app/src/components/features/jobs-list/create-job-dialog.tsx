@@ -130,7 +130,7 @@ export function CreateJobDialog({ orgId, open, onOpenChange }: CreateJobDialogPr
         onSuccess: (result) => {
           onOpenChange(false);
           resetState();
-          navigate({ to: '/org/$orgId/jobs/$jobId/details', params: { orgId, jobId: result.jobId } });
+          navigate({ to: '/org/$orgId/jobs/$jobId/settings', params: { orgId, jobId: result.jobId } });
         },
       },
     );

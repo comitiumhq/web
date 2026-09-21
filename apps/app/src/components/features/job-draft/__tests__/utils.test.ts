@@ -72,6 +72,7 @@ describe('job draft utils', () => {
       description,
       descriptionMarkdown: 'Build the product.',
       formId: '33333333-3333-4333-8333-333333333333',
+      applicationCapacity: null,
       criteria: [
         {
           id: '44444444-4444-4444-8444-444444444444',
@@ -121,6 +122,7 @@ describe('job draft utils', () => {
       compensation: null,
       description: null,
       formId: null,
+      applicationCapacity: null,
       criteria: null,
       interviewPlanId: null,
       hiringTeam: [],
@@ -154,7 +156,7 @@ describe('job draft utils', () => {
 
     expect(validateForPublish(baseValues, description, null, [])).toContainEqual({
       label: 'Application form',
-      tab: 'application-form',
+      tab: 'posting',
     });
     expect(validateForPublish(baseValues, description, '33333333-3333-4333-8333-333333333333', [])).toEqual([]);
   });

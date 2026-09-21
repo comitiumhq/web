@@ -180,7 +180,7 @@ function JobAccessLink({ orgId, assignment, title }: JobAccessLinkProps) {
   return (
     <Button variant="ghost" size="icon-sm" asChild>
       <Link
-        to="/org/$orgId/jobs/$jobId/details"
+        to="/org/$orgId/jobs/$jobId/settings"
         params={{ orgId, jobId: assignment.jobId }}
         aria-label={`Open ${title}`}
       >

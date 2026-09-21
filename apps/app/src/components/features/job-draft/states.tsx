@@ -16,7 +16,7 @@ export function DraftEditorSkeleton() {
           <Skeleton className="h-5 w-12 mt-1.5 rounded-full" />
         </div>
         <nav className="flex flex-1 flex-col gap-0.5 px-2 py-3">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-3 py-2.5">
               <Skeleton className="size-7 shrink-0 rounded-full" />
               <Skeleton className="h-4 flex-1" />

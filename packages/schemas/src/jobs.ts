@@ -195,6 +195,7 @@ export const jobDraftSchema = z.object({
   category: z.string().nullable(),
   compensation: compensationConfigSchema.nullable(),
   formId: uuidSchema.nullable(),
+  applicationCapacity: z.number().int().min(1).max(1000).nullable(),
   criteria: z.array(evaluationCriterionSchema).nullable(),
   interviewPlanId: z.string().nullable(),
   hiringTeam: z.array(hiringTeamEntrySchema).nullable(),
@@ -299,6 +300,7 @@ export type UpdateDraftData = {
   category?: string | null;
   compensation?: CompensationConfig | null;
   formId?: string | null;
+  applicationCapacity?: number | null;
   criteria?: EvaluationCriterion[] | null;
   interviewPlanId?: string | null;
   hiringTeam?: { userId: string; role: HiringTeamRole }[];

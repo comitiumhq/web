@@ -110,9 +110,20 @@ describe('JobPostingPage', () => {
     mocks.job = { ...mocks.job, status: 'closed' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
-    await expect.element(screen.getByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
-    await expect.element(screen.getByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Edit description' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Change form' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Save capacity' })).not.toBeInTheDocument();
     await expect.element(screen.getByLabelText('Maximum applications')).toBeDisabled();
     await expect.element(screen.getByRole('button', { name: 'Publish' })).toBeDisabled();
+  });
+
+  it('shows the capacity save action only after the value changes', async () => {
+    mocks.posting = { ...mocks.posting, status: 'published' };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await expect.element(screen.getByRole('button', { name: 'Save capacity' })).not.toBeInTheDocument();
+    await screen.getByLabelText('Maximum applications').fill('30');
+
+    await expect.element(screen.getByRole('button', { name: 'Save capacity' })).toBeEnabled();
   });
 });

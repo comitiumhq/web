@@ -27,7 +27,7 @@ export function useReopenJobAsDraft() {
 
       toast.success('Job reopened as draft');
       await navigate({
-        to: '/org/$orgId/jobs/$jobId/details',
+        to: '/org/$orgId/jobs/$jobId/settings',
         params: { orgId: params.orgId, jobId: params.jobId },
       });
     },

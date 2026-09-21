@@ -1,55 +1,43 @@
 import type { Icon } from '@phosphor-icons/react';
-import { BriefcaseIcon, FileTextIcon } from '@phosphor-icons/react';
-import {
-  ApplicationFormIcon,
-  EvaluationCriteriaIcon,
-  HiringTeamIcon,
-  InterviewPlanIcon,
-} from '@/lib/constants/domain-icons';
+import { GearSixIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
+import { EvaluationCriteriaIcon, InterviewPlanIcon } from '@/lib/constants/domain-icons';
 
 interface DraftSectionDefinition {
   id: string;
   label: string;
+  description: string;
   icon: Icon;
   route: string;
 }
 
 export const DRAFT_SECTIONS = [
   {
-    id: 'details',
-    label: 'Details',
-    icon: BriefcaseIcon,
-    route: '/org/$orgId/jobs/$jobId/details',
-  },
-  {
-    id: 'description',
-    label: 'Description',
-    icon: FileTextIcon,
-    route: '/org/$orgId/jobs/$jobId/description',
-  },
-  {
-    id: 'application-form',
-    label: 'Application form',
-    icon: ApplicationFormIcon,
-    route: '/org/$orgId/jobs/$jobId/application-form',
-  },
-  {
-    id: 'criteria',
-    label: 'Evaluation criteria',
-    icon: EvaluationCriteriaIcon,
-    route: '/org/$orgId/jobs/$jobId/criteria',
+    id: 'settings',
+    label: 'Settings',
+    description: 'Configure the role and the people responsible for hiring.',
+    icon: GearSixIcon,
+    route: '/org/$orgId/jobs/$jobId/settings',
   },
   {
     id: 'interview-plan',
     label: 'Interview plan',
+    description: 'Define the interview stages and activities for this Job.',
     icon: InterviewPlanIcon,
     route: '/org/$orgId/jobs/$jobId/interview-plan',
   },
   {
-    id: 'hiring-team',
-    label: 'Hiring team',
-    icon: HiringTeamIcon,
-    route: '/org/$orgId/jobs/$jobId/hiring-team',
+    id: 'posting',
+    label: 'Posting',
+    description: 'Set up the public page, application form, and application limit.',
+    icon: GlobeSimpleIcon,
+    route: '/org/$orgId/jobs/$jobId/posting',
+  },
+  {
+    id: 'criteria',
+    label: 'Evaluation criteria',
+    description: 'Define the criteria used to evaluate candidates consistently.',
+    icon: EvaluationCriteriaIcon,
+    route: '/org/$orgId/jobs/$jobId/criteria',
   },
 ] as const satisfies readonly DraftSectionDefinition[];
 

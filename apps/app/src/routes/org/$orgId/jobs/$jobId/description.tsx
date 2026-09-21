@@ -1,20 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router';
-
-import { DraftDescriptionTab } from '@/components/features/job-draft/draft-description-tab';
-import { useDraftFormContext } from '@/components/features/job-draft/draft-form-context';
-import { DraftSectionFrame } from '@/components/features/job-draft/draft-section-frame';
+import { createFileRoute, Navigate } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/org/$orgId/jobs/$jobId/description')({
   ssr: false,
-  component: DraftDescriptionPage,
+  component: LegacyDescriptionRoute,
 });
 
-function DraftDescriptionPage() {
-  const { description, handleDescriptionChange } = useDraftFormContext();
+function LegacyDescriptionRoute() {
+  const { orgId, jobId } = Route.useParams();
 
-  return (
-    <DraftSectionFrame tab="description">
-      <DraftDescriptionTab content={description} onChange={handleDescriptionChange} />
-    </DraftSectionFrame>
-  );
+  return <Navigate to="/org/$orgId/jobs/$jobId/posting" params={{ orgId, jobId }} replace />;
 }

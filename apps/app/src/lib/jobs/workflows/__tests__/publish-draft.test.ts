@@ -60,6 +60,7 @@ const mockDraft: JobDraft = {
   category: 'engineering',
   compensation: { tiers: [{ currency: 'USD', period: 'year', base_min: 100000, base_max: 150000 }] },
   formId: null,
+  applicationCapacity: null,
   criteria: null,
   interviewPlanId: null,
   hiringTeam: null,
