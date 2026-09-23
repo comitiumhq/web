@@ -1,5 +1,4 @@
 import { Button } from '@comitium/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Form } from '@comitium/ui/form';
 import { PageContainer } from '@comitium/ui/page-container';
 import { SectionHeader } from '@comitium/ui/section-header';
@@ -7,15 +6,19 @@ import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { DraftDetailsTab } from '@/components/features/job-draft/draft-details-tab';
-import { draftToEditorState, prepareJobSettingsUpdate } from '@/components/features/job-draft/draft-editor-state';
 import { DetailsSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
-import { useSaveDraft } from '@/components/features/job-draft/use-save-draft';
 import { JobHiringTeam } from '@/components/features/job-hiring-team';
-import { useQueryDraft } from '@/hooks/queries/use-query-drafts';
+import { JobBasicSettingsCard } from '@/components/features/job-settings/job-basic-settings-card';
+import {
+  jobToSettingsFormValues,
+  prepareJobSettingsUpdate,
+} from '@/components/features/job-settings/job-settings-state';
+import { JobSettingsTabs } from '@/components/features/job-settings/job-settings-tabs';
+import { useSaveJobEditor } from '@/components/features/job-settings/use-save-job-editor';
+import { useQueryJobEditor } from '@/hooks/queries/use-query-job-editor';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
-import { type DraftFormData, DraftFormSchema } from '@/lib/schemas/draft-form';
+import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
 import { Permission } from '@/lib/schemas/org';
 
 interface OpenJobSettingsPageProps {
@@ -24,12 +27,12 @@ interface OpenJobSettingsPageProps {
 }
 
 export function OpenJobSettingsPage({ org, jobId }: OpenJobSettingsPageProps) {
-  const { data: job, isLoading, isError } = useQueryDraft(org.id, jobId);
-  const { mutateAsync: saveSettings, isPending } = useSaveDraft(org.id, jobId);
+  const { data: job, isLoading, isError } = useQueryJobEditor(org.id, jobId);
+  const { mutateAsync: saveSettings, isPending } = useSaveJobEditor(org.id, jobId);
   const { canOnJob } = useJobPermissions(jobId);
   const [version, setVersion] = useState<number | null>(null);
-  const form = useForm<DraftFormData>({
-    resolver: zodResolver(DraftFormSchema),
+  const form = useForm<JobSettingsFormData>({
+    resolver: zodResolver(JobSettingsFormSchema),
     defaultValues: { title: '' },
   });
 
@@ -38,7 +41,7 @@ export function OpenJobSettingsPage({ org, jobId }: OpenJobSettingsPageProps) {
       return;
     }
 
-    form.reset(draftToEditorState(job).values);
+    form.reset(jobToSettingsFormValues(job));
     setVersion(job.version);
   }, [form, job]);
 
@@ -61,7 +64,7 @@ export function OpenJobSettingsPage({ org, jobId }: OpenJobSettingsPageProps) {
   if (isLoading) {
     return (
       <PageContainer size="editor" className="py-8 lg:px-10">
-        <SectionHeader title="Settings" description="Configure the role and the people responsible for hiring." />
+        <SectionHeader title="Settings" description={null} />
         <DetailsSkeleton />
       </PageContainer>
     );
@@ -81,7 +84,7 @@ export function OpenJobSettingsPage({ org, jobId }: OpenJobSettingsPageProps) {
     <div className="h-full overflow-y-auto">
       <PageContainer size="editor" className="space-y-6 py-8 lg:px-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <SectionHeader title="Settings" description="Configure the role and the people responsible for hiring." />
+          <SectionHeader title="Settings" description={null} />
           {canEdit ? (
             <Button onClick={handleSave} disabled={!form.formState.isDirty || isPending}>
               {isPending ? <Spinner data-icon="inline-start" /> : null}
@@ -91,18 +94,18 @@ export function OpenJobSettingsPage({ org, jobId }: OpenJobSettingsPageProps) {
         </div>
 
         <Form {...form}>
-          <DraftDetailsTab orgId={org.id} form={form} editableStructure={false} readOnly={!canEdit} />
+          <JobSettingsTabs
+            basic={
+              <JobBasicSettingsCard
+                orgId={org.id}
+                form={form}
+                editableStructure={false}
+                readOnly={!canEdit}
+              />
+            }
+            hiringTeam={<JobHiringTeam org={org} jobId={jobId} />}
+          />
         </Form>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-heading-16">Hiring team</CardTitle>
-            <CardDescription>Choose the people responsible for this Job and their hiring role.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <JobHiringTeam org={org} jobId={jobId} />
-          </CardContent>
-        </Card>
       </PageContainer>
     </div>
   );

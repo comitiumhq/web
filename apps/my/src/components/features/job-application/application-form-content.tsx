@@ -18,7 +18,6 @@ interface ApplicationFormContentProps {
   controller: ApplicationFormController;
   isPending: boolean;
   jobTitle: string;
-  notice?: ReactNode;
   onSubmit: (data: Record<string, unknown>) => void;
   pendingLabel: string;
   policy: CareerJob['recruitingPrivacy'];
@@ -34,7 +33,6 @@ export function ApplicationFormContent({
   controller,
   isPending,
   jobTitle,
-  notice,
   onSubmit,
   pendingLabel,
   policy,
@@ -116,8 +114,6 @@ export function ApplicationFormContent({
               </AlertDescription>
             </Alert>
           )}
-
-          {notice}
 
           <FormRenderer form={applyForm} control={form.control} variant="application" />
 

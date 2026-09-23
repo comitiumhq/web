@@ -3,7 +3,7 @@ import { useAccount, useActiveWallet } from '@comitium/auth/use-wallet';
 import type { FeeTier } from '@comitium/chain/job-economics';
 import { useOnchainSettlementObserver } from '@comitium/chain/use-onchain-settlement-observer';
 import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { BACKGROUND_CONFIRMATION_COPY } from '@comitium/ui/action-confirmation';
 import { getCommonErrorMessage } from '@comitium/ui/product-error-messages';
 import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +18,7 @@ import { getErrorMessage } from '@/lib/utils';
 export interface PublishDraftParams {
   orgId: string;
   jobId: string;
-  draft: JobDraft;
+  draft: JobEditor;
   expectedVersion: number;
   stakeUsd: number;
   feeTier: FeeTier;
@@ -94,7 +94,7 @@ export function usePublishDraft() {
       }
 
       if (getErrorStatus(error) === 409) {
-        queryClient.invalidateQueries({ queryKey: qk.jobs.draft(params.orgId, params.jobId) });
+        queryClient.invalidateQueries({ queryKey: qk.jobs.editor(params.orgId, params.jobId) });
         toast.error('Draft was updated by another session — refresh and try again', { id: 'publish-draft' });
 
         return;

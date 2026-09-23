@@ -15,6 +15,7 @@ export const jobTemplateSchema = z.object({
   isConfidential: z.boolean(),
   title: z.string(),
   description: z.unknown().nullable(),
+  descriptionMarkdown: z.string().nullable(),
   departmentId: uuidSchema.nullable(),
   locationId: uuidSchema.nullable(),
   location: z.array(locationEntrySchema).nullable(),
@@ -51,7 +52,8 @@ export const jobTemplatesResponseSchema = paginatedSchema(jobTemplateListItemSch
 
 export const createJobTemplateBodySchema = z.object({
   title: z.string().min(1).max(255),
-  description: z.unknown().optional(),
+  description: z.unknown().nullable().optional(),
+  descriptionMarkdown: z.string().max(50_000).nullable().optional(),
   departmentId: uuidSchema.nullable().optional(),
   locationId: uuidSchema.nullable().optional(),
   employmentType: z.string().optional(),

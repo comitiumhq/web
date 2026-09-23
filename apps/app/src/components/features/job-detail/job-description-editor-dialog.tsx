@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DescriptionToolbar } from '@/components/tiptap-ui/editor-toolbars';
 import { RichTextEditor, type RichTextEditorHandle } from '@/components/tiptap-ui/rich-text-editor';
-import { markdownManager } from '@/lib/tiptap/extensions';
+import { parseJobDescription, serializeJobDescription } from '@/lib/jobs/description';
 
 interface JobDescriptionEditorDialogProps {
   descriptionMarkdown: string | null;
@@ -12,28 +12,6 @@ interface JobDescriptionEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (description: TipTapDoc, descriptionMarkdown: string) => Promise<unknown>;
-}
-
-const EMPTY_DESCRIPTION: TipTapDoc = { type: 'doc', content: [{ type: 'paragraph' }] };
-
-function parseDescription(markdown: string | null): TipTapDoc {
-  if (!markdown) {
-    return EMPTY_DESCRIPTION;
-  }
-
-  try {
-    return markdownManager.parse(markdown) as TipTapDoc;
-  } catch {
-    return EMPTY_DESCRIPTION;
-  }
-}
-
-function serializeDescription(doc: TipTapDoc): string {
-  try {
-    return markdownManager.serialize(doc).trim();
-  } catch {
-    return '';
-  }
 }
 
 export function JobDescriptionEditorDialog({
@@ -46,7 +24,7 @@ export function JobDescriptionEditorDialog({
   const editorRef = useRef<RichTextEditorHandle | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const initialMarkdown = (descriptionMarkdown ?? '').trim();
-  const initialDoc = useMemo(() => parseDescription(descriptionMarkdown), [descriptionMarkdown]);
+  const initialDoc = useMemo(() => parseJobDescription(descriptionMarkdown), [descriptionMarkdown]);
 
   useEffect(() => {
     if (open) {
@@ -56,7 +34,7 @@ export function JobDescriptionEditorDialog({
 
   const handleSubmit = useCallback(async () => {
     const description = editorRef.current?.getJSON();
-    const nextMarkdown = description ? serializeDescription(description) : '';
+    const nextMarkdown = serializeJobDescription(description ?? null);
 
     if (isPending || !description || !nextMarkdown || nextMarkdown === initialMarkdown) {
       onOpenChange(false);

@@ -1,4 +1,4 @@
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { Badge } from '@comitium/ui/badge';
 import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { EmptyState } from '@comitium/ui/empty-state';
@@ -19,7 +19,7 @@ import {
 
 interface DraftPreviewDialogProps {
   orgId: string;
-  draft: JobDraft;
+  draft: JobEditor;
   descriptionMarkdown: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;

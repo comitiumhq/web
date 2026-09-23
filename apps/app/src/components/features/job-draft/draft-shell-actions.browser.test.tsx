@@ -71,6 +71,14 @@ beforeEach(() => {
 });
 
 describe('DraftShellActions', () => {
+  it('exposes Preview as a direct action', async () => {
+    const screen = await render(<DraftShellActions lifecycle={lifecycle} postingApplyMode="standard" />);
+
+    await screen.getByRole('button', { name: 'Preview' }).click();
+
+    expect(mocks.context.handlePreviewClick).toHaveBeenCalledOnce();
+  });
+
   it('opens the standard Publish flow for a standard Posting', async () => {
     const screen = await render(<DraftShellActions lifecycle={lifecycle} postingApplyMode="standard" />);
 

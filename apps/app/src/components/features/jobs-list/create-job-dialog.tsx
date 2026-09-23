@@ -14,7 +14,7 @@ import { useCreateDraft } from '@/hooks/mutations/use-create-draft';
 import { useCreateDraftFromTemplate } from '@/hooks/mutations/use-job-template-mutations';
 import { useQueryJobCreationContext } from '@/hooks/queries/use-query-job-creation-context';
 import { useQueryOrgDepartments, useQueryOrgLocations } from '@/hooks/queries/use-query-org-structure';
-import { type CreateDraftDialogData, CreateDraftDialogSchema } from '@/lib/schemas/draft-form';
+import { type CreateDraftDialogData, CreateDraftDialogSchema } from '@/lib/schemas/job-settings-form';
 import type { JobTemplateListItem } from '@/lib/schemas/job-templates';
 import { isDefined } from '@/lib/utils';
 

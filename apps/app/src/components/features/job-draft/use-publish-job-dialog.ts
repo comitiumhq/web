@@ -1,5 +1,5 @@
 import type { FeeTier, JobEconomicsConfig } from '@comitium/chain/job-economics';
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useMemo } from 'react';
 import { type DefaultValues, type UseFormReturn, useForm, useWatch } from 'react-hook-form';
@@ -14,7 +14,7 @@ import {
   type FeeTierValue,
   getMinimumStakeUsd,
 } from '@/lib/jobs/stake-calculations';
-import { type PublishDialogData, PublishDialogSchema } from '@/lib/schemas/draft-form';
+import { type PublishDialogData, PublishDialogSchema } from '@/lib/schemas/job-settings-form';
 import { formatUsd, formatUsdWhole, isDefined } from '@/lib/utils';
 
 const DEFAULT_APPLICATION_LIMIT = 50;
@@ -27,7 +27,7 @@ const DEFAULT_PUBLISH_VALUES: DefaultValues<PublishDialogData> = {
 interface UsePublishJobDialogParams {
   orgId: string;
   jobId: string;
-  draft: JobDraft;
+  draft: JobEditor;
   expectedVersion: number;
   descriptionMarkdown: string;
   open: boolean;

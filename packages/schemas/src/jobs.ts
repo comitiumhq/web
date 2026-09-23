@@ -181,9 +181,9 @@ export type OrgJobListItem = z.infer<typeof orgJobListItemSchema>;
 
 export const orgJobsResponseSchema = paginatedSchema(orgJobListItemSchema);
 
-// --- Job drafts ---
+// --- Job editor ---
 
-export const jobDraftSchema = z.object({
+export const jobEditorSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.unknown().nullable(),
@@ -205,7 +205,7 @@ export const jobDraftSchema = z.object({
   updatedAt: z.string(),
 });
 
-export type JobDraft = z.infer<typeof jobDraftSchema>;
+export type JobEditor = z.infer<typeof jobEditorSchema>;
 
 const jobDraftListItemSchema = z.object({
   id: z.string(),
@@ -287,7 +287,7 @@ export type GetOrgJobsParams = {
 
 export type CreateDraftParams = { title: string; departmentId: string; locationId: string } | { sourceJobId: string };
 
-export type UpdateDraftData = {
+export type UpdateJobEditorData = {
   expectedVersion: number;
   title?: string;
   description?: unknown;
@@ -332,7 +332,7 @@ export type PrepareJobContentUriUpdateParams = {
   descriptionMarkdown: string;
 };
 
-export const updateDraftResponseSchema = z.object({
+export const updateJobEditorResponseSchema = z.object({
   success: z.literal(true),
   version: z.number().int().min(0),
 });

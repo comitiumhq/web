@@ -92,6 +92,11 @@ export function DraftShellActions({ lifecycle, postingApplyMode }: DraftShellAct
         {isSaving ? 'Saving...' : 'Save changes'}
       </Button>
 
+      <Button variant="outline" size="sm" onClick={handlePreviewClick} disabled={actionsDisabled || isDirty}>
+        <EyeIcon data-icon="inline-start" />
+        Preview
+      </Button>
+
       {canPublish && (
         <Button size="sm" onClick={handlePublishClick} disabled={actionsDisabled || isDirty}>
           Publish
@@ -107,10 +112,6 @@ export function DraftShellActions({ lifecycle, postingApplyMode }: DraftShellAct
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
-            <DropdownMenuItem disabled={isDirty} onSelect={handlePreviewClick}>
-              <EyeIcon />
-              Preview
-            </DropdownMenuItem>
             {canDuplicate && (
               <DropdownMenuItem disabled={isDirty || isDuplicating} onSelect={handleDuplicate}>
                 <CopyIcon />

@@ -1,7 +1,7 @@
 import type { WalletAccount } from '@comitium/auth/send-calls';
 import type { FeeTier } from '@comitium/chain/job-economics';
 import { wholeUsdToUsdcUnits } from '@comitium/chain/usdc';
-import type { JobDraft, PublishDraftParams } from '@comitium/schemas/jobs';
+import type { JobEditor, PublishDraftParams } from '@comitium/schemas/jobs';
 import { type JobError, SignatureError, TransactionError, ValidationError } from '@comitium/schemas/product-errors';
 import { errAsync, ResultAsync } from 'neverthrow';
 import { isApiError } from '@/lib/api/client';
@@ -15,7 +15,7 @@ import {
 export interface PublishDraftWorkflowParams {
   orgId: string;
   jobId: string;
-  draft: JobDraft;
+  draft: JobEditor;
   expectedVersion: number;
   stakeUsd: number;
   feeTier: FeeTier;

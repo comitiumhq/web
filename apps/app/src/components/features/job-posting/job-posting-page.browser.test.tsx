@@ -106,12 +106,26 @@ describe('JobPostingPage', () => {
     );
   });
 
+  it('resolves a relative canonical URL against the public site origin', async () => {
+    mocks.job = { ...mocks.job, canonicalUrl: '/careers/acme/jobs/backend-engineer' };
+    mocks.posting = { ...mocks.posting, status: 'published' };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await expect
+      .element(screen.getByRole('link', { name: 'View posting' }))
+      .toHaveAttribute('href', 'http://localhost:3000/careers/acme/jobs/backend-engineer');
+  });
+
   it('renders a Closed Job Posting as read-only', async () => {
     mocks.job = { ...mocks.job, status: 'closed' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await expect.element(screen.getByRole('button', { name: 'Edit description' })).not.toBeInTheDocument();
+
+    await screen.getByRole('tab', { name: 'Application form' }).click();
     await expect.element(screen.getByRole('button', { name: 'Change form' })).not.toBeInTheDocument();
+
+    await screen.getByRole('tab', { name: 'Capacity' }).click();
     await expect.element(screen.getByRole('button', { name: 'Save capacity' })).not.toBeInTheDocument();
     await expect.element(screen.getByLabelText('Maximum applications')).toBeDisabled();
     await expect.element(screen.getByRole('button', { name: 'Publish' })).toBeDisabled();
@@ -121,6 +135,7 @@ describe('JobPostingPage', () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
+    await screen.getByRole('tab', { name: 'Capacity' }).click();
     await expect.element(screen.getByRole('button', { name: 'Save capacity' })).not.toBeInTheDocument();
     await screen.getByLabelText('Maximum applications').fill('30');
 

@@ -2,9 +2,7 @@ import { PageContainer } from '@comitium/ui/page-container';
 import { SectionHeader } from '@comitium/ui/section-header';
 import { Skeleton } from '@comitium/ui/skeleton';
 import type { ReactNode } from 'react';
-import { HiringTeamSkeleton } from '@/components/features/hiring-team-editor/skeleton';
 import { InterviewPlanSkeleton } from '@/components/features/job-interview-plan/skeleton';
-import { ApplicationFormListSkeleton } from './application-form-picker';
 import { type DraftTab, getDraftSection } from './sections';
 
 interface DraftSectionSkeletonProps {
@@ -27,12 +25,7 @@ export function DraftSectionSkeleton({ tab }: DraftSectionSkeletonProps) {
 function getSkeletonContent(tab: DraftTab) {
   switch (tab) {
     case 'settings':
-      return (
-        <div className="space-y-6">
-          <DetailsSkeleton />
-          <HiringTeamSkeleton />
-        </div>
-      );
+      return <DetailsSkeleton />;
     case 'posting':
       return <PostingSkeleton />;
     case 'interview-plan':
@@ -65,6 +58,8 @@ function SkeletonField({ width = 'w-24' }: { width?: string }) {
 export function DetailsSkeleton() {
   return (
     <div className="flex flex-col gap-6">
+      <TabListSkeleton widths={['w-16', 'w-24']} />
+
       <SkeletonSurface className="flex flex-col gap-5">
         <SkeletonField width="w-12" />
         <div className="grid gap-5 md:grid-cols-2">
@@ -87,20 +82,30 @@ export function DetailsSkeleton() {
         </div>
       </SkeletonSurface>
 
-      <SkeletonSurface className="flex flex-col gap-5">
-        <Skeleton className="h-5 w-32 rounded-md" />
-        <div className="flex flex-wrap items-end gap-3">
+      <SkeletonSurface>
+        <div className="flex flex-wrap items-center gap-3">
           <div className="grid min-w-64 flex-1 grid-cols-[1fr_auto_1fr] items-center gap-3">
             <Skeleton className="h-9 rounded-xl" />
             <Skeleton className="h-3.5 w-5 rounded-md" />
             <Skeleton className="h-9 rounded-xl" />
           </div>
-          <div className="grid min-w-64 flex-1 grid-cols-2 gap-3">
+          <div className="grid min-w-64 flex-1 grid-cols-[1fr_auto_1fr] items-center gap-3">
             <Skeleton className="h-9 rounded-xl" />
+            <Skeleton className="h-3.5 w-5 rounded-md" />
             <Skeleton className="h-9 rounded-xl" />
           </div>
         </div>
       </SkeletonSurface>
+    </div>
+  );
+}
+
+function TabListSkeleton({ widths }: { widths: string[] }) {
+  return (
+    <div aria-hidden="true" className="flex h-10 items-center gap-6 border-b border-separator px-3">
+      {widths.map((width) => (
+        <Skeleton key={width} className={`h-4 ${width} rounded-md`} />
+      ))}
     </div>
   );
 }
@@ -119,7 +124,7 @@ function DescriptionSkeleton() {
         <Skeleton className="size-7 rounded-lg" />
         <Skeleton className="size-7 rounded-lg" />
       </div>
-      <div className="min-h-100 space-y-3 px-5 py-5">
+      <div className="min-h-56 space-y-3 px-5 py-5">
         <Skeleton className="h-4 w-2/3 rounded-md" />
         <Skeleton className="h-4 w-full rounded-md" />
         <Skeleton className="h-4 w-5/6 rounded-md" />
@@ -131,22 +136,9 @@ function DescriptionSkeleton() {
 
 function PostingSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
-      <div className="border-b border-separator p-6">
-        <Skeleton className="mb-2 h-5 w-28 rounded-md" />
-        <Skeleton className="mb-5 h-4 w-80 max-w-full rounded-md" />
-        <DescriptionSkeleton />
-      </div>
-      <div className="border-b border-separator p-6">
-        <Skeleton className="mb-2 h-5 w-36 rounded-md" />
-        <Skeleton className="mb-5 h-4 w-96 max-w-full rounded-md" />
-        <ApplicationFormListSkeleton />
-      </div>
-      <div className="space-y-3 p-6">
-        <Skeleton className="h-5 w-40 rounded-md" />
-        <Skeleton className="h-4 w-72 max-w-full rounded-md" />
-        <Skeleton className="h-9 w-full rounded-xl" />
-      </div>
+    <div className="space-y-6">
+      <TabListSkeleton widths={['w-24', 'w-32', 'w-20']} />
+      <DescriptionSkeleton />
     </div>
   );
 }

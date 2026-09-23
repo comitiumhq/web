@@ -13,3 +13,5 @@ export const TAG_LABEL_REGEX = /^[a-zA-Z0-9\s\-_.]+$/;
 export const CAREERS_SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const DATE_YYYY_MM_DD_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 export const PHONE_NUMBER_REGEX = /^\+?[0-9\s().-]+$/;
+export const NON_DIGIT_REGEX = /\D/g;
+export const THOUSANDS_SEPARATOR_POSITION_REGEX = /\B(?=(\d{3})+(?!\d))/g;

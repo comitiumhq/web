@@ -2,12 +2,12 @@ import type { JobSummary } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { Skeleton } from '@comitium/ui/skeleton';
 import type { Icon } from '@phosphor-icons/react';
-import { ArrowLeftIcon, GearSixIcon, GlobeSimpleIcon, KanbanIcon } from '@phosphor-icons/react';
+import { ArrowLeftIcon, KanbanIcon } from '@phosphor-icons/react';
 import { Link, useLocation } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { DRAFT_SECTIONS } from '@/components/features/job-draft/sections';
 import type { StepStatus } from '@/components/features/job-draft/utils';
-import { HiringTeamIcon, InterviewPlanIcon } from '@/lib/constants/domain-icons';
+import { HiringTeamIcon, InterviewPlanIcon, JobPostingIcon, JobSettingsIcon } from '@/lib/constants/domain-icons';
 import { cn } from '@/lib/utils';
 
 import { JobActionButton } from './job-action-button';
@@ -204,7 +204,7 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
       ...commonItems,
       {
         label: 'Settings',
-        icon: GearSixIcon,
+        icon: JobSettingsIcon,
         to: '/org/$orgId/jobs/$jobId/settings',
         isActive: (pathname) => pathname.endsWith('/settings'),
       },
@@ -216,7 +216,7 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
       },
       {
         label: 'Posting',
-        icon: GlobeSimpleIcon,
+        icon: JobPostingIcon,
         to: '/org/$orgId/jobs/$jobId/posting',
         isActive: (pathname) => pathname.endsWith('/posting'),
       },

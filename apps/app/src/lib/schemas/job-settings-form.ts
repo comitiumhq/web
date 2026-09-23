@@ -11,9 +11,9 @@ import { z } from 'zod';
 import { isDefined } from '@/lib/utils';
 
 /**
- * Schema for draft editing form.
+ * Schema for editable Job settings shared by drafts, open standard Jobs, and templates.
  */
-export const DraftFormSchema = z.object({
+export const JobSettingsFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255, 'Title is too long'),
   departmentId: uuidSchema.optional(),
   locationId: uuidSchema.optional(),
@@ -28,12 +28,12 @@ export const DraftFormSchema = z.object({
   applicationCapacity: z.number().int().min(1).max(1000).nullable().optional(),
 });
 
-export type DraftFormData = z.infer<typeof DraftFormSchema>;
+export type JobSettingsFormData = z.infer<typeof JobSettingsFormSchema>;
 
 /**
  * Schema for the create draft dialog.
  */
-export const CreateDraftDialogSchema = DraftFormSchema.pick({
+export const CreateDraftDialogSchema = JobSettingsFormSchema.pick({
   title: true,
 });
 

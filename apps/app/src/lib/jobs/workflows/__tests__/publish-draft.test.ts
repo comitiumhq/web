@@ -1,5 +1,5 @@
 import type { WalletAccount } from '@comitium/auth/send-calls';
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import type { Address } from 'viem';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -48,7 +48,7 @@ const mockSubmitAndConfirm = vi.mocked(submitAndConfirmPreparedRelayedOperation)
 const OPERATION_ID = '22222222-2222-4222-8222-222222222222';
 const ACCOUNT_ADDRESS = '0x9999999999999999999999999999999999999999' as Address;
 
-const mockDraft: JobDraft = {
+const mockDraft: JobEditor = {
   id: 'job-uuid',
   title: 'Senior Engineer',
   description: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Test' }] }] },

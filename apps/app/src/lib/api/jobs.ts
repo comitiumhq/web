@@ -4,7 +4,7 @@ import {
   draftJobsResponseSchema,
   type GetOrgJobsParams,
   jobCreationContextSchema,
-  jobDraftSchema,
+  jobEditorSchema,
   jobLifecycleMutationResponseSchema,
   jobPostingSchema,
   jobSummarySchema,
@@ -16,9 +16,9 @@ import {
   prepareUnpublishSchema,
   publishDraftResponseSchema,
   reopenJobAsDraftResponseSchema,
-  type UpdateDraftData,
+  type UpdateJobEditorData,
   type UpdateJobPostingData,
-  updateDraftResponseSchema,
+  updateJobEditorResponseSchema,
 } from '@comitium/schemas/jobs';
 import { preparedRelayedOnchainOperationSchema } from '@comitium/schemas/onchain-operations';
 import { successSchema } from '@comitium/schemas/public';
@@ -96,7 +96,7 @@ export function getOrgJobs(orgId: string, params: GetOrgJobsParams = {}) {
 
 // --- Job Drafts ---
 
-function draftUpdatePayload(data: UpdateDraftData) {
+function jobEditorUpdatePayload(data: UpdateJobEditorData) {
   const { location: _location, ...payload } = data;
 
   return payload;
@@ -126,12 +126,12 @@ export function getDrafts(orgId: string, params: Omit<GetOrgJobsParams, 'status'
   return api.get(`/orgs/${orgId}/jobs?${searchParams.toString()}`, draftJobsResponseSchema);
 }
 
-export function getDraft(orgId: string, jobId: string) {
-  return api.get(`/orgs/${orgId}/jobs/${jobId}`, jobDraftSchema);
+export function getJobEditor(orgId: string, jobId: string) {
+  return api.get(`/orgs/${orgId}/jobs/${jobId}`, jobEditorSchema);
 }
 
-export function updateDraft(orgId: string, jobId: string, data: UpdateDraftData) {
-  return api.patch(`/orgs/${orgId}/jobs/${jobId}`, draftUpdatePayload(data), updateDraftResponseSchema);
+export function updateJobEditor(orgId: string, jobId: string, data: UpdateJobEditorData) {
+  return api.patch(`/orgs/${orgId}/jobs/${jobId}`, jobEditorUpdatePayload(data), updateJobEditorResponseSchema);
 }
 
 export function deleteDraft(orgId: string, jobId: string) {

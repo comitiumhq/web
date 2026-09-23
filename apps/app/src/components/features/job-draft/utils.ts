@@ -1,39 +1,12 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
-import { DEFAULT_COMPENSATION_CURRENCY, DEFAULT_COMPENSATION_PERIOD } from '@comitium/schemas/job-enums';
 import type { EvaluationCriterion } from '@comitium/schemas/jobs';
-import type { DraftFormData } from '@/lib/schemas/draft-form';
+import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
 import { isDefined } from '@/lib/utils';
 import { DRAFT_SECTIONS, type DraftTab } from './sections';
 
 export type PublishError = { label: string; tab: DraftTab };
 
 export type StepStatus = 'incomplete' | 'error';
-
-type CompensationFormValues = Pick<
-  DraftFormData,
-  'compensationCurrency' | 'compensationPeriod' | 'compensationMin' | 'compensationMax'
->;
-
-export function buildCompensation(values: CompensationFormValues) {
-  if (values.compensationMin == null && values.compensationMax == null) {
-    return null;
-  }
-
-  return {
-    tiers: [
-      {
-        currency: values.compensationCurrency ?? DEFAULT_COMPENSATION_CURRENCY,
-        period: values.compensationPeriod ?? DEFAULT_COMPENSATION_PERIOD,
-        base_min: values.compensationMin ?? undefined,
-        base_max: values.compensationMax ?? undefined,
-      },
-    ],
-  };
-}
-
-export function prepareEvaluationCriteria(criteria: EvaluationCriterion[]): EvaluationCriterion[] {
-  return criteria.filter((criterion) => criterion.title.trim() && criterion.prompt.trim());
-}
 
 export function isDraftEditorPath(pathname: string, orgId: string, jobId: string): boolean {
   const basePath = `/org/${orgId}/jobs/${jobId}`;
@@ -64,7 +37,7 @@ function descriptionHasContent(doc: TipTapDoc | null): boolean {
 }
 
 export function validateForPublish(
-  values: DraftFormData,
+  values: JobSettingsFormData,
   description: TipTapDoc | null,
   formId: string | null,
   criteria: EvaluationCriterion[],

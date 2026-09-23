@@ -1,4 +1,4 @@
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { ActionConfirmationNotice, getActionConfirmationPresentation } from '@comitium/ui/action-confirmation';
 import { Alert, AlertDescription } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
@@ -20,7 +20,7 @@ interface PublishJobDialogProps {
   orgId: string;
   jobId: string;
   draftTitle: string;
-  draft: JobDraft;
+  draft: JobEditor;
   expectedVersion: number;
   descriptionMarkdown: string;
   open: boolean;

@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-import type { DraftFormData } from '@/lib/schemas/draft-form';
+import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
 import { DraftNavigationGuard } from './draft-navigation-guard';
 import { type DraftTab, getDraftSection } from './sections';
 import { useDraftForm } from './use-draft-form';
@@ -55,7 +55,7 @@ export function DraftFormProvider({ orgId, jobId, children }: DraftFormProviderP
       return;
     }
 
-    const values = draftForm.form.getValues() as DraftFormData;
+    const values = draftForm.form.getValues() as JobSettingsFormData;
     const errors = validateForPublish(values, draftForm.description, draftForm.formId, draftForm.criteria);
 
     if (errors.length > 0) {

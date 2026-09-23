@@ -1,6 +1,10 @@
 import type { Icon } from '@phosphor-icons/react';
-import { GearSixIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
-import { EvaluationCriteriaIcon, InterviewPlanIcon } from '@/lib/constants/domain-icons';
+import {
+  EvaluationCriteriaIcon,
+  InterviewPlanIcon,
+  JobPostingIcon,
+  JobSettingsIcon,
+} from '@/lib/constants/domain-icons';
 
 interface TemplateSectionDefinition {
   id: string;
@@ -10,9 +14,9 @@ interface TemplateSectionDefinition {
 }
 
 export const TEMPLATE_SECTION_ITEMS = [
-  { id: 'settings', label: 'Settings', title: 'Settings', icon: GearSixIcon },
+  { id: 'settings', label: 'Settings', title: 'Settings', icon: JobSettingsIcon },
   { id: 'interview-plan', label: 'Interview plan', title: 'Interview plan', icon: InterviewPlanIcon },
-  { id: 'posting', label: 'Posting', title: 'Posting', icon: GlobeSimpleIcon },
+  { id: 'posting', label: 'Posting', title: 'Posting', icon: JobPostingIcon },
   {
     id: 'criteria',
     label: 'Evaluation criteria',

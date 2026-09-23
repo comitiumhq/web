@@ -1,6 +1,6 @@
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { describe, expect, it } from 'vitest';
-import type { DraftFormData } from '@/lib/schemas/draft-form';
+import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
 
 import { draftToEditorState, prepareDraftSave } from '../draft-editor-state';
 import { isDraftEditorPath, validateForPublish } from '../utils';
@@ -16,7 +16,7 @@ const baseValues = {
   compensationPeriod: 'year',
   compensationMin: 115000,
   compensationMax: 150000,
-} satisfies DraftFormData;
+} satisfies JobSettingsFormData;
 
 describe('job draft utils', () => {
   it('builds one complete versioned update from the editor state', () => {
@@ -130,7 +130,7 @@ describe('job draft utils', () => {
       version: 0,
       createdAt: '2026-08-11T00:00:00.000Z',
       updatedAt: '2026-08-11T00:00:00.000Z',
-    } satisfies JobDraft;
+    } satisfies JobEditor;
     const state = draftToEditorState(draft);
 
     expect(state.values).toMatchObject({ compensationCurrency: 'USD', compensationPeriod: 'year' });

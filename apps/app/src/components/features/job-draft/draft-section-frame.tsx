@@ -37,7 +37,7 @@ export function DraftSectionFrame({ tab, children }: DraftSectionFrameProps) {
       )}
 
       <PageContainer size="editor" className="py-8 lg:px-10">
-        <SectionHeader title={section.label} description={section.description} />
+        <SectionHeader title={section.label} description={null} />
         {children}
       </PageContainer>
     </div>

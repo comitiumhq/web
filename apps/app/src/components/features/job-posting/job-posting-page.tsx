@@ -1,5 +1,6 @@
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
+import { Card, CardContent } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { PageContainer } from '@comitium/ui/page-container';
 import { Skeleton } from '@comitium/ui/skeleton';
@@ -8,6 +9,7 @@ import { ArrowSquareOutIcon, CopyIcon, PencilIcon } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { JobDescriptionEditorDialog } from '@/components/features/job-detail/job-description-editor-dialog';
+import { getPublicSiteOrigin } from '@/config/site';
 import { useUnpublishJobPosting, useUpdateJobPosting } from '@/hooks/mutations/use-job-posting-mutations';
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
 import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
@@ -16,6 +18,7 @@ import { Permission } from '@/lib/schemas/org';
 
 import { ApplicationCapacityControl, isValidApplicationCapacity } from './application-capacity-control';
 import { ApplicationFormDialog } from './application-form-dialog';
+import { PostingTabs } from './posting-tabs';
 import { PublishJobDialogV2 } from './publish-job-dialog-v2';
 
 const UNPUBLISH_DESCRIPTION =
@@ -68,17 +71,16 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const capacityChanged = applicationCapacity !== posting.applicationCapacity;
   const capacityIsValid = isValidApplicationCapacity(applicationCapacity);
   const canSaveCapacity = canEdit && capacityChanged && capacityIsValid && !updatePosting.isPending;
+  const publicPostingUrl = job.canonicalUrl ? new URL(job.canonicalUrl, getPublicSiteOrigin()).toString() : null;
 
   const canOpenPublishDialog = canPublishPosting && !isPublished && job.status === 'open' && !permissionsLoading;
 
   const handleCopyPostingLink = async () => {
-    if (!job.canonicalUrl) {
+    if (!publicPostingUrl) {
       return;
     }
 
-    const publicUrl = new URL(job.canonicalUrl, window.location.origin).toString();
-
-    await navigator.clipboard.writeText(publicUrl);
+    await navigator.clipboard.writeText(publicPostingUrl);
     toast.success('Posting link copied');
   };
 
@@ -118,27 +120,22 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     <div className="h-full overflow-y-auto">
       <PageContainer size="editor" className="space-y-6 py-8 lg:px-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h1 className="text-heading-20">Posting</h1>
-              <Badge variant={isPublished ? 'success' : 'secondary'}>{isPublished ? 'Published' : 'Unpublished'}</Badge>
-            </div>
-            <p className="text-copy-14 text-muted-foreground">
-              Manage the page candidates see and when it accepts applications.
-            </p>
+          <div className="flex items-center gap-2">
+            <h1 className="text-heading-20">Posting</h1>
+            <Badge variant={isPublished ? 'success' : 'secondary'}>{isPublished ? 'Published' : 'Unpublished'}</Badge>
           </div>
 
           <div className="flex flex-wrap justify-end gap-2">
-            {isPublished && job.canonicalUrl && (
+            {isPublished && publicPostingUrl && (
               <Button asChild variant="outline" size="sm">
-                <a href={job.canonicalUrl} target="_blank" rel="noopener noreferrer">
+                <a href={publicPostingUrl} target="_blank" rel="noopener noreferrer">
                   <ArrowSquareOutIcon data-icon="inline-start" />
                   View posting
                 </a>
               </Button>
             )}
 
-            {isPublished && job.canonicalUrl && (
+            {isPublished && publicPostingUrl && (
               <Button variant="outline" size="sm" onClick={handleCopyPostingLink}>
                 <CopyIcon data-icon="inline-start" />
                 Copy link
@@ -159,66 +156,67 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-surface-border bg-card bg-clip-padding">
-          <section className="border-b border-separator p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <h2 className="text-heading-16">Description</h2>
-                <p className="mt-1 truncate text-copy-13 text-muted-foreground">
-                  {posting.descriptionMarkdown ? 'Ready for candidates' : 'No description'}
-                </p>
-              </div>
-              {canEdit && (
-                <Button variant="outline" size="sm" onClick={() => setDescriptionDialogOpen(true)}>
-                  <PencilIcon data-icon="inline-start" />
-                  Edit description
-                </Button>
-              )}
-            </div>
-          </section>
-
-          <section className="border-b border-separator p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <h2 className="text-heading-16">Application form</h2>
-                <p className="mt-1 truncate text-copy-13 text-muted-foreground">
-                  {posting.form?.title ?? 'No form selected'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {posting.form?.isArchived && <Badge variant="secondary">Archived</Badge>}
-                {canEdit && (
-                  <Button variant="outline" size="sm" onClick={() => setApplicationFormDialogOpen(true)}>
-                    <PencilIcon data-icon="inline-start" />
-                    Change form
-                  </Button>
-                )}
-              </div>
-            </div>
-          </section>
-
-          <section className="p-6">
-            <div className="mb-5 space-y-1">
-              <h2 className="text-heading-16">Application capacity</h2>
-              <p className="text-copy-13 text-muted-foreground">
-                {applicationCountLabel(posting.completedApplicationCount, posting.applicationCapacity)}
-              </p>
-            </div>
-            <div className="space-y-5">
-              <ApplicationCapacityControl
-                value={applicationCapacity}
-                onChange={setApplicationCapacity}
-                disabled={!canEdit || updatePosting.isPending}
-              />
-              {canEdit && capacityChanged && (
-                <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
-                  {updatePosting.isPending && <Spinner data-icon="inline-start" />}
-                  {updatePosting.isPending ? 'Saving...' : 'Save capacity'}
-                </Button>
-              )}
-            </div>
-          </section>
-        </div>
+        <PostingTabs
+          description={
+            <Card>
+              <CardContent>
+                <div className="flex items-center justify-between gap-4">
+                  <p className="min-w-0 truncate text-copy-13 text-muted-foreground">
+                    {posting.descriptionMarkdown ? 'Ready for candidates' : 'No description'}
+                  </p>
+                  {canEdit && (
+                    <Button variant="outline" size="sm" onClick={() => setDescriptionDialogOpen(true)}>
+                      <PencilIcon data-icon="inline-start" />
+                      Edit description
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          }
+          applicationForm={
+            <Card>
+              <CardContent>
+                <div className="flex items-center justify-between gap-4">
+                  <p className="min-w-0 truncate text-copy-13 text-muted-foreground">
+                    {posting.form?.title ?? 'No form selected'}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {posting.form?.isArchived && <Badge variant="secondary">Archived</Badge>}
+                    {canEdit && (
+                      <Button variant="outline" size="sm" onClick={() => setApplicationFormDialogOpen(true)}>
+                        <PencilIcon data-icon="inline-start" />
+                        Change form
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          }
+          capacity={
+            <Card>
+              <CardContent>
+                <div className="space-y-5">
+                  <p className="text-copy-13 text-muted-foreground">
+                    {applicationCountLabel(posting.completedApplicationCount, posting.applicationCapacity)}
+                  </p>
+                  <ApplicationCapacityControl
+                    value={applicationCapacity}
+                    onChange={setApplicationCapacity}
+                    disabled={!canEdit || updatePosting.isPending}
+                  />
+                  {canEdit && capacityChanged && (
+                    <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
+                      {updatePosting.isPending && <Spinner data-icon="inline-start" />}
+                      {updatePosting.isPending ? 'Saving...' : 'Save capacity'}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          }
+        />
       </PageContainer>
 
       <ConfirmDialog
@@ -274,12 +272,12 @@ function applicationCountLabel(completedCount: number, capacity: number | null):
 function PostingPageSkeleton() {
   return (
     <PageContainer size="editor" className="space-y-6 py-8 lg:px-10">
-      <div className="space-y-2">
-        <Skeleton className="h-7 w-32" />
-        <Skeleton className="h-4 w-96 max-w-full" />
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-7 w-24" />
+        <Skeleton className="h-5 w-20 rounded-full" />
       </div>
-      <Skeleton className="h-40 w-full rounded-xl" />
-      <Skeleton className="h-48 w-full rounded-xl" />
+      <Skeleton className="h-9 w-80 max-w-full" />
+      <Skeleton className="h-28 w-full rounded-2xl" />
     </PageContainer>
   );
 }

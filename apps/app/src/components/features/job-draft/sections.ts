@@ -1,11 +1,14 @@
 import type { Icon } from '@phosphor-icons/react';
-import { GearSixIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
-import { EvaluationCriteriaIcon, InterviewPlanIcon } from '@/lib/constants/domain-icons';
+import {
+  EvaluationCriteriaIcon,
+  InterviewPlanIcon,
+  JobPostingIcon,
+  JobSettingsIcon,
+} from '@/lib/constants/domain-icons';
 
 interface DraftSectionDefinition {
   id: string;
   label: string;
-  description: string;
   icon: Icon;
   route: string;
 }
@@ -14,28 +17,24 @@ export const DRAFT_SECTIONS = [
   {
     id: 'settings',
     label: 'Settings',
-    description: 'Configure the role and the people responsible for hiring.',
-    icon: GearSixIcon,
+    icon: JobSettingsIcon,
     route: '/org/$orgId/jobs/$jobId/settings',
   },
   {
     id: 'interview-plan',
     label: 'Interview plan',
-    description: 'Define the interview stages and activities for this Job.',
     icon: InterviewPlanIcon,
     route: '/org/$orgId/jobs/$jobId/interview-plan',
   },
   {
     id: 'posting',
     label: 'Posting',
-    description: 'Set up the public page, application form, and application limit.',
-    icon: GlobeSimpleIcon,
+    icon: JobPostingIcon,
     route: '/org/$orgId/jobs/$jobId/posting',
   },
   {
     id: 'criteria',
     label: 'Evaluation criteria',
-    description: 'Define the criteria used to evaluate candidates consistently.',
     icon: EvaluationCriteriaIcon,
     route: '/org/$orgId/jobs/$jobId/criteria',
   },

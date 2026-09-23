@@ -1,5 +1,5 @@
 import type { JobEconomicsConfig } from '@comitium/chain/job-economics';
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { usePublishJobDialog } from './use-publish-job-dialog';
@@ -60,7 +60,7 @@ function Harness() {
   const dialog = usePublishJobDialog({
     orgId: '11111111-1111-4111-8111-111111111111',
     jobId: '22222222-2222-4222-8222-222222222222',
-    draft: { title: 'Backend engineer' } as JobDraft,
+    draft: { title: 'Backend engineer' } as JobEditor,
     expectedVersion: 4,
     descriptionMarkdown: 'Build reliable systems.',
     open: true,

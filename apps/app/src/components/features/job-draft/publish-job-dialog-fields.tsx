@@ -12,7 +12,7 @@ import { type ChangeEvent, memo, type ReactNode, useCallback, useId } from 'reac
 import type { Control, ControllerRenderProps } from 'react-hook-form';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { FeeTierOption } from '@/lib/jobs/stake-calculations';
-import type { PublishDialogData } from '@/lib/schemas/draft-form';
+import type { PublishDialogData } from '@/lib/schemas/job-settings-form';
 import { formatUsd, formatUsdWhole } from '@/lib/utils';
 
 interface EmployerStakeFieldProps {
