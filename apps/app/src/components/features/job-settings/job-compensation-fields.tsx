@@ -4,10 +4,7 @@ import { FormControl, FormField, FormItem, FormMessage } from '@comitium/ui/form
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@comitium/ui/input-group';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { type UseFormReturn, useWatch } from 'react-hook-form';
-import {
-  formatCompensationAmountInput,
-  parseCompensationAmountInput,
-} from '@/lib/jobs/compensation';
+import { formatCompensationAmountInput, parseCompensationAmountInput } from '@/lib/jobs/compensation';
 import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
 import { RequiredMarker } from './required-marker';
 

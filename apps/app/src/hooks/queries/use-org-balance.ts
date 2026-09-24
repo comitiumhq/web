@@ -31,6 +31,8 @@ export function useOrgBalance(onChainOrgId?: number) {
     lockedUsd: balance ? usdcToUsd(balance.lockedInJobs) : 0,
     totalUsd: balance ? usdcToUsd(balance.operationalBalance) : 0,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error: query.error ? 'Failed to load balance' : null,
+    refetch: query.refetch,
   };
 }

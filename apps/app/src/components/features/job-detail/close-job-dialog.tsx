@@ -65,11 +65,11 @@ export function CloseJobDialog({
       expectedVersion,
       commitmentSettlementRequired,
     });
-  }, [expectedVersion, commitmentSettlementRequired, isActionPending, jobId, orgId, reasonId, runClose]);
+  }, [commitmentSettlementRequired, expectedVersion, isActionPending, jobId, orgId, reasonId, runClose]);
 
   const handleOpenChange = useCallback(
     (value: boolean) => {
-      if (isPending) {
+      if (isActionPending) {
         return;
       }
 
@@ -79,7 +79,7 @@ export function CloseJobDialog({
 
       onOpenChange(value);
     },
-    [isPending, onOpenChange],
+    [isActionPending, onOpenChange],
   );
 
   const handleCancel = useCallback(() => {
@@ -131,7 +131,7 @@ export function CloseJobDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleCancel} disabled={isPending}>
+          <Button variant="outline" onClick={handleCancel} disabled={isActionPending}>
             Cancel
           </Button>
           <Button onClick={handleClose} disabled={!reasonId || isActionPending}>

@@ -7,15 +7,13 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { Spinner } from '@comitium/ui/spinner';
 import { SignInIcon } from '@phosphor-icons/react';
 import { Link, useRouterState } from '@tanstack/react-router';
-import { CommittedApplicationForm } from './committed-application-form';
-import { StandardApplicationForm } from './standard-application-form';
+import { AuthenticatedApplicationForm } from './authenticated-application-form';
 
 interface ApplicationFormProps {
   applyForm: NestedForm;
   jobData: JobApplicationData;
   jobTitle: string;
   company: string;
-  responseDeadlineDays: number | null;
   policy: CareerJob['recruitingPrivacy'];
   onSuccess?: () => void;
 }
@@ -51,9 +49,5 @@ export function ApplicationForm(props: ApplicationFormProps) {
     );
   }
 
-  if (props.jobData.applyMode === 'standard') {
-    return <StandardApplicationForm {...props} accountId={user.id} jobData={props.jobData} />;
-  }
-
-  return <CommittedApplicationForm {...props} accountId={user.id} jobData={props.jobData} />;
+  return <AuthenticatedApplicationForm {...props} accountId={user.id} jobData={props.jobData} />;
 }

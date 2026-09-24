@@ -1,38 +1,34 @@
 import { Card, CardContent } from '@comitium/ui/card';
 import { cn, formatUsd, formatUsdWhole } from '@/lib/utils';
 
-interface CostSummaryProps {
+interface CommitmentCostSummaryProps {
   employerStake: number;
   feeLabel: string;
   platformFee: number;
   totalCost: number;
   availableUsd: number;
-  isConfigLoading: boolean;
-  hasJobConfig: boolean;
+  pricingAvailable: boolean;
   isBalanceLoading: boolean;
   isInsufficient: boolean;
 }
 
-export function CostSummary({
+export function CommitmentCostSummary({
   employerStake,
   feeLabel,
   platformFee,
   totalCost,
   availableUsd,
-  isConfigLoading,
-  hasJobConfig,
+  pricingAvailable,
   isBalanceLoading,
   isInsufficient,
-}: CostSummaryProps) {
-  const isPricingUnavailable = isConfigLoading || !hasJobConfig;
-  const feeValue = isPricingUnavailable ? '—' : formatUsd(platformFee);
-  const totalValue = isPricingUnavailable ? '—' : formatUsd(totalCost);
+}: CommitmentCostSummaryProps) {
+  const feeValue = pricingAvailable ? formatUsd(platformFee) : '—';
+  const totalValue = pricingAvailable ? formatUsd(totalCost) : '—';
 
   return (
     <Card size="sm" className="gap-0 py-0">
       <CardContent className="flex flex-col gap-2 py-4">
         <p className="text-label-12 uppercase tracking-wide text-muted-foreground">Funding summary</p>
-
         <SummaryRow label="Refundable stake" value={formatUsdWhole(employerStake)} />
         <SummaryRow label={feeLabel} value={feeValue} />
 
@@ -42,7 +38,7 @@ export function CostSummary({
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-copy-13 text-muted-foreground">Available balance</span>
+          <span className="text-copy-13 text-muted-foreground">Available Job Funds</span>
           <span className={cn('text-copy-13 tabular-nums', { 'text-destructive': isInsufficient })}>
             {isBalanceLoading ? '—' : formatUsd(availableUsd)}
           </span>

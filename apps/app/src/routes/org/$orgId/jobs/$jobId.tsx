@@ -110,29 +110,7 @@ function JobRouteShell({ org, jobId, pathname }: JobRouteShellProps) {
     );
   }
 
-  if (pathname.endsWith('/posting') && job.postingApplyMode !== 'standard') {
-    return (
-      <Navigate
-        to="/org/$orgId/jobs/$jobId/pipeline"
-        params={{ orgId: org.id, jobId }}
-        search={{ tab: 'active' }}
-        replace
-      />
-    );
-  }
-
-  if (pathname.endsWith('/settings') && job.postingApplyMode !== 'standard') {
-    return (
-      <Navigate
-        to="/org/$orgId/jobs/$jobId/pipeline"
-        params={{ orgId: org.id, jobId }}
-        search={{ tab: 'active' }}
-        replace
-      />
-    );
-  }
-
-  if (pathname.endsWith('/hiring-team') && job.postingApplyMode === 'standard') {
+  if (pathname.endsWith('/hiring-team')) {
     return <Navigate to="/org/$orgId/jobs/$jobId/settings" params={{ orgId: org.id, jobId }} replace />;
   }
 
@@ -182,7 +160,7 @@ function DraftJobShell({ org, jobId, job }: DraftJobShellProps) {
         orgId={org.id}
         jobId={jobId}
         job={job}
-        actions={<DraftShellActions lifecycle={job.lifecycle} postingApplyMode={job.postingApplyMode} />}
+        actions={<DraftShellActions lifecycle={job.lifecycle} />}
         draftStepStatuses={stepStatuses}
       >
         <Outlet />

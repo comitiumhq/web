@@ -95,14 +95,7 @@ export function OpenJobSettingsPage({ org, jobId }: OpenJobSettingsPageProps) {
 
         <Form {...form}>
           <JobSettingsTabs
-            basic={
-              <JobBasicSettingsCard
-                orgId={org.id}
-                form={form}
-                editableStructure={false}
-                readOnly={!canEdit}
-              />
-            }
+            basic={<JobBasicSettingsCard orgId={org.id} form={form} editableStructure={false} readOnly={!canEdit} />}
             hiringTeam={<JobHiringTeam org={org} jobId={jobId} />}
           />
         </Form>

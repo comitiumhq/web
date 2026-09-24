@@ -66,7 +66,7 @@ type CloseResult =
 
 type MutationOptions = {
   mutationFn: (input: typeof params) => Promise<CloseResult>;
-  onSuccess: (result: CloseResult, input: typeof params) => Promise<void>;
+  onSuccess: (result: CloseResult, input: typeof params) => void;
 };
 
 function options(): MutationOptions {
@@ -87,7 +87,7 @@ describe('useCloseJob', () => {
     mocks.closeJob.mockResolvedValue({ version: 2 });
   });
 
-  it('prepares a durable Job close before submitting settlement', async () => {
+  it('prepares a durable Job close before submitting Commitment settlement', async () => {
     let confirm = () => {};
     mocks.submitAndConfirm.mockReturnValue(
       new Promise((resolve) => {
@@ -108,10 +108,9 @@ describe('useCloseJob', () => {
     await expect(pending).resolves.toEqual({ kind: 'settlement', prepared, state: 'confirmed' });
   });
 
-  it('closes a standard Job directly without wallet or settlement work', async () => {
+  it('closes a Job without a live Commitment directly', async () => {
     const directParams = { ...params, commitmentSettlementRequired: false };
-    const mutation = options();
-    const result = await mutation.mutationFn(directParams);
+    const result = await options().mutationFn(directParams);
 
     expect(result).toEqual({ kind: 'closed' });
     expect(mocks.requireConnectedWallet).not.toHaveBeenCalled();
@@ -123,7 +122,7 @@ describe('useCloseJob', () => {
     const mutation = options();
     const result = await mutation.mutationFn(params);
 
-    await mutation.onSuccess(result, params);
+    mutation.onSuccess(result, params);
 
     expect(mocks.closeJob).not.toHaveBeenCalled();
     expect(mocks.onCompleted).toHaveBeenCalledOnce();

@@ -1,3 +1,4 @@
+import type { JobPosting } from '@comitium/schemas/jobs';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Card, CardContent } from '@comitium/ui/card';
@@ -10,7 +11,11 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { JobDescriptionEditorDialog } from '@/components/features/job-detail/job-description-editor-dialog';
 import { getPublicSiteOrigin } from '@/config/site';
-import { useUnpublishJobPosting, useUpdateJobPosting } from '@/hooks/mutations/use-job-posting-mutations';
+import {
+  useReleaseCommitmentFunds,
+  useUnpublishJobPosting,
+  useUpdateJobPosting,
+} from '@/hooks/mutations/use-job-posting-mutations';
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
 import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
@@ -20,6 +25,8 @@ import { ApplicationCapacityControl, isValidApplicationCapacity } from './applic
 import { ApplicationFormDialog } from './application-form-dialog';
 import { PostingTabs } from './posting-tabs';
 import { PublishJobDialogV2 } from './publish-job-dialog-v2';
+import { ResponseCommitmentDialog } from './response-commitment-dialog';
+import { ResponseCommitmentStatus } from './response-commitment-status';
 
 const UNPUBLISH_DESCRIPTION =
   'The Posting will be removed from job boards and stop accepting new applications. Existing candidates will remain in the Pipeline.';
@@ -34,11 +41,13 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const summaryQuery = useQueryJobSummary(jobId);
   const updatePosting = useUpdateJobPosting({ orgId, jobId });
   const unpublishPosting = useUnpublishJobPosting({ orgId, jobId });
+  const releaseCommitmentFunds = useReleaseCommitmentFunds({ orgId, jobId });
   const { canOnJob, isLoading: permissionsLoading } = useJobPermissions(jobId);
   const [applicationCapacity, setApplicationCapacity] = useState<number | null>(null);
   const [applicationFormDialogOpen, setApplicationFormDialogOpen] = useState(false);
   const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [commitmentOpen, setCommitmentOpen] = useState(false);
   const [unpublishOpen, setUnpublishOpen] = useState(false);
 
   useEffect(() => {
@@ -63,17 +72,29 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     );
   }
 
-  const isPublished = posting.status === 'published';
-  const isClosed = job.status === 'closed';
-  const canEdit = !isClosed && canOnJob(Permission.JOB_EDIT);
+  const commitment = posting.commitment;
+  const isPostingPublished = posting.status === 'published';
+  const isJobClosed = job.status === 'closed';
+  const isCommitmentFinalizing = job.lifecycle.commitmentFinalizationPending;
+  const commitmentAllowsActivation = commitment === null || commitment.status === 'closed';
+  const postingAllowsCommitment =
+    isPostingPublished && commitmentAllowsActivation && !isCommitmentFinalizing;
+  const postingAllowsPublication =
+    !isPostingPublished && job.status === 'open' && !isCommitmentFinalizing;
+
+  const canEdit = !isJobClosed && canOnJob(Permission.JOB_EDIT);
   const canPublishPosting = canOnJob(Permission.JOB_PUBLISH);
   const canUnpublishPosting = canOnJob(Permission.JOB_UNPUBLISH);
-  const capacityChanged = applicationCapacity !== posting.applicationCapacity;
-  const capacityIsValid = isValidApplicationCapacity(applicationCapacity);
-  const canSaveCapacity = canEdit && capacityChanged && capacityIsValid && !updatePosting.isPending;
-  const publicPostingUrl = job.canonicalUrl ? new URL(job.canonicalUrl, getPublicSiteOrigin()).toString() : null;
+  const canReleaseFunds = canOnJob(Permission.JOB_CLOSE);
+  const canAddCommitment = canPublishPosting && postingAllowsCommitment;
+  const canOpenPublishDialog = canPublishPosting && postingAllowsPublication && !permissionsLoading;
 
-  const canOpenPublishDialog = canPublishPosting && !isPublished && job.status === 'open' && !permissionsLoading;
+  const capacityHasChanged = applicationCapacity !== posting.applicationCapacity;
+  const capacityIsValid = isValidApplicationCapacity(applicationCapacity);
+  const capacityAllowsSave = capacityHasChanged && capacityIsValid && !updatePosting.isPending;
+  const canSaveCapacity = canEdit && capacityAllowsSave;
+  const publicPostingUrl = getPublicPostingUrl(job.canonicalUrl);
+  const postingStatusLabel = getPostingStatusLabel(posting.status, commitment);
 
   const handleCopyPostingLink = async () => {
     if (!publicPostingUrl) {
@@ -122,11 +143,11 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-2">
             <h1 className="text-heading-20">Posting</h1>
-            <Badge variant={isPublished ? 'success' : 'secondary'}>{isPublished ? 'Published' : 'Unpublished'}</Badge>
+            <Badge variant={isPostingPublished ? 'success' : 'secondary'}>{postingStatusLabel}</Badge>
           </div>
 
           <div className="flex flex-wrap justify-end gap-2">
-            {isPublished && publicPostingUrl && (
+            {isPostingPublished && publicPostingUrl && (
               <Button asChild variant="outline" size="sm">
                 <a href={publicPostingUrl} target="_blank" rel="noopener noreferrer">
                   <ArrowSquareOutIcon data-icon="inline-start" />
@@ -135,26 +156,40 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
               </Button>
             )}
 
-            {isPublished && publicPostingUrl && (
+            {isPostingPublished && publicPostingUrl && (
               <Button variant="outline" size="sm" onClick={handleCopyPostingLink}>
                 <CopyIcon data-icon="inline-start" />
                 Copy link
               </Button>
             )}
 
-            {isPublished && canUnpublishPosting ? (
+            {isPostingPublished && canUnpublishPosting ? (
               <Button variant="outline" size="sm" onClick={() => setUnpublishOpen(true)}>
                 Unpublish
               </Button>
             ) : null}
 
-            {!isPublished && canPublishPosting ? (
+            {canAddCommitment ? (
+              <Button variant="outline" size="sm" onClick={() => setCommitmentOpen(true)}>
+                Add response commitment
+              </Button>
+            ) : null}
+
+            {!isPostingPublished && canPublishPosting ? (
               <Button size="sm" onClick={() => setPublishOpen(true)} disabled={!canOpenPublishDialog}>
                 Publish
               </Button>
             ) : null}
           </div>
         </div>
+
+        <ResponseCommitmentStatus
+          commitment={commitment}
+          isPostingPublished={isPostingPublished}
+          canReleaseFunds={canReleaseFunds}
+          isReleasing={releaseCommitmentFunds.isPending || releaseCommitmentFunds.isConfirming}
+          onRelease={() => releaseCommitmentFunds.mutate()}
+        />
 
         <PostingTabs
           description={
@@ -206,7 +241,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
                     onChange={setApplicationCapacity}
                     disabled={!canEdit || updatePosting.isPending}
                   />
-                  {canEdit && capacityChanged && (
+                  {canEdit && capacityHasChanged && (
                     <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
                       {updatePosting.isPending && <Spinner data-icon="inline-start" />}
                       {updatePosting.isPending ? 'Saving...' : 'Save capacity'}
@@ -238,6 +273,14 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
         onOpenChange={setPublishOpen}
       />
 
+      <ResponseCommitmentDialog
+        orgId={orgId}
+        jobId={jobId}
+        expectedVersion={posting.version}
+        open={commitmentOpen}
+        onOpenChange={setCommitmentOpen}
+      />
+
       <JobDescriptionEditorDialog
         descriptionMarkdown={posting.descriptionMarkdown}
         isPending={updatePosting.isPending}
@@ -257,6 +300,26 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
       />
     </div>
   );
+}
+
+function responseDeadlineLabel(days: number): string {
+  return days === 1 ? '1 day' : `${days} days`;
+}
+
+function getPostingStatusLabel(status: JobPosting['status'], commitment: JobPosting['commitment']): string {
+  if (status === 'unpublished') {
+    return 'Unpublished';
+  }
+
+  if (commitment?.status === 'published') {
+    return `Published · Response within ${responseDeadlineLabel(commitment.responseDeadlineDays)}`;
+  }
+
+  return 'Published';
+}
+
+function getPublicPostingUrl(canonicalUrl: string | null): string | null {
+  return canonicalUrl ? new URL(canonicalUrl, getPublicSiteOrigin()).toString() : null;
 }
 
 function applicationCountLabel(completedCount: number, capacity: number | null): string {

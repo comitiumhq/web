@@ -3,11 +3,6 @@
     "type": "constructor",
     "inputs": [
       {
-        "name": "stakeToken_",
-        "type": "address",
-        "internalType": "contract IERC20"
-      },
-      {
         "name": "jobFunds_",
         "type": "address",
         "internalType": "contract IJobFunds"
@@ -179,11 +174,6 @@
             "internalType": "uint8"
           }
         ]
-      },
-      {
-        "name": "applicantStakeAmount_",
-        "type": "uint96",
-        "internalType": "uint96"
       }
     ],
     "stateMutability": "nonpayable"
@@ -236,19 +226,6 @@
   },
   {
     "type": "function",
-    "name": "applicantStakeAmount",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint96",
-        "internalType": "uint96"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "application",
     "inputs": [
       {
@@ -269,11 +246,6 @@
             "internalType": "address"
           },
           {
-            "name": "stake",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
             "name": "appliedAt",
             "type": "uint256",
             "internalType": "uint256"
@@ -290,11 +262,6 @@
           },
           {
             "name": "isResponded",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "stakeWithdrawn",
             "type": "bool",
             "internalType": "bool"
           }
@@ -1221,19 +1188,6 @@
   },
   {
     "type": "function",
-    "name": "setApplicantStakeAmount",
-    "inputs": [
-      {
-        "name": "newAmount",
-        "type": "uint96",
-        "internalType": "uint96"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "setJobConfig",
     "inputs": [
       {
@@ -1438,76 +1392,12 @@
   },
   {
     "type": "function",
-    "name": "stakeReturnInfo",
-    "inputs": [
-      {
-        "name": "applicationId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "info",
-        "type": "tuple",
-        "internalType": "struct StakeReturnInfo",
-        "components": [
-          {
-            "name": "status",
-            "type": "uint8",
-            "internalType": "enum StakeReturnStatus"
-          },
-          {
-            "name": "applicant",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "stake",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "responseDeadline",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "isResponded",
-            "type": "bool",
-            "internalType": "bool"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "stakeToken",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "contract IERC20"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "submitApplication",
     "inputs": [
       {
         "name": "applicationId",
         "type": "bytes32",
         "internalType": "bytes32"
-      },
-      {
-        "name": "stake",
-        "type": "uint96",
-        "internalType": "uint96"
       },
       {
         "name": "responseDeadlineDays",
@@ -1527,19 +1417,6 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "totalApplicantStakes",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "total",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -1636,92 +1513,6 @@
     "stateMutability": "nonpayable"
   },
   {
-    "type": "function",
-    "name": "withdrawStake",
-    "inputs": [
-      {
-        "name": "applicationId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "withdrawStakes",
-    "inputs": [
-      {
-        "name": "applicationIds",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "returnedCount",
-        "type": "uint16",
-        "internalType": "uint16"
-      },
-      {
-        "name": "skippedCount",
-        "type": "uint16",
-        "internalType": "uint16"
-      },
-      {
-        "name": "totalReturned",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "event",
-    "name": "ApplicantStakeAmountUpdated",
-    "inputs": [
-      {
-        "name": "amount",
-        "type": "uint96",
-        "indexed": false,
-        "internalType": "uint96"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "ApplicantStakeReturnProcessed",
-    "inputs": [
-      {
-        "name": "applicationId",
-        "type": "bytes32",
-        "indexed": true,
-        "internalType": "bytes32"
-      },
-      {
-        "name": "applicant",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "amount",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "outcome",
-        "type": "uint8",
-        "indexed": false,
-        "internalType": "enum StakeReturnOutcome"
-      }
-    ],
-    "anonymous": false
-  },
-  {
     "type": "event",
     "name": "ApplicationResponded",
     "inputs": [
@@ -1761,12 +1552,6 @@
         "type": "address",
         "indexed": true,
         "internalType": "address"
-      },
-      {
-        "name": "stake",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
       },
       {
         "name": "responseDeadline",
@@ -2338,17 +2123,6 @@
   },
   {
     "type": "error",
-    "name": "ApplicantStakeAmountUnchanged",
-    "inputs": [
-      {
-        "name": "amount",
-        "type": "uint96",
-        "internalType": "uint96"
-      }
-    ]
-  },
-  {
-    "type": "error",
     "name": "ApplicationAlreadyResponded",
     "inputs": [
       {
@@ -2536,22 +2310,6 @@
         "name": "currentNonce",
         "type": "uint256",
         "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "InvalidApplicantStake",
-    "inputs": [
-      {
-        "name": "provided",
-        "type": "uint96",
-        "internalType": "uint96"
-      },
-      {
-        "name": "current",
-        "type": "uint96",
-        "internalType": "uint96"
       }
     ]
   },
@@ -2839,22 +2597,6 @@
   },
   {
     "type": "error",
-    "name": "RescueExceedsSurplus",
-    "inputs": [
-      {
-        "name": "requested",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "available",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
     "name": "SafeCastOverflowedUintDowncast",
     "inputs": [
       {
@@ -2887,11 +2629,6 @@
   },
   {
     "type": "error",
-    "name": "StakeAlreadyWithdrawn",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "StakeTooLow",
     "inputs": [
       {
@@ -2916,11 +2653,6 @@
         "internalType": "string"
       }
     ]
-  },
-  {
-    "type": "error",
-    "name": "WithdrawalNotReady",
-    "inputs": []
   },
   {
     "type": "error",

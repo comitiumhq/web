@@ -184,7 +184,6 @@ export const jobCommitmentAbi = [
   {
     type: 'constructor',
     inputs: [
-      { name: 'stakeToken_', internalType: 'contract IERC20', type: 'address' },
       {
         name: 'jobFunds_',
         internalType: 'contract IJobFunds',
@@ -262,7 +261,6 @@ export const jobCommitmentAbi = [
           { name: 'deadlineDays', internalType: 'uint8', type: 'uint8' },
         ],
       },
-      { name: 'applicantStakeAmount_', internalType: 'uint96', type: 'uint96' },
     ],
     stateMutability: 'nonpayable',
   },
@@ -296,13 +294,6 @@ export const jobCommitmentAbi = [
   },
   {
     type: 'function',
-    inputs: [],
-    name: 'applicantStakeAmount',
-    outputs: [{ name: '', internalType: 'uint96', type: 'uint96' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     inputs: [{ name: 'applicationId', internalType: 'bytes32', type: 'bytes32' }],
     name: 'application',
     outputs: [
@@ -312,7 +303,6 @@ export const jobCommitmentAbi = [
         type: 'tuple',
         components: [
           { name: 'applicant', internalType: 'address', type: 'address' },
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
           { name: 'appliedAt', internalType: 'uint256', type: 'uint256' },
           {
             name: 'responseDeadline',
@@ -321,7 +311,6 @@ export const jobCommitmentAbi = [
           },
           { name: 'respondedAt', internalType: 'uint256', type: 'uint256' },
           { name: 'isResponded', internalType: 'bool', type: 'bool' },
-          { name: 'stakeWithdrawn', internalType: 'bool', type: 'bool' },
         ],
       },
     ],
@@ -747,13 +736,6 @@ export const jobCommitmentAbi = [
   },
   {
     type: 'function',
-    inputs: [{ name: 'newAmount', internalType: 'uint96', type: 'uint96' }],
-    name: 'setApplicantStakeAmount',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
     inputs: [
       {
         name: 'config',
@@ -846,44 +828,8 @@ export const jobCommitmentAbi = [
   },
   {
     type: 'function',
-    inputs: [{ name: 'applicationId', internalType: 'bytes32', type: 'bytes32' }],
-    name: 'stakeReturnInfo',
-    outputs: [
-      {
-        name: 'info',
-        internalType: 'struct StakeReturnInfo',
-        type: 'tuple',
-        components: [
-          {
-            name: 'status',
-            internalType: 'enum StakeReturnStatus',
-            type: 'uint8',
-          },
-          { name: 'applicant', internalType: 'address', type: 'address' },
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'responseDeadline',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          { name: 'isResponded', internalType: 'bool', type: 'bool' },
-        ],
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'stakeToken',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     inputs: [
       { name: 'applicationId', internalType: 'bytes32', type: 'bytes32' },
-      { name: 'stake', internalType: 'uint96', type: 'uint96' },
       { name: 'responseDeadlineDays', internalType: 'uint8', type: 'uint8' },
       { name: 'expiry', internalType: 'uint256', type: 'uint256' },
       { name: 'signature', internalType: 'bytes', type: 'bytes' },
@@ -891,13 +837,6 @@ export const jobCommitmentAbi = [
     name: 'submitApplication',
     outputs: [],
     stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'totalApplicantStakes',
-    outputs: [{ name: 'total', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -946,68 +885,6 @@ export const jobCommitmentAbi = [
     stateMutability: 'nonpayable',
   },
   {
-    type: 'function',
-    inputs: [{ name: 'applicationId', internalType: 'bytes32', type: 'bytes32' }],
-    name: 'withdrawStake',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'applicationIds', internalType: 'bytes32[]', type: 'bytes32[]' }],
-    name: 'withdrawStakes',
-    outputs: [
-      { name: 'returnedCount', internalType: 'uint16', type: 'uint16' },
-      { name: 'skippedCount', internalType: 'uint16', type: 'uint16' },
-      { name: 'totalReturned', internalType: 'uint256', type: 'uint256' },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'amount',
-        internalType: 'uint96',
-        type: 'uint96',
-        indexed: false,
-      },
-    ],
-    name: 'ApplicantStakeAmountUpdated',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'applicationId',
-        internalType: 'bytes32',
-        type: 'bytes32',
-        indexed: true,
-      },
-      {
-        name: 'applicant',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'amount',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-      {
-        name: 'outcome',
-        internalType: 'enum StakeReturnOutcome',
-        type: 'uint8',
-        indexed: false,
-      },
-    ],
-    name: 'ApplicantStakeReturnProcessed',
-  },
-  {
     type: 'event',
     anonymous: false,
     inputs: [
@@ -1047,12 +924,6 @@ export const jobCommitmentAbi = [
         internalType: 'address',
         type: 'address',
         indexed: true,
-      },
-      {
-        name: 'stake',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
       },
       {
         name: 'responseDeadline',
@@ -1519,11 +1390,6 @@ export const jobCommitmentAbi = [
   },
   {
     type: 'error',
-    inputs: [{ name: 'amount', internalType: 'uint96', type: 'uint96' }],
-    name: 'ApplicantStakeAmountUnchanged',
-  },
-  {
-    type: 'error',
     inputs: [{ name: 'applicationId', internalType: 'bytes32', type: 'bytes32' }],
     name: 'ApplicationAlreadyResponded',
   },
@@ -1599,14 +1465,6 @@ export const jobCommitmentAbi = [
       { name: 'currentNonce', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'InvalidAccountNonce',
-  },
-  {
-    type: 'error',
-    inputs: [
-      { name: 'provided', internalType: 'uint96', type: 'uint96' },
-      { name: 'current', internalType: 'uint96', type: 'uint96' },
-    ],
-    name: 'InvalidApplicantStake',
   },
   {
     type: 'error',
@@ -1729,14 +1587,6 @@ export const jobCommitmentAbi = [
   {
     type: 'error',
     inputs: [
-      { name: 'requested', internalType: 'uint256', type: 'uint256' },
-      { name: 'available', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'RescueExceedsSurplus',
-  },
-  {
-    type: 'error',
-    inputs: [
       { name: 'bits', internalType: 'uint8', type: 'uint8' },
       { name: 'value', internalType: 'uint256', type: 'uint256' },
     ],
@@ -1748,7 +1598,6 @@ export const jobCommitmentAbi = [
     name: 'SafeERC20FailedOperation',
   },
   { type: 'error', inputs: [], name: 'SignatureExpired' },
-  { type: 'error', inputs: [], name: 'StakeAlreadyWithdrawn' },
   {
     type: 'error',
     inputs: [
@@ -1762,7 +1611,6 @@ export const jobCommitmentAbi = [
     inputs: [{ name: 'str', internalType: 'string', type: 'string' }],
     name: 'StringTooLong',
   },
-  { type: 'error', inputs: [], name: 'WithdrawalNotReady' },
   { type: 'error', inputs: [], name: 'ZeroAddress' },
   { type: 'error', inputs: [], name: 'ZeroApplicationId' },
   { type: 'error', inputs: [], name: 'ZeroResponseId' },

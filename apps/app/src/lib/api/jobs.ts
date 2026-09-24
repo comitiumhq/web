@@ -9,15 +9,14 @@ import {
   jobPostingSchema,
   jobSummarySchema,
   orgJobsResponseSchema,
+  type PrepareCommitmentParams,
   type PrepareJobContentUriUpdateParams,
-  type PublishDraftParams,
   type PublishJobPostingData,
   prepareJobContentUriUpdateResponseSchema,
-  prepareUnpublishSchema,
-  publishDraftResponseSchema,
   reopenJobAsDraftResponseSchema,
   type UpdateJobEditorData,
   type UpdateJobPostingData,
+  unpublishJobPostingResponseSchema,
   updateJobEditorResponseSchema,
 } from '@comitium/schemas/jobs';
 import { preparedRelayedOnchainOperationSchema } from '@comitium/schemas/onchain-operations';
@@ -29,8 +28,12 @@ export function getJobSummary(id: string) {
   return api.get(`/jobs/${id}/summary`, jobSummarySchema);
 }
 
-export function prepareUnpublishJob(jobId: string) {
-  return api.post(`/jobs/${jobId}/unpublish/prepare`, undefined, prepareUnpublishSchema);
+export function prepareJobSettlement(jobId: string) {
+  return api.post(`/jobs/${jobId}/settle/prepare`, {}, preparedRelayedOnchainOperationSchema);
+}
+
+export function closeJob(jobId: string, expectedVersion: number, closeReasonId: string) {
+  return api.post(`/jobs/${jobId}/close`, { expectedVersion, closeReasonId }, jobLifecycleMutationResponseSchema);
 }
 
 export function prepareJobClose(jobId: string, expectedVersion: number, closeReasonId: string) {
@@ -39,10 +42,6 @@ export function prepareJobClose(jobId: string, expectedVersion: number, closeRea
     { expectedVersion, closeReasonId },
     preparedRelayedOnchainOperationSchema,
   );
-}
-
-export function closeJob(jobId: string, expectedVersion: number, closeReasonId: string) {
-  return api.post(`/jobs/${jobId}/close`, { expectedVersion, closeReasonId }, jobLifecycleMutationResponseSchema);
 }
 
 export function reopenJobAsDraft(jobId: string) {
@@ -138,10 +137,6 @@ export function deleteDraft(orgId: string, jobId: string) {
   return api.delete(`/orgs/${orgId}/jobs/${jobId}`, successSchema);
 }
 
-export function publishDraft(orgId: string, jobId: string, data: PublishDraftParams) {
-  return api.post(`/orgs/${orgId}/jobs/${jobId}/publish/prepare`, data, publishDraftResponseSchema);
-}
-
 export function prepareJobContentUriUpdate(orgId: string, jobId: string, data: PrepareJobContentUriUpdateParams) {
   return api.post(`/orgs/${orgId}/jobs/${jobId}/content/prepare`, data, prepareJobContentUriUpdateResponseSchema);
 }
@@ -161,5 +156,13 @@ export function publishJobPosting(orgId: string, jobId: string, data: PublishJob
 }
 
 export function unpublishJobPosting(orgId: string, jobId: string, expectedVersion: number) {
-  return api.post(`/orgs/${orgId}/jobs/${jobId}/posting/unpublish`, { expectedVersion }, jobPostingSchema);
+  return api.post(
+    `/orgs/${orgId}/jobs/${jobId}/posting/unpublish`,
+    { expectedVersion },
+    unpublishJobPostingResponseSchema,
+  );
+}
+
+export function prepareCommitment(orgId: string, jobId: string, data: PrepareCommitmentParams) {
+  return api.post(`/orgs/${orgId}/jobs/${jobId}/commitment/prepare`, data, preparedRelayedOnchainOperationSchema);
 }

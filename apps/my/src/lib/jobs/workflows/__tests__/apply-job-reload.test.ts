@@ -1,5 +1,6 @@
-import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { deriveApplicationId } from '@/lib/eip712';
 
 import { type ApplyJobWorkflowParams, applyJobWorkflow } from '../apply-job';
 
@@ -21,6 +22,7 @@ const mocks = vi.hoisted(() => ({
   submitPreparedUserWalletOnchainOperation: vi.fn(),
   uploadApplicationFile: vi.fn(),
   waitForOperationReceipt: vi.fn(),
+  applicationSalt: `0x${'4'.repeat(64)}` as `0x${string}`,
 }));
 
 vi.mock('@/lib/api/applications', async (importOriginal) => ({
@@ -50,23 +52,22 @@ vi.mock('@comitium/chain/onchain-operation-observer', () => ({
   waitForOperationReceipt: mocks.waitForOperationReceipt,
 }));
 
+vi.mock('@/lib/eip712', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/eip712')>()),
+  generateApplicationSalt: () => mocks.applicationSalt,
+}));
+
 const APPLICATION_DB_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const OPERATION_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
 function runWorkflow(overrides: Partial<ApplyJobWorkflowParams> = {}) {
   return applyJobWorkflow({
-    address: '0x1111111111111111111111111111111111111111',
     jobData: {
-      applyMode: 'committed',
       id: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
       postingId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
-      chainId: 84532,
-      jobId: 1,
       orgId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
-      commitmentContract: '0x2222222222222222222222222222222222222222',
-      creatorAddress: '0x3333333333333333333333333333333333333333',
-    } as Extract<JobApplicationData, { applyMode: 'committed' }>,
-    stakeAmount: 5_000_000n,
+    },
+    walletReady: true,
     formId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
     answerBuckets: [],
     candidateIdentityInputs: [],
@@ -115,7 +116,7 @@ describe('applyJobWorkflow reload', () => {
 
     const result = await runWorkflow();
 
-    expect(result._unsafeUnwrap()).toEqual({ kind: 'completed', operationId: OPERATION_ID });
+    expect(result._unsafeUnwrap()).toEqual({ kind: 'completed' });
     expect(mocks.waitForOperationReceipt).not.toHaveBeenCalled();
   });
 
@@ -142,6 +143,7 @@ describe('applyJobWorkflow reload', () => {
       kind: 'prepared',
       applicationId: APPLICATION_DB_ID,
       formSnapshotHash: `0x${'1'.repeat(64)}`,
+      commitment: null,
       processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },
       vaultKey: { vaultPublicKey: {}, keyVersion: 1 },
       filePolicy: { kinds: {} },
@@ -171,6 +173,7 @@ describe('applyJobWorkflow reload', () => {
       kind: 'prepared',
       applicationId: APPLICATION_DB_ID,
       formSnapshotHash: `0x${'1'.repeat(64)}`,
+      commitment: null,
       processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },
       vaultKey: { vaultPublicKey: {}, keyVersion: 1 },
       filePolicy: {
@@ -210,6 +213,7 @@ describe('applyJobWorkflow reload', () => {
       kind: 'prepared',
       applicationId: APPLICATION_DB_ID,
       formSnapshotHash: `0x${'1'.repeat(64)}`,
+      commitment: null,
       processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },
       vaultKey: { vaultPublicKey: {}, keyVersion: 1 },
       filePolicy: {
@@ -244,6 +248,98 @@ describe('applyJobWorkflow reload', () => {
     expect(input.wrappedKeys).toEqual(expect.arrayContaining([expect.objectContaining({ slot: 'resume' })]));
   });
 
+  it('binds a response commitment application to an opaque onchain application id', async () => {
+    mocks.prepareApplication.mockResolvedValue({
+      kind: 'prepared',
+      applicationId: APPLICATION_DB_ID,
+      formSnapshotHash: `0x${'1'.repeat(64)}`,
+      commitment: {
+        chainId: 84_532,
+        contract: '0x2222222222222222222222222222222222222222',
+        jobId: 7,
+        jobUuid: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      },
+      processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },
+      vaultKey: { vaultPublicKey: {}, keyVersion: 1 },
+      filePolicy: { kinds: {} },
+    });
+    mocks.finalizeApplication.mockResolvedValue({ state: 'completed', applicationId: APPLICATION_DB_ID });
+
+    const result = await runWorkflow({
+      candidateIdentityInputs: [
+        {
+          questionId: '99999999-9999-4999-8999-999999999999',
+          value: 'candidate@example.com',
+          processorAccess: true,
+        },
+      ],
+    });
+
+    expect(result.isOk()).toBe(true);
+    expect(mocks.finalizeApplication).toHaveBeenCalledWith(
+      APPLICATION_DB_ID,
+      expect.objectContaining({
+        applicationId: deriveApplicationId({
+          chainId: 84_532,
+          commitmentContract: '0x2222222222222222222222222222222222222222',
+          jobId: 7,
+          jobUuid: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+          applicationUuid: APPLICATION_DB_ID,
+          salt: mocks.applicationSalt,
+        }),
+        applicationSalt: mocks.applicationSalt,
+      }),
+    );
+  });
+
+  it('requires the applicant wallet only when the Posting has a response commitment', async () => {
+    mocks.prepareApplication.mockResolvedValue({
+      kind: 'prepared',
+      applicationId: APPLICATION_DB_ID,
+      formSnapshotHash: `0x${'1'.repeat(64)}`,
+      commitment: {
+        chainId: 84_532,
+        contract: '0x2222222222222222222222222222222222222222',
+        jobId: 7,
+        jobUuid: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      },
+      processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },
+      vaultKey: { vaultPublicKey: {}, keyVersion: 1 },
+      filePolicy: { kinds: {} },
+    });
+
+    const result = await runWorkflow({ walletReady: false });
+
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toMatchObject({ _tag: 'ValidationError' });
+    expect(mocks.finalizeApplication).not.toHaveBeenCalled();
+
+    mocks.prepareApplication.mockResolvedValue({
+      kind: 'prepared',
+      applicationId: APPLICATION_DB_ID,
+      formSnapshotHash: `0x${'1'.repeat(64)}`,
+      commitment: null,
+      processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },
+      vaultKey: { vaultPublicKey: {}, keyVersion: 1 },
+      filePolicy: { kinds: {} },
+    });
+    mocks.finalizeApplication.mockResolvedValue({ state: 'completed', applicationId: APPLICATION_DB_ID });
+
+    const ordinaryResult = await runWorkflow({
+      walletReady: false,
+      candidateIdentityInputs: [
+        {
+          questionId: '99999999-9999-4999-8999-999999999999',
+          value: 'candidate@example.com',
+          processorAccess: true,
+        },
+      ],
+    });
+
+    expect(ordinaryResult.isOk()).toBe(true);
+    expect(mocks.finalizeApplication).toHaveBeenCalledOnce();
+  });
+
   it('retries an existing actionable operation without rebuilding encrypted submission data', async () => {
     mocks.prepareApplication.mockResolvedValue({
       kind: 'existing',
@@ -253,12 +349,8 @@ describe('applyJobWorkflow reload', () => {
 
     const result = await runWorkflow();
 
-    expect(result._unsafeUnwrap()).toEqual({ kind: 'completed', operationId: OPERATION_ID });
-    expect(mocks.retryApplicationOnchainOperation).toHaveBeenCalledExactlyOnceWith(
-      APPLICATION_DB_ID,
-      OPERATION_ID,
-      '5000000',
-    );
+    expect(result._unsafeUnwrap()).toEqual({ kind: 'completed' });
+    expect(mocks.retryApplicationOnchainOperation).toHaveBeenCalledExactlyOnceWith(APPLICATION_DB_ID, OPERATION_ID);
     expect(mocks.encryptApplication).not.toHaveBeenCalled();
     expect(mocks.finalizeApplication).not.toHaveBeenCalled();
   });
@@ -301,6 +393,7 @@ describe('applyJobWorkflow reload', () => {
       kind: 'prepared',
       applicationId: APPLICATION_DB_ID,
       formSnapshotHash: `0x${'1'.repeat(64)}`,
+      commitment: null,
       processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },
       vaultKey: { vaultPublicKey: {}, keyVersion: 1 },
       filePolicy: {

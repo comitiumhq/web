@@ -75,107 +75,107 @@ export function JobBasicInformationFields({
   return (
     <fieldset aria-label="Basic information" disabled={readOnly}>
       <div className="flex flex-col gap-5">
+        <FormField
+          control={control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="gap-1">
+                Title <RequiredMarker show />
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. Senior Frontend Developer" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
           <FormField
             control={control}
-            name="title"
+            name="departmentId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="gap-1">
-                  Title <RequiredMarker show />
+                  Team <RequiredMarker show={showPublishRequiredMarkers} />
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. Senior Frontend Developer" {...field} />
+                  <Combobox
+                    ariaLabel="Team"
+                    options={departmentOptions}
+                    value={field.value ?? null}
+                    clearable={false}
+                    onValueChange={handleDepartmentChange}
+                    placeholder="Select team"
+                    searchPlaceholder="Search teams…"
+                    emptyMessage="No teams found."
+                    disabled={!editableStructure || readOnly}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-            <FormField
-              control={control}
-              name="departmentId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="gap-1">
-                    Team <RequiredMarker show={showPublishRequiredMarkers} />
-                  </FormLabel>
-                  <FormControl>
-                    <Combobox
-                      ariaLabel="Team"
-                      options={departmentOptions}
-                      value={field.value ?? null}
-                      clearable={false}
-                      onValueChange={handleDepartmentChange}
-                      placeholder="Select team"
-                      searchPlaceholder="Search teams…"
-                      emptyMessage="No teams found."
-                      disabled={!editableStructure || readOnly}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="locationId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="gap-1">
-                    Location <RequiredMarker show={showPublishRequiredMarkers} />
-                  </FormLabel>
-                  <FormControl>
-                    <Combobox
-                      ariaLabel="Location"
-                      options={locationOptions}
-                      value={field.value ?? null}
-                      clearable={false}
-                      onValueChange={handleLocationChange}
-                      placeholder="Select location"
-                      searchPlaceholder="Search locations…"
-                      emptyMessage="No locations found."
-                      disabled={!editableStructure || readOnly}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
-            <CategoryField control={control} required={showPublishRequiredMarkers} />
-          </div>
-
           <FormField
             control={control}
-            name="employmentType"
+            name="locationId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="gap-1">
-                  Employment type <RequiredMarker show={showPublishRequiredMarkers} />
+                  Location <RequiredMarker show={showPublishRequiredMarkers} />
                 </FormLabel>
                 <FormControl>
-                  <ToggleGroup
-                    type="single"
-                    value={field.value ?? ''}
-                    onValueChange={handleEmploymentTypeChange}
-                    variant="outline"
-                    className="w-full flex-wrap sm:w-fit"
-                  >
-                    {EMPLOYMENT_TYPES.map((option) => (
-                      <ToggleGroupItem key={option.value} value={option.value} className="px-4">
-                        {option.label}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
+                  <Combobox
+                    ariaLabel="Location"
+                    options={locationOptions}
+                    value={field.value ?? null}
+                    clearable={false}
+                    onValueChange={handleLocationChange}
+                    placeholder="Select location"
+                    searchPlaceholder="Search locations…"
+                    emptyMessage="No locations found."
+                    disabled={!editableStructure || readOnly}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </div>
+
+        <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
+          <CategoryField control={control} required={showPublishRequiredMarkers} />
+        </div>
+
+        <FormField
+          control={control}
+          name="employmentType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="gap-1">
+                Employment type <RequiredMarker show={showPublishRequiredMarkers} />
+              </FormLabel>
+              <FormControl>
+                <ToggleGroup
+                  type="single"
+                  value={field.value ?? ''}
+                  onValueChange={handleEmploymentTypeChange}
+                  variant="outline"
+                  className="w-full flex-wrap sm:w-fit"
+                >
+                  {EMPLOYMENT_TYPES.map((option) => (
+                    <ToggleGroupItem key={option.value} value={option.value} className="px-4">
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </fieldset>
   );

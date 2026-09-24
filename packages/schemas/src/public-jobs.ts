@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import type { PublicJobSort } from './job-enums';
-import { addressSchema, paginatedWithTotalSchema, uuidSchema, walletAddressSchema } from './public';
+import { paginatedWithTotalSchema, uuidSchema } from './public';
 
 const compensationTierSchema = z.object({
   title: z.string().optional(),
@@ -59,28 +59,18 @@ export const jobLifecycleSchema = z.object({
 
 export type JobLifecycle = z.infer<typeof jobLifecycleSchema>;
 
-export const jobPostingApplyModeSchema = z.enum(['standard', 'committed']);
-
 export const jobListItemSchema = z.object({
   id: z.string(),
   postingId: uuidSchema,
   postingSlug: z.string(),
   orgSlug: z.string(),
   canonicalUrl: z.string(),
-  jobCommitmentId: uuidSchema.nullable(),
-  applyMode: jobPostingApplyModeSchema,
   applicationCapacityAvailable: z.boolean(),
-  chainId: z.number().nullable(),
-  commitmentContract: addressSchema.nullable(),
-  jobId: z.number().nullable(),
-  commitmentStatus: jobCommitmentStatusSchema.nullable(),
   title: z.string().nullable(),
   description: z.string().nullable(),
   socialDescription: z.string().nullable(),
   status: jobStatusSchema,
-  creatorAddress: walletAddressSchema.nullable(),
   responseDeadlineDays: z.number().nullable(),
-  txHash: z.string().nullable(),
   createdAt: z.string(),
   location: z.array(locationEntrySchema).nullable(),
   locationType: z.string().nullable(),
@@ -101,26 +91,12 @@ const jobSchema = z.object({
   postingSlug: z.string(),
   orgSlug: z.string(),
   canonicalUrl: z.string(),
-  jobCommitmentId: uuidSchema.nullable(),
-  applyMode: jobPostingApplyModeSchema,
   applicationCapacityAvailable: z.boolean(),
-  chainId: z.number().nullable(),
-  commitmentContract: addressSchema.nullable(),
-  jobId: z.number().nullable(),
-  commitmentStatus: jobCommitmentStatusSchema.nullable(),
-  lifecycle: jobLifecycleSchema,
   orgId: z.string(),
-  orgOnChainId: z.number().nullable(),
-  creatorAddress: walletAddressSchema.nullable(),
-  stake: z.string().nullable(),
-  feeTier: z.number().nullable(),
-  feeAmount: z.string().nullable(),
   responseDeadlineDays: z.number().nullable(),
   status: jobStatusSchema,
-  txHash: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  contentUri: z.string().nullable(),
   title: z.string().nullable(),
   description: z.string().nullable(),
   location: z.array(locationEntrySchema).nullable(),

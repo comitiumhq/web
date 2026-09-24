@@ -5,7 +5,6 @@ import {
   onchainUintSchema,
   parseOnchainAddress,
   parseOnchainSafeInteger,
-  parseOnchainUint,
   tupleField,
 } from '@comitium/schemas/onchain';
 import { ContractError } from '@comitium/schemas/product-errors';
@@ -52,13 +51,6 @@ export async function fetchJobCommitmentMaxBatchSize(commitmentContract: Address
   const configTuple = await bindings.readJobConfig(publicClient, commitmentContract, version);
 
   return parseJobConfigTuple(configTuple).maxBatchSize;
-}
-
-export async function fetchApplicantStakeAmount(commitmentContract: Address): Promise<bigint> {
-  const { bindings } = resolveJobCommitment(commitmentContract);
-  const amount = await bindings.readApplicantStakeAmount(publicClient, commitmentContract);
-
-  return parseOnchainUint(amount, 'applicantStakeAmount');
 }
 
 async function readCurrentJobConfigUnchecked(): Promise<JobEconomicsConfig> {

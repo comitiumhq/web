@@ -13,9 +13,6 @@ function application(overrides: Partial<MyApplicationResponse> = {}): MyApplicat
     isResponded: false,
     respondedAt: null,
     responseKind: null,
-    stakeAmount: '1000000',
-    stakeWithdrawn: false,
-    withdrawnAt: null,
     responseDeadline: '2099-06-16T12:00:00.000Z',
     terminalOutcome: null,
     terminalOutcomeAt: null,
@@ -31,7 +28,7 @@ function application(overrides: Partial<MyApplicationResponse> = {}): MyApplicat
 }
 
 describe('my applications utils', () => {
-  it('keeps responded stake returns out of candidate action state', () => {
+  it('keeps responded applications out of candidate action state', () => {
     const app = application({
       isResponded: true,
       candidateStatus: {

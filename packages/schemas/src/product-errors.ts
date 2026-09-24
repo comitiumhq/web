@@ -68,4 +68,4 @@ export class TransactionError extends Error {
   }
 }
 
-export type ApplicationResult = { kind: 'completed' | 'confirmed' | 'confirming'; operationId: string };
+export type ApplicationResult = { kind: 'completed' } | { kind: 'confirmed' | 'confirming'; operationId: string };

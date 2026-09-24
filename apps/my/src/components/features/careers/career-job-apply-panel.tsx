@@ -5,7 +5,6 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { FileXIcon, type Icon as PhosphorIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useMemo } from 'react';
-import type { Address } from 'viem';
 import { ApplicationForm } from '@/components/features/job-application';
 import { useQueryApplyForm } from '@/hooks/queries/use-query-apply-form';
 
@@ -82,34 +81,10 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
   const { data: applyForm, isLoading: formLoading, error: formError } = useQueryApplyForm(applyFormTarget);
 
   const jobData = useMemo<JobApplicationData | null>(() => {
-    if (job.applyMode === 'standard') {
-      return {
-        applyMode: 'standard',
-        id: job.id,
-        postingId: job.postingId,
-        orgId: job.orgId,
-      };
-    }
-
-    if (
-      job.jobId === null ||
-      job.chainId === null ||
-      job.commitmentContract === null ||
-      job.creatorAddress === null ||
-      job.responseDeadlineDays === null
-    ) {
-      return null;
-    }
-
     return {
-      applyMode: 'committed',
       id: job.id,
       postingId: job.postingId,
-      chainId: job.chainId,
-      jobId: job.jobId,
-      commitmentContract: job.commitmentContract,
       orgId: job.orgId,
-      creatorAddress: job.creatorAddress as Address,
     };
   }, [job]);
 
@@ -151,7 +126,6 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
       jobData={jobData}
       jobTitle={job.title ?? 'Untitled'}
       company={companyName}
-      responseDeadlineDays={job.responseDeadlineDays}
       policy={job.recruitingPrivacy}
     />
   );

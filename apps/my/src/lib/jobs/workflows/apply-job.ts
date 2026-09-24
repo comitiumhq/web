@@ -5,8 +5,10 @@ import {
 import { waitForOperationReceipt } from '@comitium/chain/onchain-operation-observer';
 import { isApiError } from '@comitium/schemas/api-errors';
 import type {
+  ApplicationPrepare,
   ApplicationSubmitDisposition,
-  CommittedFinalizeApplicationInput,
+  FinalizeApplicationInput,
+  ResponseCommitmentFinalizeApplicationInput,
   UserWalletApplicationRequest,
 } from '@comitium/schemas/applications';
 import { getErrorMessage } from '@comitium/schemas/error';
@@ -18,12 +20,11 @@ import {
   type JobError,
   SignatureError,
   TransactionError,
+  ValidationError,
 } from '@comitium/schemas/product-errors';
 import { ResultAsync } from 'neverthrow';
-import type { Address } from 'viem';
 import { finalizeApplication, prepareApplication, retryApplicationOnchainOperation } from '@/lib/api/applications';
 import { deriveApplicationId, generateApplicationSalt } from '@/lib/eip712';
-import { validateApplicationData } from '../core/validation';
 import {
   type ApplicationIntakeParams,
   type ApplicationIntakeStep,
@@ -33,10 +34,15 @@ import {
 export type WorkflowStep = ApplicationIntakeStep | 'signing';
 
 export interface ApplyJobWorkflowParams extends Omit<ApplicationIntakeParams, 'orgId'> {
-  address: Address;
-  jobData: Extract<JobApplicationData, { applyMode: 'committed' }>;
-  stakeAmount: bigint;
+  jobData: JobApplicationData;
+  walletReady: boolean;
   onStep?: (step: WorkflowStep) => void;
+}
+
+interface ApplicationSubmission {
+  kind: 'prepared' | 'existing';
+  applicationId: string;
+  disposition: ApplicationSubmitDisposition;
 }
 
 function sendApplication(
@@ -50,11 +56,7 @@ function sendApplication(
 
 async function resolveDisposition(disposition: ApplicationSubmitDisposition): Promise<ApplicationResult> {
   if (disposition.state === 'completed') {
-    if (!('operationId' in disposition)) {
-      throw new Error('Expected an onchain application result');
-    }
-
-    return { kind: 'completed', operationId: disposition.operationId };
+    return { kind: 'completed' };
   }
 
   if (disposition.state === 'confirming') {
@@ -64,7 +66,7 @@ async function resolveDisposition(disposition: ApplicationSubmitDisposition): Pr
   }
 
   if (disposition.state !== 'wallet_confirmation') {
-    throw new Error('Request a new wallet confirmation to submit this application.');
+    throw new Error('This application is no longer ready. Refresh the page and try again.');
   }
 
   const operation = disposition.operation;
@@ -86,17 +88,12 @@ function toSignatureError(error: unknown): SignatureError {
 
 async function resolveApplicationSubmission(
   submission: ApplicationSubmission,
-  stakeAmount: bigint,
   onSubmission: () => void,
 ): Promise<ApplicationResult> {
   let disposition = submission.disposition;
 
   if (submission.kind === 'existing' && disposition.state === 'try_again') {
-    disposition = await retryApplicationOnchainOperation(
-      submission.applicationId,
-      disposition.operationId,
-      stakeAmount.toString(),
-    );
+    disposition = await retryApplicationOnchainOperation(submission.applicationId, disposition.operationId);
   }
 
   if (disposition.state === 'wallet_confirmation') {
@@ -106,18 +103,11 @@ async function resolveApplicationSubmission(
   return resolveDisposition(disposition);
 }
 
-interface ApplicationSubmission {
-  kind: 'prepared' | 'existing';
-  applicationId: string;
-  disposition: ApplicationSubmitDisposition;
-}
-
 function resolveApplicationSubmissionResult(
   submission: ApplicationSubmission,
-  stakeAmount: bigint,
   onSubmission: () => void,
 ): ResultAsync<ApplicationResult, JobError> {
-  return ResultAsync.fromPromise(resolveApplicationSubmission(submission, stakeAmount, onSubmission), (error) => {
+  return ResultAsync.fromPromise(resolveApplicationSubmission(submission, onSubmission), (error) => {
     if (error instanceof TransactionError || error instanceof ContractError) {
       return error;
     }
@@ -126,11 +116,36 @@ function resolveApplicationSubmissionResult(
   });
 }
 
+function responseCommitmentFinalizationInput(
+  prepared: ApplicationPrepare,
+  applicationData: FinalizeApplicationInput,
+): ResponseCommitmentFinalizeApplicationInput {
+  const commitment = prepared.commitment;
+
+  if (commitment === null) {
+    throw new Error('Expected response commitment');
+  }
+
+  const applicationSalt = generateApplicationSalt();
+
+  return {
+    ...applicationData,
+    applicationId: deriveApplicationId({
+      chainId: commitment.chainId,
+      commitmentContract: commitment.contract,
+      jobId: commitment.jobId,
+      jobUuid: commitment.jobUuid,
+      applicationUuid: prepared.applicationId,
+      salt: applicationSalt,
+    }),
+    applicationSalt,
+  };
+}
+
 export function applyJobWorkflow(params: ApplyJobWorkflowParams): ResultAsync<ApplicationResult, JobError> {
   const {
-    address,
     jobData,
-    stakeAmount,
+    walletReady,
     formId,
     answerBuckets,
     candidateIdentityInputs,
@@ -142,63 +157,56 @@ export function applyJobWorkflow(params: ApplyJobWorkflowParams): ResultAsync<Ap
   } = params;
   const step = (value: WorkflowStep) => onStep?.(value);
 
-  return validateApplicationData(jobData, address, stakeAmount)
-    .andThen(() =>
-      ResultAsync.fromPromise(
-        prepareApplication({
-          jobPostingId: jobData.postingId,
-          formId,
-        }),
-        (error) => new ContractError('prepare_application', error),
-      ),
-    )
-    .andThen((preparation) => {
-      if (preparation.kind === 'existing') {
-        return resolveApplicationSubmissionResult(preparation, stakeAmount, () => step('submitting'));
-      }
+  return ResultAsync.fromPromise(
+    prepareApplication({
+      jobPostingId: jobData.postingId,
+      formId,
+    }),
+    toSignatureError,
+  ).andThen((preparation) => {
+    if (preparation.kind === 'existing') {
+      return resolveApplicationSubmissionResult(preparation, () => step('submitting'));
+    }
 
-      const prepared = preparation;
-
-      step('encrypting');
-
+    if (preparation.commitment !== null && !walletReady) {
       return ResultAsync.fromPromise(
-        prepareApplicationFinalization(prepared, {
-          orgId: jobData.orgId,
-          formId,
-          answerBuckets,
-          candidateIdentityInputs,
-          candidateProfileInput,
-          aiCriteriaEvaluation,
-          resumeUpload,
-          fileUploads,
-        }),
-        (error) => new EncryptionError('encrypt_data', error),
-      )
-        .andThen((applicationData) => {
-          step('signing');
+        Promise.reject(
+          new ValidationError('eligibility', 'This application is not ready. Refresh the page and try again.'),
+        ),
+        (error) => error as ValidationError,
+      );
+    }
 
-          const applicationSalt = generateApplicationSalt();
-          const input: CommittedFinalizeApplicationInput = {
-            ...applicationData,
-            applicationId: deriveApplicationId({
-              chainId: jobData.chainId,
-              commitmentContract: jobData.commitmentContract,
-              jobId: jobData.jobId,
-              jobUuid: jobData.id,
-              applicationUuid: prepared.applicationId,
-              salt: applicationSalt,
-            }),
-            applicationSalt,
-            stake: stakeAmount.toString(),
-          };
+    step('encrypting');
 
-          return ResultAsync.fromPromise(finalizeApplication(prepared.applicationId, input), toSignatureError);
-        })
-        .map((disposition) => ({
-          kind: 'prepared' as const,
-          applicationId: prepared.applicationId,
-          disposition,
-        }))
-        .andThen((submission) => resolveApplicationSubmissionResult(submission, stakeAmount, () => step('submitting')));
-    });
+    return ResultAsync.fromPromise(
+      prepareApplicationFinalization(preparation, {
+        orgId: jobData.orgId,
+        formId,
+        answerBuckets,
+        candidateIdentityInputs,
+        candidateProfileInput,
+        aiCriteriaEvaluation,
+        resumeUpload,
+        fileUploads,
+      }),
+      (error) => new EncryptionError('encrypt_data', error),
+    )
+      .andThen((applicationData) => {
+        const input =
+          preparation.commitment === null
+            ? applicationData
+            : responseCommitmentFinalizationInput(preparation, applicationData);
+
+        step(preparation.commitment === null ? 'submitting' : 'signing');
+
+        return ResultAsync.fromPromise(finalizeApplication(preparation.applicationId, input), toSignatureError);
+      })
+      .map((disposition) => ({
+        kind: 'prepared' as const,
+        applicationId: preparation.applicationId,
+        disposition,
+      }))
+      .andThen((submission) => resolveApplicationSubmissionResult(submission, () => step('submitting')));
+  });
 }

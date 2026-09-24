@@ -29,11 +29,7 @@ export function JobBasicSettingsCard({
           editableStructure={editableStructure}
           readOnly={readOnly}
         />
-        <JobCompensationFields
-          form={form}
-          showPublishRequiredMarker={showPublishRequiredMarkers}
-          readOnly={readOnly}
-        />
+        <JobCompensationFields form={form} showPublishRequiredMarker={showPublishRequiredMarkers} readOnly={readOnly} />
       </CardContent>
     </Card>
   );

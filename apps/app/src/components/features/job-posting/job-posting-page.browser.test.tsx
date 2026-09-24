@@ -5,6 +5,7 @@ import { JobPostingPage } from './job-posting-page';
 const mocks = vi.hoisted(() => ({
   job: {
     canonicalUrl: 'https://jobs.example.test/backend-engineer',
+    lifecycle: { commitmentFinalizationPending: false },
     status: 'open' as 'open' | 'closed',
     title: 'Backend Engineer',
   },
@@ -15,8 +16,15 @@ const mocks = vi.hoisted(() => ({
     form: { id: 'form-1', title: 'Default Application Form', isArchived: false },
     applicationCapacity: 25 as number | null,
     completedApplicationCount: 4,
+    commitment: null as null | {
+      status: 'published' | 'unpublished' | 'closed' | 'expired';
+      responseDeadlineDays: number;
+      pendingApplicationResponses: number;
+      canSettle: boolean;
+    },
     version: 7,
   },
+  release: vi.fn(),
   unpublish: vi.fn(),
   update: vi.fn(),
   updateAsync: vi.fn(),
@@ -27,6 +35,11 @@ vi.mock('@/components/features/job-detail/job-description-editor-dialog', () => 
 }));
 
 vi.mock('@/hooks/mutations/use-job-posting-mutations', () => ({
+  useReleaseCommitmentFunds: () => ({
+    isPending: false,
+    isConfirming: false,
+    mutate: mocks.release,
+  }),
   useUnpublishJobPosting: () => ({ isPending: false, mutate: mocks.unpublish }),
   useUpdateJobPosting: () => ({ isPending: false, mutate: mocks.update, mutateAsync: mocks.updateAsync }),
 }));
@@ -60,10 +73,16 @@ vi.mock('./publish-job-dialog-v2', () => ({
     ) : null,
 }));
 
+vi.mock('./response-commitment-dialog', () => ({
+  ResponseCommitmentDialog: ({ open }: { open: boolean }) =>
+    open ? <div role="dialog">Add response commitment</div> : null,
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.job = {
     canonicalUrl: 'https://jobs.example.test/backend-engineer',
+    lifecycle: { commitmentFinalizationPending: false },
     status: 'open',
     title: 'Backend Engineer',
   };
@@ -74,6 +93,7 @@ beforeEach(() => {
     form: { id: 'form-1', title: 'Default Application Form', isArchived: false },
     applicationCapacity: 25,
     completedApplicationCount: 4,
+    commitment: null,
     version: 7,
   };
 });
@@ -104,6 +124,85 @@ describe('JobPostingPage', () => {
       7,
       expect.objectContaining({ onSuccess: expect.any(Function) }),
     );
+  });
+
+  it('adds a response commitment after a Posting is published', async () => {
+    mocks.posting = { ...mocks.posting, status: 'published' };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await screen.getByRole('button', { name: 'Add response commitment' }).click();
+
+    await expect.element(screen.getByRole('dialog', { name: '' })).toHaveTextContent('Add response commitment');
+  });
+
+  it('shows an active response commitment without another add action', async () => {
+    mocks.posting = {
+      ...mocks.posting,
+      status: 'published',
+      commitment: {
+        status: 'published',
+        responseDeadlineDays: 7,
+        pendingApplicationResponses: 0,
+        canSettle: false,
+      },
+    };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await expect.element(screen.getByText('Published · Response within 7 days')).toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Add response commitment' })).not.toBeInTheDocument();
+  });
+
+  it('allows a completed active response commitment to settle without unpublishing the Posting', async () => {
+    mocks.posting = {
+      ...mocks.posting,
+      status: 'published',
+      commitment: {
+        status: 'published',
+        responseDeadlineDays: 7,
+        pendingApplicationResponses: 0,
+        canSettle: true,
+      },
+    };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await expect.element(screen.getByRole('button', { name: 'Release funds' })).toBeEnabled();
+    await screen.getByRole('button', { name: 'Release funds' }).click();
+
+    expect(mocks.release).toHaveBeenCalledOnce();
+    expect(mocks.unpublish).not.toHaveBeenCalled();
+  });
+
+  it('allows another response commitment after the previous one is finalized', async () => {
+    mocks.posting = {
+      ...mocks.posting,
+      status: 'published',
+      commitment: {
+        status: 'closed',
+        responseDeadlineDays: 7,
+        pendingApplicationResponses: 0,
+        canSettle: false,
+      },
+    };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await expect.element(screen.getByRole('button', { name: 'Add response commitment' })).toBeEnabled();
+  });
+
+  it('waits for Commitment finalization before allowing another one', async () => {
+    mocks.job = { ...mocks.job, lifecycle: { commitmentFinalizationPending: true } };
+    mocks.posting = {
+      ...mocks.posting,
+      status: 'published',
+      commitment: {
+        status: 'closed',
+        responseDeadlineDays: 7,
+        pendingApplicationResponses: 0,
+        canSettle: false,
+      },
+    };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await expect.element(screen.getByRole('button', { name: 'Add response commitment' })).not.toBeInTheDocument();
   });
 
   it('resolves a relative canonical URL against the public site origin', async () => {

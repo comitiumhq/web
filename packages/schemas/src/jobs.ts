@@ -6,7 +6,6 @@ import {
   compensationConfigSchema,
   jobCommitmentStatusSchema,
   jobLifecycleSchema,
-  jobPostingApplyModeSchema,
   jobStatusSchema,
   type LocationEntry,
   locationEntrySchema,
@@ -35,7 +34,6 @@ export const jobSummarySchema = z.object({
   commitmentStatus: jobCommitmentStatusSchema.nullable(),
   postingStatus: jobPostingStatusSchema.nullable(),
   lifecycle: jobLifecycleSchema,
-  postingApplyMode: jobPostingApplyModeSchema.nullable(),
   chainId: z.number().nullable(),
   commitmentContract: addressSchema.nullable(),
   jobId: z.number().nullable(),
@@ -67,8 +65,6 @@ export type JobSummary = z.infer<typeof jobSummarySchema>;
 // --- Lifecycle operations ---
 
 export const preparedOnchainOperationSchema = preparedRelayedOnchainOperationSchema;
-
-export const prepareUnpublishSchema = preparedRelayedOnchainOperationSchema;
 
 export const jobLifecycleMutationResponseSchema = z.object({
   version: z.number().int().min(0),
@@ -122,18 +118,7 @@ const jobApplicationDataBaseSchema = z.object({
   orgId: z.string(),
 });
 
-const jobApplicationDataSchema = z.discriminatedUnion('applyMode', [
-  jobApplicationDataBaseSchema.extend({ applyMode: z.literal('standard') }),
-  jobApplicationDataBaseSchema.extend({
-    applyMode: z.literal('committed'),
-    chainId: z.number(),
-    jobId: z.number(),
-    commitmentContract: addressSchema,
-    creatorAddress: addressSchema,
-  }),
-]);
-
-export type JobApplicationData = z.infer<typeof jobApplicationDataSchema>;
+export type JobApplicationData = z.infer<typeof jobApplicationDataBaseSchema>;
 
 // --- IPFS job metadata ---
 
@@ -262,6 +247,16 @@ export const jobPostingSchema = z.object({
   applicationCapacity: z.number().int().min(1).max(1000).nullable(),
   completedApplicationCount: z.number().int().nonnegative(),
   availability: z.enum(['accepting', 'capacity-reached', 'unavailable']),
+  commitment: z
+    .object({
+      status: jobCommitmentStatusSchema,
+      responseDeadlineDays: z.number().int().positive(),
+      stake: z.string(),
+      feeAmount: z.string(),
+      canSettle: z.boolean(),
+      pendingApplicationResponses: z.number().int().nonnegative(),
+    })
+    .nullable(),
   publishedAt: z.string().nullable(),
   unpublishedAt: z.string().nullable(),
   version: z.number().int().min(0),
@@ -269,7 +264,10 @@ export const jobPostingSchema = z.object({
 
 export type JobPosting = z.infer<typeof jobPostingSchema>;
 
-export const publishDraftResponseSchema = preparedRelayedOnchainOperationSchema;
+export const unpublishJobPostingResponseSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('completed'), posting: jobPostingSchema }),
+  z.object({ kind: z.literal('prepared'), operation: preparedRelayedOnchainOperationSchema }),
+]);
 
 export const prepareJobContentUriUpdateResponseSchema = preparedRelayedOnchainOperationSchema;
 
@@ -319,12 +317,10 @@ export type PublishJobPostingData = {
   applicationCapacity?: number | null;
 };
 
-export type PublishDraftParams = {
+export type PrepareCommitmentParams = {
   expectedVersion: number;
   stake: string;
   feeTier: number;
-  maxApplications?: number;
-  descriptionMarkdown: string;
 };
 
 export type PrepareJobContentUriUpdateParams = {

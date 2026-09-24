@@ -13,8 +13,8 @@ const mocks = vi.hoisted(() => ({
     save: vi.fn(),
     descriptionMarkdown: 'Build reliable systems.',
     previewOpen: false,
-    publishOpen: true,
-    publishVersion: 3,
+    publishOpen: false,
+    publishVersion: null,
     setPreviewOpen: vi.fn(),
     setPublishOpen: vi.fn(),
     handlePreviewClick: vi.fn(),
@@ -51,14 +51,6 @@ vi.mock('./draft-preview-dialog', () => ({
   DraftPreviewDialog: () => null,
 }));
 
-vi.mock('./publish-job-dialog', () => ({
-  PublishJobDialog: () => <div>Committed Publish dialog</div>,
-}));
-
-vi.mock('@/components/features/job-posting/publish-job-dialog-v2', () => ({
-  PublishJobDialogV2: () => <div>Standard Publish dialog</div>,
-}));
-
 const lifecycle: JobLifecycle = {
   transition: null,
   commitmentFinalizationPending: false,
@@ -72,24 +64,18 @@ beforeEach(() => {
 
 describe('DraftShellActions', () => {
   it('exposes Preview as a direct action', async () => {
-    const screen = await render(<DraftShellActions lifecycle={lifecycle} postingApplyMode="standard" />);
+    const screen = await render(<DraftShellActions lifecycle={lifecycle} />);
 
     await screen.getByRole('button', { name: 'Preview' }).click();
 
     expect(mocks.context.handlePreviewClick).toHaveBeenCalledOnce();
   });
 
-  it('opens the standard Publish flow for a standard Posting', async () => {
-    const screen = await render(<DraftShellActions lifecycle={lifecycle} postingApplyMode="standard" />);
+  it('exposes Publish as a direct action', async () => {
+    const screen = await render(<DraftShellActions lifecycle={lifecycle} />);
 
-    await expect.element(screen.getByText('Standard Publish dialog')).toBeInTheDocument();
-    await expect.element(screen.getByText('Committed Publish dialog')).not.toBeInTheDocument();
-  });
+    await screen.getByRole('button', { name: 'Publish' }).click();
 
-  it('preserves the committed Publish flow for a committed Posting', async () => {
-    const screen = await render(<DraftShellActions lifecycle={lifecycle} postingApplyMode="committed" />);
-
-    await expect.element(screen.getByText('Committed Publish dialog')).toBeInTheDocument();
-    await expect.element(screen.getByText('Standard Publish dialog')).not.toBeInTheDocument();
+    expect(mocks.context.handlePublishClick).toHaveBeenCalledOnce();
   });
 });

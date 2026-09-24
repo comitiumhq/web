@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { isDefined } from '@/lib/utils';
 
 /**
- * Schema for editable Job settings shared by drafts, open standard Jobs, and templates.
+ * Schema for editable Job settings shared by drafts, open Jobs, and templates.
  */
 export const JobSettingsFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255, 'Title is too long'),
@@ -39,10 +39,7 @@ export const CreateDraftDialogSchema = JobSettingsFormSchema.pick({
 
 export type CreateDraftDialogData = z.infer<typeof CreateDraftDialogSchema>;
 
-/**
- * Schema for the publish dialog.
- */
-export const PublishDialogSchema = z.object({
+export const ResponseCommitmentFormSchema = z.object({
   employerStake: z
     .number({
       error: (issue) => (isDefined(issue.input) ? 'Must be a number' : 'Refundable stake is required'),
@@ -50,12 +47,6 @@ export const PublishDialogSchema = z.object({
     .int('Must be a whole number')
     .min(1, 'Minimum deposit is $1'),
   feeTier: z.number().int().min(0).max(9),
-  maxApplications: z
-    .number()
-    .int('Must be a whole number')
-    .min(1, 'Must be at least 1')
-    .max(1000, 'Maximum 1000 applications')
-    .optional(),
 });
 
-export type PublishDialogData = z.infer<typeof PublishDialogSchema>;
+export type ResponseCommitmentFormData = z.infer<typeof ResponseCommitmentFormSchema>;

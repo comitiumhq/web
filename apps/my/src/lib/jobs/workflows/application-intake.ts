@@ -9,8 +9,8 @@ import {
 import type { EnvelopeKey } from '@comitium/crypto/schemas';
 import type {
   ApplicationPrepare,
+  OffchainFinalizeApplicationInput,
   ProcessingGrantWrappedKey,
-  StandardFinalizeApplicationInput,
 } from '@comitium/schemas/applications';
 import type { CandidateProfileInputValue } from '@comitium/schemas/forms/application-required-fields';
 import type { AnswerVisibility } from '@comitium/schemas/forms/visibility';
@@ -318,7 +318,7 @@ async function stageUpload(applicationId: string, upload: EncryptedUpload): Prom
 export async function prepareApplicationFinalization(
   prepared: ApplicationPrepare,
   params: ApplicationIntakeParams,
-): Promise<StandardFinalizeApplicationInput> {
+): Promise<OffchainFinalizeApplicationInput> {
   assertValidCandidateIdentityInputs(params.candidateIdentityInputs);
   const [encryptedAnswers, encryptedIdentities, encryptedProfile, uploads] = await Promise.all([
     encryptAnswers(prepared.vaultKey, params.orgId, params.formId, params.answerBuckets),

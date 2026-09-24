@@ -6,7 +6,7 @@ import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
-import { useApplyStandardJob } from '@/hooks/mutations/use-apply-standard-job';
+import { useApplyJob } from '@/hooks/mutations/use-apply-job';
 import { qk } from '@/hooks/query-keys';
 import { api } from '@/lib/api/client';
 import { ApplicationFormContent } from './application-form-content';
@@ -14,17 +14,17 @@ import { useApplicationForm } from './use-application-form';
 
 const accountApi = createAuthAccountApi(api);
 
-interface StandardApplicationFormProps {
+interface AuthenticatedApplicationFormProps {
   accountId: string;
   applyForm: NestedForm;
   company: string;
-  jobData: Extract<JobApplicationData, { applyMode: 'standard' }>;
+  jobData: JobApplicationData;
   jobTitle: string;
   policy: CareerJob['recruitingPrivacy'];
   onSuccess?: () => void;
 }
 
-export function StandardApplicationForm({
+export function AuthenticatedApplicationForm({
   accountId,
   applyForm,
   company,
@@ -32,14 +32,16 @@ export function StandardApplicationForm({
   jobTitle,
   policy,
   onSuccess,
-}: StandardApplicationFormProps) {
+}: AuthenticatedApplicationFormProps) {
   const [needsZkIdentity, setNeedsZkIdentity] = useState(false);
+
   const zkIdentityQuery = useQuery({
     queryKey: qk.account.zkIdentity(accountId),
     queryFn: accountApi.getZkIdentityStatus,
     retry: shouldRetryQuery,
     staleTime: STALE_TIME_SHORT,
   });
+
   const controller = useApplicationForm({
     accountId,
     applyForm,
@@ -49,7 +51,7 @@ export function StandardApplicationForm({
   });
 
   const { form, handleApplicationCompleted, prepareSubmission } = controller;
-  const { submit, isPending } = useApplyStandardJob({
+  const { submit, isPending, isConfirming } = useApplyJob({
     onCompleted: handleApplicationCompleted,
     onZkIdentityRequired: () => setNeedsZkIdentity(true),
   });
@@ -73,7 +75,7 @@ export function StandardApplicationForm({
     [applyForm.form.id, hasVerifiedZkIdentity, jobData, prepareSubmission, submit],
   );
 
-  const isSubmitting = form.formState.isSubmitting || isPending;
+  const isSubmitting = form.formState.isSubmitting || isPending || isConfirming;
   const identityRequirementMessage = zkIdentityQuery.isError
     ? 'ZK Identity status could not be loaded.'
     : 'Complete ZK Identity before submitting this application.';

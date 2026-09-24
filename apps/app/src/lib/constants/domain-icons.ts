@@ -1,7 +1,7 @@
 export {
   ArchiveIcon as ArchiveReasonsIcon,
-  BrowserIcon as JobPostingIcon,
   BriefcaseIcon as CloseJobReasonsIcon,
+  BrowserIcon as JobPostingIcon,
   CalendarSlashIcon as CancelRescheduleReasonsIcon,
   ChatCenteredTextIcon as FeedbackFormIcon,
   ClipboardTextIcon as ApplicationFormIcon,

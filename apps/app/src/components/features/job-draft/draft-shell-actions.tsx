@@ -1,4 +1,3 @@
-import type { JobSummary } from '@comitium/schemas/jobs';
 import type { JobLifecycle } from '@comitium/schemas/public-jobs';
 import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
@@ -22,7 +21,6 @@ import { canRunJobLifecycleAction, isJobPublishing } from '@/lib/jobs/status';
 import { Permission } from '@/lib/schemas/org';
 import { useDraftFormContext } from './draft-form-context';
 import { DraftPreviewDialog } from './draft-preview-dialog';
-import { PublishJobDialog } from './publish-job-dialog';
 
 function getDuplicateLabel(isDuplicating: boolean) {
   return isDuplicating ? 'Duplicating...' : 'Duplicate';
@@ -30,10 +28,9 @@ function getDuplicateLabel(isDuplicating: boolean) {
 
 interface DraftShellActionsProps {
   lifecycle: JobLifecycle;
-  postingApplyMode: JobSummary['postingApplyMode'];
 }
 
-export function DraftShellActions({ lifecycle, postingApplyMode }: DraftShellActionsProps) {
+export function DraftShellActions({ lifecycle }: DraftShellActionsProps) {
   const { can } = usePermissions();
   const navigate = useNavigate();
   const {
@@ -158,24 +155,11 @@ export function DraftShellActions({ lifecycle, postingApplyMode }: DraftShellAct
             onOpenChange={setPreviewOpen}
           />
 
-          {publishVersion !== null && postingApplyMode === 'standard' && (
+          {publishVersion !== null && (
             <PublishJobDialogV2
               orgId={orgId}
               jobId={jobId}
               jobTitle={draft.title}
-              open={publishOpen}
-              onOpenChange={setPublishOpen}
-            />
-          )}
-
-          {publishVersion !== null && postingApplyMode === 'committed' && (
-            <PublishJobDialog
-              orgId={orgId}
-              jobId={jobId}
-              draftTitle={draft.title}
-              draft={draft}
-              expectedVersion={publishVersion}
-              descriptionMarkdown={descriptionMarkdown}
               open={publishOpen}
               onOpenChange={setPublishOpen}
             />

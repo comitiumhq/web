@@ -1,6 +1,5 @@
 import { requireConnectedWallet } from '@comitium/auth/require-wallet-account';
 import { useAccount, useActiveWallet } from '@comitium/auth/use-wallet';
-
 import { useOnchainSettlementObserver } from '@comitium/chain/use-onchain-settlement-observer';
 import { BACKGROUND_CONFIRMATION_COPY } from '@comitium/ui/action-confirmation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -40,7 +39,7 @@ export function useCloseJob({ onCompleted }: { onCompleted: () => void }) {
     onMutate: () => {
       toast.loading('Closing job...', { id: 'close-job' });
     },
-    onSuccess: async (result, params) => {
+    onSuccess: (result, params) => {
       const refresh = () => {
         queryClient.invalidateQueries({ queryKey: qk.jobs.summary(params.jobId) });
         queryClient.invalidateQueries({ queryKey: qk.jobs.root() });
@@ -58,15 +57,7 @@ export function useCloseJob({ onCompleted }: { onCompleted: () => void }) {
         onCompleted();
       };
 
-      if (result.kind === 'closed') {
-        refresh();
-        toast.success('Job closed', { id: 'close-job' });
-        onCompleted();
-
-        return;
-      }
-
-      if (result.state === 'completed') {
+      if (result.kind === 'closed' || result.state === 'completed') {
         complete();
 
         return;

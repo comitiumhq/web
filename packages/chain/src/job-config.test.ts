@@ -15,7 +15,6 @@ vi.mock('@comitium/chain/deployment-catalog', () => ({
       readCurrentConfigVersion: () => mocks.readContract(),
       readJobConfig: () => mocks.readContract(),
       readFeeTiers: () => mocks.readContract(),
-      readApplicantStakeAmount: () => mocks.readContract(),
     },
   })),
 }));

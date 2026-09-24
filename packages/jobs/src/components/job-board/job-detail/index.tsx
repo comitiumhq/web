@@ -21,11 +21,9 @@ interface JobDetailProps {
 type JobDetailData = Pick<
   Job,
   | 'id'
-  | 'applyMode'
   | 'applicationCapacityAvailable'
   | 'responseDeadlineDays'
   | 'status'
-  | 'txHash'
   | 'canonicalUrl'
   | 'title'
   | 'description'
@@ -59,7 +57,7 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
                 <ApplyButton applyUrl={applyUrl} size="default" />
               </div>
             )}
-            <JobActions jobUrl={job.canonicalUrl} txHash={job.txHash} />
+            <JobActions jobUrl={job.canonicalUrl} />
           </div>
         </div>
 

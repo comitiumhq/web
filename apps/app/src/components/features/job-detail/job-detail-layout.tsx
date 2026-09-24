@@ -7,7 +7,7 @@ import { Link, useLocation } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { DRAFT_SECTIONS } from '@/components/features/job-draft/sections';
 import type { StepStatus } from '@/components/features/job-draft/utils';
-import { HiringTeamIcon, InterviewPlanIcon, JobPostingIcon, JobSettingsIcon } from '@/lib/constants/domain-icons';
+import { InterviewPlanIcon, JobPostingIcon, JobSettingsIcon } from '@/lib/constants/domain-icons';
 import { cn } from '@/lib/utils';
 
 import { JobActionButton } from './job-action-button';
@@ -199,32 +199,14 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
     },
   ];
 
-  if (job?.postingApplyMode === 'standard') {
-    return [
-      ...commonItems,
-      {
-        label: 'Settings',
-        icon: JobSettingsIcon,
-        to: '/org/$orgId/jobs/$jobId/settings',
-        isActive: (pathname) => pathname.endsWith('/settings'),
-      },
-      {
-        label: 'Interview plan',
-        icon: InterviewPlanIcon,
-        to: '/org/$orgId/jobs/$jobId/interview-plan',
-        isActive: (pathname) => pathname.includes('/interview-plan'),
-      },
-      {
-        label: 'Posting',
-        icon: JobPostingIcon,
-        to: '/org/$orgId/jobs/$jobId/posting',
-        isActive: (pathname) => pathname.endsWith('/posting'),
-      },
-    ];
-  }
-
   return [
     ...commonItems,
+    {
+      label: 'Settings',
+      icon: JobSettingsIcon,
+      to: '/org/$orgId/jobs/$jobId/settings',
+      isActive: (pathname) => pathname.endsWith('/settings'),
+    },
     {
       label: 'Interview plan',
       icon: InterviewPlanIcon,
@@ -232,10 +214,10 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
       isActive: (pathname) => pathname.includes('/interview-plan'),
     },
     {
-      label: 'Hiring team',
-      icon: HiringTeamIcon,
-      to: '/org/$orgId/jobs/$jobId/hiring-team',
-      isActive: (pathname) => pathname.endsWith('/hiring-team'),
+      label: 'Posting',
+      icon: JobPostingIcon,
+      to: '/org/$orgId/jobs/$jobId/posting',
+      isActive: (pathname) => pathname.endsWith('/posting'),
     },
   ];
 }

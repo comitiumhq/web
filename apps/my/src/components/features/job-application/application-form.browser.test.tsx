@@ -9,7 +9,7 @@ import { render } from 'vitest-browser-react';
 import { ApplicationForm } from './index';
 
 const mocks = vi.hoisted(() => ({
-  submitStandardApplication: vi.fn(),
+  submitApplication: vi.fn(),
   session: {
     isSessionLoading: false,
     isSignedIn: false,
@@ -52,20 +52,13 @@ vi.mock('@tanstack/react-router', async (importOriginal) => ({
 }));
 
 vi.mock('@/hooks/mutations/use-apply-job', () => ({
-  useApplyJob: () => ({
-    submit: vi.fn(),
-    isPending: false,
-    isConfirming: false,
-  }),
-}));
-
-vi.mock('@/hooks/mutations/use-apply-standard-job', () => ({
-  useApplyStandardJob: ({ onCompleted }: { onCompleted: () => void }) => ({
+  useApplyJob: ({ onCompleted }: { onCompleted: () => void }) => ({
     submit: (input: unknown) => {
-      mocks.submitStandardApplication(input);
+      mocks.submitApplication(input);
       onCompleted();
     },
     isPending: false,
+    isConfirming: false,
   }),
 }));
 
@@ -104,7 +97,7 @@ const resumeForm: NestedForm = {
   ],
 };
 
-const standardForm: NestedForm = {
+const applicationForm: NestedForm = {
   form: resumeForm.form,
   sections: [
     {
@@ -156,14 +149,9 @@ const standardForm: NestedForm = {
 };
 
 const jobData: JobApplicationData = {
-  applyMode: 'committed',
   id: '44444444-4444-4444-8444-444444444444',
   postingId: '55555555-5555-4555-8555-555555555555',
-  chainId: 84532,
-  jobId: 1,
-  commitmentContract: '0x1111111111111111111111111111111111111111',
   orgId: '66666666-6666-4666-8666-666666666666',
-  creatorAddress: '0x2222222222222222222222222222222222222222',
 };
 
 const policy: CareerJob['recruitingPrivacy'] = {
@@ -181,7 +169,6 @@ const authenticatedApplicationProps: ComponentProps<typeof ApplicationForm> = {
   jobData,
   jobTitle: 'Product Designer',
   company: 'Comitium',
-  responseDeadlineDays: 14,
   policy,
 };
 
@@ -192,7 +179,7 @@ beforeEach(() => {
     isSignedIn: false,
     user: null,
   };
-  mocks.submitStandardApplication.mockReset();
+  mocks.submitApplication.mockReset();
   mocks.zkIdentityStatus = { status: 'verified' };
 });
 
@@ -265,26 +252,13 @@ describe('ApplicationForm', () => {
       .toBeInTheDocument();
   });
 
-  it('submits a standard Application directly without the committed confirmation flow', async () => {
+  it('submits an Application through the unified flow', async () => {
     mocks.session = {
       isSessionLoading: false,
       isSignedIn: true,
       user: { id: 'applicant-1' },
     };
-    const standardJobData: JobApplicationData = {
-      applyMode: 'standard',
-      id: jobData.id,
-      postingId: jobData.postingId,
-      orgId: jobData.orgId,
-    };
-    const screen = await render(
-      <ApplicationForm
-        {...authenticatedApplicationProps}
-        applyForm={standardForm}
-        jobData={standardJobData}
-        responseDeadlineDays={null}
-      />,
-    );
+    const screen = await render(<ApplicationForm {...authenticatedApplicationProps} applyForm={applicationForm} />);
 
     await expect.element(screen.getByRole('button', { name: 'Submit application' })).toBeEnabled();
     await expect.element(screen.getByRole('button', { name: 'Continue' })).not.toBeInTheDocument();
@@ -295,37 +269,26 @@ describe('ApplicationForm', () => {
     await screen.getByPlaceholder('name@example.com').fill('ada@example.com');
     await screen.getByRole('button', { name: 'Submit application' }).click();
 
-    expect(mocks.submitStandardApplication).toHaveBeenCalledExactlyOnceWith(
+    expect(mocks.submitApplication).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
-        jobData: standardJobData,
-        formId: standardForm.form.id,
+        jobData,
+        formId: applicationForm.form.id,
         candidateProfileInput: { firstName: 'Ada', lastName: 'Lovelace', location: null },
       }),
     );
     await expect.element(screen.getByRole('heading', { name: 'Application Submitted' })).toBeInTheDocument();
   });
 
-  it('keeps the standard Application Form visible and explains why submission requires ZK Identity', async () => {
+  it('keeps the Application Form visible and explains why submission requires ZK Identity', async () => {
     mocks.session = {
       isSessionLoading: false,
       isSignedIn: true,
       user: { id: 'applicant-1' },
     };
     mocks.zkIdentityStatus = { status: 'not_started' };
-    const standardJobData: JobApplicationData = {
-      applyMode: 'standard',
-      id: jobData.id,
-      postingId: jobData.postingId,
-      orgId: jobData.orgId,
-    };
     const screen = await render(
       <TooltipProvider>
-        <ApplicationForm
-          {...authenticatedApplicationProps}
-          applyForm={standardForm}
-          jobData={standardJobData}
-          responseDeadlineDays={null}
-        />
+        <ApplicationForm {...authenticatedApplicationProps} applyForm={applicationForm} />
       </TooltipProvider>,
     );
 
