@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 
-import { PublishJobDialogV2 } from './publish-job-dialog-v2';
+import { PublishPostingDialog } from './publish-posting-dialog';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -48,10 +48,10 @@ beforeEach(() => {
   mocks.navigate.mockResolvedValue(undefined);
 });
 
-describe('PublishJobDialogV2', () => {
+describe('PublishPostingDialog', () => {
   it('publishes the Posting and capacity as one action', async () => {
     const screen = await render(
-      <PublishJobDialogV2
+      <PublishPostingDialog
         orgId="org-1"
         jobId="job-1"
         jobTitle="Backend engineer"
@@ -83,7 +83,7 @@ describe('PublishJobDialogV2', () => {
       form: { ...mocks.posting.form, isArchived: true },
     };
     const screen = await render(
-      <PublishJobDialogV2
+      <PublishPostingDialog
         orgId="org-1"
         jobId="job-1"
         jobTitle="Backend engineer"

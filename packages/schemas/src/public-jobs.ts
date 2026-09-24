@@ -39,19 +39,11 @@ export type JobStatus = z.infer<typeof jobStatusSchema>;
 
 export const jobCommitmentStatusSchema = z.enum(['published', 'unpublished', 'closed']);
 
-const jobLifecycleActionSchema = z.enum([
-  'open_job',
-  'publish_job',
-  'settle_commitment',
-  'unpublish_job',
-  'close_job',
-  'reopen_as_draft',
-]);
+const jobLifecycleActionSchema = z.enum(['publish_posting', 'settle_commitment', 'close_job', 'reopen_as_draft']);
 
 export type JobLifecycleAction = z.infer<typeof jobLifecycleActionSchema>;
 
 export const jobLifecycleSchema = z.object({
-  transition: z.enum(['publishing', 'unpublishing', 'settling']).nullable(),
   commitmentFinalizationPending: z.boolean(),
   activeApplications: z.number().int().nonnegative(),
   allowedActions: z.array(jobLifecycleActionSchema),

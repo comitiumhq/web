@@ -10,7 +10,7 @@ import { getErrorMessage } from '@comitium/schemas/error';
 import type { CandidateProfileInputValue } from '@comitium/schemas/forms/application-required-fields';
 import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { isJobError } from '@comitium/schemas/product-errors';
-import { getCommonErrorMessage } from '@comitium/ui/product-error-messages';
+import { isProductSubmissionUncertain } from '@comitium/schemas/transaction-errors';
 import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -55,15 +55,27 @@ function getApplyErrorMessage(error: unknown): string {
     return 'The hiring organization changed its AI-assisted evaluation setting. Review the updated choice before submitting again.';
   }
 
-  if (error._tag === 'SignatureError' && !(error.httpStatus >= 400 && error.httpStatus < 500)) {
+  if (error._tag === 'SignatureError') {
     return 'Application submission could not be prepared. Please try again.';
+  }
+
+  if (error._tag === 'TransactionError') {
+    if (isProductSubmissionUncertain(error)) {
+      return 'We could not confirm whether your application was submitted. Check My applications before trying again.';
+    }
+
+    if (error.message.includes('rejected')) {
+      return 'Application submission was cancelled.';
+    }
+
+    return 'Application could not be submitted. Please try again.';
   }
 
   if (error._tag === 'ContractError' && error.operation === 'application_confirmation_pending') {
     return 'Your application is still being submitted. Check My applications again in a moment.';
   }
 
-  return getCommonErrorMessage(error);
+  return 'Application could not be submitted. Please try again.';
 }
 
 export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequired: () => void }) {

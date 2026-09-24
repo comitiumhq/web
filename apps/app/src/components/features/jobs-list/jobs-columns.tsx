@@ -17,7 +17,6 @@ import { JobStatusBadge } from '@/components/features/job-detail/job-status-badg
 import { useCreateDraft } from '@/hooks/mutations/use-create-draft';
 import { usePermissions } from '@/hooks/use-permissions';
 import { formatEmployerStake } from '@/lib/jobs';
-import { isJobPublishing } from '@/lib/jobs/status';
 import { Permission } from '@/lib/schemas/org';
 import { formatLocation } from '@/lib/utils';
 
@@ -48,7 +47,7 @@ export const ActionsCell = memo(function ActionsCell({ orgId, row, onRequestDele
   const { can } = usePermissions();
   const { mutate: createDraft, isPending: isDuplicating } = useCreateDraft(orgId, { navigateOnSuccess: false });
   const canCreate = can(Permission.JOB_CREATE);
-  const canDeleteDraft = row.kind === 'draft' && !isJobPublishing(row.draft.lifecycle) && can(Permission.JOB_EDIT);
+  const canDeleteDraft = row.kind === 'draft' && can(Permission.JOB_EDIT);
 
   const sourceId = row.id;
 
@@ -121,13 +120,11 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
       const item = row.original;
 
       if (item.kind === 'draft') {
-        const subtitle = isJobPublishing(item.draft.lifecycle) ? 'Publication submitted' : 'Finish setup';
-
         return (
           <div className="flex min-w-0 flex-col">
             <span className="truncate font-medium text-foreground">{item.draft.title || 'Untitled role'}</span>
             <span className="inline-flex items-center gap-1 text-label-12 text-muted-foreground">
-              {subtitle}
+              Finish setup
               <ArrowRightIcon className="size-3 shrink-0" />
             </span>
           </div>

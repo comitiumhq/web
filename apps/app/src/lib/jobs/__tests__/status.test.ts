@@ -4,10 +4,9 @@ import { canRunJobLifecycleAction, isJobConfigurationReadOnly } from '../status'
 
 function lifecycle(overrides: Partial<JobLifecycle> = {}): JobLifecycle {
   return {
-    transition: null,
     commitmentFinalizationPending: false,
     activeApplications: 0,
-    allowedActions: ['unpublish_job', 'close_job'],
+    allowedActions: ['close_job'],
     ...overrides,
   };
 }
@@ -16,8 +15,9 @@ describe('job lifecycle status', () => {
   it('uses the derived lifecycle action contract', () => {
     const state = lifecycle();
 
-    expect(canRunJobLifecycleAction(state, 'unpublish_job')).toBe(true);
     expect(canRunJobLifecycleAction(state, 'close_job')).toBe(true);
+
+    expect(canRunJobLifecycleAction(state, 'settle_commitment')).toBe(false);
   });
 
   it('makes only closed Job configuration read-only', () => {

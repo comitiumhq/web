@@ -51,11 +51,7 @@ import { Route as OrgOrgIdJobsJobIdSettingsRouteImport } from './routes/org/$org
 import { Route as OrgOrgIdJobsJobIdPostingRouteImport } from './routes/org/$orgId/jobs/$jobId/posting'
 import { Route as OrgOrgIdJobsJobIdPipelineRouteImport } from './routes/org/$orgId/jobs/$jobId/pipeline'
 import { Route as OrgOrgIdJobsJobIdInterviewPlanRouteImport } from './routes/org/$orgId/jobs/$jobId/interview-plan'
-import { Route as OrgOrgIdJobsJobIdHiringTeamRouteImport } from './routes/org/$orgId/jobs/$jobId/hiring-team'
-import { Route as OrgOrgIdJobsJobIdDetailsRouteImport } from './routes/org/$orgId/jobs/$jobId/details'
-import { Route as OrgOrgIdJobsJobIdDescriptionRouteImport } from './routes/org/$orgId/jobs/$jobId/description'
 import { Route as OrgOrgIdJobsJobIdCriteriaRouteImport } from './routes/org/$orgId/jobs/$jobId/criteria'
-import { Route as OrgOrgIdJobsJobIdApplicationFormRouteImport } from './routes/org/$orgId/jobs/$jobId/application-form'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -293,34 +289,10 @@ const OrgOrgIdJobsJobIdInterviewPlanRoute =
     path: '/interview-plan',
     getParentRoute: () => OrgOrgIdJobsJobIdRoute,
   } as any)
-const OrgOrgIdJobsJobIdHiringTeamRoute =
-  OrgOrgIdJobsJobIdHiringTeamRouteImport.update({
-    id: '/hiring-team',
-    path: '/hiring-team',
-    getParentRoute: () => OrgOrgIdJobsJobIdRoute,
-  } as any)
-const OrgOrgIdJobsJobIdDetailsRoute =
-  OrgOrgIdJobsJobIdDetailsRouteImport.update({
-    id: '/details',
-    path: '/details',
-    getParentRoute: () => OrgOrgIdJobsJobIdRoute,
-  } as any)
-const OrgOrgIdJobsJobIdDescriptionRoute =
-  OrgOrgIdJobsJobIdDescriptionRouteImport.update({
-    id: '/description',
-    path: '/description',
-    getParentRoute: () => OrgOrgIdJobsJobIdRoute,
-  } as any)
 const OrgOrgIdJobsJobIdCriteriaRoute =
   OrgOrgIdJobsJobIdCriteriaRouteImport.update({
     id: '/criteria',
     path: '/criteria',
-    getParentRoute: () => OrgOrgIdJobsJobIdRoute,
-  } as any)
-const OrgOrgIdJobsJobIdApplicationFormRoute =
-  OrgOrgIdJobsJobIdApplicationFormRouteImport.update({
-    id: '/application-form',
-    path: '/application-form',
     getParentRoute: () => OrgOrgIdJobsJobIdRoute,
   } as any)
 
@@ -358,11 +330,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgId/jobs': typeof OrgOrgIdJobsIndexRoute
   '/org/$orgId/organization/': typeof OrgOrgIdOrganizationIndexRoute
   '/org/$orgId/settings/': typeof OrgOrgIdSettingsIndexRoute
-  '/org/$orgId/jobs/$jobId/application-form': typeof OrgOrgIdJobsJobIdApplicationFormRoute
   '/org/$orgId/jobs/$jobId/criteria': typeof OrgOrgIdJobsJobIdCriteriaRoute
-  '/org/$orgId/jobs/$jobId/description': typeof OrgOrgIdJobsJobIdDescriptionRoute
-  '/org/$orgId/jobs/$jobId/details': typeof OrgOrgIdJobsJobIdDetailsRoute
-  '/org/$orgId/jobs/$jobId/hiring-team': typeof OrgOrgIdJobsJobIdHiringTeamRoute
   '/org/$orgId/jobs/$jobId/interview-plan': typeof OrgOrgIdJobsJobIdInterviewPlanRoute
   '/org/$orgId/jobs/$jobId/pipeline': typeof OrgOrgIdJobsJobIdPipelineRoute
   '/org/$orgId/jobs/$jobId/posting': typeof OrgOrgIdJobsJobIdPostingRoute
@@ -400,11 +368,7 @@ export interface FileRoutesByTo {
   '/org/$orgId/jobs': typeof OrgOrgIdJobsIndexRoute
   '/org/$orgId/organization': typeof OrgOrgIdOrganizationIndexRoute
   '/org/$orgId/settings': typeof OrgOrgIdSettingsIndexRoute
-  '/org/$orgId/jobs/$jobId/application-form': typeof OrgOrgIdJobsJobIdApplicationFormRoute
   '/org/$orgId/jobs/$jobId/criteria': typeof OrgOrgIdJobsJobIdCriteriaRoute
-  '/org/$orgId/jobs/$jobId/description': typeof OrgOrgIdJobsJobIdDescriptionRoute
-  '/org/$orgId/jobs/$jobId/details': typeof OrgOrgIdJobsJobIdDetailsRoute
-  '/org/$orgId/jobs/$jobId/hiring-team': typeof OrgOrgIdJobsJobIdHiringTeamRoute
   '/org/$orgId/jobs/$jobId/interview-plan': typeof OrgOrgIdJobsJobIdInterviewPlanRoute
   '/org/$orgId/jobs/$jobId/pipeline': typeof OrgOrgIdJobsJobIdPipelineRoute
   '/org/$orgId/jobs/$jobId/posting': typeof OrgOrgIdJobsJobIdPostingRoute
@@ -450,11 +414,7 @@ export interface FileRoutesById {
   '/org/$orgId/jobs/': typeof OrgOrgIdJobsIndexRoute
   '/org/$orgId/organization/': typeof OrgOrgIdOrganizationIndexRoute
   '/org/$orgId/settings/': typeof OrgOrgIdSettingsIndexRoute
-  '/org/$orgId/jobs/$jobId/application-form': typeof OrgOrgIdJobsJobIdApplicationFormRoute
   '/org/$orgId/jobs/$jobId/criteria': typeof OrgOrgIdJobsJobIdCriteriaRoute
-  '/org/$orgId/jobs/$jobId/description': typeof OrgOrgIdJobsJobIdDescriptionRoute
-  '/org/$orgId/jobs/$jobId/details': typeof OrgOrgIdJobsJobIdDetailsRoute
-  '/org/$orgId/jobs/$jobId/hiring-team': typeof OrgOrgIdJobsJobIdHiringTeamRoute
   '/org/$orgId/jobs/$jobId/interview-plan': typeof OrgOrgIdJobsJobIdInterviewPlanRoute
   '/org/$orgId/jobs/$jobId/pipeline': typeof OrgOrgIdJobsJobIdPipelineRoute
   '/org/$orgId/jobs/$jobId/posting': typeof OrgOrgIdJobsJobIdPostingRoute
@@ -501,11 +461,7 @@ export interface FileRouteTypes {
     | '/org/$orgId/jobs'
     | '/org/$orgId/organization/'
     | '/org/$orgId/settings/'
-    | '/org/$orgId/jobs/$jobId/application-form'
     | '/org/$orgId/jobs/$jobId/criteria'
-    | '/org/$orgId/jobs/$jobId/description'
-    | '/org/$orgId/jobs/$jobId/details'
-    | '/org/$orgId/jobs/$jobId/hiring-team'
     | '/org/$orgId/jobs/$jobId/interview-plan'
     | '/org/$orgId/jobs/$jobId/pipeline'
     | '/org/$orgId/jobs/$jobId/posting'
@@ -543,11 +499,7 @@ export interface FileRouteTypes {
     | '/org/$orgId/jobs'
     | '/org/$orgId/organization'
     | '/org/$orgId/settings'
-    | '/org/$orgId/jobs/$jobId/application-form'
     | '/org/$orgId/jobs/$jobId/criteria'
-    | '/org/$orgId/jobs/$jobId/description'
-    | '/org/$orgId/jobs/$jobId/details'
-    | '/org/$orgId/jobs/$jobId/hiring-team'
     | '/org/$orgId/jobs/$jobId/interview-plan'
     | '/org/$orgId/jobs/$jobId/pipeline'
     | '/org/$orgId/jobs/$jobId/posting'
@@ -592,11 +544,7 @@ export interface FileRouteTypes {
     | '/org/$orgId/jobs/'
     | '/org/$orgId/organization/'
     | '/org/$orgId/settings/'
-    | '/org/$orgId/jobs/$jobId/application-form'
     | '/org/$orgId/jobs/$jobId/criteria'
-    | '/org/$orgId/jobs/$jobId/description'
-    | '/org/$orgId/jobs/$jobId/details'
-    | '/org/$orgId/jobs/$jobId/hiring-team'
     | '/org/$orgId/jobs/$jobId/interview-plan'
     | '/org/$orgId/jobs/$jobId/pipeline'
     | '/org/$orgId/jobs/$jobId/posting'
@@ -914,39 +862,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrgOrgIdJobsJobIdInterviewPlanRouteImport
       parentRoute: typeof OrgOrgIdJobsJobIdRoute
     }
-    '/org/$orgId/jobs/$jobId/hiring-team': {
-      id: '/org/$orgId/jobs/$jobId/hiring-team'
-      path: '/hiring-team'
-      fullPath: '/org/$orgId/jobs/$jobId/hiring-team'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdHiringTeamRouteImport
-      parentRoute: typeof OrgOrgIdJobsJobIdRoute
-    }
-    '/org/$orgId/jobs/$jobId/details': {
-      id: '/org/$orgId/jobs/$jobId/details'
-      path: '/details'
-      fullPath: '/org/$orgId/jobs/$jobId/details'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdDetailsRouteImport
-      parentRoute: typeof OrgOrgIdJobsJobIdRoute
-    }
-    '/org/$orgId/jobs/$jobId/description': {
-      id: '/org/$orgId/jobs/$jobId/description'
-      path: '/description'
-      fullPath: '/org/$orgId/jobs/$jobId/description'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdDescriptionRouteImport
-      parentRoute: typeof OrgOrgIdJobsJobIdRoute
-    }
     '/org/$orgId/jobs/$jobId/criteria': {
       id: '/org/$orgId/jobs/$jobId/criteria'
       path: '/criteria'
       fullPath: '/org/$orgId/jobs/$jobId/criteria'
       preLoaderRoute: typeof OrgOrgIdJobsJobIdCriteriaRouteImport
-      parentRoute: typeof OrgOrgIdJobsJobIdRoute
-    }
-    '/org/$orgId/jobs/$jobId/application-form': {
-      id: '/org/$orgId/jobs/$jobId/application-form'
-      path: '/application-form'
-      fullPath: '/org/$orgId/jobs/$jobId/application-form'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdApplicationFormRouteImport
       parentRoute: typeof OrgOrgIdJobsJobIdRoute
     }
   }
@@ -1077,11 +997,7 @@ const OrgOrgIdSettingsRouteWithChildren =
   OrgOrgIdSettingsRoute._addFileChildren(OrgOrgIdSettingsRouteChildren)
 
 interface OrgOrgIdJobsJobIdRouteChildren {
-  OrgOrgIdJobsJobIdApplicationFormRoute: typeof OrgOrgIdJobsJobIdApplicationFormRoute
   OrgOrgIdJobsJobIdCriteriaRoute: typeof OrgOrgIdJobsJobIdCriteriaRoute
-  OrgOrgIdJobsJobIdDescriptionRoute: typeof OrgOrgIdJobsJobIdDescriptionRoute
-  OrgOrgIdJobsJobIdDetailsRoute: typeof OrgOrgIdJobsJobIdDetailsRoute
-  OrgOrgIdJobsJobIdHiringTeamRoute: typeof OrgOrgIdJobsJobIdHiringTeamRoute
   OrgOrgIdJobsJobIdInterviewPlanRoute: typeof OrgOrgIdJobsJobIdInterviewPlanRoute
   OrgOrgIdJobsJobIdPipelineRoute: typeof OrgOrgIdJobsJobIdPipelineRoute
   OrgOrgIdJobsJobIdPostingRoute: typeof OrgOrgIdJobsJobIdPostingRoute
@@ -1089,11 +1005,7 @@ interface OrgOrgIdJobsJobIdRouteChildren {
 }
 
 const OrgOrgIdJobsJobIdRouteChildren: OrgOrgIdJobsJobIdRouteChildren = {
-  OrgOrgIdJobsJobIdApplicationFormRoute: OrgOrgIdJobsJobIdApplicationFormRoute,
   OrgOrgIdJobsJobIdCriteriaRoute: OrgOrgIdJobsJobIdCriteriaRoute,
-  OrgOrgIdJobsJobIdDescriptionRoute: OrgOrgIdJobsJobIdDescriptionRoute,
-  OrgOrgIdJobsJobIdDetailsRoute: OrgOrgIdJobsJobIdDetailsRoute,
-  OrgOrgIdJobsJobIdHiringTeamRoute: OrgOrgIdJobsJobIdHiringTeamRoute,
   OrgOrgIdJobsJobIdInterviewPlanRoute: OrgOrgIdJobsJobIdInterviewPlanRoute,
   OrgOrgIdJobsJobIdPipelineRoute: OrgOrgIdJobsJobIdPipelineRoute,
   OrgOrgIdJobsJobIdPostingRoute: OrgOrgIdJobsJobIdPostingRoute,

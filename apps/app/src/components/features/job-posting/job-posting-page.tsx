@@ -14,6 +14,7 @@ import { getPublicSiteOrigin } from '@/config/site';
 import {
   useReleaseCommitmentFunds,
   useUnpublishJobPosting,
+  useUpdateActiveCommitmentDescription,
   useUpdateJobPosting,
 } from '@/hooks/mutations/use-job-posting-mutations';
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
@@ -24,7 +25,7 @@ import { Permission } from '@/lib/schemas/org';
 import { ApplicationCapacityControl, isValidApplicationCapacity } from './application-capacity-control';
 import { ApplicationFormDialog } from './application-form-dialog';
 import { PostingTabs } from './posting-tabs';
-import { PublishJobDialogV2 } from './publish-job-dialog-v2';
+import { PublishPostingDialog } from './publish-posting-dialog';
 import { ResponseCommitmentDialog } from './response-commitment-dialog';
 import { ResponseCommitmentStatus } from './response-commitment-status';
 
@@ -40,6 +41,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const postingQuery = useQueryJobPosting(orgId, jobId);
   const summaryQuery = useQueryJobSummary(jobId);
   const updatePosting = useUpdateJobPosting({ orgId, jobId });
+  const updateCommitmentDescription = useUpdateActiveCommitmentDescription({ orgId, jobId });
   const unpublishPosting = useUnpublishJobPosting({ orgId, jobId });
   const releaseCommitmentFunds = useReleaseCommitmentFunds({ orgId, jobId });
   const { canOnJob, isLoading: permissionsLoading } = useJobPermissions(jobId);
@@ -73,14 +75,13 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   }
 
   const commitment = posting.commitment;
+  const hasActiveCommitment = commitment?.status === 'published';
   const isPostingPublished = posting.status === 'published';
   const isJobClosed = job.status === 'closed';
   const isCommitmentFinalizing = job.lifecycle.commitmentFinalizationPending;
   const commitmentAllowsActivation = commitment === null || commitment.status === 'closed';
-  const postingAllowsCommitment =
-    isPostingPublished && commitmentAllowsActivation && !isCommitmentFinalizing;
-  const postingAllowsPublication =
-    !isPostingPublished && job.status === 'open' && !isCommitmentFinalizing;
+  const postingAllowsCommitment = isPostingPublished && commitmentAllowsActivation && !isCommitmentFinalizing;
+  const postingAllowsPublication = !isPostingPublished && job.status === 'open' && !isCommitmentFinalizing;
 
   const canEdit = !isJobClosed && canOnJob(Permission.JOB_EDIT);
   const canPublishPosting = canOnJob(Permission.JOB_PUBLISH);
@@ -117,6 +118,15 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   };
 
   const handleSaveDescription = async (description: unknown, descriptionMarkdown: string) => {
+    if (hasActiveCommitment) {
+      await updateCommitmentDescription.mutateAsync({
+        expectedVersion: job.version,
+        descriptionMarkdown,
+      });
+
+      return;
+    }
+
     await updatePosting.mutateAsync({
       expectedVersion: posting.version,
       description,
@@ -265,7 +275,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
         isPending={unpublishPosting.isPending}
       />
 
-      <PublishJobDialogV2
+      <PublishPostingDialog
         orgId={orgId}
         jobId={jobId}
         jobTitle={job.title ?? 'Untitled Position'}
@@ -283,7 +293,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
 
       <JobDescriptionEditorDialog
         descriptionMarkdown={posting.descriptionMarkdown}
-        isPending={updatePosting.isPending}
+        isPending={updatePosting.isPending || updateCommitmentDescription.isPending}
         open={descriptionDialogOpen}
         onOpenChange={setDescriptionDialogOpen}
         onSave={handleSaveDescription}

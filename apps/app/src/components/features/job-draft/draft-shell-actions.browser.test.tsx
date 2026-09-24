@@ -52,10 +52,9 @@ vi.mock('./draft-preview-dialog', () => ({
 }));
 
 const lifecycle: JobLifecycle = {
-  transition: null,
   commitmentFinalizationPending: false,
   activeApplications: 0,
-  allowedActions: ['publish_job'],
+  allowedActions: ['publish_posting'],
 };
 
 beforeEach(() => {

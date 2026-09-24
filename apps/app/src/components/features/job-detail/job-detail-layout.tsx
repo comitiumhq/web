@@ -149,7 +149,6 @@ type JobNavRoute =
   | '/org/$orgId/jobs/$jobId/pipeline'
   | '/org/$orgId/jobs/$jobId/posting'
   | '/org/$orgId/jobs/$jobId/settings'
-  | '/org/$orgId/jobs/$jobId/hiring-team'
   | (typeof DRAFT_SECTIONS)[number]['route'];
 
 interface JobNavItem {

@@ -1,7 +1,7 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import { markdownManager } from '@/lib/tiptap/extensions';
 
-export const EMPTY_JOB_DESCRIPTION: TipTapDoc = {
+const EMPTY_JOB_DESCRIPTION: TipTapDoc = {
   type: 'doc',
   content: [{ type: 'paragraph' }],
 };

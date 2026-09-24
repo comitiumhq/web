@@ -240,7 +240,6 @@
       "name": "@comitium/jobs",
       "version": "0.1.0",
       "dependencies": {
-        "@comitium/chain": "workspace:*",
         "@comitium/schemas": "workspace:*",
         "@comitium/ui": "workspace:*",
         "@phosphor-icons/react": "2.1.10",

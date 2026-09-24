@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { qk } from '@/hooks/query-keys';
 import {
   prepareCommitment,
+  prepareJobContentUriUpdate,
   prepareJobSettlement,
   publishJobPosting,
   unpublishJobPosting,
@@ -77,6 +78,26 @@ export function useAddResponseCommitment(target: JobPostingTarget) {
       confirming: 'Response commitment is being added.',
       completed: 'Response commitment added',
       failed: 'Could not add response commitment',
+    },
+  });
+}
+
+type UpdateActiveCommitmentDescriptionParams = {
+  expectedVersion: number;
+  descriptionMarkdown: string;
+};
+
+export function useUpdateActiveCommitmentDescription(target: JobPostingTarget) {
+  return usePreparedPostingOperation({
+    target,
+    prepare: (data: UpdateActiveCommitmentDescriptionParams) =>
+      prepareJobContentUriUpdate(target.orgId, target.jobId, data),
+    copy: {
+      toastId: 'update-posting-description',
+      pending: 'Saving description...',
+      confirming: 'Description update is being completed.',
+      completed: 'Description saved',
+      failed: 'Could not save description',
     },
   });
 }

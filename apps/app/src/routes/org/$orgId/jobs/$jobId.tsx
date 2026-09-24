@@ -1,8 +1,6 @@
 import type { JobSummary } from '@comitium/schemas/jobs';
-import { EmptyState } from '@comitium/ui/empty-state';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { RouteNotFound } from '@comitium/ui/route-not-found';
-import { PaperPlaneTiltIcon } from '@phosphor-icons/react';
 import { createFileRoute, Navigate, Outlet, useLocation } from '@tanstack/react-router';
 import { useCallback } from 'react';
 import { OrgGuard } from '@/components/auth/org-guard';
@@ -15,7 +13,6 @@ import { DraftShellActions } from '@/components/features/job-draft/draft-shell-a
 import { DRAFT_SECTIONS, type DraftTab } from '@/components/features/job-draft/sections';
 import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
-import { isJobPublishing } from '@/lib/jobs/status';
 import { Permission } from '@/lib/schemas/org';
 
 export const Route = createFileRoute('/org/$orgId/jobs/$jobId')({
@@ -74,21 +71,6 @@ function JobRouteShell({ org, jobId, pathname }: JobRouteShellProps) {
     return <RouteNotFound />;
   }
 
-  if (isJobPublishing(job.lifecycle)) {
-    return (
-      <JobDetailRouteOrgProvider org={org}>
-        <JobDetailLayout orgId={org.id} jobId={jobId} job={job}>
-          <EmptyState
-            icon={PaperPlaneTiltIcon}
-            title="Publication submitted"
-            description="This role will appear in open jobs when publishing is complete."
-            className="min-h-64"
-          />
-        </JobDetailLayout>
-      </JobDetailRouteOrgProvider>
-    );
-  }
-
   if (job.status === 'draft') {
     return (
       <JobRoutePermissionGuard permission={Permission.JOB_EDIT} orgId={org.id} jobId={jobId}>
@@ -108,10 +90,6 @@ function JobRouteShell({ org, jobId, pathname }: JobRouteShellProps) {
         replace
       />
     );
-  }
-
-  if (pathname.endsWith('/hiring-team')) {
-    return <Navigate to="/org/$orgId/jobs/$jobId/settings" params={{ orgId: org.id, jobId }} replace />;
   }
 
   return (
@@ -137,7 +115,7 @@ function getDraftTabFromPathname(pathname: string): DraftTab | null {
   return DRAFT_SECTIONS.find((section) => pathname.endsWith(`/${section.id}`))?.id ?? null;
 }
 
-const DRAFT_ONLY_JOB_ROUTE_SUFFIXES = ['details', 'description', 'application-form', 'criteria'] as const;
+const DRAFT_ONLY_JOB_ROUTE_SUFFIXES = ['criteria'] as const;
 
 function isDraftOnlyJobRoute(pathname: string, orgId: string, jobId: string): boolean {
   const basePath = `/org/${orgId}/jobs/${jobId}`;

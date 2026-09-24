@@ -183,4 +183,14 @@ describe('useApplyJob', () => {
       { id: 'apply-job' },
     );
   });
+
+  it('describes preparation failures without wallet terminology', async () => {
+    const options = getMutationOptions();
+
+    await options.onError(new SignatureError(500, 'Wallet signature failed'));
+
+    expect(mocks.toastError).toHaveBeenCalledWith('Application submission could not be prepared. Please try again.', {
+      id: 'apply-job',
+    });
+  });
 });

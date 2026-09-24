@@ -2,7 +2,7 @@ import type { HiringTeamEntry } from '@comitium/schemas/jobs';
 import type { UseFormReturn } from 'react-hook-form';
 import { HiringTeamTab } from '@/components/features/hiring-team-editor/hiring-team-tab';
 import { JobBasicSettingsCard } from '@/components/features/job-settings/job-basic-settings-card';
-import { JobSettingsTabs } from '@/components/features/job-settings/job-settings-tabs';
+import { type JobSettingsTab, JobSettingsTabs } from '@/components/features/job-settings/job-settings-tabs';
 import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
 
 interface JobSettingsEditorProps {
@@ -12,6 +12,7 @@ interface JobSettingsEditorProps {
   onChangeHiringTeam: (team: HiringTeamEntry[]) => void;
   showPublishRequiredMarkers?: boolean;
   editableStructure?: boolean;
+  initialTab?: JobSettingsTab;
 }
 
 export function JobSettingsEditor({
@@ -21,9 +22,11 @@ export function JobSettingsEditor({
   onChangeHiringTeam,
   showPublishRequiredMarkers = true,
   editableStructure = true,
+  initialTab,
 }: JobSettingsEditorProps) {
   return (
     <JobSettingsTabs
+      initialTab={initialTab}
       basic={
         <JobBasicSettingsCard
           orgId={orgId}

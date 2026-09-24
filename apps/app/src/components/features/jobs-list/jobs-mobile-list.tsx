@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import { memo, useCallback } from 'react';
 import { JobStatusBadge } from '@/components/features/job-detail/job-status-badge';
 import { formatEmployerStake } from '@/lib/jobs';
-import { isJobPublishing } from '@/lib/jobs/status';
 import { PostingStatusValue } from './job-list-cell-values';
 import { ActionsCell, type JobsRow, metaLine } from './jobs-columns';
 
@@ -113,9 +112,7 @@ const JobMobileCard = memo(function JobMobileCard({
 
         {isDraft ? (
           <>
-            <span className="text-label-12 text-primary">
-              {isJobPublishing(row.draft.lifecycle) ? 'Publication submitted' : 'Finish setup →'}
-            </span>
+            <span className="text-label-12 text-primary">Finish setup →</span>
             <JobMobileOperationalMeta
               candidateCount={row.draft.candidateCount}
               interviewPlanName={row.draft.interviewPlanName}

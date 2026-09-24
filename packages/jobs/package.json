@@ -17,7 +17,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@comitium/chain": "workspace:*",
     "@comitium/schemas": "workspace:*",
     "@comitium/ui": "workspace:*",
     "@phosphor-icons/react": "2.1.10",

@@ -13,7 +13,7 @@ import {
   jobToSettingsFormValues,
   prepareJobSettingsUpdate,
 } from '@/components/features/job-settings/job-settings-state';
-import { JobSettingsTabs } from '@/components/features/job-settings/job-settings-tabs';
+import { type JobSettingsTab, JobSettingsTabs } from '@/components/features/job-settings/job-settings-tabs';
 import { useSaveJobEditor } from '@/components/features/job-settings/use-save-job-editor';
 import { useQueryJobEditor } from '@/hooks/queries/use-query-job-editor';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
@@ -24,9 +24,10 @@ import { Permission } from '@/lib/schemas/org';
 interface OpenJobSettingsPageProps {
   org: MyOrg;
   jobId: string;
+  initialTab?: JobSettingsTab;
 }
 
-export function OpenJobSettingsPage({ org, jobId }: OpenJobSettingsPageProps) {
+export function OpenJobSettingsPage({ org, jobId, initialTab }: OpenJobSettingsPageProps) {
   const { data: job, isLoading, isError } = useQueryJobEditor(org.id, jobId);
   const { mutateAsync: saveSettings, isPending } = useSaveJobEditor(org.id, jobId);
   const { canOnJob } = useJobPermissions(jobId);
@@ -95,6 +96,7 @@ export function OpenJobSettingsPage({ org, jobId }: OpenJobSettingsPageProps) {
 
         <Form {...form}>
           <JobSettingsTabs
+            initialTab={initialTab}
             basic={<JobBasicSettingsCard orgId={org.id} form={form} editableStructure={false} readOnly={!canEdit} />}
             hiringTeam={<JobHiringTeam org={org} jobId={jobId} />}
           />

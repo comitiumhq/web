@@ -60,7 +60,6 @@ function createJob(overrides: Partial<PipelineJob> = {}): PipelineJob {
     jobId: 1,
     status: 'open',
     lifecycle: {
-      transition: null,
       commitmentFinalizationPending: false,
       activeApplications: 1,
       allowedActions: [],

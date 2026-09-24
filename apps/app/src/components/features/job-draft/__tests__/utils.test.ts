@@ -141,8 +141,8 @@ describe('job draft utils', () => {
     const orgId = '11111111-1111-4111-8111-111111111111';
     const jobId = '22222222-2222-4222-8222-222222222222';
 
-    expect(isDraftEditorPath(`/org/${orgId}/jobs/${jobId}/description`, orgId, jobId)).toBe(true);
-    expect(isDraftEditorPath(`/org/${orgId}/jobs/33333333-3333-4333-8333-333333333333/details`, orgId, jobId)).toBe(
+    expect(isDraftEditorPath(`/org/${orgId}/jobs/${jobId}/posting`, orgId, jobId)).toBe(true);
+    expect(isDraftEditorPath(`/org/${orgId}/jobs/33333333-3333-4333-8333-333333333333/settings`, orgId, jobId)).toBe(
       false,
     );
     expect(isDraftEditorPath(`/org/${orgId}/jobs`, orgId, jobId)).toBe(false);

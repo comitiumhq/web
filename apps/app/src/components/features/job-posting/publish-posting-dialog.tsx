@@ -12,7 +12,7 @@ import {
 import { usePublishJobPosting } from '@/hooks/mutations/use-job-posting-mutations';
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
 
-interface PublishJobDialogV2Props {
+interface PublishPostingDialogProps {
   orgId: string;
   jobId: string;
   jobTitle: string;
@@ -20,7 +20,7 @@ interface PublishJobDialogV2Props {
   onOpenChange: (open: boolean) => void;
 }
 
-export function PublishJobDialogV2({ orgId, jobId, jobTitle, open, onOpenChange }: PublishJobDialogV2Props) {
+export function PublishPostingDialog({ orgId, jobId, jobTitle, open, onOpenChange }: PublishPostingDialogProps) {
   const navigate = useNavigate();
   const postingQuery = useQueryJobPosting(orgId, jobId, open);
   const publishPosting = usePublishJobPosting({ orgId, jobId });

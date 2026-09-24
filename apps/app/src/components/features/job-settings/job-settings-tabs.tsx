@@ -4,11 +4,14 @@ import type { ReactNode } from 'react';
 interface JobSettingsTabsProps {
   basic: ReactNode;
   hiringTeam: ReactNode;
+  initialTab?: JobSettingsTab;
 }
 
-export function JobSettingsTabs({ basic, hiringTeam }: JobSettingsTabsProps) {
+export type JobSettingsTab = 'basic' | 'hiring-team';
+
+export function JobSettingsTabs({ basic, hiringTeam, initialTab = 'basic' }: JobSettingsTabsProps) {
   return (
-    <Tabs defaultValue="basic" className="min-w-0 gap-6">
+    <Tabs defaultValue={initialTab} className="min-w-0 gap-6">
       <div className="overflow-x-auto pb-1">
         <TabsList variant="line" className="w-full min-w-max justify-start">
           <TabsTrigger value="basic" className="flex-none px-3">

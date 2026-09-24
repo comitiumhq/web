@@ -41,6 +41,7 @@ vi.mock('@/hooks/mutations/use-job-posting-mutations', () => ({
     mutate: mocks.release,
   }),
   useUnpublishJobPosting: () => ({ isPending: false, mutate: mocks.unpublish }),
+  useUpdateActiveCommitmentDescription: () => ({ isPending: false, mutateAsync: mocks.updateAsync }),
   useUpdateJobPosting: () => ({ isPending: false, mutate: mocks.update, mutateAsync: mocks.updateAsync }),
 }));
 
@@ -64,8 +65,8 @@ vi.mock('./application-form-dialog', () => ({
   ApplicationFormDialog: () => null,
 }));
 
-vi.mock('./publish-job-dialog-v2', () => ({
-  PublishJobDialogV2: ({ jobTitle, open }: { jobTitle: string; open: boolean }) =>
+vi.mock('./publish-posting-dialog', () => ({
+  PublishPostingDialog: ({ jobTitle, open }: { jobTitle: string; open: boolean }) =>
     open ? (
       <div role="dialog">
         <h2>Publish &ldquo;{jobTitle}&rdquo;?</h2>

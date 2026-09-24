@@ -65,12 +65,7 @@ export function useResponseCommitmentDialog({
   const hasRequiredData = Boolean(configQuery.data && orgQuery.data);
   const isPending = addCommitment.isPending || addCommitment.isConfirming;
   const canSubmit =
-    hasRequiredData &&
-    hasValidFeeTier &&
-    !isBalanceLoading &&
-    !isBalanceError &&
-    !isInsufficient &&
-    !isPending;
+    hasRequiredData && hasValidFeeTier && !isBalanceLoading && !isBalanceError && !isInsufficient && !isPending;
 
   const reset = () => form.reset(DEFAULT_VALUES);
 

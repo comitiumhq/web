@@ -12,12 +12,12 @@ import {
 import { CopyIcon, DotsThreeVerticalIcon, EyeIcon, TrashIcon } from '@phosphor-icons/react';
 import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
-import { PublishJobDialogV2 } from '@/components/features/job-posting/publish-job-dialog-v2';
+import { PublishPostingDialog } from '@/components/features/job-posting/publish-posting-dialog';
 import { useCreateDraft } from '@/hooks/mutations/use-create-draft';
 import { useDeleteDraft } from '@/hooks/mutations/use-delete-draft';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
 import { usePermissions } from '@/hooks/use-permissions';
-import { canRunJobLifecycleAction, isJobPublishing } from '@/lib/jobs/status';
+import { canRunJobLifecycleAction } from '@/lib/jobs/status';
 import { Permission } from '@/lib/schemas/org';
 import { useDraftFormContext } from './draft-form-context';
 import { DraftPreviewDialog } from './draft-preview-dialog';
@@ -55,12 +55,11 @@ export function DraftShellActions({ lifecycle }: DraftShellActionsProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const canDuplicate = can(Permission.JOB_CREATE);
-  const isPublishing = isJobPublishing(lifecycle);
-  const canDelete = canOnJob(Permission.JOB_EDIT) && !isPublishing;
+  const canDelete = canOnJob(Permission.JOB_EDIT);
   const canPublish =
     canOnJob(Permission.JOB_EDIT) &&
     canOnJob(Permission.JOB_PUBLISH) &&
-    canRunJobLifecycleAction(lifecycle, 'publish_job');
+    canRunJobLifecycleAction(lifecycle, 'publish_posting');
   const draftTitle = draft?.title ?? 'Draft';
 
   const handleDuplicate = useCallback(() => {
@@ -81,7 +80,7 @@ export function DraftShellActions({ lifecycle }: DraftShellActionsProps) {
   }, [deleteDraftMutate, jobId, navigate, orgId]);
 
   const duplicateLabel = getDuplicateLabel(isDuplicating);
-  const actionsDisabled = !draft || isPublishing || isSaving;
+  const actionsDisabled = !draft || isSaving;
 
   return (
     <>
@@ -156,7 +155,7 @@ export function DraftShellActions({ lifecycle }: DraftShellActionsProps) {
           />
 
           {publishVersion !== null && (
-            <PublishJobDialogV2
+            <PublishPostingDialog
               orgId={orgId}
               jobId={jobId}
               jobTitle={draft.title}
