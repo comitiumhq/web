@@ -1,6 +1,7 @@
 import type { CareerJob } from '@comitium/jobs/schemas';
 import type { EmploymentType } from '@comitium/schemas/job-enums';
 import type { CompensationConfig, CompensationTier, LocationEntry } from '@comitium/schemas/public-jobs';
+import { richTextToPlainText } from '@comitium/ui/rich-text';
 
 import { getWebUrl } from './json-ld';
 import { absolutePublicUrl } from './public';
@@ -155,7 +156,7 @@ export function buildJobPostingJsonLd(job: CareerJob) {
       value: job.postingId,
     },
     title: job.title ?? 'Untitled Position',
-    description: job.description ?? '',
+    description: richTextToPlainText(job.description),
     datePosted: job.createdAt,
     employmentType: getEmploymentType(job.employmentType),
     url: absolutePublicUrl(job.canonicalUrl),

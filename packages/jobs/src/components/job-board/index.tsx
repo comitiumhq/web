@@ -227,8 +227,8 @@ export function JobBoard({ api, selectedPosting = null, filters = {}, resolveApp
 
     return jobs[0];
   }, [jobs, selectedPosting]);
-  const selectedJobQuery = useQueryCareerJob(api, selectedPosting && !selectedListJob ? selectedPosting : null);
-  const detailJob = selectedPosting ? (selectedListJob ?? selectedJobQuery.data ?? null) : selectedListJob;
+  const selectedJobQuery = useQueryCareerJob(api, selectedPosting);
+  const detailJob = selectedPosting ? (selectedJobQuery.data ?? null) : selectedListJob;
   const selectedCareersUrl = detailJob ? getCareersUrl(detailJob) : null;
   const selectedApplyUrl = detailJob ? resolveApplyUrl(getApplyPath(detailJob)) : null;
 

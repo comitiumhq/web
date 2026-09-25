@@ -40,7 +40,7 @@ export function DraftShellActions({ lifecycle }: DraftShellActionsProps) {
     isDirty,
     isSaving,
     save,
-    descriptionMarkdown,
+    description,
     previewOpen,
     publishOpen,
     publishVersion,
@@ -149,7 +149,7 @@ export function DraftShellActions({ lifecycle }: DraftShellActionsProps) {
           <DraftPreviewDialog
             orgId={orgId}
             draft={draft}
-            descriptionMarkdown={descriptionMarkdown}
+            description={description}
             open={previewOpen}
             onOpenChange={setPreviewOpen}
           />

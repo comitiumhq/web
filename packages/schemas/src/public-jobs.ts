@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { tipTapDocSchema } from './common';
 import type { PublicJobSort } from './job-enums';
 import { paginatedWithTotalSchema, uuidSchema } from './public';
 
@@ -90,7 +91,7 @@ const jobSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   title: z.string().nullable(),
-  description: z.string().nullable(),
+  description: tipTapDocSchema.nullable(),
   location: z.array(locationEntrySchema).nullable(),
   employmentType: z.string().nullable(),
   locationType: z.string().nullable(),

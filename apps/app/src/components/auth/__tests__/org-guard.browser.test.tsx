@@ -71,8 +71,8 @@ vi.mock('../auth-session-recovery', () => ({
   AuthSessionRecovery: () => <main>Recovering session</main>,
 }));
 
-vi.mock('../connect-wallet-button', () => ({
-  ConnectWalletButton: () => <button type="button">Sign in</button>,
+vi.mock('../login-button', () => ({
+  LoginButton: () => <button type="button">Sign in</button>,
 }));
 
 const org = {

@@ -27,7 +27,7 @@ export function draftToEditorState(draft: JobEditor): DraftEditorState {
   };
 }
 
-export function prepareDraftSave(state: DraftEditorState, expectedVersion: number, descriptionMarkdown: string) {
+export function prepareDraftSave(state: DraftEditorState, expectedVersion: number) {
   const normalized: DraftEditorState = {
     ...state,
     values: {
@@ -40,7 +40,6 @@ export function prepareDraftSave(state: DraftEditorState, expectedVersion: numbe
   const data: UpdateJobEditorData = {
     ...prepareJobSettingsUpdate(normalized.values, expectedVersion),
     description: normalized.description,
-    descriptionMarkdown,
     formId: normalized.formId,
     applicationCapacity: normalized.values.applicationCapacity ?? null,
     criteria: normalized.criteria.length > 0 ? normalized.criteria : null,

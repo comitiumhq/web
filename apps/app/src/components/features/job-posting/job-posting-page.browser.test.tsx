@@ -5,14 +5,17 @@ import { JobPostingPage } from './job-posting-page';
 const mocks = vi.hoisted(() => ({
   job: {
     canonicalUrl: 'https://jobs.example.test/backend-engineer',
-    lifecycle: { commitmentFinalizationPending: false },
+    lifecycle: { commitmentFinalizationPending: false, activeApplications: 0, allowedActions: ['close_job'] },
     status: 'open' as 'open' | 'closed',
     title: 'Backend Engineer',
   },
   posting: {
     id: 'posting-1',
     status: 'unpublished' as 'published' | 'unpublished',
-    descriptionMarkdown: 'Build reliable systems.',
+    description: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build reliable systems.' }] }],
+    },
     form: { id: 'form-1', title: 'Default Application Form', isArchived: false },
     applicationCapacity: 25 as number | null,
     completedApplicationCount: 4,
@@ -83,14 +86,17 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.job = {
     canonicalUrl: 'https://jobs.example.test/backend-engineer',
-    lifecycle: { commitmentFinalizationPending: false },
+    lifecycle: { commitmentFinalizationPending: false, activeApplications: 0, allowedActions: ['close_job'] },
     status: 'open',
     title: 'Backend Engineer',
   };
   mocks.posting = {
     id: 'posting-1',
     status: 'unpublished',
-    descriptionMarkdown: 'Build reliable systems.',
+    description: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build reliable systems.' }] }],
+    },
     form: { id: 'form-1', title: 'Default Application Form', isArchived: false },
     applicationCapacity: 25,
     completedApplicationCount: 4,
@@ -134,6 +140,14 @@ describe('JobPostingPage', () => {
     await screen.getByRole('button', { name: 'Add response commitment' }).click();
 
     await expect.element(screen.getByRole('dialog', { name: '' })).toHaveTextContent('Add response commitment');
+  });
+
+  it('does not offer another response commitment while a lifecycle operation is pending', async () => {
+    mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, allowedActions: [] } };
+    mocks.posting = { ...mocks.posting, status: 'published' };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await expect.element(screen.getByRole('button', { name: 'Add response commitment' })).not.toBeInTheDocument();
   });
 
   it('shows an active response commitment without another add action', async () => {
@@ -190,7 +204,7 @@ describe('JobPostingPage', () => {
   });
 
   it('waits for Commitment finalization before allowing another one', async () => {
-    mocks.job = { ...mocks.job, lifecycle: { commitmentFinalizationPending: true } };
+    mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, commitmentFinalizationPending: true } };
     mocks.posting = {
       ...mocks.posting,
       status: 'published',

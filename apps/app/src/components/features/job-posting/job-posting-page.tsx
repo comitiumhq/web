@@ -1,9 +1,11 @@
+import type { TipTapDoc } from '@comitium/schemas/common';
 import type { JobPosting } from '@comitium/schemas/jobs';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Card, CardContent } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { PageContainer } from '@comitium/ui/page-container';
+import { richTextToPlainText } from '@comitium/ui/rich-text';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
 import { ArrowSquareOutIcon, CopyIcon, PencilIcon } from '@phosphor-icons/react';
@@ -20,6 +22,7 @@ import {
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
 import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
+import { canRunJobLifecycleAction } from '@/lib/jobs/status';
 import { Permission } from '@/lib/schemas/org';
 
 import { ApplicationCapacityControl, isValidApplicationCapacity } from './application-capacity-control';
@@ -80,7 +83,9 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const isJobClosed = job.status === 'closed';
   const isCommitmentFinalizing = job.lifecycle.commitmentFinalizationPending;
   const commitmentAllowsActivation = commitment === null || commitment.status === 'closed';
-  const postingAllowsCommitment = isPostingPublished && commitmentAllowsActivation && !isCommitmentFinalizing;
+  const lifecycleAllowsCommitment = canRunJobLifecycleAction(job.lifecycle, 'close_job');
+  const postingAllowsCommitment =
+    isPostingPublished && commitmentAllowsActivation && lifecycleAllowsCommitment && !isCommitmentFinalizing;
   const postingAllowsPublication = !isPostingPublished && job.status === 'open' && !isCommitmentFinalizing;
 
   const canEdit = !isJobClosed && canOnJob(Permission.JOB_EDIT);
@@ -117,11 +122,11 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     });
   };
 
-  const handleSaveDescription = async (description: unknown, descriptionMarkdown: string) => {
+  const handleSaveDescription = async (description: TipTapDoc) => {
     if (hasActiveCommitment) {
       await updateCommitmentDescription.mutateAsync({
         expectedVersion: job.version,
-        descriptionMarkdown,
+        description,
       });
 
       return;
@@ -130,7 +135,6 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     await updatePosting.mutateAsync({
       expectedVersion: posting.version,
       description,
-      descriptionMarkdown,
     });
   };
 
@@ -207,7 +211,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
               <CardContent>
                 <div className="flex items-center justify-between gap-4">
                   <p className="min-w-0 truncate text-copy-13 text-muted-foreground">
-                    {posting.descriptionMarkdown ? 'Ready for candidates' : 'No description'}
+                    {richTextToPlainText(posting.description) ? 'Ready for candidates' : 'No description'}
                   </p>
                   {canEdit && (
                     <Button variant="outline" size="sm" onClick={() => setDescriptionDialogOpen(true)}>
@@ -292,7 +296,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
       />
 
       <JobDescriptionEditorDialog
-        descriptionMarkdown={posting.descriptionMarkdown}
+        description={posting.description}
         isPending={updatePosting.isPending || updateCommitmentDescription.isPending}
         open={descriptionDialogOpen}
         onOpenChange={setDescriptionDialogOpen}

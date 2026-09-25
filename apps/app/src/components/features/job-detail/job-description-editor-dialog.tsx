@@ -1,21 +1,23 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import { Button } from '@comitium/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { richTextToPlainText } from '@comitium/ui/rich-text';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { DescriptionToolbar } from '@/components/tiptap-ui/editor-toolbars';
 import { RichTextEditor, type RichTextEditorHandle } from '@/components/tiptap-ui/rich-text-editor';
-import { parseJobDescription, serializeJobDescription } from '@/lib/jobs/description';
+
+const EMPTY_DESCRIPTION: TipTapDoc = { type: 'doc', content: [{ type: 'paragraph' }] };
 
 interface JobDescriptionEditorDialogProps {
-  descriptionMarkdown: string | null;
+  description: TipTapDoc | null;
   isPending: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (description: TipTapDoc, descriptionMarkdown: string) => Promise<unknown>;
+  onSave: (description: TipTapDoc) => Promise<unknown>;
 }
 
 export function JobDescriptionEditorDialog({
-  descriptionMarkdown,
+  description,
   isPending,
   open,
   onOpenChange,
@@ -23,8 +25,7 @@ export function JobDescriptionEditorDialog({
 }: JobDescriptionEditorDialogProps) {
   const editorRef = useRef<RichTextEditorHandle | null>(null);
   const [isDirty, setIsDirty] = useState(false);
-  const initialMarkdown = (descriptionMarkdown ?? '').trim();
-  const initialDoc = useMemo(() => parseJobDescription(descriptionMarkdown), [descriptionMarkdown]);
+  const initialDoc = description ?? EMPTY_DESCRIPTION;
 
   useEffect(() => {
     if (open) {
@@ -33,22 +34,21 @@ export function JobDescriptionEditorDialog({
   }, [open]);
 
   const handleSubmit = useCallback(async () => {
-    const description = editorRef.current?.getJSON();
-    const nextMarkdown = serializeJobDescription(description ?? null);
+    const nextDescription = editorRef.current?.getJSON();
 
-    if (isPending || !description || !nextMarkdown || nextMarkdown === initialMarkdown) {
+    if (isPending || !nextDescription || !richTextToPlainText(nextDescription)) {
       onOpenChange(false);
 
       return;
     }
 
     try {
-      await onSave(description, nextMarkdown);
+      await onSave(nextDescription);
       onOpenChange(false);
     } catch {
       return;
     }
-  }, [initialMarkdown, isPending, onOpenChange, onSave]);
+  }, [isPending, onOpenChange, onSave]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

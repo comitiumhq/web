@@ -1,7 +1,13 @@
 import { requireConnectedWallet } from '@comitium/auth/require-wallet-account';
 import { useAccount, useActiveWallet } from '@comitium/auth/use-wallet';
+import { refreshAfterOnchainOperationSettles } from '@comitium/chain/onchain-operation-observer';
 import { useOnchainSettlementObserver } from '@comitium/chain/use-onchain-settlement-observer';
-import type { PrepareCommitmentParams, PublishJobPostingData, UpdateJobPostingData } from '@comitium/schemas/jobs';
+import type {
+  PrepareCommitmentParams,
+  PrepareJobContentUriUpdateParams,
+  PublishJobPostingData,
+  UpdateJobPostingData,
+} from '@comitium/schemas/jobs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { qk } from '@/hooks/query-keys';
@@ -16,6 +22,7 @@ import {
 import {
   type PreparedRelayedOperation,
   submitAndConfirmPreparedRelayedOperation,
+  submitPreparedRelayedOperation,
 } from '@/lib/onchain-operation-signatures';
 
 interface JobPostingTarget {
@@ -82,23 +89,30 @@ export function useAddResponseCommitment(target: JobPostingTarget) {
   });
 }
 
-type UpdateActiveCommitmentDescriptionParams = {
-  expectedVersion: number;
-  descriptionMarkdown: string;
-};
-
 export function useUpdateActiveCommitmentDescription(target: JobPostingTarget) {
-  return usePreparedPostingOperation({
-    target,
-    prepare: (data: UpdateActiveCommitmentDescriptionParams) =>
-      prepareJobContentUriUpdate(target.orgId, target.jobId, data),
-    copy: {
-      toastId: 'update-posting-description',
-      pending: 'Saving description...',
-      confirming: 'Description update is being completed.',
-      completed: 'Description saved',
-      failed: 'Could not save description',
+  const queryClient = useQueryClient();
+  const { isConnected } = useAccount();
+  const wallet = useActiveWallet();
+
+  return useMutation({
+    mutationFn: async (data: PrepareJobContentUriUpdateParams) => {
+      const { account } = requireConnectedWallet(isConnected, wallet);
+      const operation = await prepareJobContentUriUpdate(target.orgId, target.jobId, data);
+
+      await submitPreparedRelayedOperation(target.orgId, operation, account);
+
+      return operation.operationId;
     },
+    onMutate: () => toast.loading('Saving description...', { id: 'update-posting-description' }),
+    onSuccess: async (operationId) => {
+      const refresh = () => invalidatePostingQueries(queryClient, target);
+
+      await refresh();
+      void refreshAfterOnchainOperationSettles(operationId, refresh);
+      toast.success('Description saved', { id: 'update-posting-description' });
+    },
+    onError: (error: Error) =>
+      toast.error(error.message || 'Could not save description', { id: 'update-posting-description' }),
   });
 }
 

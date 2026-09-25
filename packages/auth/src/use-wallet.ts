@@ -19,10 +19,7 @@ import {
 function getCanonicalConnectedWallet(wallets: ConnectedWallet[], address: string): ConnectedWallet | null {
   return (
     wallets.find(
-      (wallet) =>
-        wallet.walletClientType === 'privy' &&
-        wallet.walletIndex === 0 &&
-        wallet.address.toLowerCase() === address.toLowerCase(),
+      (wallet) => wallet.walletClientType === 'privy' && wallet.address.toLowerCase() === address.toLowerCase(),
     ) ?? null
   );
 }

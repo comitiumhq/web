@@ -1,5 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
+import { richTextToPlainText } from '@comitium/ui/rich-text';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -7,7 +8,6 @@ import { toast } from 'sonner';
 import { useCreateJobTemplate, useUpdateJobTemplate } from '@/hooks/mutations/use-job-template-mutations';
 import { useQueryJobTemplate } from '@/hooks/queries/use-query-job-templates';
 import { buildCompensation } from '@/lib/jobs/compensation';
-import { serializeJobDescription } from '@/lib/jobs/description';
 import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
 import type { CreateJobTemplateBody } from '@/lib/schemas/job-templates';
 
@@ -97,8 +97,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
     const isUpdating = templateId !== null;
     const shouldSendDepartment = !isUpdating || form.getFieldState('departmentId').isDirty;
     const shouldSendLocation = !isUpdating || form.getFieldState('locationId').isDirty;
-    const descriptionMarkdown = serializeJobDescription(description);
-    const descriptionContent = descriptionMarkdown ? description : null;
+    const descriptionContent = richTextToPlainText(description) ? description : null;
 
     if (!trimmedTitle) {
       toast.error('Title is required');
@@ -113,7 +112,6 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
       category: v.category,
       compensation: buildCompensation(v) ?? undefined,
       description: descriptionContent,
-      descriptionMarkdown: descriptionMarkdown || null,
       formId,
       criteria: validCriteria,
       hiringTeam: hiringTeam.map((member) => ({ userId: member.userId, role: member.role })),

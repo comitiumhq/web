@@ -17,7 +17,10 @@ const capacityReachedJob: CareerJob = {
   canonicalUrl: 'https://jobs.example.test/backend-engineer',
   applicationCapacityAvailable: false,
   title: 'Backend Engineer',
-  description: 'Build reliable systems.',
+  description: {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build reliable systems.' }] }],
+  },
   socialDescription: null,
   status: 'open',
   responseDeadlineDays: null,

@@ -11,7 +11,10 @@ const mocks = vi.hoisted(() => ({
     isDirty: false,
     isSaving: false,
     save: vi.fn(),
-    descriptionMarkdown: 'Build reliable systems.',
+    description: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build reliable systems.' }] }],
+    },
     previewOpen: false,
     publishOpen: false,
     publishVersion: null,

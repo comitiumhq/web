@@ -2,6 +2,7 @@ import { Alert, AlertDescription } from '@comitium/ui/alert';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
+import { richTextToPlainText } from '@comitium/ui/rich-text';
 import { Spinner } from '@comitium/ui/spinner';
 import { useNavigate } from '@tanstack/react-router';
 import { type ReactNode, useEffect, useState } from 'react';
@@ -35,7 +36,7 @@ export function PublishPostingDialog({ orgId, jobId, jobTitle, open, onOpenChang
   const posting = postingQuery.data;
   const isPending = publishPosting.isPending;
   const hasActiveApplicationForm = Boolean(posting?.form && !posting.form.isArchived);
-  const hasPublicDescription = Boolean(posting?.descriptionMarkdown?.trim());
+  const hasPublicDescription = Boolean(richTextToPlainText(posting?.description ?? null));
   const capacityIsValid = isValidApplicationCapacity(applicationCapacity);
 
   const canPublish =

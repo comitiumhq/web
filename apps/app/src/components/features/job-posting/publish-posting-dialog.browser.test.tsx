@@ -9,7 +9,10 @@ const mocks = vi.hoisted(() => ({
   publish: vi.fn(),
   posting: {
     applicationCapacity: 25 as number | null,
-    descriptionMarkdown: 'Build reliable systems.',
+    description: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build reliable systems.' }] }],
+    },
     form: { id: 'form-1', title: 'Default Application Form', isArchived: false },
     version: 4,
   },
@@ -40,7 +43,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.posting = {
     applicationCapacity: 25,
-    descriptionMarkdown: 'Build reliable systems.',
+    description: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build reliable systems.' }] }],
+    },
     form: { id: 'form-1', title: 'Default Application Form', isArchived: false },
     version: 4,
   };

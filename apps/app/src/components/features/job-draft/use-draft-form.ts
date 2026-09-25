@@ -1,11 +1,10 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSaveJobEditor } from '@/components/features/job-settings/use-save-job-editor';
 import { useQueryJobEditor } from '@/hooks/queries/use-query-job-editor';
-import { serializeJobDescription } from '@/lib/jobs/description';
 import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
 import { type DraftEditorState, draftToEditorState, prepareDraftSave } from './draft-editor-state';
 
@@ -110,8 +109,7 @@ export function useDraftForm(orgId: string, jobId: string) {
     }
 
     const snapshot = currentSnapshot();
-    const descriptionMarkdown = serializeJobDescription(snapshot.description);
-    const prepared = prepareDraftSave(snapshot, versionRef.current, descriptionMarkdown);
+    const prepared = prepareDraftSave(snapshot, versionRef.current);
     const submittedRevision = editRevisionRef.current;
 
     try {
@@ -170,8 +168,6 @@ export function useDraftForm(orgId: string, jobId: string) {
     [markNonFormDirty],
   );
 
-  const descriptionMarkdown = useMemo(() => serializeJobDescription(description), [description]);
-
   return {
     draft,
     isLoading,
@@ -181,7 +177,6 @@ export function useDraftForm(orgId: string, jobId: string) {
     isDirty,
     isSaving,
     save,
-    descriptionMarkdown,
     description,
     formId,
     criteria,

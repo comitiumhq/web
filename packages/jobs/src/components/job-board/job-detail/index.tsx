@@ -1,4 +1,4 @@
-import type { Job } from '@comitium/schemas/public-jobs';
+import type { Job, JobListItem } from '@comitium/schemas/public-jobs';
 import { Badge } from '@comitium/ui/badge';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { formatCompensationSalary, hasCompensation } from '@comitium/ui/salary';
@@ -19,7 +19,7 @@ interface JobDetailProps {
 }
 
 type JobDetailData = Pick<
-  Job,
+  Job | JobListItem,
   | 'id'
   | 'applicationCapacityAvailable'
   | 'responseDeadlineDays'

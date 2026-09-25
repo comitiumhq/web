@@ -1,3 +1,4 @@
+import { tipTapDocSchema } from '@comitium/schemas/common';
 import { evaluationCriterionSchema, hiringTeamEntrySchema } from '@comitium/schemas/jobs';
 import { paginatedSchema, uuidSchema } from '@comitium/schemas/public';
 import { compensationConfigSchema, locationEntrySchema } from '@comitium/schemas/public-jobs';
@@ -14,8 +15,7 @@ export const jobTemplateSchema = z.object({
   status: jobTemplateStatusSchema,
   isConfidential: z.boolean(),
   title: z.string(),
-  description: z.unknown().nullable(),
-  descriptionMarkdown: z.string().nullable(),
+  description: tipTapDocSchema.nullable(),
   departmentId: uuidSchema.nullable(),
   locationId: uuidSchema.nullable(),
   location: z.array(locationEntrySchema).nullable(),
@@ -52,8 +52,7 @@ export const jobTemplatesResponseSchema = paginatedSchema(jobTemplateListItemSch
 
 export const createJobTemplateBodySchema = z.object({
   title: z.string().min(1).max(255),
-  description: z.unknown().nullable().optional(),
-  descriptionMarkdown: z.string().max(50_000).nullable().optional(),
+  description: tipTapDocSchema.nullable().optional(),
   departmentId: uuidSchema.nullable().optional(),
   locationId: uuidSchema.nullable().optional(),
   employmentType: z.string().optional(),

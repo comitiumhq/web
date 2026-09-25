@@ -31,7 +31,10 @@ const baseJob: CareerJob = {
     logo: 'ipfs://bafybeigdyrzt',
     website: 'https://acme.example',
   },
-  description: '<p>Build useful things.</p>',
+  description: {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build useful things.' }] }],
+  },
   responseDeadlineDays: 5,
   category: 'engineering',
   recruitingPrivacy: {
@@ -60,7 +63,7 @@ describe('buildJobPostingJsonLd', () => {
       '@context': 'https://schema.org',
       '@type': 'JobPosting',
       title: 'Senior Engineer',
-      description: '<p>Build useful things.</p>',
+      description: 'Build useful things.',
       employmentType: 'CONTRACTOR',
       url: 'https://comitium.co/careers/acme/jobs/senior-engineer',
       jobLocationType: 'TELECOMMUTE',

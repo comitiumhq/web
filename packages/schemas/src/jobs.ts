@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { type TipTapDoc, tipTapDocSchema } from './common';
 import { preparedRelayedOnchainOperationSchema } from './onchain-operations';
 import { addressSchema, paginatedSchema, uuidSchema, walletAddressSchema } from './public';
 import {
@@ -51,7 +52,7 @@ export const jobSummarySchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   title: z.string().nullable(),
-  description: z.string().nullable(),
+  description: tipTapDocSchema.nullable(),
   location: z.array(locationEntrySchema).nullable(),
   locationType: z.string().nullable(),
   employmentType: z.string().nullable(),
@@ -171,7 +172,7 @@ export const orgJobsResponseSchema = paginatedSchema(orgJobListItemSchema);
 export const jobEditorSchema = z.object({
   id: z.string(),
   title: z.string(),
-  description: z.unknown().nullable(),
+  description: tipTapDocSchema.nullable(),
   departmentId: uuidSchema.nullable(),
   locationId: uuidSchema.nullable(),
   location: z.array(locationEntrySchema).nullable(),
@@ -235,8 +236,7 @@ export const jobPostingSchema = z.object({
   jobId: z.string(),
   slug: z.string(),
   status: jobPostingStatusSchema,
-  description: z.unknown().nullable(),
-  descriptionMarkdown: z.string().nullable(),
+  description: tipTapDocSchema.nullable(),
   form: z
     .object({
       id: uuidSchema,
@@ -288,8 +288,7 @@ export type CreateDraftParams = { title: string; departmentId: string; locationI
 export type UpdateJobEditorData = {
   expectedVersion: number;
   title?: string;
-  description?: unknown;
-  descriptionMarkdown?: string;
+  description?: TipTapDoc | null;
   departmentId?: string;
   locationId?: string;
   locationType?: string | null;
@@ -306,8 +305,7 @@ export type UpdateJobEditorData = {
 
 export type UpdateJobPostingData = {
   expectedVersion: number;
-  description?: unknown | null;
-  descriptionMarkdown?: string | null;
+  description?: TipTapDoc | null;
   formId?: string | null;
   applicationCapacity?: number | null;
 };
@@ -325,7 +323,7 @@ export type PrepareCommitmentParams = {
 
 export type PrepareJobContentUriUpdateParams = {
   expectedVersion: number;
-  descriptionMarkdown: string;
+  description: TipTapDoc;
 };
 
 export const updateJobEditorResponseSchema = z.object({

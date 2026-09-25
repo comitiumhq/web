@@ -1,6 +1,6 @@
 import { AuthSessionRecovery } from '@/components/auth/auth-session-recovery';
+import { LoginButton } from '@/components/auth/login-button';
 
-import { ConnectWalletButton } from '../auth/connect-wallet-button';
 import { UserMenuDropdown } from './user-menu-dropdown';
 import { useUserMenuState } from './user-menu-state';
 
@@ -12,7 +12,7 @@ export const UserMenu = () => {
   }
 
   if (state.status === 'connect') {
-    return <ConnectWalletButton />;
+    return <LoginButton />;
   }
 
   if (state.status === 'recover') {

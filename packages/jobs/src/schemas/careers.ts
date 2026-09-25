@@ -1,3 +1,4 @@
+import { tipTapDocSchema } from '@comitium/schemas/common';
 import { paginatedWithTotalSchema, uuidSchema } from '@comitium/schemas/public';
 import { companyInfoSchema, jobListItemSchema, jobStatusSchema } from '@comitium/schemas/public-jobs';
 import { z } from 'zod';
@@ -55,7 +56,7 @@ const recruitingPrivacySchema = z.object({
 export const careerJobSchema = careerJobListItemSchema.omit({ orgSlug: true }).extend({
   orgId: z.string(),
   org: careerOrgSchema,
-  description: z.string().nullable(),
+  description: tipTapDocSchema.nullable(),
   status: jobStatusSchema,
   responseDeadlineDays: z.number().nullable(),
   category: z.string().nullable(),
