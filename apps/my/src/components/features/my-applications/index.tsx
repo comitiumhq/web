@@ -29,12 +29,7 @@ function filterApplications(applications: MyApplicationResponse[], filter: Filte
 }
 
 function DashboardHeader() {
-  return (
-    <PageHeader
-      title="Applications"
-      description="Track your applications, employer responses, and eligible deposit returns."
-    />
-  );
+  return <PageHeader title="Applications" description="Follow each application from submission to decision." />;
 }
 
 interface ApplicationsStatusCardProps {

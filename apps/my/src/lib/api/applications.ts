@@ -6,6 +6,7 @@ import {
   applicationPreparationResultSchema,
   applicationSubmitDispositionSchema,
   myApplicationSchema,
+  myApplicationStatusSchema,
 } from '@comitium/schemas/applications';
 import { paginatedSchema } from '@comitium/schemas/public';
 
@@ -13,6 +14,10 @@ import { api } from './client';
 
 export function getMyApplications() {
   return api.get('/applications/me', paginatedSchema(myApplicationSchema)).then((res) => res.data);
+}
+
+export function getMyApplicationStatus(jobId: string) {
+  return api.get(`/applications/me/jobs/${encodeURIComponent(jobId)}/status`, myApplicationStatusSchema);
 }
 
 export function prepareApplication(body: { jobPostingId: string; formId: string }) {

@@ -40,7 +40,7 @@ export function ResponseCommitmentStatus({
 
 function getCommitmentStatusLabel(pendingResponses: number): string {
   if (pendingResponses === 0) {
-    return 'All applications have received a response.';
+    return 'The response commitment is complete.';
   }
 
   const applicationLabel = pendingResponses === 1 ? 'application still needs' : 'applications still need';

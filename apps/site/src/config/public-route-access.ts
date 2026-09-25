@@ -18,5 +18,8 @@ function normalizePathname(pathname: string): string {
 }
 
 export function isPublicSiteRouteAvailable(pathname: string): boolean {
-  return PRELAUNCH_PUBLIC_ROUTES.has(normalizePathname(pathname));
+  const normalizedPathname = normalizePathname(pathname);
+  const isLocalJobsRoute = normalizedPathname === '/jobs' || normalizedPathname.startsWith('/careers/');
+
+  return PRELAUNCH_PUBLIC_ROUTES.has(normalizedPathname) || (import.meta.env.DEV && isLocalJobsRoute);
 }

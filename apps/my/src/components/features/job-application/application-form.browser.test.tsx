@@ -9,6 +9,7 @@ import { render } from 'vitest-browser-react';
 import { ApplicationForm } from './index';
 
 const mocks = vi.hoisted(() => ({
+  applicationStatus: { hasApplied: false },
   submitApplication: vi.fn(),
   session: {
     isSessionLoading: false,
@@ -31,7 +32,7 @@ vi.mock('@tanstack/react-query', async (importOriginal) => ({
   useQuery: ({ queryKey }: { queryKey: readonly unknown[] }) =>
     queryKey[0] === 'account'
       ? { data: mocks.zkIdentityStatus, isError: false, isFetching: false, isLoading: false }
-      : { data: null, isError: false, isFetching: false, isLoading: false },
+      : { data: mocks.applicationStatus, isError: false, isFetching: false, isLoading: false },
 }));
 
 vi.mock('@tanstack/react-router', async (importOriginal) => ({
@@ -174,6 +175,7 @@ const authenticatedApplicationProps: ComponentProps<typeof ApplicationForm> = {
 
 beforeEach(() => {
   localStorage.clear();
+  mocks.applicationStatus = { hasApplied: false };
   mocks.session = {
     isSessionLoading: false,
     isSignedIn: false,
@@ -277,6 +279,19 @@ describe('ApplicationForm', () => {
       }),
     );
     await expect.element(screen.getByRole('heading', { name: 'Application Submitted' })).toBeInTheDocument();
+  });
+
+  it('shows the submitted state for an existing Application', async () => {
+    mocks.session = {
+      isSessionLoading: false,
+      isSignedIn: true,
+      user: { id: 'applicant-1' },
+    };
+    mocks.applicationStatus = { hasApplied: true };
+    const screen = await render(<ApplicationForm {...authenticatedApplicationProps} applyForm={applicationForm} />);
+
+    await expect.element(screen.getByRole('heading', { name: 'Application Submitted' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Submit application' })).not.toBeInTheDocument();
   });
 
   it('keeps the Application Form visible and explains why submission requires ZK Identity', async () => {

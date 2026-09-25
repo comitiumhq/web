@@ -3,13 +3,19 @@ import type { CareerJob } from '@comitium/jobs/schemas';
 import { STALE_TIME_SHORT, shouldRetryQuery } from '@comitium/schemas/api-query-policy';
 import type { NestedForm } from '@comitium/schemas/forms/form-definitions';
 import type { JobApplicationData } from '@comitium/schemas/jobs';
+import { Button } from '@comitium/ui/button';
+import { EmptyState } from '@comitium/ui/empty-state';
+import { Spinner } from '@comitium/ui/spinner';
+import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { useApplyJob } from '@/hooks/mutations/use-apply-job';
 import { qk } from '@/hooks/query-keys';
+import { getMyApplicationStatus } from '@/lib/api/applications';
 import { api } from '@/lib/api/client';
 import { ApplicationFormContent } from './application-form-content';
+import { ApplicationSuccess } from './application-success';
 import { useApplicationForm } from './use-application-form';
 
 const accountApi = createAuthAccountApi(api);
@@ -25,6 +31,62 @@ interface AuthenticatedApplicationFormProps {
 }
 
 export function AuthenticatedApplicationForm({
+  accountId,
+  applyForm,
+  company,
+  jobData,
+  jobTitle,
+  policy,
+  onSuccess,
+}: AuthenticatedApplicationFormProps) {
+  const applicationStatusQuery = useQuery({
+    queryKey: qk.application.status(accountId, jobData.id),
+    queryFn: () => getMyApplicationStatus(jobData.id),
+    retry: shouldRetryQuery,
+    staleTime: STALE_TIME_SHORT,
+  });
+
+  if (applicationStatusQuery.isLoading) {
+    return (
+      <div className="flex min-h-80 items-center justify-center">
+        <Spinner aria-label="Loading application status" />
+      </div>
+    );
+  }
+
+  if (applicationStatusQuery.isError) {
+    return (
+      <EmptyState
+        icon={WarningCircleIcon}
+        title="Application status could not be loaded"
+        description="Try again in a moment."
+        className="min-h-80"
+      >
+        <Button variant="outline" className="mt-6" onClick={() => void applicationStatusQuery.refetch()}>
+          Try again
+        </Button>
+      </EmptyState>
+    );
+  }
+
+  if (applicationStatusQuery.data?.hasApplied) {
+    return <ApplicationSuccess jobTitle={jobTitle} company={company} />;
+  }
+
+  return (
+    <NewApplicationForm
+      accountId={accountId}
+      applyForm={applyForm}
+      company={company}
+      jobData={jobData}
+      jobTitle={jobTitle}
+      policy={policy}
+      onSuccess={onSuccess}
+    />
+  );
+}
+
+function NewApplicationForm({
   accountId,
   applyForm,
   company,

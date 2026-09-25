@@ -384,6 +384,10 @@ export const myApplicationSchema = z.object({
 
 export type MyApplicationResponse = z.infer<typeof myApplicationSchema>;
 
+export const myApplicationStatusSchema = z.object({
+  hasApplied: z.boolean(),
+});
+
 // --- Stage change ---
 
 const stageChangeActivitySchema = z.object({
