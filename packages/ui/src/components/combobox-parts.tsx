@@ -305,7 +305,7 @@ export function getSelectionInputGroupClassName({
   className: string | undefined;
 }) {
   return cn(
-    'relative flex max-w-full min-w-0 items-center gap-1 overflow-hidden bg-clip-padding text-sm transition-colors outline-none has-[:focus-visible]:border-ring has-[:focus-visible]:ring-1 has-[:focus-visible]:ring-ring/50 has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:ring-[3px] has-[[aria-invalid=true]]:ring-destructive/20 dark:has-[[aria-invalid=true]]:border-destructive/50 dark:has-[[aria-invalid=true]]:ring-destructive/40',
+    'relative flex max-w-full min-w-0 items-center gap-1 overflow-hidden bg-clip-padding text-sm transition-colors outline-none has-disabled:pointer-events-none has-disabled:opacity-50 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-1 has-[:focus-visible]:ring-ring/50 has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:ring-[3px] has-[[aria-invalid=true]]:ring-destructive/20 dark:has-[[aria-invalid=true]]:border-destructive/50 dark:has-[[aria-invalid=true]]:ring-destructive/40',
     {
       'w-full rounded-4xl border border-control-border bg-control px-1 hover:border-control-border-hover hover:bg-control-hover':
         variant === 'input',
@@ -320,7 +320,7 @@ export function getSelectionInputGroupClassName({
 
 export function getSelectionInputClassName(variant: 'input' | 'ghost') {
   return cn(
-    'h-full min-w-0 bg-transparent px-2 text-base text-foreground outline-none placeholder:text-muted-foreground md:text-sm disabled:cursor-not-allowed disabled:opacity-50',
+    'h-full min-w-0 bg-transparent px-2 text-base text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed md:text-sm',
     { 'px-1': variant === 'ghost' },
   );
 }

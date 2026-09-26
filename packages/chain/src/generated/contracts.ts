@@ -535,6 +535,7 @@ export const jobCommitmentAbi = [
         type: 'tuple',
         components: [
           { name: 'orgId', internalType: 'uint256', type: 'uint256' },
+          { name: 'postingRef', internalType: 'bytes32', type: 'bytes32' },
           { name: 'creator', internalType: 'address', type: 'address' },
           { name: 'stake', internalType: 'uint256', type: 'uint256' },
           { name: 'feeAmount', internalType: 'uint256', type: 'uint256' },
@@ -544,7 +545,6 @@ export const jobCommitmentAbi = [
           { name: 'feeTier', internalType: 'uint8', type: 'uint8' },
           { name: 'status', internalType: 'enum JobStatus', type: 'uint8' },
           { name: 'orgStakeSettled', internalType: 'bool', type: 'bool' },
-          { name: 'contentURI', internalType: 'string', type: 'string' },
         ],
       },
     ],
@@ -872,19 +872,6 @@ export const jobCommitmentAbi = [
     stateMutability: 'nonpayable',
   },
   {
-    type: 'function',
-    inputs: [
-      { name: 'jobId', internalType: 'uint256', type: 'uint256' },
-      { name: 'contentURI', internalType: 'string', type: 'string' },
-      { name: 'keyNonce', internalType: 'uint256', type: 'uint256' },
-      { name: 'expiry', internalType: 'uint256', type: 'uint256' },
-      { name: 'signature', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'updateJobContentURI',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
     type: 'event',
     anonymous: false,
     inputs: [
@@ -1128,37 +1115,6 @@ export const jobCommitmentAbi = [
         indexed: true,
       },
       {
-        name: 'updater',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'contentURI',
-        internalType: 'string',
-        type: 'string',
-        indexed: false,
-      },
-    ],
-    name: 'JobContentURIUpdated',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'jobId',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: true,
-      },
-      {
-        name: 'orgId',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: true,
-      },
-      {
         name: 'executor',
         internalType: 'address',
         type: 'address',
@@ -1251,9 +1207,9 @@ export const jobCommitmentAbi = [
         indexed: false,
       },
       {
-        name: 'contentURI',
-        internalType: 'string',
-        type: 'string',
+        name: 'postingRef',
+        internalType: 'bytes32',
+        type: 'bytes32',
         indexed: false,
       },
     ],
@@ -1442,7 +1398,6 @@ export const jobCommitmentAbi = [
     name: 'ECDSAInvalidSignatureS',
   },
   { type: 'error', inputs: [], name: 'EmptyBatch' },
-  { type: 'error', inputs: [], name: 'EmptyContentURI' },
   { type: 'error', inputs: [], name: 'EnforcedPause' },
   {
     type: 'error',
@@ -1613,6 +1568,7 @@ export const jobCommitmentAbi = [
   },
   { type: 'error', inputs: [], name: 'ZeroAddress' },
   { type: 'error', inputs: [], name: 'ZeroApplicationId' },
+  { type: 'error', inputs: [], name: 'ZeroPostingRef' },
   { type: 'error', inputs: [], name: 'ZeroResponseId' },
 ] as const;
 

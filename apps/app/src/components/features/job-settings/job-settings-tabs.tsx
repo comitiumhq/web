@@ -13,11 +13,11 @@ export function JobSettingsTabs({ basic, hiringTeam, initialTab = 'basic' }: Job
   return (
     <Tabs defaultValue={initialTab} className="min-w-0 gap-6">
       <div className="overflow-x-auto pb-1">
-        <TabsList variant="line" className="w-full min-w-max justify-start">
-          <TabsTrigger value="basic" className="flex-none px-3">
+        <TabsList variant="line" className="min-w-max justify-start">
+          <TabsTrigger value="basic" className="flex-none">
             Basic
           </TabsTrigger>
-          <TabsTrigger value="hiring-team" className="flex-none px-3">
+          <TabsTrigger value="hiring-team" className="flex-none">
             Hiring team
           </TabsTrigger>
         </TabsList>

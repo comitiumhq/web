@@ -2,6 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { JobPostingPage } from './job-posting-page';
 
+const UPDATED_DESCRIPTION = {
+  type: 'doc' as const,
+  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Updated description.' }] }],
+};
+
 const mocks = vi.hoisted(() => ({
   job: {
     canonicalUrl: 'https://jobs.example.test/backend-engineer',
@@ -28,23 +33,38 @@ const mocks = vi.hoisted(() => ({
     version: 7,
   },
   release: vi.fn(),
+  publish: vi.fn(),
   unpublish: vi.fn(),
   update: vi.fn(),
   updateAsync: vi.fn(),
 }));
 
-vi.mock('@/components/features/job-detail/job-description-editor-dialog', () => ({
-  JobDescriptionEditorDialog: () => null,
+vi.mock('./posting-description-editor', () => ({
+  PostingDescriptionEditor: ({
+    onChange,
+    readOnly,
+  }: {
+    onChange?: (description: typeof UPDATED_DESCRIPTION) => void;
+    readOnly?: boolean;
+  }) => (
+    <div data-testid="description-editor" data-read-only={readOnly ? 'true' : 'false'}>
+      {onChange && (
+        <button type="button" onClick={() => onChange(UPDATED_DESCRIPTION)}>
+          Update description
+        </button>
+      )}
+    </div>
+  ),
 }));
 
 vi.mock('@/hooks/mutations/use-job-posting-mutations', () => ({
+  usePublishJobPosting: () => ({ isPending: false, mutate: mocks.publish }),
   useReleaseCommitmentFunds: () => ({
     isPending: false,
     isConfirming: false,
     mutate: mocks.release,
   }),
   useUnpublishJobPosting: () => ({ isPending: false, mutate: mocks.unpublish }),
-  useUpdateActiveCommitmentDescription: () => ({ isPending: false, mutateAsync: mocks.updateAsync }),
   useUpdateJobPosting: () => ({ isPending: false, mutate: mocks.update, mutateAsync: mocks.updateAsync }),
 }));
 
@@ -66,15 +86,6 @@ vi.mock('@/hooks/use-job-permissions', () => ({
 
 vi.mock('./application-form-dialog', () => ({
   ApplicationFormDialog: () => null,
-}));
-
-vi.mock('./publish-posting-dialog', () => ({
-  PublishPostingDialog: ({ jobTitle, open }: { jobTitle: string; open: boolean }) =>
-    open ? (
-      <div role="dialog">
-        <h2>Publish &ldquo;{jobTitle}&rdquo;?</h2>
-      </div>
-    ) : null,
 }));
 
 vi.mock('./response-commitment-dialog', () => ({
@@ -106,22 +117,51 @@ beforeEach(() => {
 });
 
 describe('JobPostingPage', () => {
-  it('opens the Publish dialog for an unpublished Open Job', async () => {
+  it('edits and saves the description inline', async () => {
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await expect.element(screen.getByTestId('description-editor')).toHaveAttribute('data-read-only', 'false');
+    await expect.element(screen.getByText('Ready for candidates')).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Edit description' })).not.toBeInTheDocument();
+
+    await screen.getByRole('button', { name: 'Update description' }).click();
+    await screen.getByRole('button', { name: 'Save changes' }).click();
+
+    expect(mocks.updateAsync).toHaveBeenCalledExactlyOnceWith({
+      expectedVersion: 7,
+      description: UPDATED_DESCRIPTION,
+    });
+  });
+
+  it('publishes an unpublished Posting directly', async () => {
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await expect.element(screen.getByRole('button', { name: 'Publish' })).toBeEnabled();
     await screen.getByRole('button', { name: 'Publish' }).click();
 
-    await expect
-      .element(screen.getByRole('dialog').getByRole('heading', { name: 'Publish “Backend Engineer”?' }))
-      .toBeInTheDocument();
+    expect(mocks.publish).toHaveBeenCalledExactlyOnceWith({ expectedVersion: 7 });
+  });
+
+  it('shows the invalid Posting section instead of publishing', async () => {
+    mocks.posting = {
+      ...mocks.posting,
+      form: { ...mocks.posting.form, isArchived: true },
+    };
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await screen.getByRole('button', { name: 'Publish' }).click();
+
+    await expect.element(screen.getByText('Complete required fields:')).toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Application form' })).toBeInTheDocument();
+    expect(mocks.publish).not.toHaveBeenCalled();
   });
 
   it('requires confirmation before unpublishing', async () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
-    await screen.getByRole('button', { name: 'Unpublish' }).click();
+    await screen.getByRole('button', { name: 'Posting actions' }).click();
+    await screen.getByRole('menuitem', { name: 'Unpublish' }).click();
 
     const dialog = screen.getByRole('dialog');
     await expect.element(dialog.getByRole('heading', { name: 'Unpublish this Posting?' })).toBeInTheDocument();
@@ -137,7 +177,8 @@ describe('JobPostingPage', () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
-    await screen.getByRole('button', { name: 'Add response commitment' }).click();
+    await screen.getByRole('button', { name: 'Posting actions' }).click();
+    await screen.getByRole('menuitem', { name: 'Add commitment' }).click();
 
     await expect.element(screen.getByRole('dialog', { name: '' })).toHaveTextContent('Add response commitment');
   });
@@ -147,7 +188,8 @@ describe('JobPostingPage', () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
-    await expect.element(screen.getByRole('button', { name: 'Add response commitment' })).not.toBeInTheDocument();
+    await screen.getByRole('button', { name: 'Posting actions' }).click();
+    await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).not.toBeInTheDocument();
   });
 
   it('shows an active response commitment without another add action', async () => {
@@ -163,8 +205,9 @@ describe('JobPostingPage', () => {
     };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
-    await expect.element(screen.getByText('Published · Response within 7 days')).toBeInTheDocument();
-    await expect.element(screen.getByRole('button', { name: 'Add response commitment' })).not.toBeInTheDocument();
+    await expect.element(screen.getByText('Published')).toBeInTheDocument();
+    await screen.getByRole('button', { name: 'Posting actions' }).click();
+    await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).not.toBeInTheDocument();
   });
 
   it('allows a completed active response commitment to settle without unpublishing the Posting', async () => {
@@ -200,7 +243,8 @@ describe('JobPostingPage', () => {
     };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
-    await expect.element(screen.getByRole('button', { name: 'Add response commitment' })).toBeEnabled();
+    await screen.getByRole('button', { name: 'Posting actions' }).click();
+    await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).toBeEnabled();
   });
 
   it('waits for Commitment finalization before allowing another one', async () => {
@@ -217,7 +261,8 @@ describe('JobPostingPage', () => {
     };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
-    await expect.element(screen.getByRole('button', { name: 'Add response commitment' })).not.toBeInTheDocument();
+    await screen.getByRole('button', { name: 'Posting actions' }).click();
+    await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).not.toBeInTheDocument();
   });
 
   it('resolves a relative canonical URL against the public site origin', async () => {
@@ -234,7 +279,7 @@ describe('JobPostingPage', () => {
     mocks.job = { ...mocks.job, status: 'closed' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
-    await expect.element(screen.getByRole('button', { name: 'Edit description' })).not.toBeInTheDocument();
+    await expect.element(screen.getByTestId('description-editor')).toHaveAttribute('data-read-only', 'true');
 
     await screen.getByRole('tab', { name: 'Application form' }).click();
     await expect.element(screen.getByRole('button', { name: 'Change form' })).not.toBeInTheDocument();

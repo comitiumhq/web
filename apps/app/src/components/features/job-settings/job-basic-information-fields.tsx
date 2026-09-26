@@ -12,7 +12,6 @@ interface JobBasicInformationFieldsProps {
   orgId: string;
   form: UseFormReturn<JobSettingsFormData>;
   showPublishRequiredMarkers?: boolean;
-  editableStructure?: boolean;
   readOnly?: boolean;
 }
 
@@ -20,7 +19,6 @@ export function JobBasicInformationFields({
   orgId,
   form,
   showPublishRequiredMarkers = true,
-  editableStructure = true,
   readOnly = false,
 }: JobBasicInformationFieldsProps) {
   const { control, setValue } = form;
@@ -110,7 +108,7 @@ export function JobBasicInformationFields({
                     placeholder="Select team"
                     searchPlaceholder="Search teams…"
                     emptyMessage="No teams found."
-                    disabled={!editableStructure || readOnly}
+                    disabled={readOnly}
                   />
                 </FormControl>
                 <FormMessage />
@@ -136,7 +134,7 @@ export function JobBasicInformationFields({
                     placeholder="Select location"
                     searchPlaceholder="Search locations…"
                     emptyMessage="No locations found."
-                    disabled={!editableStructure || readOnly}
+                    disabled={readOnly}
                   />
                 </FormControl>
                 <FormMessage />

@@ -13,9 +13,10 @@ import { EmptyState } from './empty-state';
 interface CriteriaTabProps {
   criteria: EvaluationCriterion[];
   onChangeCriteria: (criteria: EvaluationCriterion[]) => void;
+  readOnly?: boolean;
 }
 
-export function CriteriaTab({ criteria, onChangeCriteria }: CriteriaTabProps) {
+export function CriteriaTab({ criteria, onChangeCriteria, readOnly = false }: CriteriaTabProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const publish = useCallback(
@@ -56,7 +57,7 @@ export function CriteriaTab({ criteria, onChangeCriteria }: CriteriaTabProps) {
 
   const handleDragEnd = useCallback<DragDropEventHandlers['onDragEnd']>(
     (event) => {
-      if (event.canceled) {
+      if (readOnly || event.canceled) {
         return;
       }
 
@@ -73,7 +74,7 @@ export function CriteriaTab({ criteria, onChangeCriteria }: CriteriaTabProps) {
 
       publish(reordered);
     },
-    [criteria, publish],
+    [criteria, publish, readOnly],
   );
 
   const isMaxReached = criteria.length >= MAX_EVALUATION_CRITERIA;
@@ -83,7 +84,7 @@ export function CriteriaTab({ criteria, onChangeCriteria }: CriteriaTabProps) {
       <p className="text-copy-14 text-muted-foreground">{EVALUATION_CRITERIA_HELPER_TEXT}</p>
 
       {criteria.length === 0 ? (
-        <EmptyState onAdd={handleAdd} />
+        <EmptyState onAdd={readOnly ? undefined : handleAdd} />
       ) : (
         <div className="flex flex-col gap-4">
           <DragDropProvider onDragEnd={handleDragEnd}>
@@ -95,6 +96,7 @@ export function CriteriaTab({ criteria, onChangeCriteria }: CriteriaTabProps) {
                   index={index}
                   criterion={item}
                   isExpanded={expandedId === item.id}
+                  readOnly={readOnly}
                   onToggle={handleToggle}
                   onUpdate={handleUpdate}
                   onRemove={handleRemove}
@@ -103,16 +105,18 @@ export function CriteriaTab({ criteria, onChangeCriteria }: CriteriaTabProps) {
             </div>
           </DragDropProvider>
 
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleAdd} disabled={isMaxReached}>
-              <PlusIcon data-icon="inline-start" />
-              Add criterion
-            </Button>
+          {!readOnly ? (
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" onClick={handleAdd} disabled={isMaxReached}>
+                <PlusIcon data-icon="inline-start" />
+                Add criterion
+              </Button>
 
-            <p className="text-label-12 text-muted-foreground">
-              {isMaxReached ? 'Maximum reached' : `${criteria.length}/${MAX_EVALUATION_CRITERIA}`}
-            </p>
-          </div>
+              <p className="text-label-12 text-muted-foreground">
+                {isMaxReached ? 'Maximum reached' : `${criteria.length}/${MAX_EVALUATION_CRITERIA}`}
+              </p>
+            </div>
+          ) : null}
         </div>
       )}
     </div>

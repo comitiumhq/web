@@ -1,9 +1,9 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import { Card, CardContent } from '@comitium/ui/card';
 import { ApplicationFormPicker } from '@/components/features/job-draft/application-form-picker';
-import { DraftDescriptionTab } from '@/components/features/job-draft/draft-description-tab';
 import type { ApplicationFormOptionsOwner } from '@/lib/api/application-form-options';
 import { ApplicationCapacityControl } from './application-capacity-control';
+import { PostingDescriptionEditor } from './posting-description-editor';
 import { PostingTabs } from './posting-tabs';
 
 interface PostingEditorProps {
@@ -37,9 +37,7 @@ export function PostingEditor({
 
   return (
     <PostingTabs
-      description={
-        <DraftDescriptionTab content={description} onChange={onDescriptionChange} minHeightClass="min-h-56" />
-      }
+      description={<PostingDescriptionEditor content={description} onChange={onDescriptionChange} />}
       applicationForm={
         <Card>
           <CardContent>

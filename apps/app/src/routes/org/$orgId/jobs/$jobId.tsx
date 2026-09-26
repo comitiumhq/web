@@ -1,7 +1,7 @@
 import type { JobSummary } from '@comitium/schemas/jobs';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { RouteNotFound } from '@comitium/ui/route-not-found';
-import { createFileRoute, Navigate, Outlet, useLocation } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router';
 import { useCallback } from 'react';
 import { OrgGuard } from '@/components/auth/org-guard';
 import { JobRoutePermissionGuard } from '@/components/auth/route-permission-guard';
@@ -81,17 +81,6 @@ function JobRouteShell({ org, jobId, pathname }: JobRouteShellProps) {
     );
   }
 
-  if (isDraftOnlyJobRoute(pathname, org.id, jobId)) {
-    return (
-      <Navigate
-        to="/org/$orgId/jobs/$jobId/pipeline"
-        params={{ orgId: org.id, jobId }}
-        search={{ tab: 'active' }}
-        replace
-      />
-    );
-  }
-
   return (
     <JobDetailRouteOrgProvider org={org}>
       <JobDetailLayout orgId={org.id} jobId={jobId} job={job}>
@@ -115,14 +104,6 @@ function getDraftTabFromPathname(pathname: string): DraftTab | null {
   return DRAFT_SECTIONS.find((section) => pathname.endsWith(`/${section.id}`))?.id ?? null;
 }
 
-const DRAFT_ONLY_JOB_ROUTE_SUFFIXES = ['criteria'] as const;
-
-function isDraftOnlyJobRoute(pathname: string, orgId: string, jobId: string): boolean {
-  const basePath = `/org/${orgId}/jobs/${jobId}`;
-
-  return DRAFT_ONLY_JOB_ROUTE_SUFFIXES.some((suffix) => pathname === `${basePath}/${suffix}`);
-}
-
 interface DraftJobShellProps {
   org: MyOrg;
   jobId: string;
@@ -130,7 +111,7 @@ interface DraftJobShellProps {
 }
 
 function DraftJobShell({ org, jobId, job }: DraftJobShellProps) {
-  const { stepStatuses } = useDraftFormContext();
+  const { stepStatuses, isDirty, isSaving } = useDraftFormContext();
 
   return (
     <JobDetailRouteOrgProvider org={org}>
@@ -138,8 +119,9 @@ function DraftJobShell({ org, jobId, job }: DraftJobShellProps) {
         orgId={org.id}
         jobId={jobId}
         job={job}
-        actions={<DraftShellActions lifecycle={job.lifecycle} />}
+        actions={<DraftShellActions />}
         draftStepStatuses={stepStatuses}
+        lifecycleActionsDisabled={isDirty || isSaving}
       >
         <Outlet />
       </JobDetailLayout>

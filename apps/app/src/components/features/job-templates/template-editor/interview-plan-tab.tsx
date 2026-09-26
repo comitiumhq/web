@@ -132,7 +132,7 @@ const TemplateOption = memo(function TemplateOption({
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
             <span className="text-label-14 font-medium">{name}</span>
-            {isDefault ? <Badge variant="subtle">Default</Badge> : null}
+            {isDefault ? <Badge variant="secondary">Default</Badge> : null}
           </span>
           <span className="mt-0.5 block text-label-12 text-muted-foreground">
             {stageCount} {stageCount === 1 ? 'stage' : 'stages'}

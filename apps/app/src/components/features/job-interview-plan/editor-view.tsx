@@ -137,7 +137,7 @@ export function InterviewPlanEditorView({
         <div className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <h3 className="truncate text-heading-16">{selectedPlanName ?? 'No interview plan selected'}</h3>
-            {selectedPlanName ? <Badge variant="subtle">Shared plan</Badge> : null}
+            {selectedPlanName ? <Badge variant="secondary">Shared plan</Badge> : null}
           </div>
           <p className="mt-1 text-copy-13 text-muted-foreground">{scopeDescription(scope)}</p>
         </div>

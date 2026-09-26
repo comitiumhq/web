@@ -10,7 +10,7 @@ import {
 } from '@comitium/ui/dialog';
 import { Input } from '@comitium/ui/input';
 import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
-import { MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, PencilIcon } from '@phosphor-icons/react';
 import { type ChangeEvent, memo, useCallback, useMemo, useState } from 'react';
 import type { InterviewPlanSummary } from '@/lib/schemas/pipeline';
 import { cn } from '@/lib/utils';
@@ -64,7 +64,8 @@ export const PlanPickerDialog = memo(function PlanPickerDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button type="button" variant={selectedPlanId === null ? 'default' : 'ghost'} size="sm" disabled={disabled}>
+        <Button type="button" variant={selectedPlanId === null ? 'default' : 'outline'} size="sm" disabled={disabled}>
+          {selectedPlanId !== null ? <PencilIcon data-icon="inline-start" /> : null}
           {selectedPlanId === null ? 'Select plan' : 'Change plan'}
         </Button>
       </DialogTrigger>
@@ -125,7 +126,7 @@ const PlanOption = memo(function PlanOption({ plan, selected, onSelect }: PlanOp
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
           <span className="truncate text-label-14 font-medium">{plan.name}</span>
-          {plan.isDefault ? <Badge variant="subtle">Default</Badge> : null}
+          {plan.isDefault ? <Badge variant="secondary">Default</Badge> : null}
         </span>
         <span className="mt-0.5 block text-label-12 text-muted-foreground">
           {plan.stageCount} {plan.stageCount === 1 ? 'stage' : 'stages'}

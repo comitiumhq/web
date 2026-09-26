@@ -16,13 +16,13 @@ interface TemplateSectionDefinition {
 export const TEMPLATE_SECTION_ITEMS = [
   { id: 'settings', label: 'Settings', title: 'Settings', icon: JobSettingsIcon },
   { id: 'interview-plan', label: 'Interview plan', title: 'Interview plan', icon: InterviewPlanIcon },
-  { id: 'posting', label: 'Posting', title: 'Posting', icon: JobPostingIcon },
   {
     id: 'criteria',
     label: 'Evaluation criteria',
     title: 'Evaluation criteria',
     icon: EvaluationCriteriaIcon,
   },
+  { id: 'posting', label: 'Posting', title: 'Posting', icon: JobPostingIcon },
 ] as const satisfies readonly TemplateSectionDefinition[];
 
 export type TemplateSection = (typeof TEMPLATE_SECTION_ITEMS)[number]['id'];

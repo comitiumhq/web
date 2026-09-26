@@ -27,16 +27,16 @@ export const DRAFT_SECTIONS = [
     route: '/org/$orgId/jobs/$jobId/interview-plan',
   },
   {
-    id: 'posting',
-    label: 'Posting',
-    icon: JobPostingIcon,
-    route: '/org/$orgId/jobs/$jobId/posting',
-  },
-  {
     id: 'criteria',
     label: 'Evaluation criteria',
     icon: EvaluationCriteriaIcon,
     route: '/org/$orgId/jobs/$jobId/criteria',
+  },
+  {
+    id: 'posting',
+    label: 'Posting',
+    icon: JobPostingIcon,
+    route: '/org/$orgId/jobs/$jobId/posting',
   },
 ] as const satisfies readonly DraftSectionDefinition[];
 

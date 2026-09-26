@@ -44,6 +44,7 @@ export const jobSummarySchema = z.object({
   stake: z.string().nullable(),
   responseDeadlineDays: z.number().nullable(),
   status: jobStatusSchema,
+  archivedAt: z.string().nullable(),
   version: z.number().int().min(0),
   totalApplications: z.number(),
   respondedApplications: z.number(),
@@ -121,8 +122,6 @@ const jobApplicationDataBaseSchema = z.object({
 
 export type JobApplicationData = z.infer<typeof jobApplicationDataBaseSchema>;
 
-// --- IPFS job metadata ---
-
 // --- Org jobs list ---
 
 const hiringTeamSummarySchema = z.object({
@@ -157,6 +156,7 @@ const orgJobListItemSchema = z.object({
   interviewPlanName: z.string().nullable().default(null),
   stake: z.string().nullable(),
   status: jobStatusSchema,
+  archivedAt: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
   candidateCount: z.number(),
@@ -171,6 +171,8 @@ export const orgJobsResponseSchema = paginatedSchema(orgJobListItemSchema);
 
 export const jobEditorSchema = z.object({
   id: z.string(),
+  status: jobStatusSchema,
+  archivedAt: z.string().nullable(),
   title: z.string(),
   description: tipTapDocSchema.nullable(),
   departmentId: uuidSchema.nullable(),
@@ -269,12 +271,10 @@ export const unpublishJobPostingResponseSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('prepared'), operation: preparedRelayedOnchainOperationSchema }),
 ]);
 
-export const prepareJobContentUriUpdateResponseSchema = preparedRelayedOnchainOperationSchema;
-
 // --- API input types ---
 
 export type GetOrgJobsParams = {
-  status?: 'draft' | 'open' | 'closed' | 'all';
+  status?: 'draft' | 'open' | 'closed' | 'archived' | 'all';
   search?: string;
   departmentId?: string;
   locationId?: string;
@@ -312,18 +312,12 @@ export type UpdateJobPostingData = {
 
 export type PublishJobPostingData = {
   expectedVersion: number;
-  applicationCapacity?: number | null;
 };
 
 export type PrepareCommitmentParams = {
   expectedVersion: number;
   stake: string;
   feeTier: number;
-};
-
-export type PrepareJobContentUriUpdateParams = {
-  expectedVersion: number;
-  description: TipTapDoc;
 };
 
 export const updateJobEditorResponseSchema = z.object({

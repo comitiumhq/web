@@ -7,7 +7,7 @@ import { qk } from '@/hooks/query-keys';
 import { getDrafts, getOrgJobs } from '@/lib/api/jobs';
 import { isDefined } from '@/lib/utils';
 
-export type StatusFilter = 'open' | 'closed' | 'draft' | 'all';
+export type StatusFilter = 'open' | 'closed' | 'draft' | 'archived' | 'all';
 
 const PAGE_LIMIT = 100;
 
@@ -39,6 +39,18 @@ export function useJobsWithDrafts(orgId?: string) {
     staleTime: STALE_TIME_SHORT,
   });
 
+  const archivedQuery = useInfiniteQuery({
+    queryKey: qk.jobs.archivedAllPages(orgId),
+    queryFn: isDefined(orgId)
+      ? ({ pageParam }) => getOrgJobs(orgId, { status: 'archived', limit: PAGE_LIMIT, cursor: pageParam })
+      : skipToken,
+    enabled: isAuthenticated,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.pagination.hasMore ? (lastPage.pagination.nextCursor ?? undefined) : undefined,
+    staleTime: STALE_TIME_SHORT,
+  });
+
   const {
     hasNextPage: jobsHasNextPage,
     isFetchingNextPage: jobsFetchingNext,
@@ -49,6 +61,11 @@ export function useJobsWithDrafts(orgId?: string) {
     isFetchingNextPage: draftsFetchingNext,
     fetchNextPage: fetchNextDrafts,
   } = draftsQuery;
+  const {
+    hasNextPage: archivedHasNextPage,
+    isFetchingNextPage: archivedFetchingNext,
+    fetchNextPage: fetchNextArchived,
+  } = archivedQuery;
 
   useEffect(() => {
     if (jobsHasNextPage && !jobsFetchingNext) {
@@ -62,10 +79,19 @@ export function useJobsWithDrafts(orgId?: string) {
     }
   }, [draftsHasNextPage, draftsFetchingNext, fetchNextDrafts]);
 
-  const jobs: OrgJobListItem[] = jobsQuery.data?.pages.flatMap((page) => page.data) ?? [];
+  useEffect(() => {
+    if (archivedHasNextPage && !archivedFetchingNext) {
+      fetchNextArchived();
+    }
+  }, [archivedHasNextPage, archivedFetchingNext, fetchNextArchived]);
+
+  const activeJobs: OrgJobListItem[] = jobsQuery.data?.pages.flatMap((page) => page.data) ?? [];
+  const archivedJobs: OrgJobListItem[] = archivedQuery.data?.pages.flatMap((page) => page.data) ?? [];
+  const jobs = [...activeJobs, ...archivedJobs];
   const drafts: JobDraftListItem[] = draftsQuery.data?.pages.flatMap((page) => page.data) ?? [];
 
-  const isLoading = (canLoad && jobsQuery.isLoading) || (canLoad && draftsQuery.isLoading);
+  const isLoading =
+    (canLoad && jobsQuery.isLoading) || (canLoad && draftsQuery.isLoading) || (canLoad && archivedQuery.isLoading);
 
   return { jobs, drafts, isLoading };
 }

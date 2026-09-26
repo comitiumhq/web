@@ -109,6 +109,8 @@ describe('job draft utils', () => {
   it('uses display defaults without persisting empty compensation', () => {
     const draft = {
       id: '88888888-8888-4888-8888-888888888888',
+      status: 'draft',
+      archivedAt: null,
       title: 'People Lead',
       departmentId: baseValues.departmentId,
       locationId: baseValues.locationId,
@@ -150,11 +152,39 @@ describe('job draft utils', () => {
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build the product.' }] }],
     };
+    const input = {
+      values: baseValues,
+      description,
+      formId: null,
+      formIsArchived: false,
+      criteria: [],
+      interviewPlanId: '66666666-6666-4666-8666-666666666666',
+    };
 
-    expect(validateForPublish(baseValues, description, null, [])).toContainEqual({
+    expect(validateForPublish(input)).toContainEqual({
       label: 'Application form',
-      tab: 'posting',
+      target: 'posting',
     });
-    expect(validateForPublish(baseValues, description, '33333333-3333-4333-8333-333333333333', [])).toEqual([]);
+    expect(validateForPublish({ ...input, formId: '33333333-3333-4333-8333-333333333333' })).toEqual([]);
+  });
+
+  it('rejects archived forms, invalid capacity, and a missing interview plan', () => {
+    const errors = validateForPublish({
+      values: { ...baseValues, applicationCapacity: 0 },
+      description: {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build the product.' }] }],
+      },
+      formId: '33333333-3333-4333-8333-333333333333',
+      formIsArchived: true,
+      criteria: [],
+      interviewPlanId: null,
+    });
+
+    expect(errors).toEqual([
+      { label: 'Application form', target: 'posting' },
+      { label: 'Application capacity', target: 'posting' },
+      { label: 'Interview plan', target: 'interview-plan' },
+    ]);
   });
 });

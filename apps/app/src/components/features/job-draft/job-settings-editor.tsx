@@ -11,7 +11,6 @@ interface JobSettingsEditorProps {
   hiringTeam: HiringTeamEntry[];
   onChangeHiringTeam: (team: HiringTeamEntry[]) => void;
   showPublishRequiredMarkers?: boolean;
-  editableStructure?: boolean;
   initialTab?: JobSettingsTab;
 }
 
@@ -21,20 +20,12 @@ export function JobSettingsEditor({
   hiringTeam,
   onChangeHiringTeam,
   showPublishRequiredMarkers = true,
-  editableStructure = true,
   initialTab,
 }: JobSettingsEditorProps) {
   return (
     <JobSettingsTabs
       initialTab={initialTab}
-      basic={
-        <JobBasicSettingsCard
-          orgId={orgId}
-          form={form}
-          showPublishRequiredMarkers={showPublishRequiredMarkers}
-          editableStructure={editableStructure}
-        />
-      }
+      basic={<JobBasicSettingsCard orgId={orgId} form={form} showPublishRequiredMarkers={showPublishRequiredMarkers} />}
       hiringTeam={<HiringTeamTab orgId={orgId} hiringTeam={hiringTeam} onChangeHiringTeam={onChangeHiringTeam} />}
     />
   );

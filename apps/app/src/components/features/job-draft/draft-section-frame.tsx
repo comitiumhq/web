@@ -1,18 +1,19 @@
 import { PageContainer } from '@comitium/ui/page-container';
 import { SectionHeader } from '@comitium/ui/section-header';
 import type { ReactNode } from 'react';
+import { PublishValidationBanner } from '../job-posting/publish-validation-banner';
 import { useDraftFormContext } from './draft-form-context';
 import { DraftSectionSkeleton } from './draft-section-skeleton';
-import { PublishValidationBanner } from './publish-validation';
 import { type DraftTab, getDraftSection } from './sections';
 import { DraftNotFound } from './states';
 
 interface DraftSectionFrameProps {
   tab: DraftTab;
   children: ReactNode;
+  actions?: ReactNode;
 }
 
-export function DraftSectionFrame({ tab, children }: DraftSectionFrameProps) {
+export function DraftSectionFrame({ tab, children, actions }: DraftSectionFrameProps) {
   const { orgId, draft, isLoading, error, publishErrors, handleValidationFieldClick, dismissPublishErrors } =
     useDraftFormContext();
 
@@ -25,6 +26,7 @@ export function DraftSectionFrame({ tab, children }: DraftSectionFrameProps) {
   }
 
   const section = getDraftSection(tab);
+  const header = <SectionHeader title={section.label} description={null} />;
 
   return (
     <div className="h-full overflow-y-auto">
@@ -37,7 +39,14 @@ export function DraftSectionFrame({ tab, children }: DraftSectionFrameProps) {
       )}
 
       <PageContainer size="editor" className="py-8 lg:px-10">
-        <SectionHeader title={section.label} description={null} />
+        {actions ? (
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            {header}
+            {actions}
+          </div>
+        ) : (
+          header
+        )}
         {children}
       </PageContainer>
     </div>

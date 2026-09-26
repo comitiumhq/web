@@ -1,6 +1,7 @@
 import { Input } from '@comitium/ui/input';
 import { Switch } from '@comitium/ui/switch';
 import { useId } from 'react';
+import { isValidApplicationCapacity } from './application-capacity';
 
 interface ApplicationCapacityControlProps {
   value: number | null;
@@ -11,6 +12,7 @@ interface ApplicationCapacityControlProps {
 export function ApplicationCapacityControl({ value, onChange, disabled = false }: ApplicationCapacityControlProps) {
   const inputId = useId();
   const isLimited = value !== null;
+  const isValid = isValidApplicationCapacity(value);
 
   return (
     <div className="space-y-3">
@@ -30,24 +32,24 @@ export function ApplicationCapacityControl({ value, onChange, disabled = false }
       </div>
 
       {isLimited && (
-        <label htmlFor={inputId} className="flex items-center justify-between gap-4 text-copy-14">
-          <span className="text-muted-foreground">Maximum applications</span>
-          <Input
-            id={inputId}
-            type="number"
-            min={1}
-            max={1000}
-            value={value}
-            onChange={(event) => onChange(Number(event.target.value))}
-            disabled={disabled}
-            className="h-9 w-28"
-          />
-        </label>
+        <div className="space-y-1">
+          <label htmlFor={inputId} className="flex items-center justify-between gap-4 text-copy-14">
+            <span className="text-muted-foreground">Maximum applications</span>
+            <Input
+              id={inputId}
+              type="number"
+              min={1}
+              max={1000}
+              value={value}
+              onChange={(event) => onChange(Number(event.target.value))}
+              disabled={disabled}
+              aria-invalid={!isValid}
+              className="h-9 w-28"
+            />
+          </label>
+          {!isValid && <p className="text-right text-copy-12 text-destructive">Enter a number from 1 to 1000.</p>}
+        </div>
       )}
     </div>
   );
-}
-
-export function isValidApplicationCapacity(value: number | null): boolean {
-  return value === null || (Number.isInteger(value) && value >= 1 && value <= 1000);
 }

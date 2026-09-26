@@ -99,6 +99,7 @@ export const qk = {
     orgRoot: (orgId?: string) => ['jobs', 'org', orgId] as const,
     org: (orgId: string | undefined, filters: unknown) => ['jobs', 'org', orgId, filters] as const,
     orgAllPages: (orgId?: string) => ['jobs', 'org', orgId, 'all-pages'] as const,
+    archivedAllPages: (orgId?: string) => ['jobs', 'org', orgId, 'archived', 'all-pages'] as const,
     draftsRoot: () => ['jobs', 'drafts'] as const,
     draftsOrg: (orgId: string) => ['jobs', 'drafts', orgId] as const,
     drafts: (orgId: string, filters: unknown) => ['jobs', 'drafts', orgId, filters] as const,

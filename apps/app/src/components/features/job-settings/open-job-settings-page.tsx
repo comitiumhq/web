@@ -6,7 +6,7 @@ import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { DetailsSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
+import { DraftSectionSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
 import { JobHiringTeam } from '@/components/features/job-hiring-team';
 import { JobBasicSettingsCard } from '@/components/features/job-settings/job-basic-settings-card';
 import {
@@ -63,12 +63,7 @@ export function OpenJobSettingsPage({ org, jobId, initialTab }: OpenJobSettingsP
   }, [form, saveSettings, version]);
 
   if (isLoading) {
-    return (
-      <PageContainer size="editor" className="py-8 lg:px-10">
-        <SectionHeader title="Settings" description={null} />
-        <DetailsSkeleton />
-      </PageContainer>
-    );
+    return <DraftSectionSkeleton tab="settings" />;
   }
 
   if (isError || !job) {
@@ -79,11 +74,11 @@ export function OpenJobSettingsPage({ org, jobId, initialTab }: OpenJobSettingsP
     );
   }
 
-  const canEdit = canOnJob(Permission.JOB_EDIT);
+  const canEdit = job.status === 'open' && canOnJob(Permission.JOB_EDIT);
 
   return (
     <div className="h-full overflow-y-auto">
-      <PageContainer size="editor" className="space-y-6 py-8 lg:px-10">
+      <PageContainer size="editor" className="py-8 lg:px-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <SectionHeader title="Settings" description={null} />
           {canEdit ? (
@@ -97,7 +92,7 @@ export function OpenJobSettingsPage({ org, jobId, initialTab }: OpenJobSettingsP
         <Form {...form}>
           <JobSettingsTabs
             initialTab={initialTab}
-            basic={<JobBasicSettingsCard orgId={org.id} form={form} editableStructure={false} readOnly={!canEdit} />}
+            basic={<JobBasicSettingsCard orgId={org.id} form={form} readOnly={!canEdit} />}
             hiringTeam={<JobHiringTeam org={org} jobId={jobId} />}
           />
         </Form>

@@ -8,7 +8,6 @@ interface JobBasicSettingsCardProps {
   orgId: string;
   form: UseFormReturn<JobSettingsFormData>;
   showPublishRequiredMarkers?: boolean;
-  editableStructure?: boolean;
   readOnly?: boolean;
 }
 
@@ -16,7 +15,6 @@ export function JobBasicSettingsCard({
   orgId,
   form,
   showPublishRequiredMarkers = true,
-  editableStructure = true,
   readOnly = false,
 }: JobBasicSettingsCardProps) {
   return (
@@ -26,7 +24,6 @@ export function JobBasicSettingsCard({
           orgId={orgId}
           form={form}
           showPublishRequiredMarkers={showPublishRequiredMarkers}
-          editableStructure={editableStructure}
           readOnly={readOnly}
         />
         <JobCompensationFields form={form} showPublishRequiredMarker={showPublishRequiredMarkers} readOnly={readOnly} />

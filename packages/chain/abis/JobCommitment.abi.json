@@ -772,6 +772,11 @@
             "internalType": "uint256"
           },
           {
+            "name": "postingRef",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
             "name": "creator",
             "type": "address",
             "internalType": "address"
@@ -815,11 +820,6 @@
             "name": "orgStakeSettled",
             "type": "bool",
             "internalType": "bool"
-          },
-          {
-            "name": "contentURI",
-            "type": "string",
-            "internalType": "string"
           }
         ]
       }
@@ -1480,39 +1480,6 @@
     "stateMutability": "nonpayable"
   },
   {
-    "type": "function",
-    "name": "updateJobContentURI",
-    "inputs": [
-      {
-        "name": "jobId",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "contentURI",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "keyNonce",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "expiry",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "signature",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
     "type": "event",
     "name": "ApplicationResponded",
     "inputs": [
@@ -1831,37 +1798,6 @@
   },
   {
     "type": "event",
-    "name": "JobContentURIUpdated",
-    "inputs": [
-      {
-        "name": "jobId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "orgId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "updater",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "contentURI",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
     "name": "JobExpiredSettled",
     "inputs": [
       {
@@ -1974,10 +1910,10 @@
         "internalType": "uint8"
       },
       {
-        "name": "contentURI",
-        "type": "string",
+        "name": "postingRef",
+        "type": "bytes32",
         "indexed": false,
-        "internalType": "string"
+        "internalType": "bytes32"
       }
     ],
     "anonymous": false
@@ -2253,11 +2189,6 @@
   {
     "type": "error",
     "name": "EmptyBatch",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "EmptyContentURI",
     "inputs": []
   },
   {
@@ -2662,6 +2593,11 @@
   {
     "type": "error",
     "name": "ZeroApplicationId",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroPostingRef",
     "inputs": []
   },
   {

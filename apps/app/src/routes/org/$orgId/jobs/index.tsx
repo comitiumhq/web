@@ -6,7 +6,7 @@ import { OrgRouteShell } from '@/components/auth/org-route-shell';
 import { JobsListContent, type JobsListFilters } from '@/components/features/jobs-list/jobs-list-content';
 
 const searchSchema = z.object({
-  status: z.enum(['all', 'open', 'draft', 'closed']).default('all'),
+  status: z.enum(['all', 'open', 'draft', 'closed', 'archived']).default('all'),
   departmentId: uuidSchema.optional(),
   locationId: uuidSchema.optional(),
   create: z.boolean().optional(),

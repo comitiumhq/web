@@ -10,18 +10,17 @@ import {
 } from '@comitium/ui/dropdown-menu';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { ArrowRightIcon, CopyIcon, DotsThreeIcon, TrashIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ArrowCounterClockwiseIcon, ArrowRightIcon, CopyIcon, DotsThreeIcon } from '@phosphor-icons/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { memo, useCallback } from 'react';
 import { JobStatusBadge } from '@/components/features/job-detail/job-status-badge';
 import { useCreateDraft } from '@/hooks/mutations/use-create-draft';
 import { usePermissions } from '@/hooks/use-permissions';
-import { formatEmployerStake } from '@/lib/jobs';
 import { Permission } from '@/lib/schemas/org';
 import { formatLocation } from '@/lib/utils';
 
 import { HiringTeamAvatars } from './hiring-team-avatars';
-import { EmptyJobCellValue, InterviewPlanValue, PostingStatusValue } from './job-list-cell-values';
+import { InterviewPlanValue, PostingStatusValue } from './job-list-cell-values';
 
 export type JobsRow =
   | { kind: 'job'; id: string; job: OrgJobListItem }
@@ -29,8 +28,8 @@ export type JobsRow =
 
 interface JobsColumnsContext {
   orgId: string;
-  isAdmin: boolean;
-  onRequestDelete: (draft: JobDraftListItem) => void;
+  onRequestArchive: (job: JobDraftListItem | OrgJobListItem) => void;
+  onRequestRestore: (job: OrgJobListItem) => void;
 }
 
 export function metaLine(departmentName: string | null, location: OrgJobListItem['location']): string {
@@ -40,15 +39,22 @@ export function metaLine(departmentName: string | null, location: OrgJobListItem
 interface ActionsCellProps {
   orgId: string;
   row: JobsRow;
-  onRequestDelete: (draft: JobDraftListItem) => void;
+  onRequestArchive: (job: JobDraftListItem | OrgJobListItem) => void;
+  onRequestRestore: (job: OrgJobListItem) => void;
 }
 
-export const ActionsCell = memo(function ActionsCell({ orgId, row, onRequestDelete }: ActionsCellProps) {
+export const ActionsCell = memo(function ActionsCell({
+  orgId,
+  row,
+  onRequestArchive,
+  onRequestRestore,
+}: ActionsCellProps) {
   const { can } = usePermissions();
   const { mutate: createDraft, isPending: isDuplicating } = useCreateDraft(orgId, { navigateOnSuccess: false });
   const canCreate = can(Permission.JOB_CREATE);
-  const canDeleteDraft = row.kind === 'draft' && can(Permission.JOB_EDIT);
-
+  const archived = row.kind === 'job' && row.job.archivedAt !== null;
+  const canArchive = can(Permission.JOB_EDIT) && !archived && (row.kind === 'draft' || row.job.status === 'closed');
+  const canRestore = can(Permission.JOB_EDIT) && archived;
   const sourceId = row.id;
 
   const handleDuplicate = useCallback(
@@ -59,22 +65,30 @@ export const ActionsCell = memo(function ActionsCell({ orgId, row, onRequestDele
     [createDraft, sourceId],
   );
 
-  const handleDelete = useCallback(
+  const handleArchive = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      onRequestArchive(row.kind === 'draft' ? row.draft : row.job);
+    },
+    [onRequestArchive, row],
+  );
+
+  const handleRestore = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
 
-      if (row.kind === 'draft') {
-        onRequestDelete(row.draft);
+      if (row.kind === 'job') {
+        onRequestRestore(row.job);
       }
     },
-    [onRequestDelete, row],
+    [onRequestRestore, row],
   );
 
   const handleStopPropagation = useCallback((event: React.MouseEvent) => {
     event.stopPropagation();
   }, []);
 
-  if (!canCreate && !canDeleteDraft) {
+  if (!canCreate && !canArchive && !canRestore) {
     return null;
   }
 
@@ -98,21 +112,31 @@ export const ActionsCell = memo(function ActionsCell({ orgId, row, onRequestDele
             {isDuplicating ? 'Duplicating...' : 'Duplicate'}
           </DropdownMenuItem>
         )}
-        {canDeleteDraft && (
+        {canArchive && (
           <>
             {canCreate && <DropdownMenuSeparator />}
-            <DropdownMenuItem variant="destructive" onClick={handleDelete}>
-              <TrashIcon />
-              Delete
+            <DropdownMenuItem variant="destructive" onClick={handleArchive}>
+              <ArchiveIcon />
+              Archive
             </DropdownMenuItem>
           </>
+        )}
+        {canRestore && (
+          <DropdownMenuItem onClick={handleRestore}>
+            <ArrowCounterClockwiseIcon />
+            Restore
+          </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 });
 
-export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsContext): ColumnDef<JobsRow>[] {
+export function getJobsColumns({
+  orgId,
+  onRequestArchive,
+  onRequestRestore,
+}: JobsColumnsContext): ColumnDef<JobsRow>[] {
   const jobColumn: ColumnDef<JobsRow> = {
     id: 'job',
     header: 'Job',
@@ -216,33 +240,12 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
     },
   };
 
-  const stakeColumn: ColumnDef<JobsRow> = {
-    id: 'stake',
-    header: 'Stake',
-    accessorFn: (row) => (row.kind === 'job' ? Number(row.job.stake ?? 0) : 0),
-    cell: ({ row }) => {
-      const item = row.original;
-
-      if (item.kind !== 'job' || !item.job.stake) {
-        return <EmptyJobCellValue>None</EmptyJobCellValue>;
-      }
-
-      return <span className="font-medium tabular-nums">{formatEmployerStake(item.job.stake)}</span>;
-    },
-    enableSorting: true,
-    meta: {
-      gridSize: '8rem',
-      label: 'Stake',
-      skeletonClassName: 'w-12',
-    },
-  };
-
   const statusColumn: ColumnDef<JobsRow> = {
     id: 'status',
     header: 'Status',
     cell: ({ row }) =>
       row.original.kind === 'job' ? (
-        <JobStatusBadge status={row.original.job.status} />
+        <JobStatusBadge status={row.original.job.status} archived={row.original.job.archivedAt !== null} />
       ) : (
         <JobStatusBadge status={row.original.draft.status} />
       ),
@@ -287,18 +290,20 @@ export function getJobsColumns({ orgId, isAdmin, onRequestDelete }: JobsColumnsC
   const actionsColumn: ColumnDef<JobsRow> = {
     id: 'actions',
     header: '',
-    cell: ({ row }) => <ActionsCell orgId={orgId} row={row.original} onRequestDelete={onRequestDelete} />,
+    cell: ({ row }) => (
+      <ActionsCell
+        orgId={orgId}
+        row={row.original}
+        onRequestArchive={onRequestArchive}
+        onRequestRestore={onRequestRestore}
+      />
+    ),
     enableSorting: false,
     enableHiding: false,
     meta: { gridSize: '3rem', label: 'Actions', skeletonClassName: 'ml-auto size-7 rounded-full' },
   };
 
   const columns: ColumnDef<JobsRow>[] = [jobColumn, candidatesColumn, teamColumn, interviewPlanColumn];
-
-  if (isAdmin) {
-    columns.push(stakeColumn);
-  }
-
   columns.push(statusColumn, postingColumn, updatedColumn, actionsColumn);
 
   return columns;

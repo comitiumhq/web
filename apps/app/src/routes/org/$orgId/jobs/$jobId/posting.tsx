@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { useWatch } from 'react-hook-form';
 import { useDraftFormContext, useOptionalDraftFormContext } from '@/components/features/job-draft/draft-form-context';
 import { DraftSectionFrame } from '@/components/features/job-draft/draft-section-frame';
+import { DraftPostingActions } from '@/components/features/job-posting/draft-posting-actions';
 import { JobPostingPage } from '@/components/features/job-posting/job-posting-page';
 import { PostingEditor } from '@/components/features/job-posting/posting-editor';
 
@@ -33,7 +34,7 @@ function DraftPostingPage({ jobId }: { jobId: string }) {
   );
 
   return (
-    <DraftSectionFrame tab="posting">
+    <DraftSectionFrame tab="posting" actions={<DraftPostingActions jobId={jobId} />}>
       <PostingEditor
         orgId={draftForm.orgId}
         owner={{ kind: 'job', jobId }}

@@ -6,17 +6,16 @@ import { Card, CardContent } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { PageContainer } from '@comitium/ui/page-container';
 import { richTextToPlainText } from '@comitium/ui/rich-text';
-import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
-import { ArrowSquareOutIcon, CopyIcon, PencilIcon } from '@phosphor-icons/react';
+import { ArrowSquareOutIcon, PencilIcon } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { JobDescriptionEditorDialog } from '@/components/features/job-detail/job-description-editor-dialog';
+import { DraftSectionSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
 import { getPublicSiteOrigin } from '@/config/site';
 import {
+  usePublishJobPosting,
   useReleaseCommitmentFunds,
   useUnpublishJobPosting,
-  useUpdateActiveCommitmentDescription,
   useUpdateJobPosting,
 } from '@/hooks/mutations/use-job-posting-mutations';
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
@@ -25,10 +24,13 @@ import { useJobPermissions } from '@/hooks/use-job-permissions';
 import { canRunJobLifecycleAction } from '@/lib/jobs/status';
 import { Permission } from '@/lib/schemas/org';
 
-import { ApplicationCapacityControl, isValidApplicationCapacity } from './application-capacity-control';
+import { isValidApplicationCapacity } from './application-capacity';
+import { ApplicationCapacityControl } from './application-capacity-control';
 import { ApplicationFormDialog } from './application-form-dialog';
-import { PostingTabs } from './posting-tabs';
-import { PublishPostingDialog } from './publish-posting-dialog';
+import { PostingActionsMenu } from './posting-actions-menu';
+import { PostingDescriptionEditor } from './posting-description-editor';
+import { type PostingTab, PostingTabs } from './posting-tabs';
+import { PublishValidationBanner, type PublishValidationError } from './publish-validation-banner';
 import { ResponseCommitmentDialog } from './response-commitment-dialog';
 import { ResponseCommitmentStatus } from './response-commitment-status';
 
@@ -44,14 +46,16 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const postingQuery = useQueryJobPosting(orgId, jobId);
   const summaryQuery = useQueryJobSummary(jobId);
   const updatePosting = useUpdateJobPosting({ orgId, jobId });
-  const updateCommitmentDescription = useUpdateActiveCommitmentDescription({ orgId, jobId });
+  const publishPosting = usePublishJobPosting({ orgId, jobId });
   const unpublishPosting = useUnpublishJobPosting({ orgId, jobId });
   const releaseCommitmentFunds = useReleaseCommitmentFunds({ orgId, jobId });
   const { canOnJob, isLoading: permissionsLoading } = useJobPermissions(jobId);
   const [applicationCapacity, setApplicationCapacity] = useState<number | null>(null);
+  const [descriptionDraft, setDescriptionDraft] = useState<TipTapDoc | null>(null);
+  const [descriptionHasChanged, setDescriptionHasChanged] = useState(false);
+  const [activeTab, setActiveTab] = useState<PostingTab>('description');
+  const [publishErrors, setPublishErrors] = useState<PublishValidationError<PostingTab>[]>([]);
   const [applicationFormDialogOpen, setApplicationFormDialogOpen] = useState(false);
-  const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);
-  const [publishOpen, setPublishOpen] = useState(false);
   const [commitmentOpen, setCommitmentOpen] = useState(false);
   const [unpublishOpen, setUnpublishOpen] = useState(false);
 
@@ -62,7 +66,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   }, [postingQuery.data]);
 
   if (postingQuery.isLoading || summaryQuery.isLoading) {
-    return <PostingPageSkeleton />;
+    return <DraftSectionSkeleton tab="posting" />;
   }
 
   const posting = postingQuery.data;
@@ -78,7 +82,6 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   }
 
   const commitment = posting.commitment;
-  const hasActiveCommitment = commitment?.status === 'published';
   const isPostingPublished = posting.status === 'published';
   const isJobClosed = job.status === 'closed';
   const isCommitmentFinalizing = job.lifecycle.commitmentFinalizationPending;
@@ -93,14 +96,18 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const canUnpublishPosting = canOnJob(Permission.JOB_UNPUBLISH);
   const canReleaseFunds = canOnJob(Permission.JOB_CLOSE);
   const canAddCommitment = canPublishPosting && postingAllowsCommitment;
-  const canOpenPublishDialog = canPublishPosting && postingAllowsPublication && !permissionsLoading;
+  const canPublish = canPublishPosting && postingAllowsPublication && !permissionsLoading;
 
   const capacityHasChanged = applicationCapacity !== posting.applicationCapacity;
   const capacityIsValid = isValidApplicationCapacity(applicationCapacity);
   const capacityAllowsSave = capacityHasChanged && capacityIsValid && !updatePosting.isPending;
   const canSaveCapacity = canEdit && capacityAllowsSave;
+  const currentDescription = descriptionHasChanged ? descriptionDraft : posting.description;
+  const descriptionIsPending = updatePosting.isPending;
+  const canSaveDescription =
+    canEdit && descriptionHasChanged && Boolean(richTextToPlainText(currentDescription)) && !descriptionIsPending;
   const publicPostingUrl = getPublicPostingUrl(job.canonicalUrl);
-  const postingStatusLabel = getPostingStatusLabel(posting.status, commitment);
+  const hasUnsavedPostingChanges = descriptionHasChanged || capacityHasChanged;
 
   const handleCopyPostingLink = async () => {
     if (!publicPostingUrl) {
@@ -122,20 +129,23 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     });
   };
 
-  const handleSaveDescription = async (description: TipTapDoc) => {
-    if (hasActiveCommitment) {
-      await updateCommitmentDescription.mutateAsync({
-        expectedVersion: job.version,
-        description,
-      });
+  const handleDescriptionChange = (description: TipTapDoc) => {
+    setDescriptionDraft(description);
+    setDescriptionHasChanged(true);
+    setPublishErrors([]);
+  };
 
+  const handleSaveDescription = async () => {
+    if (!canSaveDescription || !currentDescription) {
       return;
     }
 
     await updatePosting.mutateAsync({
       expectedVersion: posting.version,
-      description,
+      description: currentDescription,
     });
+
+    setDescriptionHasChanged(false);
   };
 
   const handleSaveApplicationForm = async (formId: string) => {
@@ -143,6 +153,20 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
       expectedVersion: posting.version,
       formId,
     });
+    setPublishErrors([]);
+  };
+
+  const handlePublish = () => {
+    const errors = getPostingPublishErrors(posting);
+
+    if (errors.length > 0) {
+      setPublishErrors(errors);
+      setActiveTab(errors[0].target);
+      return;
+    }
+
+    setPublishErrors([]);
+    publishPosting.mutate({ expectedVersion: posting.version });
   };
 
   const handleUnpublish = () => {
@@ -153,11 +177,24 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
 
   return (
     <div className="h-full overflow-y-auto">
-      <PageContainer size="editor" className="space-y-6 py-8 lg:px-10">
+      {publishErrors.length > 0 && (
+        <PublishValidationBanner
+          errors={publishErrors}
+          onClickField={(target) => {
+            setActiveTab(target);
+            setPublishErrors([]);
+          }}
+          onDismiss={() => setPublishErrors([])}
+        />
+      )}
+
+      <PageContainer size="editor" className="space-y-8 py-8 lg:px-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-2">
             <h1 className="text-heading-20">Posting</h1>
-            <Badge variant={isPostingPublished ? 'success' : 'secondary'}>{postingStatusLabel}</Badge>
+            <Badge variant={isPostingPublished ? 'success' : 'secondary'}>
+              {isPostingPublished ? 'Published' : 'Unpublished'}
+            </Badge>
           </div>
 
           <div className="flex flex-wrap justify-end gap-2">
@@ -170,30 +207,27 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
               </Button>
             )}
 
-            {isPostingPublished && publicPostingUrl && (
-              <Button variant="outline" size="sm" onClick={handleCopyPostingLink}>
-                <CopyIcon data-icon="inline-start" />
-                Copy link
-              </Button>
-            )}
-
-            {isPostingPublished && canUnpublishPosting ? (
-              <Button variant="outline" size="sm" onClick={() => setUnpublishOpen(true)}>
-                Unpublish
-              </Button>
-            ) : null}
-
-            {canAddCommitment ? (
-              <Button variant="outline" size="sm" onClick={() => setCommitmentOpen(true)}>
-                Add response commitment
-              </Button>
-            ) : null}
-
             {!isPostingPublished && canPublishPosting ? (
-              <Button size="sm" onClick={() => setPublishOpen(true)} disabled={!canOpenPublishDialog}>
-                Publish
+              <Button
+                size="sm"
+                onClick={handlePublish}
+                disabled={!canPublish || hasUnsavedPostingChanges || publishPosting.isPending}
+              >
+                {publishPosting.isPending && <Spinner data-icon="inline-start" />}
+                {publishPosting.isPending ? 'Publishing...' : 'Publish'}
               </Button>
             ) : null}
+
+            {isPostingPublished && (
+              <PostingActionsMenu
+                canAddCommitment={canAddCommitment}
+                canCopyLink={publicPostingUrl !== null}
+                canUnpublish={canUnpublishPosting}
+                onAddCommitment={() => setCommitmentOpen(true)}
+                onCopyLink={() => void handleCopyPostingLink()}
+                onUnpublish={() => setUnpublishOpen(true)}
+              />
+            )}
           </div>
         </div>
 
@@ -206,22 +240,25 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
         />
 
         <PostingTabs
+          value={activeTab}
+          onValueChange={setActiveTab}
           description={
-            <Card>
-              <CardContent>
-                <div className="flex items-center justify-between gap-4">
-                  <p className="min-w-0 truncate text-copy-13 text-muted-foreground">
-                    {richTextToPlainText(posting.description) ? 'Ready for candidates' : 'No description'}
-                  </p>
-                  {canEdit && (
-                    <Button variant="outline" size="sm" onClick={() => setDescriptionDialogOpen(true)}>
-                      <PencilIcon data-icon="inline-start" />
-                      Edit description
-                    </Button>
-                  )}
+            <div className="space-y-3">
+              <PostingDescriptionEditor
+                content={currentDescription}
+                onChange={canEdit ? handleDescriptionChange : undefined}
+                readOnly={!canEdit}
+                disabled={descriptionIsPending}
+              />
+              {canEdit && descriptionHasChanged && (
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => void handleSaveDescription()} disabled={!canSaveDescription}>
+                    {descriptionIsPending && <Spinner data-icon="inline-start" />}
+                    {descriptionIsPending ? 'Saving...' : 'Save changes'}
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           }
           applicationForm={
             <Card>
@@ -252,7 +289,10 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
                   </p>
                   <ApplicationCapacityControl
                     value={applicationCapacity}
-                    onChange={setApplicationCapacity}
+                    onChange={(value) => {
+                      setApplicationCapacity(value);
+                      setPublishErrors([]);
+                    }}
                     disabled={!canEdit || updatePosting.isPending}
                   />
                   {canEdit && capacityHasChanged && (
@@ -279,28 +319,12 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
         isPending={unpublishPosting.isPending}
       />
 
-      <PublishPostingDialog
-        orgId={orgId}
-        jobId={jobId}
-        jobTitle={job.title ?? 'Untitled Position'}
-        open={publishOpen}
-        onOpenChange={setPublishOpen}
-      />
-
       <ResponseCommitmentDialog
         orgId={orgId}
         jobId={jobId}
         expectedVersion={posting.version}
         open={commitmentOpen}
         onOpenChange={setCommitmentOpen}
-      />
-
-      <JobDescriptionEditorDialog
-        description={posting.description}
-        isPending={updatePosting.isPending || updateCommitmentDescription.isPending}
-        open={descriptionDialogOpen}
-        onOpenChange={setDescriptionDialogOpen}
-        onSave={handleSaveDescription}
       />
 
       <ApplicationFormDialog
@@ -316,20 +340,22 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   );
 }
 
-function responseDeadlineLabel(days: number): string {
-  return days === 1 ? '1 day' : `${days} days`;
-}
+function getPostingPublishErrors(posting: JobPosting): PublishValidationError<PostingTab>[] {
+  const errors: PublishValidationError<PostingTab>[] = [];
 
-function getPostingStatusLabel(status: JobPosting['status'], commitment: JobPosting['commitment']): string {
-  if (status === 'unpublished') {
-    return 'Unpublished';
+  if (!richTextToPlainText(posting.description)) {
+    errors.push({ label: 'Description', target: 'description' });
   }
 
-  if (commitment?.status === 'published') {
-    return `Published · Response within ${responseDeadlineLabel(commitment.responseDeadlineDays)}`;
+  if (!posting.form || posting.form.isArchived) {
+    errors.push({ label: 'Application form', target: 'application-form' });
   }
 
-  return 'Published';
+  if (!isValidApplicationCapacity(posting.applicationCapacity)) {
+    errors.push({ label: 'Application capacity', target: 'capacity' });
+  }
+
+  return errors;
 }
 
 function getPublicPostingUrl(canonicalUrl: string | null): string | null {
@@ -344,17 +370,4 @@ function applicationCountLabel(completedCount: number, capacity: number | null):
   }
 
   return `${completedCount} of ${capacity} applications received`;
-}
-
-function PostingPageSkeleton() {
-  return (
-    <PageContainer size="editor" className="space-y-6 py-8 lg:px-10">
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-7 w-24" />
-        <Skeleton className="h-5 w-20 rounded-full" />
-      </div>
-      <Skeleton className="h-9 w-80 max-w-full" />
-      <Skeleton className="h-28 w-full rounded-2xl" />
-    </PageContainer>
-  );
 }

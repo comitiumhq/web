@@ -35,7 +35,6 @@ function JobSettingsPage() {
           form={draftForm.form}
           hiringTeam={draftForm.hiringTeam}
           onChangeHiringTeam={draftForm.handleHiringTeamChange}
-          editableStructure={!draftForm.draft?.departmentId || !draftForm.draft?.locationId}
           initialTab={tab}
         />
       </Form>

@@ -112,23 +112,20 @@ function TabListSkeleton({ widths }: { widths: string[] }) {
 
 function DescriptionSkeleton() {
   return (
-    <div
-      aria-hidden="true"
-      className="overflow-hidden rounded-xl border border-control-border bg-control bg-clip-padding"
-    >
-      <div className="flex min-h-11 items-center gap-2 border-b border-control-border px-3 py-2">
-        <Skeleton className="size-7 rounded-lg" />
-        <Skeleton className="size-7 rounded-lg" />
-        <Skeleton className="size-7 rounded-lg" />
-        <Skeleton className="h-7 w-16 rounded-lg" />
-        <Skeleton className="size-7 rounded-lg" />
-        <Skeleton className="size-7 rounded-lg" />
+    <div aria-hidden="true" className="overflow-hidden rounded-2xl border border-border/50">
+      <div className="flex min-h-11 items-center gap-2 border-b border-border/50 px-3 py-2">
+        <Skeleton className="size-7 rounded-lg bg-foreground/10" />
+        <Skeleton className="size-7 rounded-lg bg-foreground/10" />
+        <Skeleton className="size-7 rounded-lg bg-foreground/10" />
+        <Skeleton className="h-7 w-16 rounded-lg bg-foreground/10" />
+        <Skeleton className="size-7 rounded-lg bg-foreground/10" />
+        <Skeleton className="size-7 rounded-lg bg-foreground/10" />
       </div>
-      <div className="min-h-56 space-y-3 px-5 py-5">
-        <Skeleton className="h-4 w-2/3 rounded-md" />
-        <Skeleton className="h-4 w-full rounded-md" />
-        <Skeleton className="h-4 w-5/6 rounded-md" />
-        <Skeleton className="h-4 w-1/2 rounded-md" />
+      <div className="min-h-100 space-y-3 px-5 py-5">
+        <Skeleton className="h-3.5 w-2/3 rounded-md bg-foreground/10" />
+        <Skeleton className="h-3.5 w-full rounded-md bg-foreground/10" />
+        <Skeleton className="h-3.5 w-5/6 rounded-md bg-foreground/10" />
+        <Skeleton className="h-3.5 w-1/2 rounded-md bg-foreground/10" />
       </div>
     </div>
   );

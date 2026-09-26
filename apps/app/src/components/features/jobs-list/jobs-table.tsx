@@ -1,4 +1,4 @@
-import type { JobDraftListItem } from '@comitium/schemas/jobs';
+import type { JobDraftListItem, OrgJobListItem } from '@comitium/schemas/jobs';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
 import { useMediaQuery } from '@comitium/ui/use-media-query';
@@ -6,19 +6,17 @@ import { useNavigate } from '@tanstack/react-router';
 import type { Row, SortingState } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { useDeleteDraft } from '@/hooks/mutations/use-delete-draft';
+import { useArchiveJob, useRestoreJob } from '@/hooks/mutations/use-job-archive-mutations';
 
 import { getJobsColumns, type JobsRow } from './jobs-columns';
 import { JobsMobileList } from './jobs-mobile-list';
 import { JobsTableSkeleton } from './jobs-table-skeleton';
 
-const ADMIN_GRID_MIN_WIDTH = '93rem';
-const MEMBER_GRID_MIN_WIDTH = '85rem';
+const GRID_MIN_WIDTH = '85rem';
 
 interface JobsTableProps {
   orgId: string;
   rows: JobsRow[];
-  isAdmin: boolean;
   loading: boolean;
   emptyState: ReactNode;
 }
@@ -27,23 +25,26 @@ function getJobsRowId(row: JobsRow): string {
   return `${row.kind}-${row.id}`;
 }
 
-export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTableProps) {
+export function JobsTable({ orgId, rows, loading, emptyState }: JobsTableProps) {
   const navigate = useNavigate();
-  const { mutate: deleteDraftMutate, isPending: isDeleting } = useDeleteDraft(orgId);
-  const [draftToDelete, setDraftToDelete] = useState<JobDraftListItem | null>(null);
+  const archiveJob = useArchiveJob();
+  const restoreJob = useRestoreJob();
+  const [jobToArchive, setJobToArchive] = useState<JobDraftListItem | OrgJobListItem | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const isMobile = useMediaQuery('(max-width: 639px)');
-  const gridMinWidth = isAdmin ? ADMIN_GRID_MIN_WIDTH : MEMBER_GRID_MIN_WIDTH;
-
+  const handleRestore = useCallback(
+    (job: OrgJobListItem) => restoreJob.mutate({ orgId, jobId: job.id }),
+    [orgId, restoreJob],
+  );
   const columns = useMemo(
-    () => getJobsColumns({ orgId, isAdmin, onRequestDelete: setDraftToDelete }),
-    [orgId, isAdmin],
+    () => getJobsColumns({ orgId, onRequestArchive: setJobToArchive, onRequestRestore: handleRestore }),
+    [handleRestore, orgId],
   );
 
   const navigateToRow = useCallback(
     (item: JobsRow) => {
-      if (item.kind === 'job') {
+      if (item.kind === 'job' && item.job.archivedAt === null) {
         navigate({
           to: '/org/$orgId/jobs/$jobId/pipeline',
           params: { orgId, jobId: item.id },
@@ -59,20 +60,20 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
 
   const handleRowClick = useCallback((row: Row<JobsRow>) => navigateToRow(row.original), [navigateToRow]);
 
-  const handleDeleteDialogChange = useCallback((open: boolean) => {
+  const handleArchiveDialogChange = useCallback((open: boolean) => {
     if (!open) {
-      setDraftToDelete(null);
+      setJobToArchive(null);
     }
   }, []);
 
-  const handleConfirmDelete = useCallback(() => {
-    if (!draftToDelete) {
+  const handleConfirmArchive = useCallback(() => {
+    if (!jobToArchive) {
       return;
     }
 
-    deleteDraftMutate(draftToDelete.id);
-    setDraftToDelete(null);
-  }, [draftToDelete, deleteDraftMutate]);
+    archiveJob.mutate({ orgId, jobId: jobToArchive.id });
+    setJobToArchive(null);
+  }, [archiveJob, jobToArchive, orgId]);
 
   let tableContent: ReactNode;
 
@@ -82,16 +83,16 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
         <JobsMobileList
           orgId={orgId}
           rows={rows}
-          isAdmin={isAdmin}
           loading={loading}
           emptyState={emptyState}
           onRowClick={navigateToRow}
-          onRequestDelete={setDraftToDelete}
+          onRequestArchive={setJobToArchive}
+          onRequestRestore={handleRestore}
         />
       </div>
     );
   } else if (loading && rows.length === 0) {
-    tableContent = <JobsTableSkeleton columns={columns} gridMinWidth={gridMinWidth} />;
+    tableContent = <JobsTableSkeleton columns={columns} gridMinWidth={GRID_MIN_WIDTH} />;
   } else {
     tableContent = (
       <DataTableVirtual
@@ -103,7 +104,7 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
         data={rows}
         emptyState={emptyState}
         getRowId={getJobsRowId}
-        gridMinWidth={gridMinWidth}
+        gridMinWidth={GRID_MIN_WIDTH}
         loadingMore={loading}
         loadingMoreRowCount={rows.length === 0 ? 8 : 3}
         onRowClick={handleRowClick}
@@ -118,19 +119,19 @@ export function JobsTable({ orgId, rows, isAdmin, loading, emptyState }: JobsTab
       {tableContent}
 
       <ConfirmDialog
-        open={draftToDelete !== null}
-        onOpenChange={handleDeleteDialogChange}
-        title="Delete draft"
+        open={jobToArchive !== null}
+        onOpenChange={handleArchiveDialogChange}
+        title="Archive job"
         description={
           <>
-            Permanently delete <span className="font-medium">&ldquo;{draftToDelete?.title}&rdquo;</span>? This cannot be
-            undone.
+            Archive <span className="font-medium">&ldquo;{jobToArchive?.title}&rdquo;</span>? Its candidates and
+            Pipeline history will be preserved.
           </>
         }
-        actionLabel="Delete"
-        pendingLabel="Deleting..."
-        onConfirm={handleConfirmDelete}
-        isPending={isDeleting}
+        actionLabel="Archive"
+        pendingLabel="Archiving..."
+        onConfirm={handleConfirmArchive}
+        isPending={archiveJob.isPending}
       />
     </div>
   );

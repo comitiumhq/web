@@ -10,9 +10,7 @@ import {
   jobSummarySchema,
   orgJobsResponseSchema,
   type PrepareCommitmentParams,
-  type PrepareJobContentUriUpdateParams,
   type PublishJobPostingData,
-  prepareJobContentUriUpdateResponseSchema,
   reopenJobAsDraftResponseSchema,
   type UpdateJobEditorData,
   type UpdateJobPostingData,
@@ -34,6 +32,10 @@ export function prepareJobSettlement(jobId: string) {
 
 export function closeJob(jobId: string, expectedVersion: number, closeReasonId: string) {
   return api.post(`/jobs/${jobId}/close`, { expectedVersion, closeReasonId }, jobLifecycleMutationResponseSchema);
+}
+
+export function openJob(jobId: string) {
+  return api.post(`/jobs/${jobId}/open`, {}, jobLifecycleMutationResponseSchema);
 }
 
 export function prepareJobClose(jobId: string, expectedVersion: number, closeReasonId: string) {
@@ -133,12 +135,12 @@ export function updateJobEditor(orgId: string, jobId: string, data: UpdateJobEdi
   return api.patch(`/orgs/${orgId}/jobs/${jobId}`, jobEditorUpdatePayload(data), updateJobEditorResponseSchema);
 }
 
-export function deleteDraft(orgId: string, jobId: string) {
-  return api.delete(`/orgs/${orgId}/jobs/${jobId}`, successSchema);
+export function archiveJob(orgId: string, jobId: string) {
+  return api.post(`/orgs/${orgId}/jobs/${jobId}/archive`, {}, successSchema);
 }
 
-export function prepareJobContentUriUpdate(orgId: string, jobId: string, data: PrepareJobContentUriUpdateParams) {
-  return api.post(`/orgs/${orgId}/jobs/${jobId}/content/prepare`, data, prepareJobContentUriUpdateResponseSchema);
+export function restoreJob(orgId: string, jobId: string) {
+  return api.post(`/orgs/${orgId}/jobs/${jobId}/restore`, {}, successSchema);
 }
 
 // --- Job Posting ---

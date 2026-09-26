@@ -4,7 +4,6 @@ import { Skeleton } from '@comitium/ui/skeleton';
 import type { ReactNode } from 'react';
 import { memo, useCallback } from 'react';
 import { JobStatusBadge } from '@/components/features/job-detail/job-status-badge';
-import { formatEmployerStake } from '@/lib/jobs';
 import { PostingStatusValue } from './job-list-cell-values';
 import { ActionsCell, type JobsRow, metaLine } from './jobs-columns';
 
@@ -13,21 +12,21 @@ const SKELETON_ROWS = ['s1', 's2', 's3', 's4'];
 interface JobsMobileListProps {
   orgId: string;
   rows: JobsRow[];
-  isAdmin: boolean;
   loading: boolean;
   emptyState: ReactNode;
   onRowClick: (row: JobsRow) => void;
-  onRequestDelete: (draft: JobDraftListItem) => void;
+  onRequestArchive: (job: JobDraftListItem | OrgJobListItem) => void;
+  onRequestRestore: (job: OrgJobListItem) => void;
 }
 
 export function JobsMobileList({
   orgId,
   rows,
-  isAdmin,
   loading,
   emptyState,
   onRowClick,
-  onRequestDelete,
+  onRequestArchive,
+  onRequestRestore,
 }: JobsMobileListProps) {
   if (loading && rows.length === 0) {
     return (
@@ -67,9 +66,9 @@ export function JobsMobileList({
           key={`${row.kind}-${row.id}`}
           orgId={orgId}
           row={row}
-          isAdmin={isAdmin}
           onClick={onRowClick}
-          onRequestDelete={onRequestDelete}
+          onRequestArchive={onRequestArchive}
+          onRequestRestore={onRequestRestore}
         />
       ))}
     </div>
@@ -79,17 +78,17 @@ export function JobsMobileList({
 interface JobMobileCardProps {
   orgId: string;
   row: JobsRow;
-  isAdmin: boolean;
   onClick: (row: JobsRow) => void;
-  onRequestDelete: (draft: JobDraftListItem) => void;
+  onRequestArchive: (job: JobDraftListItem | OrgJobListItem) => void;
+  onRequestRestore: (job: OrgJobListItem) => void;
 }
 
 const JobMobileCard = memo(function JobMobileCard({
   orgId,
   row,
-  isAdmin,
   onClick,
-  onRequestDelete,
+  onRequestArchive,
+  onRequestRestore,
 }: JobMobileCardProps) {
   const handleClick = useCallback(() => {
     onClick(row);
@@ -107,7 +106,11 @@ const JobMobileCard = memo(function JobMobileCard({
       >
         <span className="flex items-start justify-between gap-2">
           <span className="min-w-0 flex-1 truncate font-medium text-foreground">{title}</span>
-          {isDraft ? <JobStatusBadge status={row.draft.status} /> : <JobStatusBadge status={row.job.status} />}
+          {isDraft ? (
+            <JobStatusBadge status={row.draft.status} />
+          ) : (
+            <JobStatusBadge status={row.job.status} archived={row.job.archivedAt !== null} />
+          )}
         </span>
 
         {isDraft ? (
@@ -121,18 +124,18 @@ const JobMobileCard = memo(function JobMobileCard({
             />
           </>
         ) : (
-          <JobMobileMeta job={row.job} isAdmin={isAdmin} />
+          <JobMobileMeta job={row.job} />
         )}
       </button>
 
       <span className="absolute right-2 top-2.5">
-        <ActionsCell orgId={orgId} row={row} onRequestDelete={onRequestDelete} />
+        <ActionsCell orgId={orgId} row={row} onRequestArchive={onRequestArchive} onRequestRestore={onRequestRestore} />
       </span>
     </div>
   );
 });
 
-const JobMobileMeta = memo(function JobMobileMeta({ job, isAdmin }: { job: OrgJobListItem; isAdmin: boolean }) {
+const JobMobileMeta = memo(function JobMobileMeta({ job }: { job: OrgJobListItem }) {
   const subtitle = metaLine(job.departmentName, job.location);
 
   return (
@@ -142,7 +145,6 @@ const JobMobileMeta = memo(function JobMobileMeta({ job, isAdmin }: { job: OrgJo
         candidateCount={job.candidateCount}
         interviewPlanName={job.interviewPlanName}
         postingStatus={job.postingStatus}
-        stake={isAdmin ? job.stake : null}
         updatedAt={job.updatedAt}
       />
     </>
@@ -153,7 +155,6 @@ interface JobMobileOperationalMetaProps {
   candidateCount: number;
   interviewPlanName: string | null;
   postingStatus: OrgJobListItem['postingStatus'];
-  stake?: string | null;
   updatedAt: string;
 }
 
@@ -161,19 +162,12 @@ function JobMobileOperationalMeta({
   candidateCount,
   interviewPlanName,
   postingStatus,
-  stake,
   updatedAt,
 }: JobMobileOperationalMetaProps) {
   return (
     <>
       <span className="flex items-center gap-1.5 text-label-12 text-muted-foreground">
         <span className="tabular-nums">{candidateCount} candidates</span>
-        {stake && (
-          <>
-            <span className="text-muted-foreground/60">·</span>
-            <span className="font-medium tabular-nums text-foreground">{formatEmployerStake(stake)}</span>
-          </>
-        )}
         <span className="text-muted-foreground/60">·</span>
         <span className="tabular-nums">Updated {formatCompactDate(updatedAt)}</span>
       </span>

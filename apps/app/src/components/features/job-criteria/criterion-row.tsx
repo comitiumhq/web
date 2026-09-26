@@ -18,6 +18,7 @@ interface CriterionRowProps {
   index: number;
   criterion: EvaluationCriterion;
   isExpanded: boolean;
+  readOnly?: boolean;
   onToggle: (id: string) => void;
   onUpdate: (id: string, field: 'title' | 'prompt', value: string) => void;
   onRemove: (id: string) => void;
@@ -28,12 +29,13 @@ export const CriterionRow = memo(function CriterionRow({
   index,
   criterion,
   isExpanded,
+  readOnly = false,
   onToggle,
   onUpdate,
   onRemove,
 }: CriterionRowProps) {
   const titleRef = useRef<HTMLInputElement>(null);
-  const { ref, handleRef, isDragging } = useSortable({ id, index });
+  const { ref, handleRef, isDragging } = useSortable({ id, index, disabled: readOnly });
   const [confirmOpen, setConfirmOpen] = useState(false);
   const isFilled = criterion.title.trim().length > 0;
 
@@ -92,12 +94,16 @@ export const CriterionRow = memo(function CriterionRow({
       )}
     >
       <div className="flex items-center transition-colors hover:bg-foreground/[0.025]">
-        <span
-          ref={handleRef}
-          className="flex shrink-0 cursor-grab items-center self-stretch pl-2 pr-1 text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
-        >
-          <DotsSixVerticalIcon className="size-4" />
-        </span>
+        {!readOnly ? (
+          <span
+            ref={handleRef}
+            className="flex shrink-0 cursor-grab items-center self-stretch pl-2 pr-1 text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
+          >
+            <DotsSixVerticalIcon className="size-4" />
+          </span>
+        ) : (
+          <span aria-hidden="true" className="w-7 shrink-0" />
+        )}
 
         <CollapsibleTrigger asChild>
           <button
@@ -128,16 +134,20 @@ export const CriterionRow = memo(function CriterionRow({
           </button>
         </CollapsibleTrigger>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Delete criterion"
-          className="mx-1 shrink-0 text-muted-foreground transition-[color,background-color,opacity] hover:bg-destructive/10 hover:text-destructive-text focus-visible:opacity-100 md:opacity-0 md:group-hover/criterion:opacity-100 md:group-focus-within/criterion:opacity-100"
-          onClick={handleDeleteRequest}
-        >
-          <TrashIcon />
-        </Button>
+        {!readOnly ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Delete criterion"
+            className="mx-1 shrink-0 text-muted-foreground transition-[color,background-color,opacity] hover:bg-destructive/10 hover:text-destructive-text focus-visible:opacity-100 md:opacity-0 md:group-hover/criterion:opacity-100 md:group-focus-within/criterion:opacity-100"
+            onClick={handleDeleteRequest}
+          >
+            <TrashIcon />
+          </Button>
+        ) : (
+          <span aria-hidden="true" className="mx-1 size-8 shrink-0" />
+        )}
       </div>
 
       <CollapsibleContent className="overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:180ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:animate-accordion-down motion-reduce:animate-none!">
@@ -153,6 +163,7 @@ export const CriterionRow = memo(function CriterionRow({
               onChange={handleTitleChange}
               placeholder="e.g. React experience"
               maxLength={MAX_EVALUATION_CRITERION_TITLE_LENGTH}
+              disabled={readOnly}
             />
           </div>
 
@@ -173,28 +184,31 @@ export const CriterionRow = memo(function CriterionRow({
               maxLength={MAX_EVALUATION_CRITERION_PROMPT_LENGTH}
               rows={5}
               className="min-h-32 resize-none"
+              disabled={readOnly}
             />
           </div>
         </div>
       </CollapsibleContent>
 
-      <ConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title="Delete this criterion?"
-        description={
-          isFilled ? (
-            <>
-              <span className="font-medium">&ldquo;{criterion.title}&rdquo;</span> will be removed. This cannot be
-              undone.
-            </>
-          ) : (
-            'This criterion will be removed. This cannot be undone.'
-          )
-        }
-        actionLabel="Delete"
-        onConfirm={handleDeleteConfirm}
-      />
+      {!readOnly ? (
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title="Delete this criterion?"
+          description={
+            isFilled ? (
+              <>
+                <span className="font-medium">&ldquo;{criterion.title}&rdquo;</span> will be removed. This cannot be
+                undone.
+              </>
+            ) : (
+              'This criterion will be removed. This cannot be undone.'
+            )
+          }
+          actionLabel="Delete"
+          onConfirm={handleDeleteConfirm}
+        />
+      ) : null}
     </Collapsible>
   );
 });

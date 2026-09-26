@@ -64,7 +64,6 @@ function JobsTableHeaderSkeleton({ columnId }: { columnId?: string }) {
     candidates: 'w-20',
     team: 'w-20',
     interviewPlan: 'w-24',
-    stake: 'w-10',
     status: 'w-12',
     posting: 'w-14',
     updated: 'w-14',
@@ -103,7 +102,6 @@ function JobsTableCellSkeleton({ columnId, rowIndex }: { columnId?: string; rowI
   const widths: Record<string, string> = {
     candidates: 'w-8',
     interviewPlan: rowIndex % 2 === 0 ? 'w-28' : 'w-24',
-    stake: 'w-12',
     updated: 'w-14',
   };
 
