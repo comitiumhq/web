@@ -85,17 +85,14 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const isPostingPublished = posting.status === 'published';
   const isJobClosed = job.status === 'closed';
   const isCommitmentFinalizing = job.lifecycle.commitmentFinalizationPending;
-  const commitmentAllowsActivation = commitment === null || commitment.status === 'closed';
-  const lifecycleAllowsCommitment = canRunJobLifecycleAction(job.lifecycle, 'close_job');
-  const postingAllowsCommitment =
-    isPostingPublished && commitmentAllowsActivation && lifecycleAllowsCommitment && !isCommitmentFinalizing;
   const postingAllowsPublication = !isPostingPublished && job.status === 'open' && !isCommitmentFinalizing;
 
   const canEdit = !isJobClosed && canOnJob(Permission.JOB_EDIT);
   const canPublishPosting = canOnJob(Permission.JOB_PUBLISH);
   const canUnpublishPosting = canOnJob(Permission.JOB_UNPUBLISH);
   const canReleaseFunds = canOnJob(Permission.JOB_CLOSE);
-  const canAddCommitment = canPublishPosting && postingAllowsCommitment;
+  const canAddCommitment =
+    canPublishPosting && isPostingPublished && canRunJobLifecycleAction(job.lifecycle, 'activate_commitment');
   const canPublish = canPublishPosting && postingAllowsPublication && !permissionsLoading;
 
   const capacityHasChanged = applicationCapacity !== posting.applicationCapacity;

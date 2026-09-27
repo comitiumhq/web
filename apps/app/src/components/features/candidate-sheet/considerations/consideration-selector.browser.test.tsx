@@ -6,7 +6,7 @@ import { ConsiderationSelector } from './consideration-selector';
 const currentApplication: OtherApplicationSummary = {
   id: 'application-1',
   jobId: 'job-1',
-  jobOnChainId: 1,
+  onchainCommitmentId: 1,
   jobTitle: 'Senior Engineer',
   appliedAt: '2026-09-12T10:00:00.000Z',
   currentStageId: 'stage-1',

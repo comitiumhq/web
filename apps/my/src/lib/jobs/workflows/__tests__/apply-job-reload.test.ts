@@ -256,7 +256,7 @@ describe('applyJobWorkflow reload', () => {
       commitment: {
         chainId: 84_532,
         contract: '0x2222222222222222222222222222222222222222',
-        jobId: 7,
+        commitmentId: 7,
         jobUuid: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
       },
       processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },
@@ -281,8 +281,8 @@ describe('applyJobWorkflow reload', () => {
       expect.objectContaining({
         applicationId: deriveApplicationId({
           chainId: 84_532,
-          commitmentContract: '0x2222222222222222222222222222222222222222',
-          jobId: 7,
+          responseCommitmentContract: '0x2222222222222222222222222222222222222222',
+          commitmentId: 7,
           jobUuid: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
           applicationUuid: APPLICATION_DB_ID,
           salt: mocks.applicationSalt,
@@ -300,7 +300,7 @@ describe('applyJobWorkflow reload', () => {
       commitment: {
         chainId: 84_532,
         contract: '0x2222222222222222222222222222222222222222',
-        jobId: 7,
+        commitmentId: 7,
         jobUuid: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
       },
       processingGrant: { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', processorPublicKey: {} },

@@ -36,7 +36,7 @@ const draftJob = {
 const openJobWithPendingCommitmentResponses = {
   ...draftJob,
   status: 'open',
-  commitmentStatus: 'published',
+  commitmentStatus: 'active',
   totalApplications: 2,
   respondedApplications: 0,
   lifecycle: {

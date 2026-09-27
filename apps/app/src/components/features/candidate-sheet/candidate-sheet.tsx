@@ -26,7 +26,7 @@ import { useCandidateSheetWorkflows } from './workflows/use-candidate-sheet-work
 interface CandidateSheetProps {
   applicationId: string | null;
   jobId: string;
-  jobOnChainId: number | null;
+  onchainCommitmentId: number | null;
   orgId: string;
   stages?: InterviewStage[];
   jobTitle: string | null;
@@ -40,7 +40,7 @@ interface CandidateSheetProps {
 export function CandidateSheet({
   applicationId,
   jobId,
-  jobOnChainId,
+  onchainCommitmentId,
   orgId,
   stages,
   jobTitle,
@@ -105,7 +105,7 @@ export function CandidateSheet({
     open,
   });
   const effectiveJobTitle = application?.considerationContext.job.title ?? jobTitle;
-  const effectiveJobOnChainId = application && effectiveJobId !== jobId ? null : jobOnChainId;
+  const effectiveOnchainCommitmentId = application && effectiveJobId !== jobId ? null : onchainCommitmentId;
 
   const {
     archiveSheetOpen,
@@ -183,7 +183,7 @@ export function CandidateSheet({
     application,
     otherApplications,
     jobId: effectiveJobId,
-    jobOnChainId: effectiveJobOnChainId,
+    onchainCommitmentId: effectiveOnchainCommitmentId,
     jobTitle: effectiveJobTitle,
     currentStageName: restoreStageName,
     onApplicationSwitch,
@@ -204,7 +204,7 @@ export function CandidateSheet({
         onApplicationSwitch({
           id: attempt.id,
           jobId: effectiveJobId,
-          jobOnChainId: effectiveJobOnChainId,
+          onchainCommitmentId: effectiveOnchainCommitmentId,
           jobTitle: effectiveJobTitle,
           appliedAt: attempt.appliedAt,
           currentStageId: attempt.currentStageId,
@@ -224,7 +224,7 @@ export function CandidateSheet({
     [
       duplicateAttempts,
       effectiveJobId,
-      effectiveJobOnChainId,
+      effectiveOnchainCommitmentId,
       effectiveJobTitle,
       onApplicationSwitch,
       onNavigate,

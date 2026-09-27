@@ -38,11 +38,12 @@ export type CompanyInfo = z.infer<typeof companyInfoSchema>;
 export const jobStatusSchema = z.enum(['draft', 'open', 'closed']);
 export type JobStatus = z.infer<typeof jobStatusSchema>;
 
-export const jobCommitmentStatusSchema = z.enum(['published', 'unpublished', 'closed']);
+export const responseCommitmentStatusSchema = z.enum(['active', 'stopped', 'settled']);
 
 const jobLifecycleActionSchema = z.enum([
   'open_job',
   'publish_posting',
+  'activate_commitment',
   'settle_commitment',
   'close_job',
   'reopen_as_draft',

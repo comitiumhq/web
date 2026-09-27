@@ -1,8 +1,8 @@
 import { sendProductTransaction } from '@comitium/auth/send-calls';
 import type { CanonicalWallet } from '@comitium/auth/wallet';
 import { ACTIVE_CHAIN_ID } from '@comitium/chain/chains';
-import { jobFundsAbi } from '@comitium/chain/generated/contracts';
-import { jobFundsContract } from '@comitium/chain/instances';
+import { commitmentFundsAbi } from '@comitium/chain/generated/contracts';
+import { commitmentFundsContract } from '@comitium/chain/instances';
 import { TransactionError } from '@comitium/schemas/product-errors';
 import { randomBytes } from '@noble/hashes/utils.js';
 import { addHours, getUnixTime } from 'date-fns';
@@ -29,13 +29,13 @@ const USDC_RECEIVE_WITH_AUTHORIZATION_TYPES = {
   ],
 };
 
-interface JobFundsTransactionParams {
+interface CommitmentFundsTransactionParams {
   wallet: CanonicalWallet;
   onChainOrgId: number;
   amount: bigint;
 }
 
-interface DepositJobFundsParams extends JobFundsTransactionParams {
+interface DepositCommitmentFundsParams extends CommitmentFundsTransactionParams {
   stakeToken: Address;
 }
 
@@ -48,14 +48,14 @@ interface SignedUsdcAuthorization {
   s: Hex;
 }
 
-export function depositJobFunds(params: DepositJobFundsParams): ResultAsync<Hex, TransactionError> {
+export function depositCommitmentFunds(params: DepositCommitmentFundsParams): ResultAsync<Hex, TransactionError> {
   return ResultAsync.fromPromise(
-    signAndDepositJobFunds(params),
-    (error) => new TransactionError('job_funds_deposit', error),
+    signAndDepositCommitmentFunds(params),
+    (error) => new TransactionError('commitment_funds_deposit', error),
   );
 }
 
-async function signUsdcReceiveAuthorization(params: DepositJobFundsParams): Promise<SignedUsdcAuthorization> {
+async function signUsdcReceiveAuthorization(params: DepositCommitmentFundsParams): Promise<SignedUsdcAuthorization> {
   const validAfter = 0n;
   const validBefore = BigInt(getUnixTime(addHours(new Date(), USDC_AUTHORIZATION_TTL_HOURS)));
   const nonce = bytesToHex(randomBytes(EIP3009_NONCE_SIZE_BYTES));
@@ -71,7 +71,7 @@ async function signUsdcReceiveAuthorization(params: DepositJobFundsParams): Prom
       primaryType: 'ReceiveWithAuthorization',
       message: {
         from: params.wallet.address,
-        to: jobFundsContract.address,
+        to: commitmentFundsContract.address,
         value: params.amount.toString(),
         validAfter: validAfter.toString(),
         validBefore: validBefore.toString(),
@@ -90,14 +90,14 @@ async function signUsdcReceiveAuthorization(params: DepositJobFundsParams): Prom
   };
 }
 
-async function signAndDepositJobFunds(params: DepositJobFundsParams): Promise<Hex> {
+async function signAndDepositCommitmentFunds(params: DepositCommitmentFundsParams): Promise<Hex> {
   const authorization = await signUsdcReceiveAuthorization(params);
 
   return sendProductTransaction(params.wallet, {
     chainId: ACTIVE_CHAIN_ID,
-    to: jobFundsContract.address,
+    to: commitmentFundsContract.address,
     data: encodeFunctionData({
-      abi: jobFundsAbi,
+      abi: commitmentFundsAbi,
       functionName: 'depositWithAuthorization',
       args: [
         BigInt(params.onChainOrgId),
@@ -114,18 +114,18 @@ async function signAndDepositJobFunds(params: DepositJobFundsParams): Promise<He
   });
 }
 
-export function withdrawJobFunds(params: JobFundsTransactionParams): ResultAsync<Hex, TransactionError> {
+export function withdrawCommitmentFunds(params: CommitmentFundsTransactionParams): ResultAsync<Hex, TransactionError> {
   return ResultAsync.fromPromise(
     sendProductTransaction(params.wallet, {
       chainId: ACTIVE_CHAIN_ID,
-      to: jobFundsContract.address,
+      to: commitmentFundsContract.address,
       data: encodeFunctionData({
-        abi: jobFundsAbi,
+        abi: commitmentFundsAbi,
         functionName: 'withdraw',
         args: [BigInt(params.onChainOrgId), params.amount],
       }),
       value: 0n,
     }),
-    (error) => new TransactionError('job_funds_withdraw', error),
+    (error) => new TransactionError('commitment_funds_withdraw', error),
   );
 }

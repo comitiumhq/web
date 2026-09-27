@@ -39,6 +39,50 @@
   },
   {
     "type": "function",
+    "name": "activateCommitment",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "orgId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "stakeAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "feeAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "expectedFeeRecipient",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "activateData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "commitmentId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "availableBalance",
     "inputs": [
       {
@@ -58,7 +102,7 @@
   },
   {
     "type": "function",
-    "name": "canManageJobs",
+    "name": "canManageCommitments",
     "inputs": [
       {
         "name": "orgId",
@@ -82,11 +126,78 @@
   },
   {
     "type": "function",
-    "name": "currentJobCommitment",
+    "name": "commitmentBalance",
+    "inputs": [
+      {
+        "name": "orgId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "balance",
+        "type": "tuple",
+        "internalType": "struct OrgCommitmentBalance",
+        "components": [
+          {
+            "name": "available",
+            "type": "uint96",
+            "internalType": "uint96"
+          },
+          {
+            "name": "lockedInCommitments",
+            "type": "uint96",
+            "internalType": "uint96"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "commitmentLock",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "commitmentId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "lock",
+        "type": "tuple",
+        "internalType": "struct CommitmentLock",
+        "components": [
+          {
+            "name": "stakeAmount",
+            "type": "uint96",
+            "internalType": "uint96"
+          },
+          {
+            "name": "orgId",
+            "type": "uint96",
+            "internalType": "uint96"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "currentResponseCommitment",
     "inputs": [],
     "outputs": [
       {
-        "name": "jobCommitment",
+        "name": "responseCommitment",
         "type": "address",
         "internalType": "address"
       }
@@ -174,7 +285,7 @@
   },
   {
     "type": "function",
-    "name": "isJobManager",
+    "name": "isCommitmentManager",
     "inputs": [
       {
         "name": "orgId",
@@ -211,73 +322,6 @@
         "name": "",
         "type": "bool",
         "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "jobBalance",
-    "inputs": [
-      {
-        "name": "orgId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "balance",
-        "type": "tuple",
-        "internalType": "struct OrgJobBalance",
-        "components": [
-          {
-            "name": "available",
-            "type": "uint96",
-            "internalType": "uint96"
-          },
-          {
-            "name": "stakedInJobs",
-            "type": "uint96",
-            "internalType": "uint96"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "jobLock",
-    "inputs": [
-      {
-        "name": "jobCommitment",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "jobId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "lock",
-        "type": "tuple",
-        "internalType": "struct JobLock",
-        "components": [
-          {
-            "name": "stakeAmount",
-            "type": "uint96",
-            "internalType": "uint96"
-          },
-          {
-            "name": "orgId",
-            "type": "uint96",
-            "internalType": "uint96"
-          }
-        ]
       }
     ],
     "stateMutability": "view"
@@ -343,54 +387,10 @@
   },
   {
     "type": "function",
-    "name": "publishJob",
+    "name": "registerResponseCommitment",
     "inputs": [
       {
-        "name": "jobCommitment",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "orgId",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "stakeAmount",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "feeAmount",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "expectedFeeRecipient",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "publishData",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "jobId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "registerJobCommitment",
-    "inputs": [
-      {
-        "name": "jobCommitment",
+        "name": "responseCommitment",
         "type": "address",
         "internalType": "address"
       },
@@ -405,10 +405,10 @@
   },
   {
     "type": "function",
-    "name": "registeredJobCommitment",
+    "name": "registeredResponseCommitment",
     "inputs": [
       {
-        "name": "jobCommitment",
+        "name": "responseCommitment",
         "type": "address",
         "internalType": "address"
       }
@@ -417,7 +417,7 @@
       {
         "name": "config",
         "type": "tuple",
-        "internalType": "struct RegisteredJobCommitment",
+        "internalType": "struct RegisteredResponseCommitment",
         "components": [
           {
             "name": "commitmentVersion",
@@ -466,33 +466,7 @@
   },
   {
     "type": "function",
-    "name": "setCurrentJobCommitment",
-    "inputs": [
-      {
-        "name": "jobCommitment",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "setFeeRecipient",
-    "inputs": [
-      {
-        "name": "recipient",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "setJobManager",
+    "name": "setCommitmentManager",
     "inputs": [
       {
         "name": "orgId",
@@ -515,7 +489,33 @@
   },
   {
     "type": "function",
-    "name": "settleJob",
+    "name": "setCurrentResponseCommitment",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setFeeRecipient",
+    "inputs": [
+      {
+        "name": "recipient",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "settleCommitment",
     "inputs": [
       {
         "name": "orgId",
@@ -523,7 +523,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "jobId",
+        "name": "commitmentId",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -615,107 +615,7 @@
   },
   {
     "type": "event",
-    "name": "CurrentJobCommitmentUpdated",
-    "inputs": [
-      {
-        "name": "previousJobCommitment",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "newJobCommitment",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "FeeRecipientUpdated",
-    "inputs": [
-      {
-        "name": "previousRecipient",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "newRecipient",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "JobCommitmentRegistered",
-    "inputs": [
-      {
-        "name": "jobCommitment",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "commitmentVersion",
-        "type": "uint32",
-        "indexed": false,
-        "internalType": "uint32"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "JobFunded",
-    "inputs": [
-      {
-        "name": "jobCommitment",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "orgId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "jobId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "creator",
-        "type": "address",
-        "indexed": false,
-        "internalType": "address"
-      },
-      {
-        "name": "stakeAmount",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "feeAmount",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "JobFundsDeposited",
+    "name": "CommitmentFundsDeposited",
     "inputs": [
       {
         "name": "orgId",
@@ -740,7 +640,7 @@
   },
   {
     "type": "event",
-    "name": "JobFundsWithdrawn",
+    "name": "CommitmentFundsWithdrawn",
     "inputs": [
       {
         "name": "orgId",
@@ -765,7 +665,7 @@
   },
   {
     "type": "event",
-    "name": "JobManagerUpdated",
+    "name": "CommitmentManagerUpdated",
     "inputs": [
       {
         "name": "orgId",
@@ -802,10 +702,10 @@
   },
   {
     "type": "event",
-    "name": "JobSettled",
+    "name": "CommitmentStakeLocked",
     "inputs": [
       {
-        "name": "jobCommitment",
+        "name": "responseCommitment",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -817,7 +717,50 @@
         "internalType": "uint256"
       },
       {
-        "name": "jobId",
+        "name": "commitmentId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "creator",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "stakeAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "feeAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CommitmentStakeSettled",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "orgId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "commitmentId",
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
@@ -833,6 +776,44 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CurrentResponseCommitmentUpdated",
+    "inputs": [
+      {
+        "name": "previousResponseCommitment",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newResponseCommitment",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FeeRecipientUpdated",
+    "inputs": [
+      {
+        "name": "previousRecipient",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newRecipient",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
       }
     ],
     "anonymous": false
@@ -890,10 +871,29 @@
   },
   {
     "type": "event",
+    "name": "ResponseCommitmentRegistered",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "commitmentVersion",
+        "type": "uint32",
+        "indexed": false,
+        "internalType": "uint32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "StakeBurned",
     "inputs": [
       {
-        "name": "jobCommitment",
+        "name": "responseCommitment",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -905,7 +905,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "jobId",
+        "name": "commitmentId",
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
@@ -956,6 +956,54 @@
       }
     ],
     "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "CommitmentAlreadyLocked",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "commitmentId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "CommitmentLockOrgMismatch",
+    "inputs": [
+      {
+        "name": "providedOrgId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "lockedOrgId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "CommitmentNotLocked",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "commitmentId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
   },
   {
     "type": "error",
@@ -1039,10 +1087,10 @@
   },
   {
     "type": "error",
-    "name": "InvalidJobCommitment",
+    "name": "InvalidResponseCommitment",
     "inputs": [
       {
-        "name": "jobCommitment",
+        "name": "responseCommitment",
         "type": "address",
         "internalType": "address"
       }
@@ -1050,93 +1098,7 @@
   },
   {
     "type": "error",
-    "name": "JobAlreadyLocked",
-    "inputs": [
-      {
-        "name": "jobCommitment",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "jobId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "JobCommitmentAlreadyRegistered",
-    "inputs": [
-      {
-        "name": "jobCommitment",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "JobCommitmentNotCurrent",
-    "inputs": [
-      {
-        "name": "requested",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "current",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "JobCommitmentNotRegistered",
-    "inputs": [
-      {
-        "name": "jobCommitment",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "JobLockOrgMismatch",
-    "inputs": [
-      {
-        "name": "providedOrgId",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "lockedOrgId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "JobNotLocked",
-    "inputs": [
-      {
-        "name": "jobCommitment",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "jobId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "NotJobManager",
+    "name": "NotCommitmentManager",
     "inputs": [
       {
         "name": "orgId",
@@ -1238,6 +1200,44 @@
         "name": "available",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ResponseCommitmentAlreadyRegistered",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ResponseCommitmentNotCurrent",
+    "inputs": [
+      {
+        "name": "requested",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "current",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ResponseCommitmentNotRegistered",
+    "inputs": [
+      {
+        "name": "responseCommitment",
+        "type": "address",
+        "internalType": "address"
       }
     ]
   },

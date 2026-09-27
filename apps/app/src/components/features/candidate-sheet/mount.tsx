@@ -7,7 +7,7 @@ import { CandidateSheet } from './candidate-sheet';
 export interface CandidateSheetSelection {
   id: string;
   jobId: string;
-  jobOnChainId: number | null;
+  onchainCommitmentId: number | null;
   jobTitle: string | null;
   stages: InterviewStage[];
 }
@@ -54,7 +54,7 @@ export function CandidateSheetMount({
       applicationId={selectedApp?.id ?? null}
       orgId={orgId}
       jobId={displayApp.jobId}
-      jobOnChainId={displayApp.jobOnChainId}
+      onchainCommitmentId={displayApp.onchainCommitmentId}
       stages={displayApp.stages}
       jobTitle={displayApp.jobTitle}
       open={!!selectedApp}

@@ -6,7 +6,7 @@ import { interviewStatusEnum } from './interview-status';
 import { userWalletAuthorizationPayloadSchema } from './onchain-operations';
 import { PROCESSOR_RECIPIENT_REGEX } from './patterns';
 import { addressSchema, bytes32HexSchema, nonZeroBytes32HexSchema, uuidSchema, walletAddressSchema } from './public';
-import { companyInfoSchema, jobCommitmentStatusSchema, jobStatusSchema, locationEntrySchema } from './public-jobs';
+import { companyInfoSchema, jobStatusSchema, locationEntrySchema, responseCommitmentStatusSchema } from './public-jobs';
 import { vaultKeySchema } from './vault';
 
 const criterionAssessmentVerdictSchema = z.enum(['met', 'not_met', 'undecided']);
@@ -90,14 +90,20 @@ export const applicationTerminalOutcomeSchema = z.enum([
 
 export type ApplicationTerminalOutcome = z.infer<typeof applicationTerminalOutcomeSchema>;
 
-const applicationCommitmentStatusSchema = z.enum(['pending_signature', 'submitted', 'confirmed', 'failed', 'expired']);
+const applicationResponseCommitmentStatusSchema = z.enum([
+  'pending_signature',
+  'submitted',
+  'confirmed',
+  'failed',
+  'expired',
+]);
 
 // --- Other applications (cross-job sidebar) ---
 
 const otherApplicationSummarySchema = z.object({
   id: z.string(),
   jobId: z.string(),
-  jobOnChainId: z.number().nullable(),
+  onchainCommitmentId: z.number().nullable(),
   jobTitle: z.string().nullable(),
   appliedAt: z.string(),
   currentStageId: z.string().nullable(),
@@ -303,8 +309,8 @@ const duplicateApplicationAttemptSchema = z.object({
   candidateProfile: encryptedEnvelopeSchema.nullable(),
   onchainApplicationId: bytes32HexSchema,
   applicantAddress: walletAddressSchema,
-  jobCommitmentId: uuidSchema,
-  commitmentStatus: applicationCommitmentStatusSchema,
+  responseCommitmentId: uuidSchema,
+  commitmentStatus: applicationResponseCommitmentStatusSchema,
   appliedAt: z.string(),
   responseDeadline: z.string().nullable(),
   isResponded: z.boolean(),
@@ -331,9 +337,9 @@ export type DuplicateApplicationAttemptsResponse = z.infer<typeof duplicateAppli
 
 const myApplicationJobSchema = z.object({
   id: z.string(),
-  jobId: z.number().nullable(),
+  onchainCommitmentId: z.number().nullable(),
   chainId: z.number().nullable(),
-  commitmentContract: addressSchema.nullable(),
+  responseCommitmentContract: addressSchema.nullable(),
   orgSlug: z.string().nullable(),
   postingSlug: z.string().nullable(),
   canonicalUrl: z.string().nullable(),
@@ -342,7 +348,7 @@ const myApplicationJobSchema = z.object({
   location: z.array(locationEntrySchema).nullable(),
   locationType: z.string().nullable(),
   status: z.string().nullable(),
-  commitmentStatus: jobCommitmentStatusSchema.nullable(),
+  commitmentStatus: responseCommitmentStatusSchema.nullable(),
 });
 
 const candidateApplicationStatusSchema = z.object({
@@ -453,7 +459,7 @@ export const applicationPrepareSchema = z
       .object({
         chainId: z.number().int().positive(),
         contract: walletAddressSchema,
-        jobId: z.number().int().nonnegative(),
+        commitmentId: z.number().int().nonnegative(),
         jobUuid: uuidSchema,
       })
       .strict()

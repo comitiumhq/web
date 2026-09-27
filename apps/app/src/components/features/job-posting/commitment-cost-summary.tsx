@@ -38,7 +38,7 @@ export function CommitmentCostSummary({
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-copy-13 text-muted-foreground">Available Job Funds</span>
+          <span className="text-copy-13 text-muted-foreground">Available Commitment Funds</span>
           <span className={cn('text-copy-13 tabular-nums', { 'text-destructive': isInsufficient })}>
             {isBalanceLoading ? '—' : formatUsd(availableUsd)}
           </span>

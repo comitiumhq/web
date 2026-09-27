@@ -1,5 +1,5 @@
 import { useActiveWallet } from '@comitium/auth/use-wallet';
-import { usdcToUsd } from '@comitium/chain/job-economics';
+import { usdcToUsd } from '@comitium/chain/response-commitment-economics';
 import { formatUsdcAmount } from '@comitium/chain/usdc';
 import { Button } from '@comitium/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
@@ -10,12 +10,12 @@ import { memo, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { Address } from 'viem';
 import { useWalletBalance } from '@/hooks/queries/use-wallet-balance';
-import { depositJobFunds } from '@/lib/orgs/job-funds';
+import { depositCommitmentFunds } from '@/lib/orgs/commitment-funds';
 import { cn, formatUsd, formatUsdWhole } from '@/lib/utils';
 
-import { UsdcAmountField } from './job-funds-form';
+import { UsdcAmountField } from './commitment-funds-form';
 import { parseUsdcAmountInput, type UsdcAmountFormData, usdcAmountFormSchema } from './usdc-amount';
-import { useJobFundsTransaction } from './use-job-funds-transaction';
+import { useCommitmentFundsTransaction } from './use-commitment-funds-transaction';
 
 interface DepositModalProps {
   onChainOrgId: number;
@@ -49,7 +49,7 @@ export function DepositModal({
   const wallet = useActiveWallet();
   const { balance: walletBalance, balanceUsd: walletBalanceUsd } = useWalletBalance(stakeToken, open);
   const close = useCallback(() => onOpenChange(false), [onOpenChange]);
-  const { submit, isPending } = useJobFundsTransaction({
+  const { submit, isPending } = useCommitmentFundsTransaction({
     action: 'deposit',
     onConfirmed,
     onRefresh,
@@ -107,7 +107,7 @@ export function DepositModal({
       }
 
       submit(
-        () => depositJobFunds({ wallet, stakeToken, onChainOrgId, amount: depositAmount }),
+        () => depositCommitmentFunds({ wallet, stakeToken, onChainOrgId, amount: depositAmount }),
         depositAmount,
         displayAmount,
       );
@@ -134,9 +134,9 @@ export function DepositModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent onInteractOutside={handleInteractOutside} className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Job Funds</DialogTitle>
+          <DialogTitle>Add Commitment Funds</DialogTitle>
           <DialogDescription className="sr-only">
-            Enter the USDC amount to deposit into your organization's job funds.
+            Enter the USDC amount to deposit into your organization's commitment funds.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

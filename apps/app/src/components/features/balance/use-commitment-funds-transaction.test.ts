@@ -35,11 +35,11 @@ vi.mock('@comitium/ui/product-error-messages', () => ({
   getProductErrorMessage: mocks.getProductErrorMessage,
 }));
 
-import { useJobFundsTransaction } from './use-job-funds-transaction';
+import { useCommitmentFundsTransaction } from './use-commitment-funds-transaction';
 
 const UNCERTAIN_SUBMISSION_REFRESH_DELAY_MS = 5_000;
 
-describe('useJobFundsTransaction', () => {
+describe('useCommitmentFundsTransaction', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
@@ -54,7 +54,7 @@ describe('useJobFundsTransaction', () => {
     const onRefresh = vi.fn();
     const onClose = vi.fn();
     const onConfirmed = vi.fn();
-    const action = useJobFundsTransaction({ action: 'withdraw', onConfirmed, onRefresh, onClose });
+    const action = useCommitmentFundsTransaction({ action: 'withdraw', onConfirmed, onRefresh, onClose });
 
     await action.submit(() => errAsync(error), 10_000_000n, '$10.00');
 
@@ -77,7 +77,7 @@ describe('useJobFundsTransaction', () => {
   it('keeps deterministic failures retryable', async () => {
     const error = new TransactionError('withdraw', new Error('wallet rejected'));
     const onRefresh = vi.fn();
-    const action = useJobFundsTransaction({
+    const action = useCommitmentFundsTransaction({
       action: 'withdraw',
       onConfirmed: vi.fn(),
       onRefresh,

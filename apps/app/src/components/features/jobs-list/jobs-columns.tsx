@@ -159,9 +159,7 @@ export function getJobsColumns({
 
       return (
         <div className="flex min-w-0 flex-col">
-          <span className="truncate font-medium text-foreground">
-            {item.job.title ?? `Job #${item.job.jobId ?? ''}`}
-          </span>
+          <span className="truncate font-medium text-foreground">{item.job.title ?? 'Untitled role'}</span>
           {subtitle && <span className="truncate text-label-12 text-muted-foreground">{subtitle}</span>}
         </div>
       );

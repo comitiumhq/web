@@ -3,16 +3,16 @@ import { describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ readContract: vi.fn() }));
 
 vi.mock('@comitium/chain/instances', () => ({
-  jobFundsContract: { address: '0x0000000000000000000000000000000000000002', abi: [] },
+  commitmentFundsContract: { address: '0x0000000000000000000000000000000000000002', abi: [] },
   publicClient: { readContract: mocks.readContract },
 }));
 
 const { readOrgBalance } = await import('../core/balance');
 
-function mockOrgData(operationalBalance: bigint, lockedInJobs: bigint) {
+function mockOrgData(operationalBalance: bigint, lockedInCommitments: bigint) {
   mocks.readContract.mockResolvedValue({
-    available: operationalBalance - lockedInJobs,
-    stakedInJobs: lockedInJobs,
+    available: operationalBalance - lockedInCommitments,
+    lockedInCommitments: lockedInCommitments,
   });
 }
 
@@ -26,7 +26,7 @@ describe('orgs/balance', () => {
 
       if (result.isOk()) {
         expect(result.value.operationalBalance).toBe(1_000_000_000n);
-        expect(result.value.lockedInJobs).toBe(400_000_000n);
+        expect(result.value.lockedInCommitments).toBe(400_000_000n);
         expect(result.value.available).toBe(600_000_000n);
       }
     });
@@ -61,7 +61,7 @@ describe('orgs/balance', () => {
 
       if (result.isOk()) {
         expect(result.value.operationalBalance).toBe(700_000_000n);
-        expect(result.value.lockedInJobs).toBe(600_000_000n);
+        expect(result.value.lockedInCommitments).toBe(600_000_000n);
         expect(result.value.available).toBe(100_000_000n);
       }
     });

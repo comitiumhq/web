@@ -95,7 +95,7 @@ const JobMobileCard = memo(function JobMobileCard({
   }, [onClick, row]);
 
   const isDraft = row.kind === 'draft';
-  const title = isDraft ? row.draft.title || 'Untitled role' : (row.job.title ?? `Job #${row.job.jobId ?? ''}`);
+  const title = isDraft ? row.draft.title || 'Untitled role' : (row.job.title ?? 'Untitled role');
 
   return (
     <div className="relative">

@@ -10,7 +10,11 @@ const UPDATED_DESCRIPTION = {
 const mocks = vi.hoisted(() => ({
   job: {
     canonicalUrl: 'https://jobs.example.test/backend-engineer',
-    lifecycle: { commitmentFinalizationPending: false, activeApplications: 0, allowedActions: ['close_job'] },
+    lifecycle: {
+      commitmentFinalizationPending: false,
+      activeApplications: 0,
+      allowedActions: ['close_job', 'activate_commitment'],
+    },
     status: 'open' as 'open' | 'closed',
     title: 'Backend Engineer',
   },
@@ -25,7 +29,7 @@ const mocks = vi.hoisted(() => ({
     applicationCapacity: 25 as number | null,
     completedApplicationCount: 4,
     commitment: null as null | {
-      status: 'published' | 'unpublished' | 'closed' | 'expired';
+      status: 'active' | 'stopped' | 'settled';
       responseDeadlineDays: number;
       pendingApplicationResponses: number;
       canSettle: boolean;
@@ -97,7 +101,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.job = {
     canonicalUrl: 'https://jobs.example.test/backend-engineer',
-    lifecycle: { commitmentFinalizationPending: false, activeApplications: 0, allowedActions: ['close_job'] },
+    lifecycle: {
+      commitmentFinalizationPending: false,
+      activeApplications: 0,
+      allowedActions: ['close_job', 'activate_commitment'],
+    },
     status: 'open',
     title: 'Backend Engineer',
   };
@@ -193,11 +201,12 @@ describe('JobPostingPage', () => {
   });
 
   it('shows an active response commitment without another add action', async () => {
+    mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, allowedActions: [] } };
     mocks.posting = {
       ...mocks.posting,
       status: 'published',
       commitment: {
-        status: 'published',
+        status: 'active',
         responseDeadlineDays: 7,
         pendingApplicationResponses: 0,
         canSettle: false,
@@ -211,11 +220,12 @@ describe('JobPostingPage', () => {
   });
 
   it('allows a completed active response commitment to settle without unpublishing the Posting', async () => {
+    mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, allowedActions: ['settle_commitment'] } };
     mocks.posting = {
       ...mocks.posting,
       status: 'published',
       commitment: {
-        status: 'published',
+        status: 'active',
         responseDeadlineDays: 7,
         pendingApplicationResponses: 0,
         canSettle: true,
@@ -235,7 +245,7 @@ describe('JobPostingPage', () => {
       ...mocks.posting,
       status: 'published',
       commitment: {
-        status: 'closed',
+        status: 'settled',
         responseDeadlineDays: 7,
         pendingApplicationResponses: 0,
         canSettle: false,
@@ -248,12 +258,15 @@ describe('JobPostingPage', () => {
   });
 
   it('waits for Commitment finalization before allowing another one', async () => {
-    mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, commitmentFinalizationPending: true } };
+    mocks.job = {
+      ...mocks.job,
+      lifecycle: { ...mocks.job.lifecycle, commitmentFinalizationPending: true, allowedActions: [] },
+    };
     mocks.posting = {
       ...mocks.posting,
       status: 'published',
       commitment: {
-        status: 'closed',
+        status: 'settled',
         responseDeadlineDays: 7,
         pendingApplicationResponses: 0,
         canSettle: false,

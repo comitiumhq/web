@@ -6,32 +6,32 @@ const BASIS_POINTS = 10_000n;
 
 export type FeeTier = number;
 
-interface JobFeeTierConfig {
+interface CommitmentFeeTierConfig {
   index: number;
   baseFee: bigint;
   feeBps: bigint;
   deadlineDays: number;
 }
 
-export interface JobEconomicsConfig {
+export interface ResponseCommitmentEconomicsConfig {
   version: number;
   minStake: bigint;
   tierCount: number;
   maxBatchSize: number;
-  maxUnpublishedDuration: number;
-  maxPublishedDuration: number;
-  feeTiers: JobFeeTierConfig[];
+  maxStoppedDuration: number;
+  maxActiveDuration: number;
+  feeTiers: CommitmentFeeTierConfig[];
 }
 
 type IntegerLike = string | number | bigint;
 
-interface RawJobEconomicsConfig {
+interface RawResponseCommitmentEconomicsConfig {
   version: number;
   minStake: IntegerLike;
   tierCount: number;
   maxBatchSize: number;
-  maxUnpublishedDuration: number;
-  maxPublishedDuration: number;
+  maxStoppedDuration: number;
+  maxActiveDuration: number;
   feeTiers: {
     index: number;
     baseFee: IntegerLike;
@@ -50,14 +50,16 @@ function toBigInt(value: IntegerLike): bigint {
   return parsed;
 }
 
-export function normalizeJobEconomicsConfig(config: RawJobEconomicsConfig): JobEconomicsConfig {
+export function normalizeResponseCommitmentEconomicsConfig(
+  config: RawResponseCommitmentEconomicsConfig,
+): ResponseCommitmentEconomicsConfig {
   return {
     version: config.version,
     minStake: toBigInt(config.minStake),
     tierCount: config.tierCount,
     maxBatchSize: config.maxBatchSize,
-    maxUnpublishedDuration: config.maxUnpublishedDuration,
-    maxPublishedDuration: config.maxPublishedDuration,
+    maxStoppedDuration: config.maxStoppedDuration,
+    maxActiveDuration: config.maxActiveDuration,
     feeTiers: config.feeTiers.map((tier) => ({
       index: tier.index,
       baseFee: toBigInt(tier.baseFee),
@@ -67,7 +69,7 @@ export function normalizeJobEconomicsConfig(config: RawJobEconomicsConfig): JobE
   };
 }
 
-function getFeeTierConfig(config: JobEconomicsConfig, feeTier: FeeTier): JobFeeTierConfig {
+function getFeeTierConfig(config: ResponseCommitmentEconomicsConfig, feeTier: FeeTier): CommitmentFeeTierConfig {
   const tier = config.feeTiers.find((item) => item.index === feeTier);
 
   if (!tier) {
@@ -77,13 +79,17 @@ function getFeeTierConfig(config: JobEconomicsConfig, feeTier: FeeTier): JobFeeT
   return tier;
 }
 
-export function calculateFee(stake: bigint, feeTier: FeeTier, config: JobEconomicsConfig): bigint {
+export function calculateFee(stake: bigint, feeTier: FeeTier, config: ResponseCommitmentEconomicsConfig): bigint {
   const tier = getFeeTierConfig(config, feeTier);
 
   return tier.baseFee + (stake * tier.feeBps) / BASIS_POINTS;
 }
 
-export function calculateTotalRequired(stake: bigint, feeTier: FeeTier, config: JobEconomicsConfig): bigint {
+export function calculateTotalRequired(
+  stake: bigint,
+  feeTier: FeeTier,
+  config: ResponseCommitmentEconomicsConfig,
+): bigint {
   return stake + calculateFee(stake, feeTier, config);
 }
 

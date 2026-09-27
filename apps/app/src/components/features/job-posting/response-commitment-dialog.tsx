@@ -59,7 +59,7 @@ export function ResponseCommitmentDialog(props: ResponseCommitmentDialogProps) {
               {dialog.isBalanceError && (
                 <Alert>
                   <AlertDescription className="flex items-center justify-between gap-3">
-                    <span>Could not load available Job Funds.</span>
+                    <span>Could not load available Commitment Funds.</span>
                     <Button
                       type="button"
                       size="sm"

@@ -12,9 +12,9 @@ export type {
 } from '@/lib/schemas/org';
 
 export {
+  isCommitmentFunded,
+  isCommitmentSettled,
   isDepositOrWithdraw,
-  isJobFunded,
-  isJobSettled,
 } from '@/lib/schemas/org';
 
 const BALANCE_HISTORY_STALE_TIME = STALE_TIME_SHORT;

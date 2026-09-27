@@ -1,19 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { readCurrentJobConfig } from './job-config';
+import { readCurrentResponseCommitmentConfig } from './response-commitment-config';
 
 const mocks = vi.hoisted(() => ({ readContract: vi.fn() }));
 
 vi.mock('@comitium/chain/instances', () => ({
-  jobFundsContract: { name: 'job-funds' },
+  commitmentFundsContract: { name: 'commitment-funds' },
   publicClient: { readContract: mocks.readContract },
 }));
 
 vi.mock('@comitium/chain/deployment-catalog', () => ({
-  resolveJobCommitment: vi.fn(() => ({
+  resolveResponseCommitment: vi.fn(() => ({
     bindings: {
       readCurrentConfigVersion: () => mocks.readContract(),
-      readJobConfig: () => mocks.readContract(),
+      readCommitmentConfig: () => mocks.readContract(),
       readFeeTiers: () => mocks.readContract(),
     },
   })),
@@ -21,12 +21,12 @@ vi.mock('@comitium/chain/deployment-catalog', () => ({
 
 const mockReadContract = mocks.readContract;
 
-describe('readCurrentJobConfig', () => {
+describe('readCurrentResponseCommitmentConfig', () => {
   beforeEach(() => {
     mockReadContract.mockReset();
   });
 
-  it('reads the current job config from the current JobCommitment', async () => {
+  it('reads the current config from the current ResponseCommitment', async () => {
     mockReadContract
       .mockResolvedValueOnce('0x1111111111111111111111111111111111111111' as never)
       .mockResolvedValueOnce(2 as never)
@@ -34,8 +34,8 @@ describe('readCurrentJobConfig', () => {
         minStake: 100_000_000n,
         tierCount: 2,
         maxBatchSize: 100,
-        maxUnpublishedDuration: 7_776_000,
-        maxPublishedDuration: 31_536_000,
+        maxStoppedDuration: 7_776_000,
+        maxActiveDuration: 31_536_000,
       } as never)
       .mockResolvedValueOnce([
         { baseFee: 25_000_000n, feeBps: 150n, deadlineDays: 3 },
@@ -43,7 +43,7 @@ describe('readCurrentJobConfig', () => {
         { baseFee: 99_000_000n, feeBps: 999n, deadlineDays: 99 },
       ] as never);
 
-    const config = await readCurrentJobConfig();
+    const config = await readCurrentResponseCommitmentConfig();
 
     expect(config.isOk()).toBe(true);
 
@@ -56,8 +56,8 @@ describe('readCurrentJobConfig', () => {
       minStake: 100_000_000n,
       tierCount: 2,
       maxBatchSize: 100,
-      maxUnpublishedDuration: 7_776_000,
-      maxPublishedDuration: 31_536_000,
+      maxStoppedDuration: 7_776_000,
+      maxActiveDuration: 31_536_000,
       feeTiers: [
         { index: 0, baseFee: 25_000_000n, feeBps: 150n, deadlineDays: 3 },
         { index: 1, baseFee: 35_000_000n, feeBps: 250n, deadlineDays: 7 },
@@ -72,7 +72,7 @@ describe('readCurrentJobConfig', () => {
       .mockResolvedValueOnce([100_000_000n, 1, 100, 7_776_000, 31_536_000] as never)
       .mockResolvedValueOnce([[25_000_000n, 150n, 3]] as never);
 
-    const config = await readCurrentJobConfig();
+    const config = await readCurrentResponseCommitmentConfig();
 
     expect(config.isOk()).toBe(true);
 
@@ -96,18 +96,18 @@ describe('readCurrentJobConfig', () => {
         minStake: 100_000_000n,
         tierCount: 2,
         maxBatchSize: 100,
-        maxUnpublishedDuration: 7_776_000,
-        maxPublishedDuration: 31_536_000,
+        maxStoppedDuration: 7_776_000,
+        maxActiveDuration: 31_536_000,
       } as never)
       .mockResolvedValueOnce({ not: 'an array' } as never);
 
-    const config = await readCurrentJobConfig();
+    const config = await readCurrentResponseCommitmentConfig();
 
     expect(config.isErr()).toBe(true);
 
     if (config.isErr()) {
       expect(config.error._tag).toBe('ContractError');
-      expect(config.error.operation).toBe('read_job_config');
+      expect(config.error.operation).toBe('read_response_commitment_config');
     }
   });
 
@@ -118,13 +118,13 @@ describe('readCurrentJobConfig', () => {
       .mockResolvedValueOnce([100_000_000n, 2, 100, 7_776_000, 31_536_000] as never)
       .mockResolvedValueOnce([[25_000_000n, 150n, 3]] as never);
 
-    const config = await readCurrentJobConfig();
+    const config = await readCurrentResponseCommitmentConfig();
 
     expect(config.isErr()).toBe(true);
 
     if (config.isErr()) {
       expect(config.error._tag).toBe('ContractError');
-      expect(config.error.operation).toBe('read_job_config');
+      expect(config.error.operation).toBe('read_response_commitment_config');
     }
   });
 
@@ -138,7 +138,7 @@ describe('readCurrentJobConfig', () => {
       .mockResolvedValueOnce(invalidConfig as never)
       .mockResolvedValueOnce([[25_000_000n, 150n, 3]] as never);
 
-    const config = await readCurrentJobConfig();
+    const config = await readCurrentResponseCommitmentConfig();
 
     expect(config.isErr()).toBe(true);
   });

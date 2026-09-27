@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import rawDeploymentCatalog from '../deployment-catalog.json';
 import { activeChain } from './chains';
-import { jobCommitmentBindings } from './job-commitment/bindings';
+import { responseCommitmentBindings } from './response-commitment/bindings';
 
 const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 const BYTES32_HEX_REGEX = /^0x[a-fA-F0-9]{64}$/;
@@ -31,8 +31,8 @@ const deploymentSchema = z
     contracts: z.object({
       forwarder: addressSchema,
       orgRegistry: z.object({ address: addressSchema }),
-      jobFunds: z.object({ address: addressSchema }),
-      jobCommitments: z
+      commitmentFunds: z.object({ address: addressSchema }),
+      responseCommitments: z
         .array(
           z.object({
             commitmentVersion: positiveIntegerSchema,
@@ -48,14 +48,14 @@ const deploymentSchema = z
   .superRefine((deployment, context) => {
     const seen = new Set<string>();
 
-    for (const commitment of deployment.contracts.jobCommitments) {
+    for (const commitment of deployment.contracts.responseCommitments) {
       const address = commitment.address.toLowerCase();
 
       if (seen.has(address)) {
         context.addIssue({
           code: 'custom',
-          message: `Duplicate JobCommitment address: ${commitment.address}`,
-          path: ['contracts', 'jobCommitments'],
+          message: `Duplicate ResponseCommitment address: ${commitment.address}`,
+          path: ['contracts', 'responseCommitments'],
         });
       }
 
@@ -81,23 +81,20 @@ export function deploymentForChain(chainId: number | string) {
   return deployment;
 }
 
-export const activeDeployment = deploymentForChain(activeChain.id);
-
-const commitmentsByAddress = new Map(
-  activeDeployment.contracts.jobCommitments.map((entry) => [entry.address.toLowerCase(), entry] as const),
-);
-
-export function resolveJobCommitment(address: Address | string) {
+export function resolveResponseCommitment(address: Address | string) {
+  const deployment = deploymentForChain(activeChain.id);
   const normalizedAddress = getAddress(address);
-  const entry = commitmentsByAddress.get(normalizedAddress.toLowerCase());
+  const entry = deployment.contracts.responseCommitments.find(
+    (commitment) => commitment.address.toLowerCase() === normalizedAddress.toLowerCase(),
+  );
 
   if (!entry) {
-    throw new Error(`Unknown JobCommitment address on chain ${activeChain.id}: ${normalizedAddress}`);
+    throw new Error(`Unknown ResponseCommitment address on chain ${activeChain.id}: ${normalizedAddress}`);
   }
 
-  if (entry.commitmentVersion !== jobCommitmentBindings.commitmentVersion) {
-    throw new Error(`Unsupported JobCommitment version: ${entry.commitmentVersion}`);
+  if (entry.commitmentVersion !== responseCommitmentBindings.commitmentVersion) {
+    throw new Error(`Unsupported ResponseCommitment version: ${entry.commitmentVersion}`);
   }
 
-  return { ...entry, bindings: jobCommitmentBindings };
+  return { ...entry, bindings: responseCommitmentBindings };
 }

@@ -124,8 +124,8 @@ export const qk = {
     job: (jobId: string) => ['application-form-options', 'job', jobId] as const,
     jobTemplate: (orgId: string) => ['application-form-options', 'job-template', orgId] as const,
   },
-  jobConfig: {
-    current: () => ['job-config'] as const,
+  responseCommitmentConfig: {
+    current: () => ['response-commitment-config'] as const,
     stakeToken: () => ['stake-token'] as const,
   },
   templates: {

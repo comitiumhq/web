@@ -161,7 +161,7 @@ const cursorPaginationSchema = z.object({
 
 const pipelineJobSchema = z.object({
   id: z.string(),
-  jobId: z.number().nullable(),
+  onchainCommitmentId: z.number().nullable(),
   status: jobStatusSchema,
   lifecycle: jobLifecycleSchema,
   title: z.string().nullable(),
@@ -186,7 +186,7 @@ const pipelineCandidateSchema = z.object({
   candidateId: z.string().nullable(),
   candidateProfile: encryptedEnvelopeSchema.nullable(),
   jobId: z.string(),
-  jobOnChainId: z.number().nullable(),
+  onchainCommitmentId: z.number().nullable(),
   jobTitle: z.string().nullable(),
   appliedAt: z.string(),
   responseDeadline: z.string().nullable(),

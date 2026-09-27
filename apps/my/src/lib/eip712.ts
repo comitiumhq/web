@@ -14,13 +14,13 @@ import {
 const COMMITMENT_SALT_SIZE_BYTES = 32;
 
 const APPLICATION_ID_TYPE =
-  'ApplicationId(uint256 chainId,address commitmentContract,uint256 jobId,bytes16 jobUuid,bytes16 applicationUuid,bytes32 salt)' as const;
+  'ApplicationId(uint256 chainId,address responseCommitmentContract,uint256 commitmentId,bytes16 jobUuid,bytes16 applicationUuid,bytes32 salt)' as const;
 const APPLICATION_ID_TYPEHASH = keccak256(stringToHex(APPLICATION_ID_TYPE));
 
 export type ApplicationIdOpening = {
   chainId: bigint | number;
-  commitmentContract: Address | string;
-  jobId: bigint | number;
+  responseCommitmentContract: Address | string;
+  commitmentId: bigint | number;
   jobUuid: string;
   applicationUuid: string;
   salt: Hex;
@@ -45,8 +45,8 @@ export function deriveApplicationId(opening: ApplicationIdOpening): Hex {
       [
         APPLICATION_ID_TYPEHASH,
         BigInt(opening.chainId),
-        getAddress(opening.commitmentContract as Address),
-        BigInt(opening.jobId),
+        getAddress(opening.responseCommitmentContract as Address),
+        BigInt(opening.commitmentId),
         uuidToBytes16(opening.jobUuid),
         uuidToBytes16(opening.applicationUuid),
         opening.salt,

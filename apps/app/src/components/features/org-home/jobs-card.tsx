@@ -64,7 +64,7 @@ export function JobsCard({ className, isLoading, jobs, orgId, totalCount }: Jobs
 }
 
 const JobRow = memo(function JobRow({ job, orgId }: JobRowProps) {
-  const title = job.title ?? `Job #${job.jobId}`;
+  const title = job.title ?? 'Untitled role';
   const location = formatLocation(job.location);
 
   return (

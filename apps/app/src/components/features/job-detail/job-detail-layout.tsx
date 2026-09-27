@@ -266,7 +266,7 @@ function jobNavLinkClass(active: boolean): string {
 }
 
 function getJobTitle(job: JobSummary): string {
-  return job.title ?? `Job #${job.jobId}`;
+  return job.title ?? 'Untitled role';
 }
 
 function HeaderTitleSkeleton() {

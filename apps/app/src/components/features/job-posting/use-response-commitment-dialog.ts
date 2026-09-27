@@ -1,12 +1,12 @@
-import type { JobEconomicsConfig } from '@comitium/chain/job-economics';
+import type { ResponseCommitmentEconomicsConfig } from '@comitium/chain/response-commitment-economics';
 import { wholeUsdToUsdcUnits } from '@comitium/chain/usdc';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo } from 'react';
 import { type DefaultValues, type UseFormReturn, useForm, useWatch } from 'react-hook-form';
 import { useAddResponseCommitment } from '@/hooks/mutations/use-job-posting-mutations';
 import { useOrgBalance } from '@/hooks/queries/use-org-balance';
-import { useQueryJobConfig } from '@/hooks/queries/use-query-job-config';
 import { useQueryOrg } from '@/hooks/queries/use-query-org';
+import { useQueryResponseCommitmentConfig } from '@/hooks/queries/use-query-response-commitment-config';
 import {
   buildFeeTierOptions,
   calculatePlatformFee,
@@ -41,7 +41,7 @@ export function useResponseCommitmentDialog({
   });
   const orgQuery = useQueryOrg(orgId);
   const balance = useOrgBalance(orgQuery.data?.orgId);
-  const configQuery = useQueryJobConfig();
+  const configQuery = useQueryResponseCommitmentConfig();
   const addCommitment = useAddResponseCommitment({ orgId, jobId });
   const employerStake = useWatch({ control: form.control, name: 'employerStake' }) ?? 0;
   const feeTier = useWatch({ control: form.control, name: 'feeTier' });
@@ -123,7 +123,7 @@ export function useResponseCommitmentDialog({
 }
 
 function buildCommitmentEconomics(
-  config: JobEconomicsConfig | undefined,
+  config: ResponseCommitmentEconomicsConfig | undefined,
   feeTier: number | undefined,
   employerStake: number,
 ) {

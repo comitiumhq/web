@@ -1,4 +1,4 @@
-import { usdcToUsd } from '@comitium/chain/job-economics';
+import { usdcToUsd } from '@comitium/chain/response-commitment-economics';
 import { Badge } from '@comitium/ui/badge';
 import { Card, CardContent } from '@comitium/ui/card';
 import {
@@ -14,9 +14,9 @@ import { ClockCounterClockwiseIcon, WarningCircleIcon } from '@phosphor-icons/re
 import {
   type BalanceEventDetails,
   type BalanceEventType,
+  isCommitmentFunded,
+  isCommitmentSettled,
   isDepositOrWithdraw,
-  isJobFunded,
-  isJobSettled,
   useOrgBalanceHistory,
 } from '@/hooks/queries/use-org-balance-history';
 import { cn, formatUsdRaw } from '@/lib/utils';
@@ -50,13 +50,13 @@ const EVENT_CONFIG: Record<
     sign: '-',
     amountClass: 'text-muted-foreground',
   },
-  job_funded: {
+  commitment_funded: {
     label: 'Committed',
     badge: 'secondary',
     sign: '-',
     amountClass: 'text-muted-foreground',
   },
-  job_settled: {
+  commitment_settled: {
     label: 'Settled',
     badge: 'success',
     sign: '+',
@@ -69,11 +69,11 @@ function parseEventAmount(details: BalanceEventDetails): bigint {
     return BigInt(details.amount);
   }
 
-  if (isJobFunded(details)) {
+  if (isCommitmentFunded(details)) {
     return BigInt(details.stakeAmount) + BigInt(details.feeAmount);
   }
 
-  if (isJobSettled(details)) {
+  if (isCommitmentSettled(details)) {
     return BigInt(details.returnAmount);
   }
 

@@ -16,7 +16,7 @@ export function ResponseCommitmentStatus({
   isReleasing,
   onRelease,
 }: ResponseCommitmentStatusProps) {
-  if (!commitment || commitment.status === 'closed') {
+  if (!commitment || commitment.status === 'settled') {
     return null;
   }
 

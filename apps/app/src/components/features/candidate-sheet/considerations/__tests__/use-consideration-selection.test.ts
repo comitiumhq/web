@@ -95,7 +95,7 @@ const otherApplications = [
   {
     id: 'app-old',
     jobId: 'job-old',
-    jobOnChainId: 10,
+    onchainCommitmentId: 10,
     jobTitle: 'Old role',
     appliedAt: '2026-01-01T00:00:00.000Z',
     currentStageId: 'stage-old',
@@ -109,7 +109,7 @@ const otherApplications = [
   {
     id: 'app-new',
     jobId: 'job-new',
-    jobOnChainId: 11,
+    onchainCommitmentId: 11,
     jobTitle: 'New role',
     appliedAt: '2026-01-03T00:00:00.000Z',
     currentStageId: 'stage-new',
@@ -128,7 +128,7 @@ describe('buildConsiderations', () => {
       application: makeApplication(),
       otherApplications,
       jobId: 'job-current',
-      jobOnChainId: 12,
+      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       currentStageName: 'Interview',
     });
@@ -138,7 +138,7 @@ describe('buildConsiderations', () => {
     expect(applications[1]).toMatchObject({
       id: 'app-current',
       jobId: 'job-current',
-      jobOnChainId: 12,
+      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       currentStageName: 'Interview',
     });
@@ -152,7 +152,7 @@ describe('buildConsiderations', () => {
         {
           id: 'app-current',
           jobId: 'job-stale',
-          jobOnChainId: 99,
+          onchainCommitmentId: 99,
           jobTitle: 'Stale cached role',
           appliedAt: '2025-12-31T00:00:00.000Z',
           currentStageId: 'stage-stale',
@@ -165,7 +165,7 @@ describe('buildConsiderations', () => {
         },
       ],
       jobId: 'job-current',
-      jobOnChainId: 12,
+      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       currentStageName: 'Interview',
     });
@@ -174,7 +174,7 @@ describe('buildConsiderations', () => {
     expect(applications.filter((app) => app.id === 'app-current')).toHaveLength(1);
     expect(applications[1]).toMatchObject({
       jobId: 'job-current',
-      jobOnChainId: 12,
+      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       appliedAt: '2026-01-02T00:00:00.000Z',
       currentStageId: 'stage-current',
@@ -188,7 +188,7 @@ describe('buildConsiderations', () => {
       application: makeApplication({ appliedAt: '2026-01-03T00:00:00.000Z' }),
       otherApplications,
       jobId: 'job-current',
-      jobOnChainId: 12,
+      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       currentStageName: 'Interview',
     });
@@ -202,7 +202,7 @@ describe('buildConsiderations', () => {
         application: null,
         otherApplications: [],
         jobId: 'job-current',
-        jobOnChainId: null,
+        onchainCommitmentId: null,
         jobTitle: null,
         currentStageName: null,
       }),

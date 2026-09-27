@@ -294,13 +294,13 @@ export const acceptInviteSchema = z.object({
 
 // --- Funds ---
 
-const balanceEventTypeSchema = z.enum(['deposit', 'withdraw', 'job_funded', 'job_settled']);
+const balanceEventTypeSchema = z.enum(['deposit', 'withdraw', 'commitment_funded', 'commitment_settled']);
 export type BalanceEventType = z.infer<typeof balanceEventTypeSchema>;
 
 const balanceEventDetailsSchema = z.union([
   z.object({ amount: z.string() }),
-  z.object({ jobId: z.number(), stakeAmount: z.string(), feeAmount: z.string() }),
-  z.object({ jobId: z.number(), returnAmount: z.string(), slashedAmount: z.string() }),
+  z.object({ commitmentId: z.number(), stakeAmount: z.string(), feeAmount: z.string() }),
+  z.object({ commitmentId: z.number(), returnAmount: z.string(), slashedAmount: z.string() }),
 ]);
 
 export type BalanceEventDetails = z.infer<typeof balanceEventDetailsSchema>;
@@ -403,14 +403,14 @@ export function isDepositOrWithdraw(details: BalanceEventDetails): details is { 
   return 'amount' in details;
 }
 
-export function isJobFunded(
+export function isCommitmentFunded(
   details: BalanceEventDetails,
-): details is { jobId: number; stakeAmount: string; feeAmount: string } {
+): details is { commitmentId: number; stakeAmount: string; feeAmount: string } {
   return 'stakeAmount' in details;
 }
 
-export function isJobSettled(
+export function isCommitmentSettled(
   details: BalanceEventDetails,
-): details is { jobId: number; returnAmount: string; slashedAmount: string } {
+): details is { commitmentId: number; returnAmount: string; slashedAmount: string } {
   return 'returnAmount' in details;
 }

@@ -6,7 +6,7 @@ function lifecycle(overrides: Partial<JobLifecycle> = {}): JobLifecycle {
   return {
     commitmentFinalizationPending: false,
     activeApplications: 0,
-    allowedActions: ['close_job'],
+    allowedActions: ['close_job', 'activate_commitment'],
     ...overrides,
   };
 }
@@ -16,6 +16,7 @@ describe('job lifecycle status', () => {
     const state = lifecycle();
 
     expect(canRunJobLifecycleAction(state, 'close_job')).toBe(true);
+    expect(canRunJobLifecycleAction(state, 'activate_commitment')).toBe(true);
 
     expect(canRunJobLifecycleAction(state, 'settle_commitment')).toBe(false);
   });

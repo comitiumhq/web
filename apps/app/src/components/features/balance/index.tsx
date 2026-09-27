@@ -23,7 +23,7 @@ interface OrgBalanceProps {
   org: MyOrg;
 }
 
-type JobFundsBalanceAction = 'deposit' | 'withdraw';
+type CommitmentFundsBalanceAction = 'deposit' | 'withdraw';
 
 interface TreasuryActionsProps {
   isLoading: boolean;
@@ -43,15 +43,15 @@ interface BalanceMetricProps {
 
 function applyConfirmedBalanceChange(
   balance: OrgBalanceValue,
-  action: JobFundsBalanceAction,
+  action: CommitmentFundsBalanceAction,
   amount: bigint,
 ): OrgBalanceValue {
   const available = action === 'deposit' ? balance.available + amount : balance.available - amount;
   const confirmedAvailable = available < 0n ? 0n : available;
 
   return {
-    operationalBalance: confirmedAvailable + balance.lockedInJobs,
-    lockedInJobs: balance.lockedInJobs,
+    operationalBalance: confirmedAvailable + balance.lockedInCommitments,
+    lockedInCommitments: balance.lockedInCommitments,
     available: confirmedAvailable,
   };
 }
@@ -141,7 +141,7 @@ export function OrgBalance({ org }: OrgBalanceProps) {
   }, [queryClient, org.id, org.orgId]);
 
   const applyConfirmedFundsChange = useCallback(
-    (action: JobFundsBalanceAction, amount: bigint) => {
+    (action: CommitmentFundsBalanceAction, amount: bigint) => {
       queryClient.setQueryData<OrgBalanceValue>(qk.balance.org(org.orgId), (currentBalance) => {
         if (!currentBalance) {
           return currentBalance;
@@ -183,7 +183,7 @@ export function OrgBalance({ org }: OrgBalanceProps) {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-8">
-      <PageHeader title="Job Funds" />
+      <PageHeader title="Commitment Funds" />
 
       <div className="flex min-h-0 flex-1 flex-col gap-4">
         <div>

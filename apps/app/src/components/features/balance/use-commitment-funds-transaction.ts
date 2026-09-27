@@ -5,38 +5,43 @@ import type { ResultAsync } from 'neverthrow';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
-type JobFundsOperation = () => ResultAsync<unknown, TransactionError>;
+type CommitmentFundsOperation = () => ResultAsync<unknown, TransactionError>;
 
 const UNCERTAIN_SUBMISSION_REFRESH_DELAY_MS = 5_000;
 const TRANSACTION_COPY = {
   deposit: {
-    pending: 'Depositing job funds...',
+    pending: 'Depositing commitment funds...',
     delayed: 'Deposit is taking longer than expected. Check your balance in a moment.',
     fallbackError: 'Deposit could not be confirmed. Please try again.',
     success: (displayAmount: string) => `Deposit of ${displayAmount} confirmed`,
   },
   withdraw: {
-    pending: 'Withdrawing job funds...',
+    pending: 'Withdrawing commitment funds...',
     delayed: 'Withdrawal is taking longer than expected. Check your balance in a moment.',
     fallbackError: 'Withdrawal could not be confirmed. Please try again.',
     success: (displayAmount: string) => `Withdrawal of ${displayAmount} confirmed`,
   },
 } as const;
 
-type JobFundsAction = keyof typeof TRANSACTION_COPY;
+type CommitmentFundsAction = keyof typeof TRANSACTION_COPY;
 
-interface UseJobFundsTransactionParams {
-  action: JobFundsAction;
+interface UseCommitmentFundsTransactionParams {
+  action: CommitmentFundsAction;
   onConfirmed: (amount: bigint) => void;
   onRefresh: () => void;
   onClose: () => void;
 }
 
-export function useJobFundsTransaction({ action, onConfirmed, onRefresh, onClose }: UseJobFundsTransactionParams) {
+export function useCommitmentFundsTransaction({
+  action,
+  onConfirmed,
+  onRefresh,
+  onClose,
+}: UseCommitmentFundsTransactionParams) {
   const [isPending, setIsPending] = useState(false);
 
   const submit = useCallback(
-    async (operation: JobFundsOperation, amount: bigint, displayAmount: string) => {
+    async (operation: CommitmentFundsOperation, amount: bigint, displayAmount: string) => {
       const copy = TRANSACTION_COPY[action];
       const toastId = toast.loading(copy.pending);
       setIsPending(true);

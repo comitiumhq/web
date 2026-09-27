@@ -132,8 +132,8 @@ function responseCommitmentFinalizationInput(
     ...applicationData,
     applicationId: deriveApplicationId({
       chainId: commitment.chainId,
-      commitmentContract: commitment.contract,
-      jobId: commitment.jobId,
+      responseCommitmentContract: commitment.contract,
+      commitmentId: commitment.commitmentId,
       jobUuid: commitment.jobUuid,
       applicationUuid: prepared.applicationId,
       salt: applicationSalt,

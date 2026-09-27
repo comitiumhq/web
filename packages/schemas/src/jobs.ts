@@ -5,11 +5,11 @@ import { addressSchema, paginatedSchema, uuidSchema, walletAddressSchema } from 
 import {
   type CompensationConfig,
   compensationConfigSchema,
-  jobCommitmentStatusSchema,
   jobLifecycleSchema,
   jobStatusSchema,
   type LocationEntry,
   locationEntrySchema,
+  responseCommitmentStatusSchema,
 } from './public-jobs';
 
 // --- Evaluation criteria ---
@@ -31,13 +31,13 @@ const jobPostingStatusSchema = z.enum(['published', 'unpublished']);
 
 export const jobSummarySchema = z.object({
   id: z.string(),
-  jobCommitmentId: uuidSchema.nullable(),
-  commitmentStatus: jobCommitmentStatusSchema.nullable(),
+  responseCommitmentId: uuidSchema.nullable(),
+  commitmentStatus: responseCommitmentStatusSchema.nullable(),
   postingStatus: jobPostingStatusSchema.nullable(),
   lifecycle: jobLifecycleSchema,
   chainId: z.number().nullable(),
-  commitmentContract: addressSchema.nullable(),
-  jobId: z.number().nullable(),
+  responseCommitmentContract: addressSchema.nullable(),
+  onchainCommitmentId: z.number().nullable(),
   orgId: z.string(),
   orgOnChainId: z.number().nullable(),
   creatorAddress: walletAddressSchema.nullable(),
@@ -137,13 +137,13 @@ const hiringTeamSummarySchema = z.object({
 
 const orgJobListItemSchema = z.object({
   id: z.string(),
-  jobCommitmentId: uuidSchema.nullable(),
-  commitmentStatus: jobCommitmentStatusSchema.nullable(),
+  responseCommitmentId: uuidSchema.nullable(),
+  commitmentStatus: responseCommitmentStatusSchema.nullable(),
   postingStatus: jobPostingStatusSchema.nullable(),
   lifecycle: jobLifecycleSchema,
   chainId: z.number().nullable(),
-  commitmentContract: addressSchema.nullable(),
-  jobId: z.number().nullable(),
+  responseCommitmentContract: addressSchema.nullable(),
+  onchainCommitmentId: z.number().nullable(),
   title: z.string().nullable(),
   departmentId: uuidSchema.nullable(),
   departmentName: z.string().nullable(),
@@ -251,7 +251,7 @@ export const jobPostingSchema = z.object({
   availability: z.enum(['accepting', 'capacity-reached', 'unavailable']),
   commitment: z
     .object({
-      status: jobCommitmentStatusSchema,
+      status: responseCommitmentStatusSchema,
       responseDeadlineDays: z.number().int().positive(),
       stake: z.string(),
       feeAmount: z.string(),

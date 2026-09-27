@@ -1,4 +1,4 @@
-import { usdcToUsd } from '@comitium/chain/job-economics';
+import { usdcToUsd } from '@comitium/chain/response-commitment-economics';
 
 import { STALE_TIME_SHORT } from '@comitium/schemas/api-query-policy';
 import { skipToken, useQuery } from '@tanstack/react-query';
@@ -28,7 +28,7 @@ export function useOrgBalance(onChainOrgId?: number) {
   return {
     balance,
     availableUsd: balance ? usdcToUsd(balance.available) : 0,
-    lockedUsd: balance ? usdcToUsd(balance.lockedInJobs) : 0,
+    lockedUsd: balance ? usdcToUsd(balance.lockedInCommitments) : 0,
     totalUsd: balance ? usdcToUsd(balance.operationalBalance) : 0,
     isLoading: query.isLoading,
     isFetching: query.isFetching,

@@ -1,4 +1,4 @@
-import { jobFundsContract, publicClient } from '@comitium/chain/instances';
+import { commitmentFundsContract, publicClient } from '@comitium/chain/instances';
 import { parseOnchainAddress, parseOnchainUint, tupleField } from '@comitium/schemas/onchain';
 import { ContractError } from '@comitium/schemas/product-errors';
 import { ResultAsync } from 'neverthrow';
@@ -6,7 +6,7 @@ import type { Address } from 'viem';
 
 export interface OrgBalance {
   operationalBalance: bigint;
-  lockedInJobs: bigint;
+  lockedInCommitments: bigint;
   available: bigint;
 }
 
@@ -14,16 +14,19 @@ export function readOrgBalance(orgId: number): ResultAsync<OrgBalance, ContractE
   return ResultAsync.fromPromise(
     (async () => {
       const balance = await publicClient.readContract({
-        ...jobFundsContract,
-        functionName: 'jobBalance',
+        ...commitmentFundsContract,
+        functionName: 'commitmentBalance',
         args: [BigInt(orgId)],
       });
-      const available = parseOnchainUint(tupleField(balance, 0, 'available'), 'jobBalance.available');
-      const lockedInJobs = parseOnchainUint(tupleField(balance, 1, 'stakedInJobs'), 'jobBalance.stakedInJobs');
+      const available = parseOnchainUint(tupleField(balance, 0, 'available'), 'commitmentBalance.available');
+      const lockedInCommitments = parseOnchainUint(
+        tupleField(balance, 1, 'lockedInCommitments'),
+        'commitmentBalance.lockedInCommitments',
+      );
 
       return {
-        operationalBalance: available + lockedInJobs,
-        lockedInJobs,
+        operationalBalance: available + lockedInCommitments,
+        lockedInCommitments,
         available,
       };
     })(),
@@ -36,7 +39,7 @@ export function readStakeToken(): ResultAsync<Address, ContractError> {
     (async () => {
       return parseOnchainAddress(
         await publicClient.readContract({
-          ...jobFundsContract,
+          ...commitmentFundsContract,
           functionName: 'stakeToken',
         }),
         'stakeToken',
