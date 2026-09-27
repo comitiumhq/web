@@ -40,7 +40,7 @@ export function useResponseCommitmentDialog({
     defaultValues: DEFAULT_VALUES,
   });
   const orgQuery = useQueryOrg(orgId);
-  const balance = useOrgBalance(orgQuery.data?.orgId);
+  const balance = useOrgBalance(orgQuery.data?.orgId ?? null);
   const configQuery = useQueryResponseCommitmentConfig();
   const addCommitment = useAddResponseCommitment({ orgId, jobId });
   const employerStake = useWatch({ control: form.control, name: 'employerStake' }) ?? 0;
@@ -62,7 +62,7 @@ export function useResponseCommitmentDialog({
   const isBalanceError = orgQuery.isError || balance.error !== null;
   const isInsufficient = !isBalanceLoading && !isBalanceError && balance.availableUsd < economics.totalCost;
   const hasValidFeeTier = economics.feeTierOptions.some((option) => option.tier === feeTier);
-  const hasRequiredData = Boolean(configQuery.data && orgQuery.data);
+  const hasRequiredData = Boolean(configQuery.data && orgQuery.data?.orgId != null);
   const isPending = addCommitment.isPending || addCommitment.isConfirming;
   const canSubmit =
     hasRequiredData && hasValidFeeTier && !isBalanceLoading && !isBalanceError && !isInsufficient && !isPending;

@@ -1,29 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../client';
-import { deleteMemberAvatar, prepareOrgContentUriUpdate, uploadMemberAvatar } from '../orgs';
+import { deleteMemberAvatar, updateOrgProfile, uploadMemberAvatar } from '../orgs';
 
 vi.mock('../client', () => ({
   api: {
     delete: vi.fn(),
+    patch: vi.fn(),
     post: vi.fn(),
     upload: vi.fn(),
   },
 }));
 
 const mockDelete = vi.mocked(api.delete);
-const mockPost = vi.mocked(api.post);
+const mockPatch = vi.mocked(api.patch);
 const mockUpload = vi.mocked(api.upload);
 
-describe('prepareOrgContentUriUpdate', () => {
+describe('updateOrgProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('stages the careers slug in the durable on-chain prepare request', async () => {
-    mockPost.mockResolvedValue({
-      operationId: '00000000-0000-0000-0000-000000000001',
-      state: 'wallet_confirmation',
-      signatureRequest: null,
+  it('updates the product profile without exposing the registry operation', async () => {
+    mockPatch.mockResolvedValue({
+      state: 'completed',
+      organizationId: '00000000-0000-0000-0000-000000000001',
     });
     const payload = {
       name: 'Example Company',
@@ -33,9 +33,9 @@ describe('prepareOrgContentUriUpdate', () => {
       website: 'https://example.com',
     };
 
-    await prepareOrgContentUriUpdate('org-id', payload);
+    await updateOrgProfile('org-id', payload);
 
-    expect(mockPost).toHaveBeenCalledExactlyOnceWith('/orgs/org-id/profile/prepare', payload, expect.anything());
+    expect(mockPatch).toHaveBeenCalledExactlyOnceWith('/orgs/org-id/profile', payload, expect.anything());
   });
 });
 

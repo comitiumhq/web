@@ -6,7 +6,7 @@ import { qk } from '@/hooks/query-keys';
 import { type OrgBalance, readOrgBalance } from '@/lib/orgs/core/balance';
 import { isDefined } from '@/lib/utils';
 
-export function useOrgBalance(onChainOrgId?: number) {
+export function useOrgBalance(onChainOrgId: number | null) {
   const query = useQuery<OrgBalance>({
     queryKey: qk.balance.org(onChainOrgId),
     queryFn: isDefined(onChainOrgId)

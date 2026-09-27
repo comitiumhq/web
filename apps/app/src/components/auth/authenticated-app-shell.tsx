@@ -5,8 +5,7 @@ import { useEnsureCreatedOrgEncryption } from '@/hooks/queries/use-ensure-create
 import { useQueryMyOrgs } from '@/hooks/queries/use-query-my-orgs';
 import { useQueryOrgCreation } from '@/hooks/queries/use-query-org-creation';
 import { PendingVaultBootstrapProvider } from '@/hooks/use-vault-bootstrap';
-
-import { getMaterializedCreatedOrganizationId } from './org-materialization';
+import { getAccessibleCreatedOrganizationId } from '@/lib/schemas/org';
 
 interface AuthenticatedAppShellProps {
   children: ReactNode;
@@ -24,7 +23,8 @@ export function AuthenticatedAppShell({ children }: AuthenticatedAppShellProps) 
 function CreatedOrgEncryptionBootstrap({ children }: { children: ReactNode }) {
   const { data: creation } = useQueryOrgCreation();
   const { data: organizations } = useQueryMyOrgs();
-  const organizationId = getMaterializedCreatedOrganizationId(creation, organizations ?? []);
+  const createdOrganizationId = getAccessibleCreatedOrganizationId(creation);
+  const organizationId = organizations?.some(({ id }) => id === createdOrganizationId) ? createdOrganizationId : null;
   const bootstrap = useEnsureCreatedOrgEncryption(organizationId);
 
   return (

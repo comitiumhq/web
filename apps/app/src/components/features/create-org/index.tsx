@@ -12,12 +12,7 @@ import { CreateOrgStep } from './create-org-step';
 import { EmailVerificationStep } from './email-verification-step';
 
 export function CreateOrg() {
-  const {
-    data: creation,
-    error: creationError,
-    isFetching: isCreationFetching,
-    refetch,
-  } = useQueryOrgCreation({ pollWhileCreating: true });
+  const { data: creation, error: creationError, isFetching: isCreationFetching, refetch } = useQueryOrgCreation();
 
   const handleCreationRetry = useCallback(() => {
     refetch();
@@ -39,14 +34,6 @@ export function CreateOrg() {
     );
   }
 
-  if (creation.status === 'creating') {
-    return (
-      <CreateOrgLayout>
-        <CreateOrgStep domain={creation.domain} email={creation.email} isCreating />
-      </CreateOrgLayout>
-    );
-  }
-
   if (creation.status === 'created') {
     if (!creation.hasActiveMembership) {
       return <RouteNotFound />;
@@ -55,15 +42,10 @@ export function CreateOrg() {
     return <PageLoader />;
   }
 
-  if (creation.status === 'ready' || creation.status === 'failed') {
+  if (creation.status === 'ready') {
     return (
       <CreateOrgLayout>
-        <CreateOrgStep
-          domain={creation.domain}
-          email={creation.email}
-          isCreating={false}
-          creationFailed={creation.status === 'failed'}
-        />
+        <CreateOrgStep domain={creation.domain} email={creation.email} />
       </CreateOrgLayout>
     );
   }

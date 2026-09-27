@@ -56,7 +56,11 @@ function applyConfirmedBalanceChange(
   };
 }
 
-function getTreasuryDescription(treasuryError: string | null, isTreasuryWallet: boolean) {
+function getTreasuryDescription(treasuryError: string | null, isTreasuryWallet: boolean, registryPending: boolean) {
+  if (registryPending) {
+    return 'Commitment funds will be available after registry setup finishes.';
+  }
+
   if (treasuryError) {
     return 'Could not verify the treasury wallet. Try again in a moment.';
   }
@@ -122,27 +126,29 @@ function TreasuryActions({
 export function OrgBalance({ org }: OrgBalanceProps) {
   const queryClient = useQueryClient();
   const { address, wallet } = useAccount();
-  const { balance, availableUsd, lockedUsd, isLoading, error } = useOrgBalance(org.orgId);
+  const onchainOrgId = org.orgId ?? null;
+  const { balance, availableUsd, lockedUsd, isLoading, error } = useOrgBalance(onchainOrgId);
   const { treasury, isLoading: isTreasuryLoading, error: treasuryError } = useOrgTreasury(org.id);
   const { data: stakeToken, isLoading: isStakeTokenLoading, error: stakeTokenError } = useStakeToken();
   const [depositOpen, setDepositOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const currentTreasury = treasury?.currentTreasury ?? null;
   const isTreasuryWallet = !!address && !!currentTreasury && addressesEqual(address, currentTreasury);
-  const actionsDisabled = isLoading || isTreasuryLoading || !!treasuryError || !isTreasuryWallet;
+  const actionsDisabled =
+    onchainOrgId === null || isLoading || isTreasuryLoading || !!treasuryError || !isTreasuryWallet;
   const withdrawDisabled = actionsDisabled || !balance || balance.available === 0n;
   const depositDisabled = actionsDisabled || isStakeTokenLoading || !!stakeTokenError || !stakeToken;
-  const treasuryDescription = getTreasuryDescription(treasuryError, isTreasuryWallet);
+  const treasuryDescription = getTreasuryDescription(treasuryError, isTreasuryWallet, onchainOrgId === null);
 
   const refreshFunds = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: qk.balance.org(org.orgId), exact: true });
+    queryClient.invalidateQueries({ queryKey: qk.balance.org(onchainOrgId), exact: true });
     queryClient.invalidateQueries({ queryKey: qk.balance.orgHistory(org.id), exact: true });
     queryClient.invalidateQueries({ queryKey: qk.balance.walletRoot() });
-  }, [queryClient, org.id, org.orgId]);
+  }, [queryClient, org.id, onchainOrgId]);
 
   const applyConfirmedFundsChange = useCallback(
     (action: CommitmentFundsBalanceAction, amount: bigint) => {
-      queryClient.setQueryData<OrgBalanceValue>(qk.balance.org(org.orgId), (currentBalance) => {
+      queryClient.setQueryData<OrgBalanceValue>(qk.balance.org(onchainOrgId), (currentBalance) => {
         if (!currentBalance) {
           return currentBalance;
         }
@@ -153,7 +159,7 @@ export function OrgBalance({ org }: OrgBalanceProps) {
       queryClient.invalidateQueries({ queryKey: qk.balance.orgHistory(org.id), exact: true });
       queryClient.invalidateQueries({ queryKey: qk.balance.walletRoot() });
     },
-    [queryClient, org.id, org.orgId],
+    [queryClient, org.id, onchainOrgId],
   );
 
   const handleDepositConfirmed = useCallback(
@@ -213,7 +219,7 @@ export function OrgBalance({ org }: OrgBalanceProps) {
         </div>
       </div>
 
-      {wallet && stakeToken && isTreasuryWallet && (
+      {wallet && stakeToken && isTreasuryWallet && org.orgId !== null && (
         <DepositModal
           onChainOrgId={org.orgId}
           stakeToken={stakeToken}
@@ -224,7 +230,8 @@ export function OrgBalance({ org }: OrgBalanceProps) {
           onRefresh={refreshFunds}
         />
       )}
-      {wallet && isTreasuryWallet && (
+
+      {wallet && isTreasuryWallet && org.orgId !== null && (
         <WithdrawModal
           onChainOrgId={org.orgId}
           availableBalance={balance?.available ?? 0n}

@@ -6,7 +6,7 @@ import {
   orgDetailsSchema,
   orgMeSchema,
   orgTreasuryStatusSchema,
-  prepareOrgContentUriUpdateResponseSchema,
+  updateOrgProfileResponseSchema,
   workspaceSetupSchema,
 } from '@/lib/schemas/org';
 
@@ -64,6 +64,6 @@ export async function deleteMemberAvatar(orgId: string) {
   return { avatarUrl: null };
 }
 
-export function prepareOrgContentUriUpdate(orgId: string, data: PrepareOrgContentUriUpdateData) {
-  return api.post(`/orgs/${orgId}/profile/prepare`, data, prepareOrgContentUriUpdateResponseSchema);
+export function updateOrgProfile(orgId: string, data: PrepareOrgContentUriUpdateData) {
+  return api.patch(`/orgs/${orgId}/profile`, data, updateOrgProfileResponseSchema);
 }

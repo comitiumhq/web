@@ -1,8 +1,4 @@
 import { tipTapDocSchema } from '@comitium/schemas/common';
-import {
-  preparedRelayedOnchainOperationSchema,
-  userWalletAuthorizationPayloadSchema,
-} from '@comitium/schemas/onchain-operations';
 import { uuidSchema, walletAddressSchema } from '@comitium/schemas/public';
 import { z } from 'zod';
 
@@ -134,7 +130,7 @@ export type WorkspaceSetup = z.infer<typeof workspaceSetupSchema>;
 
 export const myOrgSchema = z.object({
   id: uuidSchema,
-  orgId: z.number(),
+  orgId: z.number().nullable(),
   domain: z.string().nullable(),
   name: z.string().nullable(),
   logo: z.string().nullable(),
@@ -150,7 +146,7 @@ export type MyOrg = z.infer<typeof myOrgSchema>;
 
 export const orgDetailsSchema = z.object({
   id: uuidSchema,
-  orgId: z.number(),
+  orgId: z.number().nullable(),
   name: z.string().nullable(),
   logo: z.string().nullable(),
   description: z.string().nullable(),
@@ -162,7 +158,10 @@ export const orgDetailsSchema = z.object({
 
 export type OrgDetails = z.infer<typeof orgDetailsSchema>;
 
-export const prepareOrgContentUriUpdateResponseSchema = preparedRelayedOnchainOperationSchema;
+export const updateOrgProfileResponseSchema = z.object({
+  state: z.literal('completed'),
+  organizationId: uuidSchema,
+});
 
 export type PrepareOrgContentUriUpdateData = {
   name: string;
@@ -330,8 +329,6 @@ export const orgCreationStatusSchema = z.discriminatedUnion('status', [
   z.object({ status: z.literal('needs_verification') }),
   z.object({ status: z.literal('inactive_membership') }),
   z.object({ status: z.literal('ready'), email: z.string(), domain: z.string() }),
-  z.object({ status: z.literal('failed'), email: z.string(), domain: z.string() }),
-  z.object({ status: z.literal('creating'), email: z.string().nullable(), domain: z.string() }),
   z.object({ status: z.literal('created'), organizationId: uuidSchema, hasActiveMembership: z.boolean() }),
 ]);
 
@@ -375,16 +372,10 @@ export const verifyCodeSchema = z.object({
   domain: z.string(),
 });
 
-export const orgCreationPreparationSchema = z.discriminatedUnion('state', [
-  z.object({ state: z.enum(['confirming', 'completed', 'try_again']) }),
-  userWalletAuthorizationPayloadSchema.extend({
-    state: z.literal('wallet_confirmation'),
-    operationId: uuidSchema,
-  }),
-]);
-
-type OrgCreationPreparation = z.infer<typeof orgCreationPreparationSchema>;
-export type ExecutableOrgCreation = Extract<OrgCreationPreparation, { state: 'wallet_confirmation' }>;
+export const createOrgResponseSchema = z.object({
+  state: z.literal('completed'),
+  organizationId: uuidSchema,
+});
 
 // --- Request body: update member profile ---
 
