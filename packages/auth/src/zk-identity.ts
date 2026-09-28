@@ -29,10 +29,11 @@ export const zkIdentityAttemptSchema = z
     challenge: z.string().regex(/^[a-f0-9]{64}$/),
     request: z
       .object({
-        domain: z.literal('comitium.co'),
-        oprfKeyId: z.literal('1'),
-        policyId: z.literal('policy-1'),
-        proofMode: z.literal('fast'),
+        domain: z.string().min(1),
+        oprfKeyId: z.string().min(1),
+        policyId: z.string().min(1),
+        proofMode: z.enum(['fast', 'compressed', 'compressed-evm']),
+        scope: z.string().min(1),
       })
       .strict(),
   })

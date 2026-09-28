@@ -21,6 +21,7 @@ describe('email_bounced timeline event', () => {
         name: null,
         avatarUrl: null,
       },
+      actorRole: null,
       metadata: {
         recipientEmail: 'candidate@example.com',
         reason: 'hard_bounce',

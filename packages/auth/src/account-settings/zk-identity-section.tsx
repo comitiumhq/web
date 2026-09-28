@@ -7,6 +7,7 @@ import { Spinner } from '@comitium/ui/spinner';
 import { XIcon } from '@phosphor-icons/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { lazy, type ReactNode, Suspense, useState } from 'react';
+import { toast } from 'sonner';
 
 import type {
   CompleteZkIdentityAttemptInput,
@@ -22,6 +23,9 @@ const FAILURE_MESSAGES = {
   proof_invalid: 'The proof did not satisfy this verification request.',
   identity_already_linked: 'This document has already been used to verify another Comitium account.',
 } as const;
+
+const ZK_IDENTITY_TOAST_ID = 'zk-identity-verification';
+const ZK_PASSPORT_ERROR_DESCRIPTION = 'The zkPassport app could not complete verification. Try again.';
 
 export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; queryKey: readonly unknown[] }) {
   const queryClient = useQueryClient();
@@ -42,10 +46,20 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
 
       if (status.status === 'verified') {
         queryClient.setQueryData(queryKey, status);
+        return;
       }
+
+      toast.error('Identity verification failed', {
+        id: ZK_IDENTITY_TOAST_ID,
+        description: FAILURE_MESSAGES[status.failureCode],
+      });
     },
     onError: async () => {
       setAttempt(null);
+      toast.error('Could not finish identity verification', {
+        id: ZK_IDENTITY_TOAST_ID,
+        description: 'The verification service could not confirm the result. Start a new verification and try again.',
+      });
       await queryClient.invalidateQueries({ queryKey });
     },
   });
@@ -54,7 +68,27 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
     mutationFn: api.createZkIdentityAttempt,
     onMutate: () => completeAttempt.reset(),
     onSuccess: setAttempt,
+    onError: () => {
+      toast.error('Could not start identity verification', {
+        id: ZK_IDENTITY_TOAST_ID,
+        description: 'Check your connection and try again.',
+      });
+    },
   });
+
+  const handleZkPassportError = () => {
+    toast.error('Identity verification failed', {
+      id: ZK_IDENTITY_TOAST_ID,
+      description: ZK_PASSPORT_ERROR_DESCRIPTION,
+    });
+  };
+
+  const handleZkPassportReject = () => {
+    toast.info('Identity verification cancelled', {
+      id: ZK_IDENTITY_TOAST_ID,
+      description: 'No identity information was submitted. You can try again when you are ready.',
+    });
+  };
 
   if (statusQuery.isPending) {
     return <ZkIdentityLoading />;
@@ -123,6 +157,8 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
           attempt={attempt}
           onClose={() => setAttempt(null)}
           onComplete={(input) => completeAttempt.mutate({ attemptId: attempt.attemptId, input })}
+          onError={handleZkPassportError}
+          onReject={handleZkPassportReject}
         />
       ) : null}
     </>
@@ -133,10 +169,14 @@ function ZkPassportDialog({
   attempt,
   onClose,
   onComplete,
+  onError,
+  onReject,
 }: {
   attempt: ZkIdentityAttempt;
   onClose: () => void;
   onComplete: (input: CompleteZkIdentityAttemptInput) => void;
+  onError: (message: string) => void;
+  onReject: () => void;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -162,7 +202,7 @@ function ZkPassportDialog({
           </Button>
         </DialogClose>
         <Suspense fallback={<ZkPassportFlowLoading />}>
-          <ZkPassportFlow attempt={attempt} onComplete={onComplete} />
+          <ZkPassportFlow attempt={attempt} onComplete={onComplete} onError={onError} onReject={onReject} />
         </Suspense>
       </DialogContent>
     </Dialog>

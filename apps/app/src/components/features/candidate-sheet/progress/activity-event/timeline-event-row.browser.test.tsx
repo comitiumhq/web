@@ -27,6 +27,7 @@ const event: ActivityFeedRow = {
     name: 'Ada Lovelace',
     avatarUrl: '/orgs/org/members/user/avatar/version',
   },
+  actorRole: 'org_member',
   metadata: {},
   payload: {
     kind: 'stage',
@@ -51,5 +52,54 @@ describe('TimelineEventRow', () => {
     );
 
     await expect.element(screen.getByRole('img', { name: 'Ada Lovelace' })).toHaveAttribute('src', IMAGE_SRC);
+  });
+
+  it('labels a public application as submitted without a team-member fallback', async () => {
+    const applicantEvent: ActivityFeedRow = {
+      ...event,
+      type: 'application_created',
+      actorRole: 'applicant',
+      actor: {
+        userId: '77777777-7777-4777-8777-777777777777',
+        externalWallet: null,
+        name: null,
+        avatarUrl: null,
+      },
+      payload: { kind: 'generic' },
+    };
+
+    const screen = await render(
+      <TooltipProvider>
+        <TimelineEventRow
+          event={applicantEvent}
+          selectedApplicationId={applicantEvent.applicationId}
+          timeZone="Europe/Warsaw"
+        />
+      </TooltipProvider>,
+    );
+
+    await expect.element(screen.getByText('Application submitted', { exact: true })).toBeVisible();
+    expect(screen.getByText(/Team member/).query()).toBeNull();
+  });
+
+  it('keeps creation attribution for a recruiter-created application', async () => {
+    const recruiterEvent: ActivityFeedRow = {
+      ...event,
+      type: 'application_created',
+      payload: { kind: 'generic' },
+    };
+
+    const screen = await render(
+      <TooltipProvider>
+        <TimelineEventRow
+          event={recruiterEvent}
+          selectedApplicationId={recruiterEvent.applicationId}
+          timeZone="Europe/Warsaw"
+        />
+      </TooltipProvider>,
+    );
+
+    await expect.element(screen.getByText('Application created', { exact: true })).toBeVisible();
+    await expect.element(screen.getByText('by Ada Lovelace', { exact: true })).toBeVisible();
   });
 });

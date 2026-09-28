@@ -91,7 +91,7 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
   } = useTemplateForm(orgId, templateId, { onSaved: onClose, onCreated });
 
   const [activeSection, setActiveSection] = useState<TemplateSection>('settings');
-  const watchedValues = useWatch({ control: form.control });
+  const watchedTitle = useWatch({ control: form.control, name: 'title' });
 
   if (!isNew && isLoading) {
     return (
@@ -119,8 +119,9 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
     );
   }
 
-  const displayTitle = watchedValues.title || (template?.title ?? '');
-  const trimmedTitle = (watchedValues.title ?? '').trim();
+  const currentTitle = watchedTitle ?? form.getValues('title') ?? '';
+  const displayTitle = currentTitle || (template?.title ?? '');
+  const trimmedTitle = currentTitle.trim();
   const canSave = trimmedTitle.length > 0 && (isNew || isDirty) && !isSaving;
   const saveLabel = isNew ? 'Create template' : 'Save changes';
 

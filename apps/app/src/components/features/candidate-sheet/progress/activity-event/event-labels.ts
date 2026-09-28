@@ -32,6 +32,10 @@ const EVENT_LABELS: Partial<Record<ActivityEventType, string>> = {
 };
 
 export function getEventLabel(event: ActivityFeedRow): string {
+  if (isApplicantSubmission(event)) {
+    return 'Application submitted';
+  }
+
   if (event.type === 'interview_no_show' && event.metadata.cleared === true) {
     return 'No-show cleared';
   }
@@ -48,4 +52,8 @@ export function getEventLabel(event: ActivityFeedRow): string {
   }
 
   return base;
+}
+
+export function isApplicantSubmission(event: ActivityFeedRow): boolean {
+  return event.type === 'application_created' && event.actorRole === 'applicant';
 }

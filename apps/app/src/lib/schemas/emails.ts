@@ -219,6 +219,7 @@ export const activityFeedRowSchema = z.object({
     name: z.string().nullable(),
     avatarUrl: z.string().nullable(),
   }),
+  actorRole: senderRoleSchema.nullable(),
   metadata: activityFeedMetadataSchema,
   payload: activityPayloadSchema,
 });

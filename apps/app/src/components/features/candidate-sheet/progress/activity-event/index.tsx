@@ -6,7 +6,7 @@ import { MemberAvatar } from '@/components/user/member-avatar';
 import type { ActivityFeedRow } from '@/lib/schemas/emails';
 import { getActorDisplayName } from '@/lib/utils';
 
-import { getEventLabel } from './event-labels';
+import { getEventLabel, isApplicantSubmission } from './event-labels';
 import { getEventSubline } from './event-subline';
 
 interface TimelineEventRowProps {
@@ -49,12 +49,13 @@ function EventBody({ event, selectedApplicationId }: EventBodyProps) {
   const label = getEventLabel(event);
   const subline = getEventSubline(event, selectedApplicationId);
   const actor = getActorDisplayName(event.actor.name);
+  const showActor = !isApplicantSubmission(event);
 
   return (
     <div className="flex-1 min-w-0">
       <span className="text-label-13">
         <span className="font-medium">{label}</span>
-        <span className="text-muted-foreground"> by {actor}</span>
+        {showActor && <span className="text-muted-foreground"> by {actor}</span>}
       </span>
       {subline && <p className="text-label-12 text-muted-foreground mt-0.5">{subline}</p>}
     </div>
