@@ -11,7 +11,7 @@ import { ArrowSquareOutIcon, PencilIcon } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { DraftSectionSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
-import { getPublicSiteOrigin } from '@/config/site';
+import { getMyOrigin } from '@/config/site';
 import {
   usePublishJobPosting,
   useReleaseCommitmentFunds,
@@ -103,15 +103,15 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const descriptionIsPending = updatePosting.isPending;
   const canSaveDescription =
     canEdit && descriptionHasChanged && Boolean(richTextToPlainText(currentDescription)) && !descriptionIsPending;
-  const publicPostingUrl = getPublicPostingUrl(job.canonicalUrl);
+  const candidatePostingUrl = getCandidatePostingUrl(job.canonicalUrl);
   const hasUnsavedPostingChanges = descriptionHasChanged || capacityHasChanged;
 
   const handleCopyPostingLink = async () => {
-    if (!publicPostingUrl) {
+    if (!candidatePostingUrl) {
       return;
     }
 
-    await navigator.clipboard.writeText(publicPostingUrl);
+    await navigator.clipboard.writeText(candidatePostingUrl);
     toast.success('Posting link copied');
   };
 
@@ -195,9 +195,9 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
           </div>
 
           <div className="flex flex-wrap justify-end gap-2">
-            {isPostingPublished && publicPostingUrl && (
+            {isPostingPublished && candidatePostingUrl && (
               <Button asChild variant="outline" size="sm">
-                <a href={publicPostingUrl} target="_blank" rel="noopener noreferrer">
+                <a href={candidatePostingUrl} target="_blank" rel="noopener noreferrer">
                   <ArrowSquareOutIcon data-icon="inline-start" />
                   View posting
                 </a>
@@ -218,7 +218,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
             {isPostingPublished && (
               <PostingActionsMenu
                 canAddCommitment={canAddCommitment}
-                canCopyLink={publicPostingUrl !== null}
+                canCopyLink={candidatePostingUrl !== null}
                 canUnpublish={canUnpublishPosting}
                 onAddCommitment={() => setCommitmentOpen(true)}
                 onCopyLink={() => void handleCopyPostingLink()}
@@ -355,8 +355,15 @@ function getPostingPublishErrors(posting: JobPosting): PublishValidationError<Po
   return errors;
 }
 
-function getPublicPostingUrl(canonicalUrl: string | null): string | null {
-  return canonicalUrl ? new URL(canonicalUrl, getPublicSiteOrigin()).toString() : null;
+function getCandidatePostingUrl(canonicalUrl: string | null): string | null {
+  if (!canonicalUrl) {
+    return null;
+  }
+
+  const candidateOrigin = getMyOrigin();
+  const canonical = new URL(canonicalUrl, candidateOrigin);
+
+  return new URL(`${canonical.pathname}${canonical.search}${canonical.hash}`, candidateOrigin).toString();
 }
 
 function applicationCountLabel(completedCount: number, capacity: number | null): string {

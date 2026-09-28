@@ -2,7 +2,7 @@ import { requireConnectedWallet } from '@comitium/auth/require-wallet-account';
 import { useAccount, useActiveWallet } from '@comitium/auth/use-wallet';
 import { useOnchainSettlementObserver } from '@comitium/chain/use-onchain-settlement-observer';
 import type { PrepareCommitmentParams, PublishJobPostingData, UpdateJobPostingData } from '@comitium/schemas/jobs';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { qk } from '@/hooks/query-keys';
 import {
@@ -16,11 +16,7 @@ import {
   type PreparedRelayedOperation,
   submitAndConfirmPreparedRelayedOperation,
 } from '@/lib/onchain-operation-signatures';
-
-interface JobPostingTarget {
-  orgId: string;
-  jobId: string;
-}
+import { invalidateJobQueries, type JobQueryTarget } from './invalidate-job-queries';
 
 interface PreparedPostingOperationCopy {
   toastId: string;
@@ -30,44 +26,42 @@ interface PreparedPostingOperationCopy {
   failed: string;
 }
 
-function invalidatePostingQueries(queryClient: ReturnType<typeof useQueryClient>, target: JobPostingTarget) {
+function invalidateCommitmentBalanceQueries(queryClient: QueryClient) {
   return Promise.all([
-    queryClient.invalidateQueries({ queryKey: qk.jobs.posting(target.orgId, target.jobId) }),
-    queryClient.invalidateQueries({ queryKey: qk.jobs.summary(target.jobId) }),
-    queryClient.invalidateQueries({ queryKey: qk.jobs.orgRoot(target.orgId) }),
-    queryClient.invalidateQueries({ queryKey: qk.jobs.draftsOrg(target.orgId) }),
     queryClient.invalidateQueries({ queryKey: qk.balance.orgRoot() }),
     queryClient.invalidateQueries({ queryKey: qk.balance.orgHistoryRoot() }),
   ]);
 }
 
-export function useUpdateJobPosting(target: JobPostingTarget) {
+export function useUpdateJobPosting(target: JobQueryTarget) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: UpdateJobPostingData) => updateJobPosting(target.orgId, target.jobId, data),
-    onSuccess: async () => {
-      await invalidatePostingQueries(queryClient, target);
+    onSuccess: (posting) => {
+      queryClient.setQueryData(qk.jobs.posting(target.orgId, target.jobId), posting);
+      void invalidateJobQueries(queryClient, target);
       toast.success('Posting settings saved');
     },
     onError: (error: Error) => toast.error(error.message || 'Could not save Posting settings'),
   });
 }
 
-export function usePublishJobPosting(target: JobPostingTarget) {
+export function usePublishJobPosting(target: JobQueryTarget) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: PublishJobPostingData) => publishJobPosting(target.orgId, target.jobId, data),
-    onSuccess: async () => {
-      await invalidatePostingQueries(queryClient, target);
+    onSuccess: async (posting) => {
+      queryClient.setQueryData(qk.jobs.posting(target.orgId, target.jobId), posting);
+      await invalidateJobQueries(queryClient, target);
       toast.success('Posting published');
     },
     onError: (error: Error) => toast.error(error.message || 'Could not publish Posting'),
   });
 }
 
-export function useAddResponseCommitment(target: JobPostingTarget) {
+export function useAddResponseCommitment(target: JobQueryTarget) {
   return usePreparedPostingOperation({
     target,
     prepare: (data: PrepareCommitmentParams) => prepareCommitment(target.orgId, target.jobId, data),
@@ -81,7 +75,7 @@ export function useAddResponseCommitment(target: JobPostingTarget) {
   });
 }
 
-export function useUnpublishJobPosting(target: JobPostingTarget) {
+export function useUnpublishJobPosting(target: JobQueryTarget) {
   const queryClient = useQueryClient();
   const { isConnected } = useAccount();
   const wallet = useActiveWallet();
@@ -101,15 +95,19 @@ export function useUnpublishJobPosting(target: JobPostingTarget) {
       return { ...result, state: confirmation.kind };
     },
     onMutate: () => toast.loading('Unpublishing Posting...', { id: 'unpublish-posting' }),
-    onSuccess: (result) => {
-      const refresh = () => invalidatePostingQueries(queryClient, target);
-      const complete = () => {
-        refresh();
+    onSuccess: async (result) => {
+      if (result.kind === 'completed') {
+        queryClient.setQueryData(qk.jobs.posting(target.orgId, target.jobId), result.posting);
+      }
+
+      const refresh = () => invalidateJobQueries(queryClient, target);
+      const showCompleted = () => {
         toast.success('Posting unpublished', { id: 'unpublish-posting' });
       };
 
       if (result.kind === 'completed' || result.state !== 'confirming') {
-        complete();
+        await refresh();
+        showCompleted();
 
         return;
       }
@@ -118,7 +116,7 @@ export function useUnpublishJobPosting(target: JobPostingTarget) {
       settlementObserver.observe({
         operationId: result.operation.operationId,
         refresh,
-        onCompleted: complete,
+        onCompleted: showCompleted,
         onFailed: () => {
           toast.error('Could not unpublish Posting', { id: 'unpublish-posting' });
         },
@@ -135,7 +133,7 @@ export function useUnpublishJobPosting(target: JobPostingTarget) {
   };
 }
 
-export function useReleaseCommitmentFunds(target: JobPostingTarget) {
+export function useReleaseCommitmentFunds(target: JobQueryTarget) {
   return usePreparedPostingOperation<void>({
     target,
     prepare: () => prepareJobSettlement(target.jobId),
@@ -150,7 +148,7 @@ export function useReleaseCommitmentFunds(target: JobPostingTarget) {
 }
 
 function usePreparedPostingOperation<TInput>(params: {
-  target: JobPostingTarget;
+  target: JobQueryTarget;
   prepare: (input: TInput) => Promise<PreparedRelayedOperation>;
   copy: PreparedPostingOperationCopy;
 }) {
@@ -168,15 +166,20 @@ function usePreparedPostingOperation<TInput>(params: {
       return { operation, state: confirmation.kind };
     },
     onMutate: () => toast.loading(params.copy.pending, { id: params.copy.toastId }),
-    onSuccess: (result) => {
-      const refresh = () => invalidatePostingQueries(queryClient, params.target);
-      const complete = () => {
-        refresh();
+    onSuccess: async (result) => {
+      const refresh = async () => {
+        await Promise.all([
+          invalidateJobQueries(queryClient, params.target),
+          invalidateCommitmentBalanceQueries(queryClient),
+        ]);
+      };
+      const showCompleted = () => {
         toast.success(params.copy.completed, { id: params.copy.toastId });
       };
 
       if (result.state !== 'confirming') {
-        complete();
+        await refresh();
+        showCompleted();
 
         return;
       }
@@ -185,7 +188,7 @@ function usePreparedPostingOperation<TInput>(params: {
       settlementObserver.observe({
         operationId: result.operation.operationId,
         refresh,
-        onCompleted: complete,
+        onCompleted: showCompleted,
         onFailed: () => {
           toast.error(params.copy.failed, { id: params.copy.toastId });
         },

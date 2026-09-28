@@ -66,7 +66,7 @@ type CloseResult =
 
 type MutationOptions = {
   mutationFn: (input: typeof params) => Promise<CloseResult>;
-  onSuccess: (result: CloseResult, input: typeof params) => void;
+  onSuccess: (result: CloseResult, input: typeof params) => Promise<void>;
 };
 
 function options(): MutationOptions {
@@ -122,7 +122,7 @@ describe('useCloseJob', () => {
     const mutation = options();
     const result = await mutation.mutationFn(params);
 
-    mutation.onSuccess(result, params);
+    await mutation.onSuccess(result, params);
 
     expect(mocks.closeJob).not.toHaveBeenCalled();
     expect(mocks.onCompleted).toHaveBeenCalledOnce();

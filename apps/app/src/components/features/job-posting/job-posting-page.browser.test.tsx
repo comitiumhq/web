@@ -9,7 +9,7 @@ const UPDATED_DESCRIPTION = {
 
 const mocks = vi.hoisted(() => ({
   job: {
-    canonicalUrl: 'https://jobs.example.test/backend-engineer',
+    canonicalUrl: 'https://jobs.example.test/careers/acme/jobs/backend-engineer',
     lifecycle: {
       commitmentFinalizationPending: false,
       activeApplications: 0,
@@ -88,6 +88,10 @@ vi.mock('@/hooks/use-job-permissions', () => ({
   useJobPermissions: () => ({ canOnJob: () => true, isLoading: false }),
 }));
 
+vi.mock('@/config/site', () => ({
+  getMyOrigin: () => 'https://my.example.test',
+}));
+
 vi.mock('./application-form-dialog', () => ({
   ApplicationFormDialog: () => null,
 }));
@@ -100,7 +104,7 @@ vi.mock('./response-commitment-dialog', () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.job = {
-    canonicalUrl: 'https://jobs.example.test/backend-engineer',
+    canonicalUrl: 'https://jobs.example.test/careers/acme/jobs/backend-engineer',
     lifecycle: {
       commitmentFinalizationPending: false,
       activeApplications: 0,
@@ -278,14 +282,13 @@ describe('JobPostingPage', () => {
     await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).not.toBeInTheDocument();
   });
 
-  it('resolves a relative canonical URL against the public site origin', async () => {
-    mocks.job = { ...mocks.job, canonicalUrl: '/careers/acme/jobs/backend-engineer' };
+  it('opens the canonical Posting path in the candidate app', async () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await expect
       .element(screen.getByRole('link', { name: 'View posting' }))
-      .toHaveAttribute('href', 'http://localhost:3000/careers/acme/jobs/backend-engineer');
+      .toHaveAttribute('href', 'https://my.example.test/careers/acme/jobs/backend-engineer');
   });
 
   it('renders a Closed Job Posting as read-only', async () => {

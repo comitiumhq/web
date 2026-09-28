@@ -3,24 +3,17 @@ import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { openJob } from '@/lib/api/jobs';
 import { qk } from '../query-keys';
-
-interface OpenJobParams {
-  orgId: string;
-  jobId: string;
-}
+import { invalidateJobQueries, type JobQueryTarget } from './invalidate-job-queries';
 
 export function useOpenJob() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ jobId }: OpenJobParams) => openJob(jobId),
+    mutationFn: ({ jobId }: JobQueryTarget) => openJob(jobId),
     onSuccess: async (_response, params) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: qk.jobs.summary(params.jobId) }),
-        queryClient.invalidateQueries({ queryKey: qk.jobs.detail(params.jobId) }),
-        queryClient.invalidateQueries({ queryKey: qk.jobs.orgRoot(params.orgId) }),
-        queryClient.invalidateQueries({ queryKey: qk.jobs.draftsOrg(params.orgId) }),
+        invalidateJobQueries(queryClient, params),
         queryClient.invalidateQueries({ queryKey: qk.pipeline.root() }),
       ]);
 

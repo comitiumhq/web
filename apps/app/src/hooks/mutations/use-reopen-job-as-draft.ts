@@ -4,26 +4,16 @@ import { toast } from 'sonner';
 
 import { reopenJobAsDraft } from '@/lib/api/jobs';
 
-import { qk } from '../query-keys';
-
-interface ReopenJobAsDraftParams {
-  orgId: string;
-  jobId: string;
-}
+import { invalidateJobQueries, type JobQueryTarget } from './invalidate-job-queries';
 
 export function useReopenJobAsDraft() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ jobId }: ReopenJobAsDraftParams) => reopenJobAsDraft(jobId),
+    mutationFn: ({ jobId }: JobQueryTarget) => reopenJobAsDraft(jobId),
     onSuccess: async (_response, params) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: qk.jobs.summary(params.jobId) }),
-        queryClient.invalidateQueries({ queryKey: qk.jobs.detail(params.jobId) }),
-        queryClient.invalidateQueries({ queryKey: qk.jobs.orgRoot(params.orgId) }),
-        queryClient.invalidateQueries({ queryKey: qk.jobs.draftsOrg(params.orgId) }),
-      ]);
+      await invalidateJobQueries(queryClient, params);
 
       toast.success('Job reopened as draft');
       await navigate({

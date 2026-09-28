@@ -1,6 +1,7 @@
 import type { UpdateJobEditorData } from '@comitium/schemas/jobs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { invalidateJobQueries } from '@/hooks/mutations/invalidate-job-queries';
 import { invalidateSettingsUsage } from '@/hooks/mutations/invalidate-settings-usage';
 import { qk } from '@/hooks/query-keys';
 import { getErrorStatus } from '@/lib/api/client';
@@ -13,10 +14,7 @@ async function invalidateJobEditorQueries(
   jobId: string,
 ) {
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: qk.jobs.draftsOrg(orgId) }),
-    queryClient.invalidateQueries({ queryKey: qk.jobs.editor(orgId, jobId) }),
-    queryClient.invalidateQueries({ queryKey: qk.jobs.posting(orgId, jobId) }),
-    queryClient.invalidateQueries({ queryKey: qk.jobs.summary(jobId) }),
+    invalidateJobQueries(queryClient, { orgId, jobId }),
     queryClient.invalidateQueries({ queryKey: qk.jobs.pipeline(jobId) }),
     queryClient.invalidateQueries({ queryKey: qk.stageActivities.job(jobId) }),
     queryClient.invalidateQueries({ queryKey: qk.stageActivities.jobOptions(jobId) }),

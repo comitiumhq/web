@@ -7,10 +7,9 @@ import { toast } from 'sonner';
 import { closeJob, prepareJobClose } from '@/lib/api/jobs';
 import { submitAndConfirmPreparedRelayedOperation } from '@/lib/onchain-operation-signatures';
 import { qk } from '../query-keys';
+import { invalidateJobQueries, type JobQueryTarget } from './invalidate-job-queries';
 
-type CloseJobParams = {
-  orgId: string;
-  jobId: string;
+type CloseJobParams = JobQueryTarget & {
   closeReasonId: string;
   expectedVersion: number;
   commitmentSettlementRequired: boolean;
@@ -39,26 +38,31 @@ export function useCloseJob({ onCompleted }: { onCompleted: () => void }) {
     onMutate: () => {
       toast.loading('Closing job...', { id: 'close-job' });
     },
-    onSuccess: (result, params) => {
-      const refresh = () => {
-        queryClient.invalidateQueries({ queryKey: qk.jobs.summary(params.jobId) });
-        queryClient.invalidateQueries({ queryKey: qk.jobs.root() });
-        queryClient.invalidateQueries({ queryKey: qk.pipeline.root() });
+    onSuccess: async (result, params) => {
+      const refresh = async () => {
+        const invalidations: Promise<unknown>[] = [
+          invalidateJobQueries(queryClient, params),
+          queryClient.invalidateQueries({ queryKey: qk.pipeline.root() }),
+        ];
 
         if (params.commitmentSettlementRequired) {
-          queryClient.invalidateQueries({ queryKey: qk.balance.orgRoot() });
-          queryClient.invalidateQueries({ queryKey: qk.balance.orgHistoryRoot() });
-          queryClient.invalidateQueries({ queryKey: qk.balance.walletRoot() });
+          invalidations.push(
+            queryClient.invalidateQueries({ queryKey: qk.balance.orgRoot() }),
+            queryClient.invalidateQueries({ queryKey: qk.balance.orgHistoryRoot() }),
+            queryClient.invalidateQueries({ queryKey: qk.balance.walletRoot() }),
+          );
         }
+
+        await Promise.all(invalidations);
       };
-      const complete = () => {
-        refresh();
+      const showCompleted = () => {
         toast.success('Job closed', { id: 'close-job' });
         onCompleted();
       };
 
       if (result.kind === 'closed' || result.state === 'completed') {
-        complete();
+        await refresh();
+        showCompleted();
 
         return;
       }
@@ -67,7 +71,7 @@ export function useCloseJob({ onCompleted }: { onCompleted: () => void }) {
       settlementObserver.observe({
         operationId: result.prepared.operationId,
         refresh,
-        onCompleted: complete,
+        onCompleted: showCompleted,
         onFailed: () => {
           toast.error('Failed to close job', { id: 'close-job' });
         },
