@@ -1,4 +1,14 @@
 import { ComitiumLogo } from '@comitium/ui/comitium-logo';
+import { Badge } from '@comitium/ui/badge';
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@comitium/ui/popover';
+import { LockIcon } from '@phosphor-icons/react';
 import { useParams, useRouterState } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { getPublicSiteOrigin } from '@/config/site';
@@ -26,8 +36,8 @@ export const WorkspaceHeader = () => {
   const currentOrgId = routeOrgId ?? preferredOrgId;
   const currentOrg = currentOrgId ? myOrgs?.find((org) => org.id === currentOrgId) : null;
   const showOrgHeader = !!currentOrgId && !!currentOrg;
-
   const { data: orgMe } = useQueryOrgMe(showOrgHeader ? currentOrgId : undefined);
+  const showLimitedAccess = isOrgContext && orgMe?.hasJobAccess === false;
   const role = orgMe?.role ?? null;
   const orgNavItems = useMemo(
     () => (showOrgHeader && currentOrgId ? getVisibleOrgHeaderNavItems(currentOrgId, role) : []),
@@ -45,8 +55,39 @@ export const WorkspaceHeader = () => {
           <WorkspaceNav isOrgContext={isOrgContext || isAccountContext} orgNavItems={orgNavItems} pathname={pathname} />
         </div>
 
-        <div className="flex shrink-0 items-center gap-3">{!isInvite && <UserMenu />}</div>
+        <div className="flex shrink-0 items-center gap-3">
+          {showLimitedAccess && <LimitedAccessStatus />}
+          {!isInvite && <UserMenu />}
+        </div>
       </div>
     </header>
   );
 };
+
+function LimitedAccessStatus() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Badge asChild variant="warning">
+          <button
+            type="button"
+            className="h-7 cursor-pointer px-2.5 hover:bg-warning/20 dark:hover:bg-warning/30"
+            aria-label="Limited access"
+          >
+            <LockIcon />
+            <span className="hidden sm:inline">Limited access</span>
+          </button>
+        </Badge>
+      </PopoverTrigger>
+      <PopoverContent align="end" sideOffset={8} className="w-[min(20rem,calc(100vw-2rem))] gap-0 p-3">
+        <PopoverHeader>
+          <PopoverTitle className="text-heading-14">Limited access</PopoverTitle>
+          <PopoverDescription className="flex flex-col gap-2">
+            <span>Jobs and candidate profiles are unavailable.</span>
+            <span>Ask an organization admin for additional permissions.</span>
+          </PopoverDescription>
+        </PopoverHeader>
+      </PopoverContent>
+    </Popover>
+  );
+}

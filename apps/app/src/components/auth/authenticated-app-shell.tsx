@@ -4,7 +4,6 @@ import { WorkspaceHeader } from '@/components/header/workspace-header';
 import { useEnsureCreatedOrgEncryption } from '@/hooks/queries/use-ensure-created-org-encryption';
 import { useQueryMyOrgs } from '@/hooks/queries/use-query-my-orgs';
 import { useQueryOrgCreation } from '@/hooks/queries/use-query-org-creation';
-import { PendingVaultBootstrapProvider } from '@/hooks/use-vault-bootstrap';
 import { getAccessibleCreatedOrganizationId } from '@/lib/schemas/org';
 
 interface AuthenticatedAppShellProps {
@@ -25,11 +24,8 @@ function CreatedOrgEncryptionBootstrap({ children }: { children: ReactNode }) {
   const { data: organizations } = useQueryMyOrgs();
   const createdOrganizationId = getAccessibleCreatedOrganizationId(creation);
   const organizationId = organizations?.some(({ id }) => id === createdOrganizationId) ? createdOrganizationId : null;
-  const bootstrap = useEnsureCreatedOrgEncryption(organizationId);
 
-  return (
-    <PendingVaultBootstrapProvider organizationId={bootstrap.isPending ? organizationId : null}>
-      {children}
-    </PendingVaultBootstrapProvider>
-  );
+  useEnsureCreatedOrgEncryption(organizationId);
+
+  return children;
 }

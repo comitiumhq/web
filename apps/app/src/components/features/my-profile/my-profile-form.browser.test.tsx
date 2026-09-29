@@ -38,6 +38,7 @@ const meData: OrgMeResponse = {
   userId: '11111111-1111-4111-8111-111111111111',
   role: 'org_admin',
   permissions: ['org_member:read'],
+  hasJobAccess: true,
   name: 'Ada Lovelace',
   jobTitle: 'Recruiter',
   email: 'ada@example.com',

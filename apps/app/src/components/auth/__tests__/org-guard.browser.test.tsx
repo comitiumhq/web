@@ -41,8 +41,6 @@ vi.mock('@/hooks/queries/use-query-org-creation', () => ({
 vi.mock('@/hooks/queries/use-ensure-created-org-encryption', () => ({
   useEnsureCreatedOrgEncryption: (orgId: string | null) => {
     mocks.ensureCreatedOrgEncryption(orgId);
-
-    return { isPending: true };
   },
 }));
 
@@ -53,10 +51,6 @@ vi.mock('@/hooks/use-permissions', () => ({
 
 vi.mock('@/hooks/use-auto-detect-timezone', () => ({
   useAutoDetectTimezone: vi.fn(),
-}));
-
-vi.mock('@/components/features/vault-access/vault-access-banner', () => ({
-  VaultAccessBanner: () => <aside>Vault access required</aside>,
 }));
 
 vi.mock('@/components/features/workspace-setup/workspace-setup-shell', () => ({
@@ -122,20 +116,18 @@ describe('OrgGuard', () => {
     await expect.element(screen.getByText('Organization workspace')).not.toBeInTheDocument();
   });
 
-  it('renders the organization only after membership data resolves and surfaces missing vault access', async () => {
+  it('does not block an active member without vault access', async () => {
     mocks.orgsQuery.data = [org];
     const screen = await render(tree());
 
     await expect.element(screen.getByText('Organization workspace')).toBeInTheDocument();
-    await expect.element(screen.getByText('Vault access required')).toBeInTheDocument();
   });
 
-  it('does not show the missing-access banner while the created organization vault is initializing', async () => {
+  it('initializes encryption for a newly created organization', async () => {
     mocks.orgsQuery.data = [{ ...org, role: 'org_admin' }];
     const screen = await render(<AuthenticatedAppShell>{tree()}</AuthenticatedAppShell>);
 
     await expect.element(screen.getByText('Organization workspace')).toBeInTheDocument();
-    await expect.element(screen.getByText('Vault access required')).not.toBeInTheDocument();
     expect(mocks.ensureCreatedOrgEncryption).toHaveBeenCalledWith('org-1');
   });
 });
