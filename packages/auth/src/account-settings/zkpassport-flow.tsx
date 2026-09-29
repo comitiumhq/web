@@ -1,6 +1,6 @@
 import { isDefined } from '@comitium/schemas/guards';
 import { NullifierType, type ProofResult } from '@zkpassport/sdk';
-import { ZKPassportQRCode, type QueryBuilder } from '@zkpassport/ui/react';
+import { type QueryBuilder, ZKPassportQRCode } from '@zkpassport/ui/react';
 import { useTheme } from 'next-themes';
 import { useCallback, useRef } from 'react';
 

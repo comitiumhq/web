@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({
   cancelQueries: vi.fn(),
   invalidateQueries: vi.fn(),
   mutationOptions: null as object | null,
-  refreshAfterSettlement: vi.fn((_operationId: string, _refresh: () => void) => Promise.resolve('completed' as const)),
   setQueryData: vi.fn(),
   toastSuccess: vi.fn(),
   useMutation: vi.fn((options: object) => {
@@ -14,10 +13,6 @@ const mocks = vi.hoisted(() => ({
 
     return {};
   }),
-}));
-
-vi.mock('@comitium/chain/onchain-operation-observer', () => ({
-  refreshAfterOnchainOperationSettles: mocks.refreshAfterSettlement,
 }));
 
 vi.mock('@tanstack/react-query', () => ({
@@ -55,7 +50,7 @@ const profile = {
 
 interface OrgMetadataMutationOptions {
   onMutate: () => Promise<void>;
-  onSuccess: (result: { operationId: string; profile: typeof profile }) => void;
+  onSuccess: (updatedProfile: typeof profile) => void;
 }
 
 function getMutationOptions(): OrgMetadataMutationOptions {
@@ -75,7 +70,7 @@ describe('organization profile optimistic cache', () => {
     const options = getMutationOptions();
 
     await options.onMutate();
-    options.onSuccess({ operationId: 'operation-1', profile });
+    options.onSuccess(profile);
 
     expect(mocks.cancelQueries).toHaveBeenNthCalledWith(1, {
       queryKey: ['org', ORG_ID],
@@ -109,11 +104,7 @@ describe('organization profile optimistic cache', () => {
       queryKey: ['org', ORG_ID, 'job-creation-context'],
       exact: true,
     });
-    expect(mocks.refreshAfterSettlement).toHaveBeenCalledWith('operation-1', expect.any(Function));
-    const refreshAfterSettlement = mocks.refreshAfterSettlement.mock.calls[0]?.[1];
-    expect(refreshAfterSettlement).toBeDefined();
-    refreshAfterSettlement?.();
-    expect(mocks.invalidateQueries).toHaveBeenCalledTimes(4);
+    expect(mocks.invalidateQueries).toHaveBeenCalledTimes(2);
     expect(mocks.toastSuccess).toHaveBeenCalledWith('Changes saved', { id: 'update-org' });
   });
 });
