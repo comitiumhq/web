@@ -32,12 +32,12 @@ function getFilterFields(filters: JobBoardFilters) {
     category: filters.category,
     salaryMin: filters.salaryMin,
     salaryMax: filters.salaryMax,
-    sort: filters.sort ?? 'stake_desc',
+    sort: filters.sort ?? 'recommended',
   };
 }
 
 function getSortSearchValue(sort: PublicJobSort): PublicJobSort | undefined {
-  if (sort === 'stake_desc') {
+  if (sort === 'recommended') {
     return undefined;
   }
 
@@ -98,7 +98,7 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
       category: undefined,
       salaryMin: undefined,
       salaryMax: undefined,
-      sort: filters.sort ?? 'stake_desc',
+      sort: filters.sort ?? 'recommended',
     });
     setOpen(false);
   }, [filters.location, filters.search, filters.sort, onFiltersChange]);

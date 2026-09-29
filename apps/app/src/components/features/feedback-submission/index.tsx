@@ -92,7 +92,7 @@ export function FeedbackSubmissionSheet({
             <span>{sheetDescription}</span>
             {formTitle && (
               <span className="mt-1 inline-flex items-center gap-2">
-                <Badge variant="subtle">Feedback form</Badge>
+                <Badge variant="secondary">Feedback form</Badge>
                 <span className="text-label-12">{formTitle}</span>
               </span>
             )}
@@ -219,7 +219,7 @@ function FeedbackSubmissionView({
         <CardHeader>
           <CardTitle className="flex flex-wrap items-center gap-2">
             <span>{formTitle}</span>
-            <Badge variant="subtle">Feedback form</Badge>
+            <Badge variant="secondary">Feedback form</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>{feedbackForm}</CardContent>

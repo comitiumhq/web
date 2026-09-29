@@ -1,5 +1,5 @@
 import { useActiveWallet } from '@comitium/auth/use-wallet';
-import { usdcToUsd } from '@comitium/chain/job-economics';
+import { usdcToUsd } from '@comitium/chain/response-commitment-economics';
 import { formatUsdcAmount } from '@comitium/chain/usdc';
 import { Button } from '@comitium/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
@@ -8,12 +8,12 @@ import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { withdrawJobFunds } from '@/lib/orgs/job-funds';
+import { withdrawCommitmentFunds } from '@/lib/orgs/commitment-funds';
 import { cn, formatUsd } from '@/lib/utils';
 
-import { UsdcAmountField } from './job-funds-form';
+import { UsdcAmountField } from './commitment-funds-form';
 import { parseUsdcAmountInput, type UsdcAmountFormData, usdcAmountFormSchema } from './usdc-amount';
-import { useJobFundsTransaction } from './use-job-funds-transaction';
+import { useCommitmentFundsTransaction } from './use-commitment-funds-transaction';
 
 function getWithdrawSubmitLabel(isPending: boolean, amountUsdc: bigint | null) {
   if (isPending) {
@@ -44,7 +44,7 @@ export function WithdrawModal({
 }: WithdrawModalProps) {
   const wallet = useActiveWallet();
   const close = useCallback(() => onOpenChange(false), [onOpenChange]);
-  const { submit, isPending } = useJobFundsTransaction({
+  const { submit, isPending } = useCommitmentFundsTransaction({
     action: 'withdraw',
     onConfirmed,
     onRefresh,
@@ -93,7 +93,11 @@ export function WithdrawModal({
         return;
       }
 
-      submit(() => withdrawJobFunds({ wallet, onChainOrgId, amount: withdrawAmount }), withdrawAmount, displayAmount);
+      submit(
+        () => withdrawCommitmentFunds({ wallet, onChainOrgId, amount: withdrawAmount }),
+        withdrawAmount,
+        displayAmount,
+      );
     },
     [onChainOrgId, submit, wallet],
   );
@@ -129,9 +133,9 @@ export function WithdrawModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent onInteractOutside={handleInteractOutside} className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Withdraw Job Funds</DialogTitle>
+          <DialogTitle>Withdraw Commitment Funds</DialogTitle>
           <DialogDescription className="sr-only">
-            Enter the USDC amount to withdraw from your organization's job funds.
+            Enter the USDC amount to withdraw from your organization's commitment funds.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

@@ -1,17 +1,15 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useQueryDraft } from '@/hooks/queries/use-query-drafts';
-import { type DraftFormData, DraftFormSchema } from '@/lib/schemas/draft-form';
-import { markdownManager } from '@/lib/tiptap/extensions';
-
+import { useSaveJobEditor } from '@/components/features/job-settings/use-save-job-editor';
+import { useQueryJobEditor } from '@/hooks/queries/use-query-job-editor';
+import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
 import { type DraftEditorState, draftToEditorState, prepareDraftSave } from './draft-editor-state';
-import { useSaveDraft } from './use-save-draft';
 
 export function useDraftForm(orgId: string, jobId: string) {
-  const { data: draft, isLoading, error } = useQueryDraft(orgId, jobId);
+  const { data: draft, isLoading, error } = useQueryJobEditor(orgId, jobId);
   const [description, setDescription] = useState<TipTapDoc | null>(null);
   const [formId, setFormId] = useState<string | null>(null);
   const [interviewPlanId, setInterviewPlanId] = useState<string | null>(null);
@@ -24,8 +22,8 @@ export function useDraftForm(orgId: string, jobId: string) {
   const editRevisionRef = useRef(0);
   const versionRef = useRef(0);
 
-  const form = useForm<DraftFormData>({
-    resolver: zodResolver(DraftFormSchema),
+  const form = useForm<JobSettingsFormData>({
+    resolver: zodResolver(JobSettingsFormSchema),
     defaultValues: {
       title: '',
     },
@@ -71,7 +69,7 @@ export function useDraftForm(orgId: string, jobId: string) {
     return () => subscription.unsubscribe();
   }, [form]);
 
-  const { mutateAsync: persistDraft, isPending: isSaving } = useSaveDraft(orgId, jobId);
+  const { mutateAsync: persistDraft, isPending: isSaving } = useSaveJobEditor(orgId, jobId);
 
   const markNonFormDirty = useCallback(() => {
     editRevisionRef.current += 1;
@@ -110,7 +108,8 @@ export function useDraftForm(orgId: string, jobId: string) {
       return versionRef.current;
     }
 
-    const prepared = prepareDraftSave(currentSnapshot(), versionRef.current);
+    const snapshot = currentSnapshot();
+    const prepared = prepareDraftSave(snapshot, versionRef.current);
     const submittedRevision = editRevisionRef.current;
 
     try {
@@ -169,18 +168,6 @@ export function useDraftForm(orgId: string, jobId: string) {
     [markNonFormDirty],
   );
 
-  const descriptionMarkdown = useMemo(() => {
-    if (!description) {
-      return '';
-    }
-
-    try {
-      return markdownManager.serialize(description);
-    } catch {
-      return '';
-    }
-  }, [description]);
-
   return {
     draft,
     isLoading,
@@ -190,7 +177,6 @@ export function useDraftForm(orgId: string, jobId: string) {
     isDirty,
     isSaving,
     save,
-    descriptionMarkdown,
     description,
     formId,
     criteria,

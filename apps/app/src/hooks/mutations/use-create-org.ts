@@ -1,17 +1,15 @@
 import { useSession } from '@comitium/auth/use-session';
-import { useAccount } from '@comitium/auth/use-wallet';
 import { hasEncryptionKeyBundle } from '@comitium/crypto/key-bundle';
 import { ValidationError } from '@comitium/schemas/product-errors';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { qk } from '@/hooks/query-keys';
-import { createOrgWorkflow } from '@/lib/orgs/workflows/create-org';
+import { createOrg } from '@/lib/api/orgs-creation';
 import type { OrgCreationStatus } from '@/lib/schemas/org';
 
 const CREATE_ORG_MUTATION_KEY = ['orgs', 'create'] as const;
 
 export function useCreateOrg() {
   const queryClient = useQueryClient();
-  const { address } = useAccount();
   const { user } = useSession();
 
   const mutation = useMutation({
@@ -21,30 +19,15 @@ export function useCreateOrg() {
         throw new ValidationError('account', 'Activate your account before creating an organization.');
       }
 
-      if (!address) {
-        throw new ValidationError('wallet', 'Connect your wallet before creating an organization.');
-      }
-
-      const result = await createOrgWorkflow();
-
-      if (result.isErr()) {
-        throw result.error;
-      }
-
-      return result.value;
+      return createOrg();
     },
-    onSuccess: () => {
-      const current = queryClient.getQueryData<OrgCreationStatus>(qk.orgs.creation());
-
-      if (current?.status === 'ready' || current?.status === 'failed') {
-        queryClient.setQueryData<OrgCreationStatus>(qk.orgs.creation(), {
-          status: 'creating',
-          email: current.email,
-          domain: current.domain,
-        });
-      }
-
-      queryClient.invalidateQueries({ queryKey: qk.orgs.creation() });
+    onSuccess: ({ organizationId }) => {
+      queryClient.setQueryData<OrgCreationStatus>(qk.orgs.creation(), {
+        status: 'created',
+        organizationId,
+        hasActiveMembership: true,
+      });
+      void queryClient.invalidateQueries({ queryKey: qk.orgs.my() });
     },
     onError: () => queryClient.invalidateQueries({ queryKey: qk.orgs.creation() }),
   });

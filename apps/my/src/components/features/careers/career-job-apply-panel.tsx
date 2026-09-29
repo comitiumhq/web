@@ -5,7 +5,6 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { FileXIcon, type Icon as PhosphorIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useMemo } from 'react';
-import type { Address } from 'viem';
 import { ApplicationForm } from '@/components/features/job-application';
 import { useQueryApplyForm } from '@/hooks/queries/use-query-apply-form';
 
@@ -34,7 +33,7 @@ const UNAVAILABLE_APPLICATION_COPY: Record<
   unavailable: {
     icon: FileXIcon,
     title: 'Applications unavailable',
-    description: 'This role is not accepting committed applications right now.',
+    description: 'This role is not accepting applications right now.',
   },
 };
 
@@ -82,24 +81,10 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
   const { data: applyForm, isLoading: formLoading, error: formError } = useQueryApplyForm(applyFormTarget);
 
   const jobData = useMemo<JobApplicationData | null>(() => {
-    if (
-      job.jobId === null ||
-      job.chainId === null ||
-      job.commitmentContract === null ||
-      job.creatorAddress === null ||
-      job.responseDeadlineDays === null
-    ) {
-      return null;
-    }
-
     return {
       id: job.id,
       postingId: job.postingId,
-      chainId: job.chainId,
-      jobId: job.jobId,
-      commitmentContract: job.commitmentContract,
       orgId: job.orgId,
-      creatorAddress: job.creatorAddress as Address,
     };
   }, [job]);
 
@@ -113,12 +98,12 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
     return <EmptyState icon={copy.icon} title={copy.title} description={copy.description} className="min-h-80" />;
   }
 
-  if (!jobData || job.responseDeadlineDays === null) {
+  if (!jobData) {
     return (
       <EmptyState
         icon={FileXIcon}
         title="Applications unavailable"
-        description="This role is not accepting committed applications right now."
+        description="This role is not accepting applications right now."
         className="min-h-80"
       />
     );
@@ -141,7 +126,6 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
       jobData={jobData}
       jobTitle={job.title ?? 'Untitled'}
       company={companyName}
-      responseDeadlineDays={job.responseDeadlineDays}
       policy={job.recruitingPrivacy}
     />
   );

@@ -6,7 +6,7 @@ import { readStakeToken } from '@/lib/orgs/core/balance';
 
 export function useStakeToken() {
   return useQuery<Address>({
-    queryKey: qk.jobConfig.stakeToken(),
+    queryKey: qk.responseCommitmentConfig.stakeToken(),
     queryFn: async () => {
       const result = await readStakeToken();
 

@@ -1,6 +1,7 @@
 export {
   ArchiveIcon as ArchiveReasonsIcon,
   BriefcaseIcon as CloseJobReasonsIcon,
+  BrowserIcon as JobPostingIcon,
   CalendarSlashIcon as CancelRescheduleReasonsIcon,
   ChatCenteredTextIcon as FeedbackFormIcon,
   ClipboardTextIcon as ApplicationFormIcon,
@@ -9,6 +10,7 @@ export {
   ListNumbersIcon as InterviewPlanIcon,
   ListPlusIcon as CustomFieldsIcon,
   NetworkIcon as DepartmentsAndTeamsIcon,
+  SlidersHorizontalIcon as JobSettingsIcon,
   UsersThreeIcon as HiringTeamIcon,
-  WalletIcon as JobFundsIcon,
+  WalletIcon as CommitmentFundsIcon,
 } from '@phosphor-icons/react';

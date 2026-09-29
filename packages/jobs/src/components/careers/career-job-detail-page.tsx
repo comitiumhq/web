@@ -1,5 +1,3 @@
-import { EXPLORER_TX_URL } from '@comitium/chain/network';
-import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { formatRelativeTime } from '@comitium/ui/date';
@@ -13,7 +11,6 @@ import {
   BriefcaseIcon,
   BuildingsIcon,
   ClockIcon,
-  CubeIcon,
   CurrencyDollarIcon,
   MapPinIcon,
 } from '@phosphor-icons/react';
@@ -166,14 +163,6 @@ export function CareerJobDetailPage({
                     </div>
                   </div>
                 </div>
-
-                {job.txHash && (
-                  <Button variant="outline" size="icon" aria-label="View job creation transaction on BaseScan" asChild>
-                    <a href={`${EXPLORER_TX_URL}${job.txHash}`} target="_blank" rel="noopener noreferrer">
-                      <CubeIcon />
-                    </a>
-                  </Button>
-                )}
               </div>
 
               <h1 className="mt-4 max-w-3xl text-heading-26 tracking-normal">{job.title || 'Untitled Position'}</h1>

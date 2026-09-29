@@ -1,4 +1,4 @@
-import { usdcToUsd } from '@comitium/chain/job-economics';
+import { usdcToUsd } from '@comitium/chain/response-commitment-economics';
 
 import { STALE_TIME_SHORT } from '@comitium/schemas/api-query-policy';
 import { skipToken, useQuery } from '@tanstack/react-query';
@@ -6,7 +6,7 @@ import { qk } from '@/hooks/query-keys';
 import { type OrgBalance, readOrgBalance } from '@/lib/orgs/core/balance';
 import { isDefined } from '@/lib/utils';
 
-export function useOrgBalance(onChainOrgId?: number) {
+export function useOrgBalance(onChainOrgId: number | null) {
   const query = useQuery<OrgBalance>({
     queryKey: qk.balance.org(onChainOrgId),
     queryFn: isDefined(onChainOrgId)
@@ -28,9 +28,11 @@ export function useOrgBalance(onChainOrgId?: number) {
   return {
     balance,
     availableUsd: balance ? usdcToUsd(balance.available) : 0,
-    lockedUsd: balance ? usdcToUsd(balance.lockedInJobs) : 0,
+    lockedUsd: balance ? usdcToUsd(balance.lockedInCommitments) : 0,
     totalUsd: balance ? usdcToUsd(balance.operationalBalance) : 0,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error: query.error ? 'Failed to load balance' : null,
+    refetch: query.refetch,
   };
 }

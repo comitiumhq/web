@@ -10,17 +10,14 @@ import { useCreateOrg } from '@/hooks/mutations/use-create-org';
 interface CreateOrgStepProps {
   domain: string;
   email: string | null;
-  isCreating: boolean;
-  creationFailed?: boolean;
 }
 
-export function CreateOrgStep({ domain, email, isCreating, creationFailed = false }: CreateOrgStepProps) {
+export function CreateOrgStep({ domain, email }: CreateOrgStepProps) {
   const { mutate: createOrg, isPending, error } = useCreateOrg();
-  const isWorking = isPending || isCreating;
-  const hasCreationError = creationFailed || error !== null;
+  const hasCreationError = error !== null;
   let submitLabel = 'Create organization';
 
-  if (isWorking) {
+  if (isPending) {
     submitLabel = 'Creating...';
   } else if (hasCreationError) {
     submitLabel = 'Try again';
@@ -33,10 +30,6 @@ export function CreateOrgStep({ domain, email, isCreating, creationFailed = fals
     },
     [createOrg],
   );
-
-  if (isCreating) {
-    return <CreatingOrganization domain={domain} />;
-  }
 
   return (
     <div className="space-y-7">
@@ -69,23 +62,11 @@ export function CreateOrgStep({ domain, email, isCreating, creationFailed = fals
           </Alert>
         ) : null}
 
-        <Button type="submit" size="lg" className="w-full" disabled={isWorking}>
-          {isWorking && <Spinner data-icon="inline-start" />}
+        <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+          {isPending && <Spinner data-icon="inline-start" />}
           {submitLabel}
         </Button>
       </form>
-    </div>
-  );
-}
-
-function CreatingOrganization({ domain }: { domain: string }) {
-  return (
-    <div className="flex min-h-72 flex-col items-center justify-center gap-4 text-center" aria-live="polite">
-      <Spinner className="size-5 text-primary" />
-      <div className="space-y-1.5">
-        <h1 className="text-heading-20">Creating your organization</h1>
-        <p className="text-copy-14 text-muted-foreground">Setting up {domain}.</p>
-      </div>
     </div>
   );
 }

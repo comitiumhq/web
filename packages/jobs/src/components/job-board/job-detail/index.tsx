@@ -1,4 +1,4 @@
-import type { Job } from '@comitium/schemas/public-jobs';
+import type { Job, JobListItem } from '@comitium/schemas/public-jobs';
 import { Badge } from '@comitium/ui/badge';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { formatCompensationSalary, hasCompensation } from '@comitium/ui/salary';
@@ -19,13 +19,11 @@ interface JobDetailProps {
 }
 
 type JobDetailData = Pick<
-  Job,
+  Job | JobListItem,
   | 'id'
-  | 'applyMode'
   | 'applicationCapacityAvailable'
   | 'responseDeadlineDays'
   | 'status'
-  | 'txHash'
   | 'canonicalUrl'
   | 'title'
   | 'description'
@@ -59,7 +57,7 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
                 <ApplyButton applyUrl={applyUrl} size="default" />
               </div>
             )}
-            <JobActions jobUrl={job.canonicalUrl} txHash={job.txHash} />
+            <JobActions jobUrl={job.canonicalUrl} />
           </div>
         </div>
 

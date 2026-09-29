@@ -13,6 +13,7 @@ const STATUS_TABS: StatusTab[] = [
   { value: 'open', label: 'Open' },
   { value: 'draft', label: 'Draft' },
   { value: 'closed', label: 'Closed' },
+  { value: 'archived', label: 'Archived' },
 ];
 
 const STATUS_TAB_VALUES = STATUS_TABS.map((tab) => tab.value);

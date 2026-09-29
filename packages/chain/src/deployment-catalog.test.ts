@@ -1,22 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { activeDeployment, deploymentForChain, resolveJobCommitment } from './deployment-catalog';
+import { deploymentCatalog, deploymentForChain } from './deployment-catalog';
 
 describe('deployment catalog', () => {
-  it('resolves every configured JobCommitment to the supported bindings', () => {
-    for (const entry of activeDeployment.contracts.jobCommitments) {
-      const resolved = resolveJobCommitment(entry.address);
+  it('resolves every configured deployment set', () => {
+    expect(deploymentCatalog.schemaVersion).toBe(1);
 
-      expect(resolved.address).toBe(entry.address);
-      expect(resolved.commitmentVersion).toBe(entry.commitmentVersion);
-      expect(resolved.bindings.commitmentVersion).toBe(entry.commitmentVersion);
+    for (const [chainId, deployment] of Object.entries(deploymentCatalog.deployments)) {
+      expect(deploymentForChain(chainId)).toBe(deployment);
     }
-  });
-
-  it('rejects an unconfigured JobCommitment address', () => {
-    expect(() => resolveJobCommitment('0x1111111111111111111111111111111111111111')).toThrow(
-      'Unknown JobCommitment address',
-    );
   });
 
   it('rejects an unconfigured chain', () => {

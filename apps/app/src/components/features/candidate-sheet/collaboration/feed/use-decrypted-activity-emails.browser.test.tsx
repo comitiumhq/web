@@ -60,6 +60,7 @@ function emailActivity(id: string, emailId: string, applicationId = 'application
     jobId: 'job-1',
     jobTitle: 'Engineer',
     actor: { userId: null, externalWallet: null, name: 'Recruiter', avatarUrl: null },
+    actorRole: 'org_member',
     metadata: {},
     payload: { kind: 'email', emailId, content: envelope(`${id}-ciphertext`) },
   } as ActivityFeedRow;

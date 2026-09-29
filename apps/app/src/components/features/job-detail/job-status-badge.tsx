@@ -9,8 +9,13 @@ const JOB_STATUS_DISPLAY = {
 
 interface JobStatusBadgeProps {
   status: JobStatus;
+  archived?: boolean;
 }
 
-export function JobStatusBadge({ status }: JobStatusBadgeProps) {
+export function JobStatusBadge({ status, archived = false }: JobStatusBadgeProps) {
+  if (archived) {
+    return <StatusBadge label="Archived" variant="secondary" />;
+  }
+
   return <StatusBadge {...JOB_STATUS_DISPLAY[status]} />;
 }

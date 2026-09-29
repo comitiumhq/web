@@ -60,7 +60,7 @@ export function usePipelineData(
         candidateId: app.candidateId,
         candidateProfile: app.candidateProfile,
         jobId: job.id,
-        jobOnChainId: job.jobId,
+        onchainCommitmentId: job.onchainCommitmentId,
         jobTitle: job.title,
         appliedAt: app.appliedAt,
         responseDeadline: app.responseDeadline,

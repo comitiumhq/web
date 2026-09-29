@@ -1,6 +1,6 @@
 import { isDefined } from '@comitium/schemas/guards';
-import { NullifierType, type ProofResult, type QueryBuilder } from '@zkpassport/sdk';
-import { ZKPassportQRCode } from '@zkpassport/ui/react';
+import { NullifierType, type ProofResult } from '@zkpassport/sdk';
+import { type QueryBuilder, ZKPassportQRCode } from '@zkpassport/ui/react';
 import { useTheme } from 'next-themes';
 import { useCallback, useRef } from 'react';
 
@@ -9,9 +9,13 @@ import type { CompleteZkIdentityAttemptInput, ZkIdentityAttempt } from '../zk-id
 export function ZkPassportFlow({
   attempt,
   onComplete,
+  onError,
+  onReject,
 }: {
   attempt: ZkIdentityAttempt;
   onComplete: (input: CompleteZkIdentityAttemptInput) => void;
+  onError: (message: string) => void;
+  onReject: () => void;
 }) {
   const { resolvedTheme } = useTheme();
   const proofsByIndex = useRef(new Map<number, ProofResult>());
@@ -55,12 +59,15 @@ export function ZkPassportFlow({
       <ZKPassportQRCode
         name="Comitium"
         domain={attempt.request.domain}
+        scope={attempt.request.scope}
         mode={attempt.request.proofMode}
         oprfKeyId={attempt.request.oprfKeyId}
         uniqueIdentifierType={NullifierType.SALTED}
         theme={theme}
         query={buildQuery}
         onProofGenerated={submitProofs}
+        onError={onError}
+        onReject={onReject}
         onRetryClicked={resetProofs}
       />
     </div>

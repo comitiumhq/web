@@ -1,15 +1,15 @@
 import { z } from 'zod';
+import { type TipTapDoc, tipTapDocSchema } from './common';
 import { preparedRelayedOnchainOperationSchema } from './onchain-operations';
 import { addressSchema, paginatedSchema, uuidSchema, walletAddressSchema } from './public';
 import {
   type CompensationConfig,
   compensationConfigSchema,
-  jobCommitmentStatusSchema,
   jobLifecycleSchema,
-  jobPostingApplyModeSchema,
   jobStatusSchema,
   type LocationEntry,
   locationEntrySchema,
+  responseCommitmentStatusSchema,
 } from './public-jobs';
 
 // --- Evaluation criteria ---
@@ -31,20 +31,20 @@ const jobPostingStatusSchema = z.enum(['published', 'unpublished']);
 
 export const jobSummarySchema = z.object({
   id: z.string(),
-  jobCommitmentId: uuidSchema.nullable(),
-  commitmentStatus: jobCommitmentStatusSchema.nullable(),
+  responseCommitmentId: uuidSchema.nullable(),
+  commitmentStatus: responseCommitmentStatusSchema.nullable(),
   postingStatus: jobPostingStatusSchema.nullable(),
   lifecycle: jobLifecycleSchema,
-  postingApplyMode: jobPostingApplyModeSchema.nullable(),
   chainId: z.number().nullable(),
-  commitmentContract: addressSchema.nullable(),
-  jobId: z.number().nullable(),
+  responseCommitmentContract: addressSchema.nullable(),
+  onchainCommitmentId: z.number().nullable(),
   orgId: z.string(),
   orgOnChainId: z.number().nullable(),
   creatorAddress: walletAddressSchema.nullable(),
   stake: z.string().nullable(),
   responseDeadlineDays: z.number().nullable(),
   status: jobStatusSchema,
+  archivedAt: z.string().nullable(),
   version: z.number().int().min(0),
   totalApplications: z.number(),
   respondedApplications: z.number(),
@@ -53,7 +53,7 @@ export const jobSummarySchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   title: z.string().nullable(),
-  description: z.string().nullable(),
+  description: tipTapDocSchema.nullable(),
   location: z.array(locationEntrySchema).nullable(),
   locationType: z.string().nullable(),
   employmentType: z.string().nullable(),
@@ -67,8 +67,6 @@ export type JobSummary = z.infer<typeof jobSummarySchema>;
 // --- Lifecycle operations ---
 
 export const preparedOnchainOperationSchema = preparedRelayedOnchainOperationSchema;
-
-export const prepareUnpublishSchema = preparedRelayedOnchainOperationSchema;
 
 export const jobLifecycleMutationResponseSchema = z.object({
   version: z.number().int().min(0),
@@ -114,21 +112,15 @@ export const hiringTeamEntrySchema = z.object({
 
 export type HiringTeamEntry = z.infer<typeof hiringTeamEntrySchema>;
 
-// --- Job application data (contract interaction — frontend-only) ---
+// --- Public application data (frontend-only) ---
 
-const jobApplicationDataSchema = z.object({
+const jobApplicationDataBaseSchema = z.object({
   id: uuidSchema,
   postingId: uuidSchema,
-  chainId: z.number(),
-  jobId: z.number(),
-  commitmentContract: addressSchema,
   orgId: z.string(),
-  creatorAddress: addressSchema,
 });
 
-export type JobApplicationData = z.infer<typeof jobApplicationDataSchema>;
-
-// --- IPFS job metadata ---
+export type JobApplicationData = z.infer<typeof jobApplicationDataBaseSchema>;
 
 // --- Org jobs list ---
 
@@ -145,13 +137,13 @@ const hiringTeamSummarySchema = z.object({
 
 const orgJobListItemSchema = z.object({
   id: z.string(),
-  jobCommitmentId: uuidSchema.nullable(),
-  commitmentStatus: jobCommitmentStatusSchema.nullable(),
+  responseCommitmentId: uuidSchema.nullable(),
+  commitmentStatus: responseCommitmentStatusSchema.nullable(),
   postingStatus: jobPostingStatusSchema.nullable(),
   lifecycle: jobLifecycleSchema,
   chainId: z.number().nullable(),
-  commitmentContract: addressSchema.nullable(),
-  jobId: z.number().nullable(),
+  responseCommitmentContract: addressSchema.nullable(),
+  onchainCommitmentId: z.number().nullable(),
   title: z.string().nullable(),
   departmentId: uuidSchema.nullable(),
   departmentName: z.string().nullable(),
@@ -164,6 +156,7 @@ const orgJobListItemSchema = z.object({
   interviewPlanName: z.string().nullable().default(null),
   stake: z.string().nullable(),
   status: jobStatusSchema,
+  archivedAt: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
   candidateCount: z.number(),
@@ -174,12 +167,14 @@ export type OrgJobListItem = z.infer<typeof orgJobListItemSchema>;
 
 export const orgJobsResponseSchema = paginatedSchema(orgJobListItemSchema);
 
-// --- Job drafts ---
+// --- Job editor ---
 
-export const jobDraftSchema = z.object({
+export const jobEditorSchema = z.object({
   id: z.string(),
+  status: jobStatusSchema,
+  archivedAt: z.string().nullable(),
   title: z.string(),
-  description: z.unknown().nullable(),
+  description: tipTapDocSchema.nullable(),
   departmentId: uuidSchema.nullable(),
   locationId: uuidSchema.nullable(),
   location: z.array(locationEntrySchema).nullable(),
@@ -188,6 +183,7 @@ export const jobDraftSchema = z.object({
   category: z.string().nullable(),
   compensation: compensationConfigSchema.nullable(),
   formId: uuidSchema.nullable(),
+  applicationCapacity: z.number().int().min(1).max(1000).nullable(),
   criteria: z.array(evaluationCriterionSchema).nullable(),
   interviewPlanId: z.string().nullable(),
   hiringTeam: z.array(hiringTeamEntrySchema).nullable(),
@@ -197,7 +193,7 @@ export const jobDraftSchema = z.object({
   updatedAt: z.string(),
 });
 
-export type JobDraft = z.infer<typeof jobDraftSchema>;
+export type JobEditor = z.infer<typeof jobEditorSchema>;
 
 const jobDraftListItemSchema = z.object({
   id: z.string(),
@@ -237,14 +233,48 @@ export const jobCreationContextSchema = z.object({
 
 export type JobCreationContext = z.infer<typeof jobCreationContextSchema>;
 
-export const publishDraftResponseSchema = preparedRelayedOnchainOperationSchema;
+export const jobPostingSchema = z.object({
+  id: uuidSchema,
+  jobId: z.string(),
+  slug: z.string(),
+  status: jobPostingStatusSchema,
+  description: tipTapDocSchema.nullable(),
+  form: z
+    .object({
+      id: uuidSchema,
+      title: z.string(),
+      isArchived: z.boolean(),
+    })
+    .nullable(),
+  applicationCapacity: z.number().int().min(1).max(1000).nullable(),
+  completedApplicationCount: z.number().int().nonnegative(),
+  availability: z.enum(['accepting', 'capacity-reached', 'unavailable']),
+  commitment: z
+    .object({
+      status: responseCommitmentStatusSchema,
+      responseDeadlineDays: z.number().int().positive(),
+      stake: z.string(),
+      feeAmount: z.string(),
+      canSettle: z.boolean(),
+      pendingApplicationResponses: z.number().int().nonnegative(),
+    })
+    .nullable(),
+  publishedAt: z.string().nullable(),
+  unpublishedAt: z.string().nullable(),
+  version: z.number().int().min(0),
+});
 
-export const prepareJobContentUriUpdateResponseSchema = preparedRelayedOnchainOperationSchema;
+export type JobPosting = z.infer<typeof jobPostingSchema>;
+
+export const unpublishJobPostingResponseSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('completed'), posting: jobPostingSchema }),
+  z.object({ kind: z.literal('prepared'), operation: preparedRelayedOnchainOperationSchema }),
+]);
 
 // --- API input types ---
 
 export type GetOrgJobsParams = {
-  status?: 'draft' | 'open' | 'closed' | 'all';
+  status?: 'draft' | 'open' | 'closed' | 'archived' | 'all';
   search?: string;
   departmentId?: string;
   locationId?: string;
@@ -255,10 +285,10 @@ export type GetOrgJobsParams = {
 
 export type CreateDraftParams = { title: string; departmentId: string; locationId: string } | { sourceJobId: string };
 
-export type UpdateDraftData = {
+export type UpdateJobEditorData = {
   expectedVersion: number;
   title?: string;
-  description?: unknown;
+  description?: TipTapDoc | null;
   departmentId?: string;
   locationId?: string;
   locationType?: string | null;
@@ -267,25 +297,30 @@ export type UpdateDraftData = {
   category?: string | null;
   compensation?: CompensationConfig | null;
   formId?: string | null;
+  applicationCapacity?: number | null;
   criteria?: EvaluationCriterion[] | null;
   interviewPlanId?: string | null;
   hiringTeam?: { userId: string; role: HiringTeamRole }[];
 };
 
-export type PublishDraftParams = {
+export type UpdateJobPostingData = {
+  expectedVersion: number;
+  description?: TipTapDoc | null;
+  formId?: string | null;
+  applicationCapacity?: number | null;
+};
+
+export type PublishJobPostingData = {
+  expectedVersion: number;
+};
+
+export type PrepareCommitmentParams = {
   expectedVersion: number;
   stake: string;
   feeTier: number;
-  maxApplications?: number;
-  descriptionMarkdown: string;
 };
 
-export type PrepareJobContentUriUpdateParams = {
-  expectedVersion: number;
-  descriptionMarkdown: string;
-};
-
-export const updateDraftResponseSchema = z.object({
+export const updateJobEditorResponseSchema = z.object({
   success: z.literal(true),
   version: z.number().int().min(0),
 });

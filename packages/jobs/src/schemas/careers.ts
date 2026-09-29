@@ -1,12 +1,11 @@
-import { bytes32HexSchema, paginatedWithTotalSchema, uuidSchema, walletAddressSchema } from '@comitium/schemas/public';
+import { tipTapDocSchema } from '@comitium/schemas/common';
+import { paginatedWithTotalSchema, uuidSchema } from '@comitium/schemas/public';
 import { companyInfoSchema, jobListItemSchema, jobStatusSchema } from '@comitium/schemas/public-jobs';
 import { z } from 'zod';
 
 const careerOrgSchema = z.object({
   id: z.string(),
-  onChainOrgId: z.number(),
   careersSlug: z.string(),
-  txHash: bytes32HexSchema,
   name: z.string().nullable(),
   description: z.string().nullable(),
   logo: z.string().nullable(),
@@ -56,10 +55,8 @@ const recruitingPrivacySchema = z.object({
 
 export const careerJobSchema = careerJobListItemSchema.omit({ orgSlug: true }).extend({
   orgId: z.string(),
-  creatorAddress: walletAddressSchema,
-  orgOnChainId: z.number(),
   org: careerOrgSchema,
-  description: z.string().nullable(),
+  description: tipTapDocSchema.nullable(),
   status: jobStatusSchema,
   responseDeadlineDays: z.number().nullable(),
   category: z.string().nullable(),

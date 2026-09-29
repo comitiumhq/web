@@ -31,7 +31,7 @@ export function ReopenJobDialog({ open, onOpenChange, jobId, jobTitle, orgId }: 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Reopen as draft?</DialogTitle>
+          <DialogTitle>Reopen as Draft?</DialogTitle>
           <DialogDescription>{jobTitle ?? 'Closed job'}</DialogDescription>
         </DialogHeader>
 

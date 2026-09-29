@@ -35,7 +35,7 @@ export function useCreateDraft(orgId: string, options?: UseCreateDraftOptions) {
 
       if (navigateOnSuccess) {
         router.navigate({
-          to: '/org/$orgId/jobs/$jobId/details',
+          to: '/org/$orgId/jobs/$jobId/settings',
           params: { orgId, jobId: draft.id },
         });
       }

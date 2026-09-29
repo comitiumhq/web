@@ -13,10 +13,8 @@ import {
 } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { useQueryApplicantStakeReturn } from '@/hooks/queries/use-query-applicant-stake-return';
 import { useQueryMyApplications } from '@/hooks/queries/use-query-my-applications';
 import { ApplicationCard } from './application-card';
-import { StakeReturnCard } from './stake-return-card';
 import { type FilterValue, StatsHeader } from './stats-header';
 import { calculateStats, matchesApplicationFilter } from './utils';
 
@@ -31,12 +29,7 @@ function filterApplications(applications: MyApplicationResponse[], filter: Filte
 }
 
 function DashboardHeader() {
-  return (
-    <PageHeader
-      title="Applications"
-      description="Track your applications, employer responses, and eligible deposit returns."
-    />
-  );
+  return <PageHeader title="Applications" description="Follow each application from submission to decision." />;
 }
 
 interface ApplicationsStatusCardProps {
@@ -162,7 +155,6 @@ function DashboardShell({ children }: { children: ReactNode }) {
 
 export function MyApplicationsDashboard() {
   const { data: applications, isLoading, error, refetch, isFetching } = useQueryMyApplications();
-  const { data: stakeReturnAvailability } = useQueryApplicantStakeReturn();
   const [activeFilter, setActiveFilter] = useState<FilterValue>(null);
 
   const stats = useMemo(() => (applications ? calculateStats(applications) : null), [applications]);
@@ -207,10 +199,6 @@ export function MyApplicationsDashboard() {
   return (
     <DashboardShell>
       <StatsHeader stats={stats} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-
-      {stakeReturnAvailability && stakeReturnAvailability.count > 0 ? (
-        <StakeReturnCard availability={stakeReturnAvailability} />
-      ) : null}
 
       <div className="mt-6">
         {filtered.length === 0 ? (

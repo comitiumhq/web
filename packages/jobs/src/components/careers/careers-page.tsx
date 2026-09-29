@@ -1,11 +1,10 @@
-import { EXPLORER_TX_URL } from '@comitium/chain/network';
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { SKELETON_CARD_COUNT } from '@comitium/ui/config';
 import { PageContainer } from '@comitium/ui/page-container';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { CubeIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
+import { GlobeSimpleIcon } from '@phosphor-icons/react';
 import { useCallback, useMemo } from 'react';
 import type { PublicJobsApi } from '../../api';
 import { CAREERS_JOBS_LIMIT } from '../../constants';
@@ -78,17 +77,6 @@ export function CareersPage({
                   </a>
                 </Button>
               )}
-
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label="View organization creation transaction on BaseScan"
-                asChild
-              >
-                <a href={`${EXPLORER_TX_URL}${org.txHash}`} target="_blank" rel="noopener noreferrer">
-                  <CubeIcon />
-                </a>
-              </Button>
             </div>
           </div>
 

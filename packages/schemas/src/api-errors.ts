@@ -10,6 +10,7 @@ export const API_ERROR_CODES = {
   recruitingPrivacyPolicyRequired: 'RECRUITING_PRIVACY_POLICY_REQUIRED',
   recruitingControllerNameRequired: 'RECRUITING_CONTROLLER_NAME_REQUIRED',
   aiCriteriaEvaluationPolicyChanged: 'AI_CRITERIA_EVALUATION_POLICY_CHANGED',
+  zkIdentityRequired: 'ZK_IDENTITY_REQUIRED',
 } as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[keyof typeof API_ERROR_CODES];

@@ -34,7 +34,7 @@ Each Organization makes and remains solely responsible for its recruiting, emplo
 
 Some features use smart contracts on Base and amounts denominated in USDC. Before authorization, the Service displays the amount, any fee, the relevant response period, and the conditions for refund or settlement.
 
-A candidate application commitment is designed to become refundable after the contract records a response from the Organization or the applicable deadline is reached. An Organization's job commitment may be returned, partially slashed, or fully slashed under the displayed response-rate rules. A slashed amount may be sent to an irreversible burn address rather than retained by Comitium. Displayed protocol or publication fees may be non-refundable.
+An Organization may elect to fund a response commitment for a job posting. The commitment amount, fee, response period, and settlement terms are presented before authorization. Based on the recorded response rate, the commitment may be returned or slashed in whole or in part. Slashed funds may be transferred to an irreversible burn address, and fees may be non-refundable.
 
 These commitments are accountability mechanisms, not investments or promises of yield. Blockchain transactions may be public and irreversible. Confirmation can be delayed, transactions can fail, USDC can lose its reference value, and wallets, smart contracts, relayers, RPC providers, or Base may fail or be compromised. You are responsible for reviewing the information displayed before authorization.
 

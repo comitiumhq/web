@@ -35,7 +35,7 @@ function InterviewPlanPage() {
   return (
     <div className="h-full overflow-y-auto">
       <PageContainer size="editor" className="py-8 lg:px-10">
-        <SectionHeader title="Interview Plan" description={null} />
+        <SectionHeader title="Interview plan" description={null} />
         <JobInterviewPlan org={org} jobId={jobId} />
       </PageContainer>
     </div>

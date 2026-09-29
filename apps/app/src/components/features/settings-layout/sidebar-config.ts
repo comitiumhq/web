@@ -15,11 +15,11 @@ import {
   ArchiveReasonsIcon,
   CancelRescheduleReasonsIcon,
   CloseJobReasonsIcon,
+  CommitmentFundsIcon,
   CustomFieldsIcon,
   DepartmentsAndTeamsIcon,
   FeedbackFormIcon,
   InterviewPlanIcon,
-  JobFundsIcon,
 } from '@/lib/constants/domain-icons';
 import { Permission } from '@/lib/schemas/org';
 
@@ -67,9 +67,9 @@ export function buildSidebarEntries(basePath: string): SidebarEntry[] {
         },
         {
           type: 'item',
-          label: 'Job Funds',
+          label: 'Commitment Funds',
           path: `${basePath}/funds`,
-          icon: JobFundsIcon,
+          icon: CommitmentFundsIcon,
           match: (p) => p.startsWith(`${basePath}/funds`),
           permission: null,
           orgAdminOnly: true,

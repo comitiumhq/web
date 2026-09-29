@@ -1,17 +1,19 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
+import { richTextToPlainText } from '@comitium/ui/rich-text';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useCreateJobTemplate, useUpdateJobTemplate } from '@/hooks/mutations/use-job-template-mutations';
 import { useQueryJobTemplate } from '@/hooks/queries/use-query-job-templates';
-import { type DraftFormData, DraftFormSchema } from '@/lib/schemas/draft-form';
+import { buildCompensation } from '@/lib/jobs/compensation';
+import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
 import type { CreateJobTemplateBody } from '@/lib/schemas/job-templates';
 
-import { buildCompensation, prepareEvaluationCriteria } from '../../job-draft/utils';
+import { prepareEvaluationCriteria } from '../../job-criteria/utils';
 
-const EMPTY_FORM_VALUES: DraftFormData = { title: '' };
+const EMPTY_FORM_VALUES: JobSettingsFormData = { title: '' };
 
 interface UseTemplateFormOptions {
   onSaved?: () => void;
@@ -31,8 +33,8 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
 
   const isInitializedRef = useRef(false);
 
-  const form = useForm<DraftFormData>({
-    resolver: zodResolver(DraftFormSchema),
+  const form = useForm<JobSettingsFormData>({
+    resolver: zodResolver(JobSettingsFormSchema),
     defaultValues: EMPTY_FORM_VALUES,
   });
 
@@ -41,17 +43,18 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
       return;
     }
 
-    const formValues: DraftFormData = {
+    const formValues: JobSettingsFormData = {
       title: template.title,
       departmentId: template.departmentId ?? undefined,
       locationId: template.locationId ?? undefined,
       location: template.location ?? undefined,
-      locationType: (template.locationType as DraftFormData['locationType']) ?? undefined,
-      employmentType: (template.employmentType as DraftFormData['employmentType']) ?? undefined,
-      category: (template.category as DraftFormData['category']) ?? undefined,
+      locationType: (template.locationType as JobSettingsFormData['locationType']) ?? undefined,
+      employmentType: (template.employmentType as JobSettingsFormData['employmentType']) ?? undefined,
+      category: (template.category as JobSettingsFormData['category']) ?? undefined,
       compensationCurrency:
-        (template.compensation?.tiers[0]?.currency as DraftFormData['compensationCurrency']) ?? undefined,
-      compensationPeriod: (template.compensation?.tiers[0]?.period as DraftFormData['compensationPeriod']) ?? undefined,
+        (template.compensation?.tiers[0]?.currency as JobSettingsFormData['compensationCurrency']) ?? undefined,
+      compensationPeriod:
+        (template.compensation?.tiers[0]?.period as JobSettingsFormData['compensationPeriod']) ?? undefined,
       compensationMin: template.compensation?.tiers[0]?.base_min ?? undefined,
       compensationMax: template.compensation?.tiers[0]?.base_max ?? undefined,
     };
@@ -94,6 +97,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
     const isUpdating = templateId !== null;
     const shouldSendDepartment = !isUpdating || form.getFieldState('departmentId').isDirty;
     const shouldSendLocation = !isUpdating || form.getFieldState('locationId').isDirty;
+    const descriptionContent = richTextToPlainText(description) ? description : null;
 
     if (!trimmedTitle) {
       toast.error('Title is required');
@@ -107,7 +111,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
       employmentType: v.employmentType,
       category: v.category,
       compensation: buildCompensation(v) ?? undefined,
-      description,
+      description: descriptionContent,
       formId,
       criteria: validCriteria,
       hiringTeam: hiringTeam.map((member) => ({ userId: member.userId, role: member.role })),

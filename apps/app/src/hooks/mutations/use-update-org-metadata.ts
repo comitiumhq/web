@@ -1,12 +1,8 @@
-import { requireWalletAccount } from '@comitium/auth/require-wallet-account';
-import { useAccount, useActiveWallet } from '@comitium/auth/use-wallet';
-import { refreshAfterOnchainOperationSettles } from '@comitium/chain/onchain-operation-observer';
 import { normalizeIpfsUri, requireIpfsUri } from '@comitium/schemas/ipfs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { prepareOrgContentUriUpdate } from '@/lib/api/orgs';
+import { updateOrgProfile } from '@/lib/api/orgs';
 import { uploadFile } from '@/lib/ipfs/storage';
-import { submitPreparedRelayedOperation } from '@/lib/onchain-operation-signatures';
 import type { MyOrg, OrgDetails } from '@/lib/schemas/org';
 import { ORG_PROFILE_LOGO_MAX_LENGTH, orgSettingsSchema } from '@/lib/schemas/org-settings-form';
 import { qk } from '../query-keys';
@@ -23,13 +19,9 @@ export interface OrgMetadataFormData {
 
 export function useUpdateOrgMetadata(orgId: string) {
   const queryClient = useQueryClient();
-  const { isConnected } = useAccount();
-  const wallet = useActiveWallet();
 
   return useMutation({
     mutationFn: async (data: OrgMetadataFormData) => {
-      const account = requireWalletAccount(isConnected, wallet);
-
       const profile = orgSettingsSchema.parse({
         name: data.name,
         careersSlug: data.careersSlug,
@@ -49,7 +41,7 @@ export function useUpdateOrgMetadata(orgId: string) {
         });
       }
 
-      const prepared = await prepareOrgContentUriUpdate(orgId, {
+      await updateOrgProfile(orgId, {
         name: profile.name,
         careersSlug: profile.careersSlug,
         description: profile.description,
@@ -57,9 +49,7 @@ export function useUpdateOrgMetadata(orgId: string) {
         website: profile.website,
       });
 
-      await submitPreparedRelayedOperation(orgId, prepared, account);
-
-      return { operationId: prepared.operationId, profile: { ...profile, logo: logoCid } };
+      return { ...profile, logo: logoCid };
     },
     onMutate: async () => {
       toast.loading('Saving organization profile...', { id: 'update-org' });
@@ -68,9 +58,8 @@ export function useUpdateOrgMetadata(orgId: string) {
         queryClient.cancelQueries({ queryKey: qk.orgs.my(), exact: true }),
       ]);
     },
-    onSuccess: ({ operationId, profile }) => {
+    onSuccess: (profile) => {
       invalidateWorkspaceSetup(queryClient, orgId);
-      void refreshAfterOnchainOperationSettles(operationId, () => invalidateWorkspaceSetup(queryClient, orgId));
       queryClient.setQueryData<OrgDetails>(qk.org.detail(orgId), (current) => {
         if (!current) {
           return current;

@@ -12,10 +12,10 @@
     "./generated/contracts": "./src/generated/contracts.ts",
     "./instances": "./src/instances.ts",
     "./network": "./src/network.ts",
-    "./job-config": "./src/job-config.ts",
-    "./job-economics": "./src/job-economics.ts",
+    "./response-commitment-config": "./src/response-commitment-config.ts",
+    "./response-commitment-economics": "./src/response-commitment-economics.ts",
     "./onchain-operation-observer": "./src/onchain-operation-observer.ts",
-    "./job-commitment/bindings": "./src/job-commitment/bindings.ts",
+    "./response-commitment/bindings": "./src/response-commitment/bindings.ts",
     "./usdc": "./src/usdc.ts",
     "./use-onchain-settlement-observer": "./src/use-onchain-settlement-observer.ts"
   },

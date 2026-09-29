@@ -87,7 +87,7 @@ describe('useCloseJob', () => {
     mocks.closeJob.mockResolvedValue({ version: 2 });
   });
 
-  it('prepares a durable Job close before submitting settlement', async () => {
+  it('prepares a durable Job close before submitting Commitment settlement', async () => {
     let confirm = () => {};
     mocks.submitAndConfirm.mockReturnValue(
       new Promise((resolve) => {
@@ -108,10 +108,9 @@ describe('useCloseJob', () => {
     await expect(pending).resolves.toEqual({ kind: 'settlement', prepared, state: 'confirmed' });
   });
 
-  it('closes directly after an already-finalized Commitment', async () => {
+  it('closes a Job without a live Commitment directly', async () => {
     const directParams = { ...params, commitmentSettlementRequired: false };
-    const mutation = options();
-    const result = await mutation.mutationFn(directParams);
+    const result = await options().mutationFn(directParams);
 
     expect(result).toEqual({ kind: 'closed' });
     expect(mocks.requireConnectedWallet).not.toHaveBeenCalled();

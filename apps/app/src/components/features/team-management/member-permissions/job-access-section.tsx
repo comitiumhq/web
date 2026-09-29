@@ -167,8 +167,9 @@ function JobAccessLink({ orgId, assignment, title }: JobAccessLinkProps) {
     return (
       <Button variant="ghost" size="icon-sm" asChild>
         <Link
-          to="/org/$orgId/jobs/$jobId/hiring-team"
+          to="/org/$orgId/jobs/$jobId/settings"
           params={{ orgId, jobId: assignment.jobId }}
+          search={{ tab: 'hiring-team' }}
           aria-label={`Open ${title} hiring team`}
         >
           <ArrowUpRightIcon />
@@ -180,8 +181,9 @@ function JobAccessLink({ orgId, assignment, title }: JobAccessLinkProps) {
   return (
     <Button variant="ghost" size="icon-sm" asChild>
       <Link
-        to="/org/$orgId/jobs/$jobId/details"
+        to="/org/$orgId/jobs/$jobId/settings"
         params={{ orgId, jobId: assignment.jobId }}
+        search={{ tab: 'basic' }}
         aria-label={`Open ${title}`}
       >
         <ArrowUpRightIcon />

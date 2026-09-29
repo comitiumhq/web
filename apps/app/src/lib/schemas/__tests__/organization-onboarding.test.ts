@@ -9,7 +9,9 @@ import {
 describe('canAccessOrganizationOnboarding', () => {
   it('allows a signed-in account with no active organization to enter setup', () => {
     expect(canAccessOrganizationOnboarding({ status: 'needs_verification' }, 0)).toBe(true);
-    expect(canAccessOrganizationOnboarding({ status: 'creating', email: null, domain: 'example.com' }, 0)).toBe(true);
+    expect(
+      canAccessOrganizationOnboarding({ status: 'ready', email: 'owner@example.com', domain: 'example.com' }, 0),
+    ).toBe(true);
   });
 
   it('blocks setup for any active organization member', () => {

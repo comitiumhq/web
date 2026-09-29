@@ -225,7 +225,7 @@ function ApplicationReviewBody({ activity, memberMap, isRequired }: ApplicationR
 
 function RequiredReviewIndicator() {
   return (
-    <Badge variant="subtle" title="This review is required for the Application Review stage and cannot be deleted.">
+    <Badge variant="secondary" title="This review is required for the Application Review stage and cannot be deleted.">
       <LockIcon data-icon="inline-start" />
       Required
     </Badge>

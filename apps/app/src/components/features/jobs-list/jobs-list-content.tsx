@@ -66,6 +66,18 @@ function matchesTextFilters(item: TextFilterFields, search: string, filters: Job
   return true;
 }
 
+function matchesStatusFilter(job: OrgJobListItem, status: StatusFilter): boolean {
+  if (status === 'archived') {
+    return job.archivedAt !== null;
+  }
+
+  if (status === 'draft' || job.archivedAt !== null) {
+    return false;
+  }
+
+  return status === 'all' || job.status === status;
+}
+
 function toDraftRows(
   drafts: JobDraftListItem[],
   status: StatusFilter,
@@ -82,20 +94,8 @@ function toDraftRows(
 }
 
 function toJobRows(jobs: OrgJobListItem[], status: StatusFilter, search: string, filters: JobsListFilters): JobsRow[] {
-  if (status === 'draft') {
-    return [];
-  }
-
   return jobs
-    .filter((job) => job.status !== 'draft')
-    .filter((job) => {
-      const matchesStatus =
-        status === 'all' ||
-        (status === 'open' && job.status === 'open') ||
-        (status === 'closed' && job.status === 'closed');
-
-      return matchesStatus && matchesTextFilters(job, search, filters);
-    })
+    .filter((job) => matchesStatusFilter(job, status) && matchesTextFilters(job, search, filters))
     .map((job): JobsRow => ({ kind: 'job', id: job.id, job }));
 }
 
@@ -105,12 +105,13 @@ function computeStatusCounts(
   search: string,
   filters: JobsListFilters,
 ): Record<StatusFilter, number> {
-  const matchingJobs = jobs.filter((job) => job.status !== 'draft' && matchesTextFilters(job, search, filters));
-  const open = matchingJobs.filter((job) => job.status === 'open').length;
-  const closed = matchingJobs.filter((job) => job.status === 'closed').length;
+  const matchingJobs = jobs.filter((job) => matchesTextFilters(job, search, filters));
+  const open = matchingJobs.filter((job) => matchesStatusFilter(job, 'open')).length;
+  const closed = matchingJobs.filter((job) => matchesStatusFilter(job, 'closed')).length;
   const draft = drafts.filter((item) => matchesTextFilters(item, search, filters)).length;
+  const archived = matchingJobs.filter((job) => matchesStatusFilter(job, 'archived')).length;
 
-  return { all: open + closed + draft, open, draft, closed };
+  return { all: open + closed + draft, open, draft, closed, archived };
 }
 
 export function JobsListContent({
@@ -268,7 +269,6 @@ export function JobsListContent({
           <JobsTable
             orgId={orgId}
             rows={isGlobalEmpty ? [] : rows}
-            isAdmin={isAdmin}
             loading={isGlobalEmpty ? false : isLoading}
             emptyState={emptyState}
           />

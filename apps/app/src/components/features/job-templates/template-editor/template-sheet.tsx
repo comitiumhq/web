@@ -2,25 +2,25 @@ import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { FeatureSheetContent } from '@comitium/ui/feature-sheet';
 import { Form } from '@comitium/ui/form';
+import { PageContainer } from '@comitium/ui/page-container';
 import { SectionHeader } from '@comitium/ui/section-header';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
+import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
 import { FileXIcon } from '@phosphor-icons/react';
 import { useCallback, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import { HiringTeamTab } from '@/components/features/hiring-team-editor/hiring-team-tab';
 import { CriteriaTab } from '@/components/features/job-criteria';
-import { ApplicationFormPicker } from '@/components/features/job-draft/application-form-picker';
-import { DraftDescriptionTab } from '@/components/features/job-draft/draft-description-tab';
-import { DraftDetailsTab } from '@/components/features/job-draft/draft-details-tab';
-import { DraftEditorSkeleton } from '@/components/features/job-draft/states';
+import { DetailsSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
+import { JobSettingsEditor } from '@/components/features/job-draft/job-settings-editor';
 import { TemplateInterviewPlan } from '@/components/features/job-interview-plan/template-interview-plan';
+import { PostingEditor } from '@/components/features/job-posting/posting-editor';
 
 import { TemplateHeader } from './header';
 import { InterviewPlanTab } from './interview-plan-tab';
 import { TemplateMobileSectionTabs, TemplateSectionNav } from './section-nav';
 import { useTemplateForm } from './use-template-form';
-import { getTemplateSection, type TemplateSection } from './utils';
+import { getTemplateSection, TEMPLATE_SECTION_ITEMS, type TemplateSection } from './utils';
 
 interface TemplateSheetProps {
   orgId: string;
@@ -90,17 +90,15 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
     handleHiringTeamChange,
   } = useTemplateForm(orgId, templateId, { onSaved: onClose, onCreated });
 
-  const [activeSection, setActiveSection] = useState<TemplateSection>('details');
-  const watchedValues = useWatch({ control: form.control });
+  const [activeSection, setActiveSection] = useState<TemplateSection>('settings');
+  const watchedTitle = useWatch({ control: form.control, name: 'title' });
 
   if (!isNew && isLoading) {
     return (
       <>
         <SheetTitle className="sr-only">Loading template</SheetTitle>
         <SheetDescription className="sr-only">Loading reusable job template defaults.</SheetDescription>
-        <div className="p-6">
-          <DraftEditorSkeleton />
-        </div>
+        <TemplateEditorSkeleton />
       </>
     );
   }
@@ -121,8 +119,9 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
     );
   }
 
-  const displayTitle = watchedValues.title || (template?.title ?? '');
-  const trimmedTitle = (watchedValues.title ?? '').trim();
+  const currentTitle = watchedTitle ?? form.getValues('title') ?? '';
+  const displayTitle = currentTitle || (template?.title ?? '');
+  const trimmedTitle = currentTitle.trim();
   const canSave = trimmedTitle.length > 0 && (isNew || isDirty) && !isSaving;
   const saveLabel = isNew ? 'Create template' : 'Save changes';
 
@@ -144,23 +143,28 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
         <TemplateSectionNav activeSection={activeSection} onSelect={setActiveSection} />
 
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 lg:px-8">
+          <PageContainer size="editor" className="py-8 lg:px-10">
             <SectionHeader title={getTemplateSection(activeSection).title} description={null} />
 
-            {activeSection === 'details' && (
+            {activeSection === 'settings' && (
               <Form {...form}>
-                <DraftDetailsTab orgId={orgId} form={form} showPublishRequiredMarkers={false} />
+                <JobSettingsEditor
+                  orgId={orgId}
+                  form={form}
+                  hiringTeam={hiringTeam}
+                  onChangeHiringTeam={handleHiringTeamChange}
+                  showPublishRequiredMarkers={false}
+                />
               </Form>
             )}
-            {activeSection === 'description' && (
-              <DraftDescriptionTab content={description} onChange={handleDescriptionChange} />
-            )}
-            {activeSection === 'application-form' && (
-              <ApplicationFormPicker
+            {activeSection === 'posting' && (
+              <PostingEditor
                 orgId={orgId}
                 owner={{ kind: 'job_template' }}
+                description={description}
+                onDescriptionChange={handleDescriptionChange}
                 formId={formId}
-                onChange={handleFormIdChange}
+                onFormIdChange={handleFormIdChange}
               />
             )}
             {activeSection === 'criteria' && (
@@ -181,10 +185,7 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
                   onSelectTemplate={handleInterviewPlanChange}
                 />
               ))}
-            {activeSection === 'hiring-team' && (
-              <HiringTeamTab orgId={orgId} hiringTeam={hiringTeam} onChangeHiringTeam={handleHiringTeamChange} />
-            )}
-          </div>
+          </PageContainer>
         </div>
       </div>
 
@@ -201,6 +202,39 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
         <Button type="button" onClick={save} disabled={!canSave}>
           {isSaving ? <Spinner /> : saveLabel}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function TemplateEditorSkeleton() {
+  return (
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="flex shrink-0 items-center border-b border-separator px-6 py-5">
+        <Skeleton className="h-6 w-48 rounded-md" />
+      </div>
+
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <aside className="hidden w-56 shrink-0 flex-col gap-1 border-r border-separator p-3 lg:flex">
+          {TEMPLATE_SECTION_ITEMS.map((item) => (
+            <div key={item.id} className="flex h-9 items-center gap-2.5 px-3">
+              <Skeleton className="size-4 shrink-0 rounded-md" />
+              <Skeleton className="h-3.5 w-28 rounded-md" />
+            </div>
+          ))}
+        </aside>
+
+        <div className="min-w-0 flex-1 overflow-y-auto">
+          <PageContainer size="editor" className="py-8 lg:px-10">
+            <SectionHeader title="Settings" description={null} />
+            <DetailsSkeleton />
+          </PageContainer>
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center justify-end gap-2 border-t border-separator px-6 py-4">
+        <Skeleton className="h-9 w-20 rounded-full" />
+        <Skeleton className="h-9 w-28 rounded-full" />
       </div>
     </div>
   );

@@ -50,7 +50,7 @@ Customer gives Comitium general written authorization to use the subprocessors m
 
 Comitium will give reasonable advance notice before adding or replacing a subprocessor that will process Customer Personal Data. Customer may object during the notice period on reasonable data-protection grounds by contacting [legal@comitium.co](mailto:legal@comitium.co). If the parties cannot resolve the objection, Customer's sole remedy is to stop using the affected feature or terminate the affected Service before the change takes effect.
 
-Public blockchain and IPFS networks are decentralized public infrastructure, not subprocessors controlled by Comitium. Customer instructs Comitium to publish the public Organization, job, transaction, and commitment information submitted to those networks through the Service. Protected recruitment content is not intentionally published to them.
+Public blockchain and IPFS networks are decentralized public infrastructure, not subprocessors controlled by Comitium. Customer instructs Comitium to publish the public Organization, transaction, and response-commitment information submitted to those networks through the Service. Protected recruitment content is not intentionally published to them.
 
 ## International transfers
 
@@ -125,7 +125,7 @@ These measures may evolve as technology and risk change, provided the overall pr
 - **Hetzner Online GmbH**: database, application, and self-hosted scheduling infrastructure.
 - **Horkos, LLC d/b/a Privy**: authentication and embedded-wallet infrastructure.
 - **Plus Five Five, Inc. d/b/a Resend**: outbound email delivery and delivery status.
-- **Filebase, Inc.**: distribution of public Organization and job information through IPFS.
+- **Filebase, Inc.**: distribution of public Organization information through IPFS.
 - **Alchemy Insights, Inc.**: blockchain RPC access for public Base operations and metadata.
 
 The public Base and IPFS networks are not controlled subprocessors.

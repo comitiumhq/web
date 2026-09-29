@@ -1,4 +1,4 @@
-import { usdcToUsd } from '@comitium/chain/job-economics';
+import { usdcToUsd } from '@comitium/chain/response-commitment-economics';
 import { formatUsdWhole } from '@/lib/utils';
 
 type StakeAmount = string | bigint;

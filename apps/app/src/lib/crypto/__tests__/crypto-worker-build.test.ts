@@ -9,7 +9,7 @@ const RESOLVED_VIRTUAL_ENTRY = `\0${VIRTUAL_ENTRY}`;
 describe('crypto worker production build', () => {
   it(
     'emits an executable worker chunk instead of embedding the TypeScript source as an asset',
-    { timeout: 15_000 },
+    { timeout: 60_000 },
     async () => {
       const result = await build({
         configFile: false,

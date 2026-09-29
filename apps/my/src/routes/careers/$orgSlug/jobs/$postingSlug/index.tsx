@@ -2,6 +2,7 @@ import { CareerJobDetailPage } from '@comitium/jobs/careers';
 import { careerJobQueryOptions } from '@comitium/jobs/query-options';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { createFileRoute } from '@tanstack/react-router';
+import { CareerJobRouteError } from '@/components/features/careers/career-job-route-error';
 import { publicJobsApi } from '@/lib/public-jobs-api';
 
 export const Route = createFileRoute('/careers/$orgSlug/jobs/$postingSlug/')({
@@ -19,6 +20,7 @@ export const Route = createFileRoute('/careers/$orgSlug/jobs/$postingSlug/')({
     ],
   }),
   pendingComponent: PageLoader,
+  errorComponent: CareerJobRouteError,
   component: CareerJobRoutePage,
 });
 

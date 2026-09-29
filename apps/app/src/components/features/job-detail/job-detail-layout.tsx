@@ -7,13 +7,16 @@ import { Link, useLocation } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { DRAFT_SECTIONS } from '@/components/features/job-draft/sections';
 import type { StepStatus } from '@/components/features/job-draft/utils';
-import { HiringTeamIcon, InterviewPlanIcon } from '@/lib/constants/domain-icons';
+import {
+  EvaluationCriteriaIcon,
+  InterviewPlanIcon,
+  JobPostingIcon,
+  JobSettingsIcon,
+} from '@/lib/constants/domain-icons';
 import { cn } from '@/lib/utils';
-
-import { JobActionButton } from './job-action-button';
 import { JobLifecycleInfoBar } from './job-lifecycle-info-bar';
+import { JobLifecycleMenu } from './job-lifecycle-menu';
 import { JobMoreMenu } from './job-more-menu';
-import { JobStatusBadge } from './job-status-badge';
 
 interface JobDetailLayoutProps {
   orgId: string;
@@ -22,6 +25,7 @@ interface JobDetailLayoutProps {
   actions?: ReactNode;
   draftStepStatuses?: StepStatus[];
   showNavigationSkeleton?: boolean;
+  lifecycleActionsDisabled?: boolean;
   children: ReactNode;
 }
 
@@ -32,6 +36,7 @@ export function JobDetailLayout({
   actions,
   draftStepStatuses,
   showNavigationSkeleton = false,
+  lifecycleActionsDisabled = false,
   children,
 }: JobDetailLayoutProps) {
   const { pathname } = useLocation();
@@ -39,7 +44,12 @@ export function JobDetailLayout({
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-background">
-      <JobDetailHeaderBar orgId={orgId} job={job} actions={actions} />
+      <JobDetailHeaderBar
+        orgId={orgId}
+        job={job}
+        actions={actions}
+        lifecycleActionsDisabled={lifecycleActionsDisabled}
+      />
 
       {showNav &&
         (job ? (
@@ -82,7 +92,7 @@ export function JobDetailLayout({
   );
 }
 
-const JOB_NAV_SKELETON_KEYS = ['nav-1', 'nav-2', 'nav-3', 'nav-4', 'nav-5', 'nav-6'];
+const JOB_NAV_SKELETON_KEYS = ['nav-1', 'nav-2', 'nav-3', 'nav-4'];
 
 function JobNavSkeleton({ orientation }: { orientation: 'vertical' | 'horizontal' }) {
   const containerClassName =
@@ -106,9 +116,10 @@ interface JobDetailHeaderBarProps {
   orgId: string;
   job: JobSummary | null;
   actions?: ReactNode;
+  lifecycleActionsDisabled: boolean;
 }
 
-function JobDetailHeaderBar({ orgId, job, actions }: JobDetailHeaderBarProps) {
+function JobDetailHeaderBar({ orgId, job, actions, lifecycleActionsDisabled }: JobDetailHeaderBarProps) {
   return (
     <header className="flex shrink-0 items-center gap-3 border-b border-separator px-4 py-2 sm:px-6">
       <Button asChild variant="ghost" size="icon-sm" className="shrink-0">
@@ -119,18 +130,11 @@ function JobDetailHeaderBar({ orgId, job, actions }: JobDetailHeaderBarProps) {
 
       <div className="flex min-w-0 flex-1 items-center gap-2">
         {job ? <h1 className="truncate text-heading-16">{getJobTitle(job)}</h1> : <HeaderTitleSkeleton />}
-        {job && <JobStatusBadge status={job.status} />}
+        {job && <JobLifecycleMenu job={job} orgId={orgId} actionsDisabled={lifecycleActionsDisabled} />}
       </div>
 
       {job && (
-        <div className="flex shrink-0 items-center gap-1">
-          {actions ?? (
-            <>
-              <JobActionButton job={job} orgId={orgId} />
-              <JobMoreMenu job={job} orgId={orgId} />
-            </>
-          )}
-        </div>
+        <div className="flex shrink-0 items-center gap-1">{actions ?? <JobMoreMenu job={job} orgId={orgId} />}</div>
       )}
     </header>
   );
@@ -145,7 +149,11 @@ interface JobNavProps {
   draftStepStatuses?: StepStatus[];
 }
 
-type JobNavRoute = '/org/$orgId/jobs/$jobId/pipeline' | (typeof DRAFT_SECTIONS)[number]['route'];
+type JobNavRoute =
+  | '/org/$orgId/jobs/$jobId/pipeline'
+  | '/org/$orgId/jobs/$jobId/posting'
+  | '/org/$orgId/jobs/$jobId/settings'
+  | (typeof DRAFT_SECTIONS)[number]['route'];
 
 interface JobNavItem {
   label: string;
@@ -184,13 +192,23 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
     }));
   }
 
-  return [
+  const commonItems: JobNavItem[] = [
     {
       label: 'Pipeline',
       icon: KanbanIcon,
       to: '/org/$orgId/jobs/$jobId/pipeline',
       search: { tab: 'active' },
       isActive: (pathname) => pathname.includes('/pipeline'),
+    },
+  ];
+
+  return [
+    ...commonItems,
+    {
+      label: 'Settings',
+      icon: JobSettingsIcon,
+      to: '/org/$orgId/jobs/$jobId/settings',
+      isActive: (pathname) => pathname.endsWith('/settings'),
     },
     {
       label: 'Interview plan',
@@ -199,10 +217,16 @@ function getJobNavItems(job: JobSummary | null, draftStepStatuses?: StepStatus[]
       isActive: (pathname) => pathname.includes('/interview-plan'),
     },
     {
-      label: 'Hiring team',
-      icon: HiringTeamIcon,
-      to: '/org/$orgId/jobs/$jobId/hiring-team',
-      isActive: (pathname) => pathname.endsWith('/hiring-team'),
+      label: 'Evaluation criteria',
+      icon: EvaluationCriteriaIcon,
+      to: '/org/$orgId/jobs/$jobId/criteria',
+      isActive: (pathname) => pathname.endsWith('/criteria'),
+    },
+    {
+      label: 'Posting',
+      icon: JobPostingIcon,
+      to: '/org/$orgId/jobs/$jobId/posting',
+      isActive: (pathname) => pathname.endsWith('/posting'),
     },
   ];
 }
@@ -242,7 +266,7 @@ function jobNavLinkClass(active: boolean): string {
 }
 
 function getJobTitle(job: JobSummary): string {
-  return job.title ?? `Job #${job.jobId}`;
+  return job.title ?? 'Untitled role';
 }
 
 function HeaderTitleSkeleton() {

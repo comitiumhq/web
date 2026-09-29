@@ -18,9 +18,9 @@ describe('error-messages', () => {
     });
 
     it('maps a transaction error through product copy', () => {
-      expect(getProductErrorMessage(new TransactionError('job_funds_deposit', new Error('RPC unavailable')), 'x')).toBe(
-        'Could not submit this action. Please try again.',
-      );
+      expect(
+        getProductErrorMessage(new TransactionError('commitment_funds_deposit', new Error('RPC unavailable')), 'x'),
+      ).toBe('Could not submit this action. Please try again.');
     });
   });
 

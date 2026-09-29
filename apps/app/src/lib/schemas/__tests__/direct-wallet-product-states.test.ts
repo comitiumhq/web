@@ -1,7 +1,7 @@
 import { applicationSubmitDispositionSchema } from '@comitium/schemas/applications';
 import { getOnchainOperationProductState } from '@comitium/schemas/onchain-operations';
 import { describe, expect, it } from 'vitest';
-import { orgCreationPreparationSchema } from '../org';
+import { createOrgResponseSchema } from '../org';
 
 const OPERATION_ID = '11111111-2222-4333-8444-555555555555';
 
@@ -21,10 +21,15 @@ describe('direct wallet product state boundary', () => {
     ).toEqual([{ hasStage: false, hasTxHash: false }]);
   });
 
-  it('keeps internal organization operation states out of the Web product contract', () => {
-    expect(orgCreationPreparationSchema.parse({ state: 'confirming' })).toEqual({ state: 'confirming' });
+  it('keeps registry synchronization states out of the organization creation contract', () => {
+    expect(
+      createOrgResponseSchema.parse({
+        state: 'completed',
+        organizationId: OPERATION_ID,
+      }),
+    ).toEqual({ state: 'completed', organizationId: OPERATION_ID });
     expect(() =>
-      orgCreationPreparationSchema.parse({
+      createOrgResponseSchema.parse({
         state: 'repair_required',
         operationId: OPERATION_ID,
       }),

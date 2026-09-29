@@ -5,7 +5,7 @@ interface BuildConsiderationsParams {
   application: ApplicationApiResponse | null;
   otherApplications: OtherApplicationSummary[];
   jobId: string;
-  jobOnChainId: number | null;
+  onchainCommitmentId: number | null;
   jobTitle: string | null;
   currentStageName: string | null;
 }
@@ -29,7 +29,7 @@ export function buildConsiderations({
   application,
   otherApplications,
   jobId,
-  jobOnChainId,
+  onchainCommitmentId,
   jobTitle,
   currentStageName,
 }: BuildConsiderationsParams): OtherApplicationSummary[] {
@@ -40,7 +40,7 @@ export function buildConsiderations({
   const current = {
     id: application.id,
     jobId,
-    jobOnChainId,
+    onchainCommitmentId,
     jobTitle,
     appliedAt: application.appliedAt,
     currentStageId: application.currentStageId,
@@ -72,7 +72,7 @@ export function useConsiderationSelection({
   application,
   otherApplications,
   jobId,
-  jobOnChainId,
+  onchainCommitmentId,
   jobTitle,
   currentStageName,
   onApplicationSwitch,
@@ -84,11 +84,11 @@ export function useConsiderationSelection({
         application,
         otherApplications,
         jobId,
-        jobOnChainId,
+        onchainCommitmentId,
         jobTitle,
         currentStageName,
       }),
-    [application, currentStageName, jobId, jobOnChainId, jobTitle, otherApplications],
+    [application, currentStageName, jobId, onchainCommitmentId, jobTitle, otherApplications],
   );
 
   const handleApplicationClick = useCallback(

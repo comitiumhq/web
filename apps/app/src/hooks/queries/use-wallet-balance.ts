@@ -1,5 +1,5 @@
 import { useAccount } from '@comitium/auth/use-wallet';
-import { usdcToUsd } from '@comitium/chain/job-economics';
+import { usdcToUsd } from '@comitium/chain/response-commitment-economics';
 
 import { STALE_TIME_SHORT } from '@comitium/schemas/api-query-policy';
 import { skipToken, useQuery } from '@tanstack/react-query';

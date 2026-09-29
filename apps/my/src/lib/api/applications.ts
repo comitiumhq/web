@@ -1,14 +1,14 @@
 import type { EncryptedEnvelope } from '@comitium/crypto/schemas';
 import type { FinalizeApplicationInput } from '@comitium/schemas/applications';
 import {
-  applicantStakeReturnAvailabilitySchema,
   applicationFileReservationSchema,
   applicationFileUploadSchema,
   applicationPreparationResultSchema,
   applicationSubmitDispositionSchema,
   myApplicationSchema,
+  myApplicationStatusSchema,
 } from '@comitium/schemas/applications';
-import { dataSchema, paginatedSchema } from '@comitium/schemas/public';
+import { paginatedSchema } from '@comitium/schemas/public';
 
 import { api } from './client';
 
@@ -16,10 +16,8 @@ export function getMyApplications() {
   return api.get('/applications/me', paginatedSchema(myApplicationSchema)).then((res) => res.data);
 }
 
-export function getApplicantStakeReturnAvailability() {
-  return api
-    .get('/applications/me/stake-return', dataSchema(applicantStakeReturnAvailabilitySchema))
-    .then((res) => res.data);
+export function getMyApplicationStatus(jobId: string) {
+  return api.get(`/applications/me/jobs/${encodeURIComponent(jobId)}/status`, myApplicationStatusSchema);
 }
 
 export function prepareApplication(body: { jobPostingId: string; formId: string }) {
@@ -54,10 +52,10 @@ export function finalizeApplication(applicationId: string, body: FinalizeApplica
   return api.post(`/applications/${applicationId}/finalize`, body, applicationSubmitDispositionSchema);
 }
 
-export function retryApplicationOnchainOperation(applicationId: string, operationId: string, stake: string) {
+export function retryApplicationOnchainOperation(applicationId: string, operationId: string) {
   return api.post(
     `/applications/${applicationId}/onchain-operation/retry`,
-    { operationId, stake },
+    { operationId },
     applicationSubmitDispositionSchema,
   );
 }

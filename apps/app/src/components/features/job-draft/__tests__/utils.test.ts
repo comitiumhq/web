@@ -1,6 +1,6 @@
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { describe, expect, it } from 'vitest';
-import type { DraftFormData } from '@/lib/schemas/draft-form';
+import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
 
 import { draftToEditorState, prepareDraftSave } from '../draft-editor-state';
 import { isDraftEditorPath, validateForPublish } from '../utils';
@@ -16,7 +16,7 @@ const baseValues = {
   compensationPeriod: 'year',
   compensationMin: 115000,
   compensationMax: 150000,
-} satisfies DraftFormData;
+} satisfies JobSettingsFormData;
 
 describe('job draft utils', () => {
   it('builds one complete versioned update from the editor state', () => {
@@ -70,6 +70,7 @@ describe('job draft utils', () => {
       },
       description,
       formId: '33333333-3333-4333-8333-333333333333',
+      applicationCapacity: null,
       criteria: [
         {
           id: '44444444-4444-4444-8444-444444444444',
@@ -108,6 +109,8 @@ describe('job draft utils', () => {
   it('uses display defaults without persisting empty compensation', () => {
     const draft = {
       id: '88888888-8888-4888-8888-888888888888',
+      status: 'draft',
+      archivedAt: null,
       title: 'People Lead',
       departmentId: baseValues.departmentId,
       locationId: baseValues.locationId,
@@ -118,6 +121,7 @@ describe('job draft utils', () => {
       compensation: null,
       description: null,
       formId: null,
+      applicationCapacity: null,
       criteria: null,
       interviewPlanId: null,
       hiringTeam: [],
@@ -125,7 +129,7 @@ describe('job draft utils', () => {
       version: 0,
       createdAt: '2026-08-11T00:00:00.000Z',
       updatedAt: '2026-08-11T00:00:00.000Z',
-    } satisfies JobDraft;
+    } satisfies JobEditor;
     const state = draftToEditorState(draft);
 
     expect(state.values).toMatchObject({ compensationCurrency: 'USD', compensationPeriod: 'year' });
@@ -136,8 +140,8 @@ describe('job draft utils', () => {
     const orgId = '11111111-1111-4111-8111-111111111111';
     const jobId = '22222222-2222-4222-8222-222222222222';
 
-    expect(isDraftEditorPath(`/org/${orgId}/jobs/${jobId}/description`, orgId, jobId)).toBe(true);
-    expect(isDraftEditorPath(`/org/${orgId}/jobs/33333333-3333-4333-8333-333333333333/details`, orgId, jobId)).toBe(
+    expect(isDraftEditorPath(`/org/${orgId}/jobs/${jobId}/posting`, orgId, jobId)).toBe(true);
+    expect(isDraftEditorPath(`/org/${orgId}/jobs/33333333-3333-4333-8333-333333333333/settings`, orgId, jobId)).toBe(
       false,
     );
     expect(isDraftEditorPath(`/org/${orgId}/jobs`, orgId, jobId)).toBe(false);
@@ -148,11 +152,39 @@ describe('job draft utils', () => {
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build the product.' }] }],
     };
+    const input = {
+      values: baseValues,
+      description,
+      formId: null,
+      formIsArchived: false,
+      criteria: [],
+      interviewPlanId: '66666666-6666-4666-8666-666666666666',
+    };
 
-    expect(validateForPublish(baseValues, description, null, [])).toContainEqual({
+    expect(validateForPublish(input)).toContainEqual({
       label: 'Application form',
-      tab: 'application-form',
+      target: 'posting',
     });
-    expect(validateForPublish(baseValues, description, '33333333-3333-4333-8333-333333333333', [])).toEqual([]);
+    expect(validateForPublish({ ...input, formId: '33333333-3333-4333-8333-333333333333' })).toEqual([]);
+  });
+
+  it('rejects archived forms, invalid capacity, and a missing interview plan', () => {
+    const errors = validateForPublish({
+      values: { ...baseValues, applicationCapacity: 0 },
+      description: {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build the product.' }] }],
+      },
+      formId: '33333333-3333-4333-8333-333333333333',
+      formIsArchived: true,
+      criteria: [],
+      interviewPlanId: null,
+    });
+
+    expect(errors).toEqual([
+      { label: 'Application form', target: 'posting' },
+      { label: 'Application capacity', target: 'posting' },
+      { label: 'Interview plan', target: 'interview-plan' },
+    ]);
   });
 });

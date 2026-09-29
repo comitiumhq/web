@@ -15,6 +15,7 @@ export default defineConfig({
 			'@privy-io/react-auth',
 			'@tanstack/react-router',
 			'neverthrow',
+			'react-markdown',
 			'react-hook-form',
 		],
 	},

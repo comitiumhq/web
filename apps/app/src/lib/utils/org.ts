@@ -10,7 +10,7 @@ export function getOrgDisplayName(org: MyOrg): string {
     return org.domain;
   }
 
-  return `Org #${org.orgId}`;
+  return org.orgId === null ? 'Organization' : `Org #${org.orgId}`;
 }
 
 export function formatOrgRole(role: OrgRole): string {

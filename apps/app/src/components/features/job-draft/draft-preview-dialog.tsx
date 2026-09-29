@@ -1,9 +1,11 @@
-import type { JobDraft } from '@comitium/schemas/jobs';
+import type { TipTapDoc } from '@comitium/schemas/common';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { Badge } from '@comitium/ui/badge';
 import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { FeatureSheetContent } from '@comitium/ui/feature-sheet';
 import { MarkdownRenderer } from '@comitium/ui/markdown-renderer';
+import { richTextToMarkdown } from '@comitium/ui/rich-text';
 import { ScrollArea } from '@comitium/ui/scroll-area';
 import { Sheet, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
@@ -19,16 +21,17 @@ import {
 
 interface DraftPreviewDialogProps {
   orgId: string;
-  draft: JobDraft;
-  descriptionMarkdown: string;
+  draft: JobEditor;
+  description: TipTapDoc | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function DraftPreviewDialog({ orgId, draft, descriptionMarkdown, open, onOpenChange }: DraftPreviewDialogProps) {
+export function DraftPreviewDialog({ orgId, draft, description, open, onOpenChange }: DraftPreviewDialogProps) {
   const { data: org, isLoading: isOrgLoading } = useQueryOrg(orgId);
   const locationTypeText = formatLocationType(draft.locationType);
   const locationText = formatLocation(draft.location);
+  const renderedDescription = richTextToMarkdown(description);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -83,8 +86,8 @@ export function DraftPreviewDialog({ orgId, draft, descriptionMarkdown, open, on
 
         <ScrollArea className="flex-1 h-0">
           <div className="px-6 py-5">
-            {descriptionMarkdown ? (
-              <MarkdownRenderer content={descriptionMarkdown} className="text-copy-14" />
+            {renderedDescription ? (
+              <MarkdownRenderer content={renderedDescription} className="text-copy-14" />
             ) : (
               <EmptyState
                 icon={FileTextIcon}

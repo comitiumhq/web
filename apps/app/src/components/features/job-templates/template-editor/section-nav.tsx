@@ -23,15 +23,15 @@ const SectionItem = memo(function SectionItem({ id, label, icon: Icon, isActive,
       type="button"
       onClick={handleClick}
       className={cn(
-        'flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-150',
+        'flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 text-left text-label-14 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
         {
-          'bg-accent text-foreground font-medium': isActive,
+          'bg-accent text-accent-foreground': isActive,
           'text-muted-foreground hover:bg-accent hover:text-foreground': !isActive,
         },
       )}
     >
       <Icon className="size-4 shrink-0" aria-hidden="true" />
-      <span className="min-w-0 flex-1 truncate text-label-14">{label}</span>
+      <span className="min-w-0 flex-1 truncate">{label}</span>
     </button>
   );
 });
@@ -85,10 +85,10 @@ const MobileSectionItem = memo(function MobileSectionItem({
       type="button"
       onClick={handleClick}
       className={cn(
-        'flex items-center gap-2 px-3 py-2.5 whitespace-nowrap border-b-2 transition-colors shrink-0 cursor-pointer text-label-13',
+        'flex h-9 shrink-0 cursor-pointer items-center gap-2.5 rounded-lg px-3 text-label-14 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
         {
-          'border-foreground text-foreground font-medium': isActive,
-          'border-transparent text-muted-foreground hover:text-foreground': !isActive,
+          'bg-accent text-accent-foreground': isActive,
+          'text-muted-foreground hover:bg-accent hover:text-foreground': !isActive,
         },
       )}
     >
@@ -103,7 +103,7 @@ export const TemplateMobileSectionTabs = memo(function TemplateMobileSectionTabs
   onSelect,
 }: TemplateSectionNavProps) {
   return (
-    <div className="flex shrink-0 overflow-x-auto border-b border-separator bg-card lg:hidden">
+    <div className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-separator px-4 py-2 scrollbar-hide lg:hidden">
       {TEMPLATE_SECTION_ITEMS.map((item) => (
         <MobileSectionItem
           key={item.id}

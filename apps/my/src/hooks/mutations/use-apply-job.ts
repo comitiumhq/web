@@ -5,31 +5,22 @@ import { normalizeAddress } from '@comitium/chain/address';
 import { refreshAfterOnchainOperationSettles } from '@comitium/chain/onchain-operation-observer';
 import { useOnchainSettlementObserver } from '@comitium/chain/use-onchain-settlement-observer';
 import { assertEncryptionKeyBundle } from '@comitium/crypto/key-bundle';
-import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
+import { API_ERROR_CODES, hasApiErrorCode } from '@comitium/schemas/api-errors';
 import { getErrorMessage } from '@comitium/schemas/error';
 import type { CandidateProfileInputValue } from '@comitium/schemas/forms/application-required-fields';
 import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { isJobError } from '@comitium/schemas/product-errors';
-import { BACKGROUND_CONFIRMATION_COPY } from '@comitium/ui/action-confirmation';
-import { getCommonErrorMessage } from '@comitium/ui/product-error-messages';
+import { isProductSubmissionUncertain } from '@comitium/schemas/transaction-errors';
 import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import type { Address } from 'viem';
 import { qk } from '@/hooks/query-keys';
 import type { CandidateIdentityInputValue } from '@/lib/forms/candidate-identity-inputs';
-import {
-  type ApplyAnswerBucket,
-  type ApplyFileUpload,
-  type ApplyJobWorkflowParams,
-  applyJobWorkflow,
-  type WorkflowStep,
-} from '@/lib/jobs/workflows/apply-job';
+import type { ApplyAnswerBucket, ApplyFileUpload } from '@/lib/jobs/workflows/application-intake';
+import { type ApplyJobWorkflowParams, applyJobWorkflow, type WorkflowStep } from '@/lib/jobs/workflows/apply-job';
 
 interface SubmitApplicationParams {
-  address: Address;
   jobData: JobApplicationData;
-  stakeAmount: bigint;
   formId: string;
   answerBuckets: ApplyAnswerBucket[];
   resumeUpload: { fileId: string; questionId: string; file: File } | null;
@@ -42,9 +33,9 @@ interface SubmitApplicationParams {
 const APPLY_TOAST_ID = 'apply-job';
 
 const STEP_MESSAGES: Record<WorkflowStep, string> = {
-  encrypting: 'Encrypting application data...',
-  signing: 'Requesting signature...',
-  submitting: 'Submitting transaction...',
+  encrypting: 'Securing application data...',
+  signing: 'Preparing application...',
+  submitting: 'Submitting application...',
 };
 
 function getApplyErrorMessage(error: unknown): string {
@@ -52,30 +43,42 @@ function getApplyErrorMessage(error: unknown): string {
     return getErrorMessage(error, 'Failed to submit application');
   }
 
-  if (error._tag === 'ValidationError' && error.field === 'eligibility') {
+  if (error._tag === 'ValidationError') {
     return error.reason;
   }
 
   if (error._tag === 'EncryptionError') {
-    return 'Failed to encrypt application data. Please try again.';
+    return 'Failed to secure application data. Please try again.';
   }
 
   if (error._tag === 'SignatureError' && error.apiCode === API_ERROR_CODES.aiCriteriaEvaluationPolicyChanged) {
     return 'The hiring organization changed its AI-assisted evaluation setting. Review the updated choice before submitting again.';
   }
 
-  if (error._tag === 'SignatureError' && !(error.httpStatus >= 400 && error.httpStatus < 500)) {
-    return 'Signature request failed. Please try again.';
+  if (error._tag === 'SignatureError') {
+    return 'Application submission could not be prepared. Please try again.';
+  }
+
+  if (error._tag === 'TransactionError') {
+    if (isProductSubmissionUncertain(error)) {
+      return 'We could not confirm whether your application was submitted. Check My applications before trying again.';
+    }
+
+    if (error.message.includes('rejected')) {
+      return 'Application submission was cancelled.';
+    }
+
+    return 'Application could not be submitted. Please try again.';
   }
 
   if (error._tag === 'ContractError' && error.operation === 'application_confirmation_pending') {
-    return 'Your application is still being confirmed. Check My applications again in a moment.';
+    return 'Your application is still being submitted. Check My applications again in a moment.';
   }
 
-  return getCommonErrorMessage(error);
+  return 'Application could not be submitted. Please try again.';
 }
 
-export function useApplyJob({ onCompleted }: { onCompleted: () => void }) {
+export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequired: () => void }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
@@ -84,49 +87,20 @@ export function useApplyJob({ onCompleted }: { onCompleted: () => void }) {
   const settlementObserver = useOnchainSettlementObserver();
 
   const mutation = useMutation({
-    mutationFn: async ({
-      address,
-      jobData,
-      stakeAmount,
-      formId,
-      answerBuckets,
-      resumeUpload,
-      fileUploads,
-      candidateIdentityInputs,
-      candidateProfileInput,
-      aiCriteriaEvaluation,
-    }: SubmitApplicationParams) => {
+    mutationFn: async (input: SubmitApplicationParams) => {
       if (!isAuthenticated) {
-        throw new Error('Not authenticated. Please log in to apply.');
-      }
-
-      if (!wallet) {
-        throw new Error('Wallet not connected');
+        throw new Error('Sign in to apply');
       }
 
       assertEncryptionKeyBundle(user);
 
-      if (
-        !user ||
-        normalizeAddress(user.walletAddress) !== normalizeAddress(address) ||
-        normalizeAddress(wallet.address) !== normalizeAddress(address)
-      ) {
-        throw new Error(
-          'Your authenticated session belongs to another wallet. Re-authenticate with the active wallet.',
-        );
-      }
+      const walletReady = Boolean(
+        wallet && user?.walletAddress && normalizeAddress(wallet.address) === normalizeAddress(user.walletAddress),
+      );
 
       const result = await applyJobWorkflow({
-        address,
-        jobData,
-        stakeAmount,
-        formId,
-        answerBuckets,
-        resumeUpload,
-        fileUploads,
-        candidateIdentityInputs,
-        candidateProfileInput,
-        aiCriteriaEvaluation,
+        ...input,
+        walletReady,
         onStep: (step) => {
           toast.loading(STEP_MESSAGES[step], { id: APPLY_TOAST_ID });
         },
@@ -149,22 +123,23 @@ export function useApplyJob({ onCompleted }: { onCompleted: () => void }) {
       if (result.kind === 'completed') {
         refresh();
         toast.success('Application submitted successfully!', { id: APPLY_TOAST_ID });
-        onCompleted();
+        params.onCompleted();
 
         return;
       }
 
       if (result.kind === 'confirming') {
-        toast.info(BACKGROUND_CONFIRMATION_COPY.toast, { id: APPLY_TOAST_ID });
+        toast.info('Application submission is being completed.', { id: APPLY_TOAST_ID });
+
         settlementObserver.observe({
           operationId: result.operationId,
           refresh,
           onCompleted: () => {
             toast.success('Application submitted successfully!', { id: APPLY_TOAST_ID });
-            onCompleted();
+            params.onCompleted();
           },
           onFailed: () => {
-            toast.error('Application could not be confirmed. Please try again.', { id: APPLY_TOAST_ID });
+            toast.error('Application could not be submitted. Please try again.', { id: APPLY_TOAST_ID });
           },
         });
 
@@ -173,13 +148,13 @@ export function useApplyJob({ onCompleted }: { onCompleted: () => void }) {
 
       refreshAfterOnchainOperationSettles(result.operationId, refresh);
       toast.success('Application submitted successfully!', { id: APPLY_TOAST_ID });
-      onCompleted();
+      params.onCompleted();
     },
 
-    onError: async (error: unknown, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.application.applicantStake(variables.jobData.commitmentContract),
-      });
+    onError: async (error: unknown) => {
+      if (hasApiErrorCode(error, API_ERROR_CODES.zkIdentityRequired)) {
+        params.onZkIdentityRequired();
+      }
 
       if (
         isJobError(error) &&

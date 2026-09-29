@@ -190,7 +190,7 @@ const ApplicationFormOptionRow = memo(function ApplicationFormOptionRow({
       <span className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex flex-wrap items-center gap-2">
           <span className="text-label-14 font-medium">{form.title}</span>
-          {form.isDefaultForm ? <Badge variant="subtle">Default</Badge> : null}
+          {form.isDefaultForm ? <Badge variant="secondary">Default</Badge> : null}
         </span>
         <FormMetaLine detail={form} />
       </span>

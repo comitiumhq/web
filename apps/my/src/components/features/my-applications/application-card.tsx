@@ -40,13 +40,13 @@ export const ApplicationCard = memo(function ApplicationCard({ app }: Applicatio
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                {app.job?.commitmentStatus === 'published' && jobSearch ? (
+                {jobSearch ? (
                   <Link
                     to="/jobs"
                     search={jobSearch}
                     className="line-clamp-2 text-heading-16 transition-opacity hover:opacity-80"
                   >
-                    {app.job.title || 'Untitled Job'}
+                    {app.job?.title || 'Untitled Job'}
                   </Link>
                 ) : (
                   <span className="text-heading-16 line-clamp-2">{app.job?.title || 'Untitled Job'}</span>

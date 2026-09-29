@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { ProofResult, QueryBuilder, QueryBuilderResult } from '@zkpassport/sdk';
-import type { ZKPassportQRCodeProps } from '@zkpassport/ui/react';
+import type { ProofResult } from '@zkpassport/sdk';
+import type { QueryBuilder, QueryBuilderResult, ZKPassportQRCodeProps } from '@zkpassport/ui/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 
@@ -12,6 +12,8 @@ const mocks = vi.hoisted(() => ({
   done: vi.fn(),
   policy: vi.fn(),
   props: undefined as ZKPassportQRCodeProps | undefined,
+  toastError: vi.fn(),
+  toastInfo: vi.fn(),
 }));
 
 vi.mock('@zkpassport/sdk', () => ({
@@ -30,6 +32,13 @@ vi.mock('next-themes', () => ({
   useTheme: () => ({ resolvedTheme: 'dark' }),
 }));
 
+vi.mock('sonner', () => ({
+  toast: {
+    error: mocks.toastError,
+    info: mocks.toastInfo,
+  },
+}));
+
 const attempt: ZkIdentityAttempt = {
   attemptId: '019945cd-c640-7000-8000-000000000001',
   challenge: 'a'.repeat(64),
@@ -38,6 +47,7 @@ const attempt: ZkIdentityAttempt = {
     oprfKeyId: '1',
     policyId: 'policy-1',
     proofMode: 'fast',
+    scope: 'global-account',
   },
 };
 
@@ -51,7 +61,7 @@ const originalQuery = {
 const proof = {
   proof: 'proof-bytes',
   vkeyHash: 'vkey-hash',
-  version: '0.16.2',
+  version: '0.17.1',
   name: 'compare_age',
   index: 0,
   total: 1,
@@ -111,6 +121,8 @@ beforeEach(() => {
   mocks.bind.mockReset();
   mocks.done.mockReset();
   mocks.policy.mockReset();
+  mocks.toastError.mockReset();
+  mocks.toastInfo.mockReset();
   mocks.props = undefined;
 
   mocks.policy.mockReturnValue(builder);
@@ -132,6 +144,7 @@ describe('ZK Identity account integration', () => {
       mode: 'fast',
       name: 'Comitium',
       oprfKeyId: '1',
+      scope: 'global-account',
       theme: 'dark',
       uniqueIdentifierType: 1,
     });
@@ -177,6 +190,18 @@ describe('ZK Identity account integration', () => {
         challenge: attempt.challenge,
         proofs: [proof],
       });
+    });
+  });
+
+  it('shows a stable message for an SDK error', async () => {
+    const screen = await renderSection(createApi());
+
+    await startVerification(screen);
+    mocks.props?.onError?.('The passport chip could not be read.');
+
+    expect(mocks.toastError).toHaveBeenCalledExactlyOnceWith('Identity verification failed', {
+      id: 'zk-identity-verification',
+      description: 'The zkPassport app could not complete verification. Try again.',
     });
   });
 

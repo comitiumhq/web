@@ -14,8 +14,7 @@ export const qk = {
   },
   application: {
     my: () => ['applications', 'my'] as const,
-    stakeReturn: () => ['applications', 'my', 'stake-return'] as const,
-    applicantStake: (commitmentContract: string) => ['application-stake', commitmentContract] as const,
+    status: (accountId: string, jobId: string) => ['applications', 'my', accountId, jobId] as const,
   },
   publicSchedule: {
     state: (token: string) => ['public-schedule', token, 'state'] as const,

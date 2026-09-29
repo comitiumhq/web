@@ -2,7 +2,6 @@ import type { PublicEncryptionKey, WrappedKey } from '@comitium/crypto';
 import { base64 } from '@scure/base';
 import { describe, expect, it } from 'vitest';
 import {
-  applicantStakeReturnAvailabilitySchema,
   applicationPreparationResultSchema,
   applicationPrepareSchema,
   applicationSearchProjectionSchema,
@@ -16,7 +15,6 @@ const ESCO_OCCUPATION_ID = 'http://data.europa.eu/esco/occupation/software-engin
 const ONET_SOFTWARE_ID = 'urn:onet:software:275976081ce1abf67779eb3c388b5e14531082e52137502e264776e1a6a11595';
 const UUID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const HASH = `0x${'1'.repeat(64)}`;
-const ADDRESS = `0x${'2'.repeat(40)}`;
 
 function mockPublicEncryptionKey(): PublicEncryptionKey {
   return {
@@ -141,31 +139,13 @@ describe('candidateSheetConsiderationContextSchema', () => {
   });
 });
 
-describe('applicant stake return contract', () => {
-  it('accepts an applicant-wide direct wallet batch', () => {
-    const availability = applicantStakeReturnAvailabilitySchema.parse({
-      count: 2,
-      totalAmount: '10000000',
-      groups: [
-        {
-          chainId: 84_532,
-          commitmentContract: ADDRESS,
-          applicationIds: [HASH, HASH],
-        },
-      ],
-    });
-
-    expect(availability.count).toBe(2);
-    expect(availability.groups[0]?.applicationIds).toHaveLength(2);
-  });
-});
-
 describe('application submission contracts', () => {
   it('accepts preparation with the effective file policy', () => {
     const prepared = applicationPrepareSchema.parse({
       kind: 'prepared',
       formSnapshotHash: HASH,
       applicationId: UUID,
+      commitment: null,
       processingGrant: {
         id: UUID,
         processorPublicKey: mockPublicEncryptionKey(),
@@ -243,7 +223,6 @@ describe('application submission contracts', () => {
     };
     const profileEnvelope = { ...envelope, purpose: 'candidate_profile_input' as const };
     const input = finalizeApplicationInputSchema.parse({
-      stake: '5000000',
       applicationId: HASH,
       applicationSalt: `0x${'3'.repeat(64)}`,
       formSnapshotHash: HASH,
@@ -278,6 +257,5 @@ describe('application submission contracts', () => {
       },
     ]);
     expect(input.candidateProfileInput.purpose).toBe('candidate_profile_input');
-    expect(input.stake).toBe('5000000');
   });
 });

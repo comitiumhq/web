@@ -1,8 +1,6 @@
-import { usdcToUsd } from '@comitium/chain/job-economics';
 import type { ApplicationTerminalOutcome, MyApplicationResponse } from '@comitium/schemas/applications';
 import { APPLICATION_TERMINAL_OUTCOME_LABEL } from '@comitium/ui/application-outcome-labels';
 import { formatDate } from '@comitium/ui/date';
-import { formatUsd } from '@comitium/ui/formatting';
 
 type StatusVariant = 'default' | 'destructive' | 'info' | 'outline' | 'secondary' | 'success' | 'warning';
 export type ApplicationFilter = 'active' | 'action' | 'closed';
@@ -130,14 +128,6 @@ export function matchesApplicationFilter(app: MyApplicationResponse, filter: App
   return !status.isClosed;
 }
 
-export function formatStake(amount: string | null): string {
-  if (!amount || amount === '0') {
-    return formatUsd(0);
-  }
-
-  return formatUsd(usdcToUsd(BigInt(amount)));
-}
-
 export function getApplicationStatusDescription(app: MyApplicationResponse): string {
   const status = getApplicationStatus(app);
 
@@ -157,7 +147,7 @@ export function getApplicationStatusDescription(app: MyApplicationResponse): str
     case 'response_overdue':
       return 'Response window passed.';
     case 'response_window_closed':
-      return 'Response window passed and your deposit is settled.';
+      return 'The employer response window has closed.';
     case 'awaiting_response':
       if (app.responseDeadline) {
         return `Employer response due by ${formatDate(app.responseDeadline)}.`;

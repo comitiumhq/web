@@ -1,16 +1,14 @@
-import { EXPLORER_TX_URL } from '@comitium/chain/network';
 import { Button } from '@comitium/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
-import { CopyIcon, CubeIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
+import { CopyIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
 interface JobActionsProps {
   jobUrl: string;
-  txHash: string | null;
 }
 
-export function JobActions({ jobUrl, txHash }: JobActionsProps) {
+export function JobActions({ jobUrl }: JobActionsProps) {
   const handleShare = useCallback(async () => {
     const url = `${window.location.origin}${jobUrl}`;
     await navigator.clipboard.writeText(url);
@@ -34,14 +32,6 @@ export function JobActions({ jobUrl, txHash }: JobActionsProps) {
           <CopyIcon />
           Copy posting link
         </DropdownMenuItem>
-        {txHash && (
-          <DropdownMenuItem asChild>
-            <a href={`${EXPLORER_TX_URL}${txHash}`} target="_blank" rel="noopener noreferrer">
-              <CubeIcon />
-              View in explorer
-            </a>
-          </DropdownMenuItem>
-        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

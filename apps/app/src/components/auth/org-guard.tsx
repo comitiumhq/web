@@ -13,7 +13,7 @@ import { PermissionsProvider, useQueryOrgMe } from '@/hooks/use-permissions';
 import { usePendingVaultBootstrapOrganizationId } from '@/hooks/use-vault-bootstrap';
 
 import { AuthSessionRecovery } from './auth-session-recovery';
-import { ConnectWalletButton } from './connect-wallet-button';
+import { LoginButton } from './login-button';
 
 interface OrgGuardProps {
   orgId: string;
@@ -64,8 +64,8 @@ function useOrgGuardState(orgId: string, isSignedIn: boolean) {
 
 function SignInRequired() {
   return (
-    <EmptyState icon={SignInIcon} title="Sign in required" description="Connect your wallet to continue.">
-      <ConnectWalletButton className="mt-6" />
+    <EmptyState icon={SignInIcon} title="Sign in required" description="Log in to continue.">
+      <LoginButton className="mt-6" />
     </EmptyState>
   );
 }

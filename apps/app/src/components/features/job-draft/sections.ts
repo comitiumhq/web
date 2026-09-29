@@ -1,10 +1,9 @@
 import type { Icon } from '@phosphor-icons/react';
-import { BriefcaseIcon, FileTextIcon } from '@phosphor-icons/react';
 import {
-  ApplicationFormIcon,
   EvaluationCriteriaIcon,
-  HiringTeamIcon,
   InterviewPlanIcon,
+  JobPostingIcon,
+  JobSettingsIcon,
 } from '@/lib/constants/domain-icons';
 
 interface DraftSectionDefinition {
@@ -16,28 +15,10 @@ interface DraftSectionDefinition {
 
 export const DRAFT_SECTIONS = [
   {
-    id: 'details',
-    label: 'Details',
-    icon: BriefcaseIcon,
-    route: '/org/$orgId/jobs/$jobId/details',
-  },
-  {
-    id: 'description',
-    label: 'Description',
-    icon: FileTextIcon,
-    route: '/org/$orgId/jobs/$jobId/description',
-  },
-  {
-    id: 'application-form',
-    label: 'Application form',
-    icon: ApplicationFormIcon,
-    route: '/org/$orgId/jobs/$jobId/application-form',
-  },
-  {
-    id: 'criteria',
-    label: 'Evaluation criteria',
-    icon: EvaluationCriteriaIcon,
-    route: '/org/$orgId/jobs/$jobId/criteria',
+    id: 'settings',
+    label: 'Settings',
+    icon: JobSettingsIcon,
+    route: '/org/$orgId/jobs/$jobId/settings',
   },
   {
     id: 'interview-plan',
@@ -46,10 +27,16 @@ export const DRAFT_SECTIONS = [
     route: '/org/$orgId/jobs/$jobId/interview-plan',
   },
   {
-    id: 'hiring-team',
-    label: 'Hiring team',
-    icon: HiringTeamIcon,
-    route: '/org/$orgId/jobs/$jobId/hiring-team',
+    id: 'criteria',
+    label: 'Evaluation criteria',
+    icon: EvaluationCriteriaIcon,
+    route: '/org/$orgId/jobs/$jobId/criteria',
+  },
+  {
+    id: 'posting',
+    label: 'Posting',
+    icon: JobPostingIcon,
+    route: '/org/$orgId/jobs/$jobId/posting',
   },
 ] as const satisfies readonly DraftSectionDefinition[];
 
