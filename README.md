@@ -9,7 +9,11 @@
 </p>
 
 <p align="center">
-  <strong>Hiring built for privacy and accountability.</strong>
+  <strong>Hiring is personal. Keep it that way.</strong>
+</p>
+
+<p align="center">
+  An ATS built for people on both sides.
 </p>
 
 <p align="center">
@@ -55,6 +59,12 @@
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/calendar-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/calendar-light.png">
   <img src="docs/assets/readme/calendar-light.png" alt="Comitium interview scheduler comparing four interviewer calendars" width="100%">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/job-templates-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/job-templates-light.png">
+  <img src="docs/assets/readme/job-templates-light.png" alt="Comitium organization settings with job templates and recruiting configuration" width="100%">
 </picture>
 
 ## Repository

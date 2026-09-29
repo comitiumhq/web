@@ -41,7 +41,10 @@ export default defineConfig({
     tsconfigPaths(),
     tailwindcss(),
     tanstackStart(),
-    cloudflare({ inspectorPort: 9230, viteEnvironment: { name: 'ssr' } }),
+    cloudflare({
+      inspectorPort: Number(process.env.COMITIUM_SITE_INSPECTOR_PORT ?? 9230),
+      viteEnvironment: { name: 'ssr' },
+    }),
     react(),
   ],
 });
