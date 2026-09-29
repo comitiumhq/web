@@ -1,16 +1,15 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import type { ColumnDef } from '@tanstack/react-table';
-import { parseISO } from 'date-fns';
 import type { PipelineCandidate } from '@/lib/schemas/pipeline';
 
 import { CandidateIdentityCell, CriteriaCell, DateCell, JobCell, StageAgeCell } from './cells';
-import { DeadlineCell, StatusCell } from './status-deadline';
+import { StatusCell } from './status-deadline';
 
 export type CandidateTableVariant = 'review' | 'offer' | 'hired';
 export type CandidateTableScope = 'global' | 'job';
 
 const CANDIDATE_TABLE_GRID_MIN_WIDTH: Record<CandidateTableVariant, Record<CandidateTableScope, string>> = {
-  review: { global: '72rem', job: '60rem' },
+  review: { global: '62rem', job: '50rem' },
   offer: { global: '52rem', job: '36rem' },
   hired: { global: '52rem', job: '36rem' },
 };
@@ -24,7 +23,6 @@ interface ColumnContext {
   namesMap: Map<string, CandidateProfile>;
   orgId: string;
   showJob: boolean;
-  timezone: string;
   scope: CandidateTableScope;
 }
 
@@ -151,29 +149,6 @@ const statusColumn: ColumnDef<PipelineCandidate> = {
   },
 };
 
-function getDeadlineSortValue(candidate: PipelineCandidate): number {
-  if (candidate.isResponded || candidate.responseDeadline === null) {
-    return Number.POSITIVE_INFINITY;
-  }
-
-  return parseISO(candidate.responseDeadline).getTime();
-}
-
-function deadlineColumn(timezone: string, sortable: boolean): ColumnDef<PipelineCandidate> {
-  return {
-    id: 'deadline',
-    header: 'Deadline',
-    accessorFn: sortable ? getDeadlineSortValue : undefined,
-    enableSorting: sortable,
-    cell: ({ row }) => <DeadlineCell candidate={row.original} timezone={timezone} />,
-    meta: {
-      gridSize: 'minmax(9rem,0.7fr)',
-      label: 'Deadline',
-      skeletonClassName: 'w-24 rounded-4xl',
-    },
-  };
-}
-
 export function getCandidateColumns(
   variant: CandidateTableVariant,
   ctx: ColumnContext,
@@ -186,14 +161,7 @@ export function getCandidateColumns(
     : [candidateColumn(ctx.namesMap, ctx.showJob, candidateOptions), jobColumn(ctx.orgId, isReview)];
 
   if (isReview) {
-    return [
-      ...lead,
-      statusColumn,
-      deadlineColumn(ctx.timezone, isJobScope),
-      criteriaColumn,
-      stageAgeColumn(!isJobScope),
-      appliedColumn(),
-    ];
+    return [...lead, statusColumn, criteriaColumn, stageAgeColumn(!isJobScope), appliedColumn()];
   }
 
   if (variant === 'offer') {

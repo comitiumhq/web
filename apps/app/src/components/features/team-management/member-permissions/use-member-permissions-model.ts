@@ -1,5 +1,5 @@
 import type { JobAccessRole } from '@comitium/schemas/jobs';
-import { getMemberDisplayName, truncateAddress } from '@comitium/ui/display-name';
+import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
@@ -90,7 +90,7 @@ export function useMemberPermissionsModel({ org, userId, currentTreasury }: UseM
   ]);
 
   const displayName = member === null ? 'Member' : getMemberDisplayName(member);
-  const identityLine = member === null ? userId : (member.email ?? truncateAddress(member.walletAddress));
+  const identityLine = member === null ? userId : (member.email ?? 'Organization member');
 
   const handleRoleChange = useCallback(
     async (nextRole: string) => {
@@ -101,7 +101,7 @@ export function useMemberPermissionsModel({ org, userId, currentTreasury }: UseM
       }
 
       if (memberState?.isCurrentTreasuryAdmin && role !== 'org_admin') {
-        toast.error('This admin controls the treasury wallet, so their role cannot be changed.');
+        toast.error('This admin holds protected organization responsibilities, so their role cannot be changed.');
 
         return;
       }
@@ -205,7 +205,7 @@ export function useMemberPermissionsModel({ org, userId, currentTreasury }: UseM
     }
 
     if (memberState?.isCurrentTreasuryAdmin) {
-      toast.error('This admin controls the treasury wallet, so they cannot be deactivated.');
+      toast.error('This admin holds protected organization responsibilities, so they cannot be deactivated.');
 
       return;
     }

@@ -15,7 +15,6 @@ import {
   ArchiveReasonsIcon,
   CancelRescheduleReasonsIcon,
   CloseJobReasonsIcon,
-  CommitmentFundsIcon,
   CustomFieldsIcon,
   DepartmentsAndTeamsIcon,
   FeedbackFormIcon,
@@ -64,15 +63,6 @@ export function buildSidebarEntries(basePath: string): SidebarEntry[] {
           icon: UsersIcon,
           match: (p) => p.startsWith(`${basePath}/members`),
           permission: Permission.ORG_MEMBER_READ,
-        },
-        {
-          type: 'item',
-          label: 'Commitment Funds',
-          path: `${basePath}/funds`,
-          icon: CommitmentFundsIcon,
-          match: (p) => p.startsWith(`${basePath}/funds`),
-          permission: null,
-          orgAdminOnly: true,
         },
         {
           type: 'item',

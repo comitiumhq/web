@@ -36,7 +36,7 @@ describe('error-messages', () => {
       const err = new TransactionError('apply', 'User rejected the request');
       const msg = getCommonErrorMessage(err);
 
-      expect(msg).toBe('Wallet request was rejected');
+      expect(msg).toBe('The request was cancelled');
     });
 
     it('TransactionError with other message uses product copy', () => {
@@ -50,7 +50,7 @@ describe('error-messages', () => {
       const err = new SignatureError(400, 'Invalid application data');
       const msg = getCommonErrorMessage(err);
 
-      expect(msg).toBe('Wallet confirmation could not be prepared. Please try again.');
+      expect(msg).toBe('This action could not be prepared. Please try again.');
     });
 
     it('EncryptionError', () => {
@@ -78,7 +78,7 @@ describe('error-messages', () => {
       const err = new TransactionError('apply', 'MetaMask Tx Signature: User rejected the request.');
       const msg = getCommonErrorMessage(err);
 
-      expect(msg).toBe('Wallet request was rejected');
+      expect(msg).toBe('The request was cancelled');
     });
   });
 });

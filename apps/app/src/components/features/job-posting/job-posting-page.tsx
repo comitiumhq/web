@@ -21,7 +21,6 @@ import {
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
 import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
-import { canRunJobLifecycleAction } from '@/lib/jobs/status';
 import { Permission } from '@/lib/schemas/org';
 
 import { isValidApplicationCapacity } from './application-capacity';
@@ -31,7 +30,6 @@ import { PostingActionsMenu } from './posting-actions-menu';
 import { PostingDescriptionEditor } from './posting-description-editor';
 import { type PostingTab, PostingTabs } from './posting-tabs';
 import { PublishValidationBanner, type PublishValidationError } from './publish-validation-banner';
-import { ResponseCommitmentDialog } from './response-commitment-dialog';
 import { ResponseCommitmentStatus } from './response-commitment-status';
 
 const UNPUBLISH_DESCRIPTION =
@@ -56,7 +54,6 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const [activeTab, setActiveTab] = useState<PostingTab>('description');
   const [publishErrors, setPublishErrors] = useState<PublishValidationError<PostingTab>[]>([]);
   const [applicationFormDialogOpen, setApplicationFormDialogOpen] = useState(false);
-  const [commitmentOpen, setCommitmentOpen] = useState(false);
   const [unpublishOpen, setUnpublishOpen] = useState(false);
 
   useEffect(() => {
@@ -91,8 +88,6 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const canPublishPosting = canOnJob(Permission.JOB_PUBLISH);
   const canUnpublishPosting = canOnJob(Permission.JOB_UNPUBLISH);
   const canReleaseFunds = canOnJob(Permission.JOB_CLOSE);
-  const canAddCommitment =
-    canPublishPosting && isPostingPublished && canRunJobLifecycleAction(job.lifecycle, 'activate_commitment');
   const canPublish = canPublishPosting && postingAllowsPublication && !permissionsLoading;
 
   const capacityHasChanged = applicationCapacity !== posting.applicationCapacity;
@@ -217,10 +212,8 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
 
             {isPostingPublished && (
               <PostingActionsMenu
-                canAddCommitment={canAddCommitment}
                 canCopyLink={candidatePostingUrl !== null}
                 canUnpublish={canUnpublishPosting}
-                onAddCommitment={() => setCommitmentOpen(true)}
                 onCopyLink={() => void handleCopyPostingLink()}
                 onUnpublish={() => setUnpublishOpen(true)}
               />
@@ -314,14 +307,6 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
         pendingLabel="Unpublishing..."
         onConfirm={handleUnpublish}
         isPending={unpublishPosting.isPending}
-      />
-
-      <ResponseCommitmentDialog
-        orgId={orgId}
-        jobId={jobId}
-        expectedVersion={posting.version}
-        open={commitmentOpen}
-        onOpenChange={setCommitmentOpen}
       />
 
       <ApplicationFormDialog

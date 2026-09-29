@@ -9,23 +9,14 @@ import {
 import { CopyIcon, DotsThreeVerticalIcon, EyeSlashIcon } from '@phosphor-icons/react';
 
 interface PostingActionsMenuProps {
-  canAddCommitment: boolean;
   canCopyLink: boolean;
   canUnpublish: boolean;
-  onAddCommitment: () => void;
   onCopyLink: () => void;
   onUnpublish: () => void;
 }
 
-export function PostingActionsMenu({
-  canAddCommitment,
-  canCopyLink,
-  canUnpublish,
-  onAddCommitment,
-  onCopyLink,
-  onUnpublish,
-}: PostingActionsMenuProps) {
-  if (!canAddCommitment && !canCopyLink && !canUnpublish) {
+export function PostingActionsMenu({ canCopyLink, canUnpublish, onCopyLink, onUnpublish }: PostingActionsMenuProps) {
+  if (!canCopyLink && !canUnpublish) {
     return null;
   }
 
@@ -44,8 +35,7 @@ export function PostingActionsMenu({
             Copy link
           </DropdownMenuItem>
         )}
-        {canAddCommitment && <DropdownMenuItem onSelect={onAddCommitment}>Add commitment</DropdownMenuItem>}
-        {canUnpublish && (canCopyLink || canAddCommitment) && <DropdownMenuSeparator />}
+        {canUnpublish && canCopyLink && <DropdownMenuSeparator />}
         {canUnpublish && (
           <DropdownMenuItem variant="destructive" onSelect={onUnpublish}>
             <EyeSlashIcon />

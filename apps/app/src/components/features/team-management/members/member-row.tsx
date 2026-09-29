@@ -1,4 +1,3 @@
-import { truncateAddress } from '@comitium/ui/display-name';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { TableCell, TableRow } from '@comitium/ui/table';
 import { type KeyboardEvent, type MouseEvent, memo, type ReactNode, useCallback } from 'react';
@@ -75,14 +74,14 @@ function getJobTitle(title: string | null): string {
   return 'Untitled job';
 }
 
-function getSecondaryIdentity(member: OrgTeamMember, displayName: string): { label: string; isAddress: boolean } {
+function getSecondaryIdentity(member: OrgTeamMember, displayName: string): string | null {
   const email = member.email?.trim();
 
   if (email && email !== displayName) {
-    return { label: email, isAddress: false };
+    return email;
   }
 
-  return { label: truncateAddress(member.walletAddress), isAddress: true };
+  return null;
 }
 
 export const MemberRow = memo(function MemberRow({ member, onSelect }: MemberRowProps) {
@@ -123,13 +122,9 @@ export const MemberRow = memo(function MemberRow({ member, onSelect }: MemberRow
             <span className="flex max-w-50 items-center gap-2 text-label-14">
               <span className="min-w-0 truncate">{displayName}</span>
             </span>
-            <span
-              className={cn('text-label-12 text-muted-foreground max-w-50 truncate', {
-                'font-mono': secondaryIdentity.isAddress,
-              })}
-            >
-              {secondaryIdentity.label}
-            </span>
+            {secondaryIdentity && (
+              <span className="text-label-12 text-muted-foreground max-w-50 truncate">{secondaryIdentity}</span>
+            )}
           </div>
         </div>
       </TableCell>
