@@ -1,5 +1,5 @@
-import { ComitiumLogo } from '@comitium/ui/comitium-logo';
 import { Badge } from '@comitium/ui/badge';
+import { ComitiumLogo } from '@comitium/ui/comitium-logo';
 import {
   Popover,
   PopoverContent,

@@ -6,6 +6,8 @@ import type { SendDirectBookingLinkBody } from '@/lib/schemas/interviews';
 import { prepareEncryptedEmailDelivery } from './email-delivery';
 
 const LINK_TEXT = 'Choose an interview time';
+const LINK_STYLE =
+  'display:inline-block;background-color:#006FEE;color:#ffffff;font-size:15px;font-weight:600;line-height:20px;padding:12px 20px;border-radius:8px;text-decoration:none;';
 
 interface PrepareSchedulingLinkEmailParams extends ComposeEmailData {
   applicationId: string;
@@ -76,7 +78,7 @@ function appendSchedulingLink(message: TipTapDoc, schedulingUrl: string): TipTap
 function appendSchedulingLinkHtml(messageHtml: string, schedulingUrl: string): string {
   const safeUrl = schedulingUrl.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
 
-  return `${messageHtml}<p><a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${LINK_TEXT}</a></p>`;
+  return `${messageHtml}<p><a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${LINK_STYLE}">${LINK_TEXT}</a></p>`;
 }
 
 function paragraph(text: string): TipTapDoc {
