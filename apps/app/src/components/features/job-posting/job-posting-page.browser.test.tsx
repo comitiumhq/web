@@ -96,11 +96,6 @@ vi.mock('./application-form-dialog', () => ({
   ApplicationFormDialog: () => null,
 }));
 
-vi.mock('./response-commitment-dialog', () => ({
-  ResponseCommitmentDialog: ({ open }: { open: boolean }) =>
-    open ? <div role="dialog">Add response commitment</div> : null,
-}));
-
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.job = {
@@ -185,18 +180,7 @@ describe('JobPostingPage', () => {
     );
   });
 
-  it('adds a response commitment after a Posting is published', async () => {
-    mocks.posting = { ...mocks.posting, status: 'published' };
-    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
-
-    await screen.getByRole('button', { name: 'Posting actions' }).click();
-    await screen.getByRole('menuitem', { name: 'Add commitment' }).click();
-
-    await expect.element(screen.getByRole('dialog', { name: '' })).toHaveTextContent('Add response commitment');
-  });
-
-  it('does not offer another response commitment while a lifecycle operation is pending', async () => {
-    mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, allowedActions: [] } };
+  it('does not expose commitment activation', async () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
@@ -242,44 +226,6 @@ describe('JobPostingPage', () => {
 
     expect(mocks.release).toHaveBeenCalledOnce();
     expect(mocks.unpublish).not.toHaveBeenCalled();
-  });
-
-  it('allows another response commitment after the previous one is finalized', async () => {
-    mocks.posting = {
-      ...mocks.posting,
-      status: 'published',
-      commitment: {
-        status: 'settled',
-        responseDeadlineDays: 7,
-        pendingApplicationResponses: 0,
-        canSettle: false,
-      },
-    };
-    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
-
-    await screen.getByRole('button', { name: 'Posting actions' }).click();
-    await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).toBeEnabled();
-  });
-
-  it('waits for Commitment finalization before allowing another one', async () => {
-    mocks.job = {
-      ...mocks.job,
-      lifecycle: { ...mocks.job.lifecycle, commitmentFinalizationPending: true, allowedActions: [] },
-    };
-    mocks.posting = {
-      ...mocks.posting,
-      status: 'published',
-      commitment: {
-        status: 'settled',
-        responseDeadlineDays: 7,
-        pendingApplicationResponses: 0,
-        canSettle: false,
-      },
-    };
-    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
-
-    await screen.getByRole('button', { name: 'Posting actions' }).click();
-    await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).not.toBeInTheDocument();
   });
 
   it('opens the canonical Posting path in the candidate app', async () => {

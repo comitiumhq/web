@@ -25,10 +25,6 @@ export interface MemberDisplayIdentity {
   avatarUrl?: string | null;
 }
 
-export function truncateAddress(address: string): string {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
-
 export function getCandidateDisplayName({
   applicationId,
   candidateId,
@@ -56,10 +52,6 @@ export function getMemberDisplayName(identity: MemberDisplayIdentity): string {
 
   if (label) {
     return label;
-  }
-
-  if (identity.walletAddress) {
-    return truncateAddress(identity.walletAddress);
   }
 
   return 'Team member';

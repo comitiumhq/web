@@ -1,6 +1,5 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
-import { BROWSER_TZ } from '@comitium/ui/date';
 import {
   functionalUpdate,
   type OnChangeFn,
@@ -9,7 +8,6 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useQueryOrgMe } from '@/hooks/use-permissions';
 import type { PipelineCandidate, PipelineCandidateSort, PipelineCandidateSorting } from '@/lib/schemas/pipeline';
 
 import { getCandidateRowId } from './cells';
@@ -69,15 +67,13 @@ export function CandidateTable({
   onSortChange,
   rowSelection,
 }: CandidateTableProps) {
-  const { data: me } = useQueryOrgMe(orgId);
-  const timezone = me?.timezone ?? BROWSER_TZ;
   const isJobScope = scope === 'job';
-  const defaultJobSorting = useMemo(() => getJobDefaultSorting(variant), [variant]);
+  const defaultJobSorting = useMemo(getJobDefaultSorting, []);
   const [jobSorting, setJobSorting] = useState<SortingState>(defaultJobSorting);
   const sorting = isJobScope ? jobSorting : getCandidateSortingState(candidateSorting);
   const columns = useMemo(
-    () => getCandidateColumns(variant, { namesMap, orgId, showJob: false, timezone, scope }),
-    [variant, namesMap, orgId, timezone, scope],
+    () => getCandidateColumns(variant, { namesMap, orgId, showJob: false, scope }),
+    [variant, namesMap, orgId, scope],
   );
 
   useEffect(() => {
@@ -163,10 +159,6 @@ function getCandidateSortingState(sorting: PipelineCandidateSorting): SortingSta
   return [{ id: sorting.sort, desc: sorting.direction === 'desc' }];
 }
 
-function getJobDefaultSorting(variant: CandidateTableVariant): SortingState {
-  if (variant === 'review') {
-    return [{ id: 'deadline', desc: false }];
-  }
-
+function getJobDefaultSorting(): SortingState {
   return [{ id: 'applied', desc: true }];
 }

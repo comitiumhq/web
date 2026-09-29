@@ -18,15 +18,15 @@ export function getCommonErrorMessage(error: JobError): string {
       return 'Failed to encrypt data. Please try again.';
 
     case 'SignatureError':
-      return 'Wallet confirmation could not be prepared. Please try again.';
+      return 'This action could not be prepared. Please try again.';
 
     case 'TransactionError':
       if (isProductSubmissionUncertain(error)) {
-        return 'We could not confirm whether your wallet submitted this action. Check wallet activity before trying again.';
+        return 'We could not confirm whether this action was submitted. Check its current status before trying again.';
       }
 
       if (error.message.includes('rejected')) {
-        return 'Wallet request was rejected';
+        return 'The request was cancelled';
       }
 
       return 'Could not submit this action. Please try again.';

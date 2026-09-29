@@ -14,7 +14,6 @@ import {
   JobSettingsIcon,
 } from '@/lib/constants/domain-icons';
 import { cn } from '@/lib/utils';
-import { JobLifecycleInfoBar } from './job-lifecycle-info-bar';
 import { JobLifecycleMenu } from './job-lifecycle-menu';
 import { JobMoreMenu } from './job-more-menu';
 
@@ -84,7 +83,6 @@ export function JobDetailLayout({
         )}
 
         <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          {job && <JobLifecycleInfoBar status={job.status} lifecycle={job.lifecycle} />}
           <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
         </main>
       </div>

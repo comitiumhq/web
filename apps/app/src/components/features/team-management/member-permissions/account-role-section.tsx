@@ -94,7 +94,7 @@ function AccountRoleNote({
   if (isCurrentTreasuryAdmin) {
     return (
       <p className="text-copy-13 text-muted-foreground mt-3">
-        This admin controls the treasury wallet, so their role cannot be changed.
+        This admin holds protected organization responsibilities, so their role cannot be changed.
       </p>
     );
   }

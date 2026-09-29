@@ -44,7 +44,7 @@ export const privyConfig: PrivyClientConfig = {
   },
   appearance: {
     landingHeader: 'Log in to Comitium',
-    loginMessage: 'Your account includes a secure embedded wallet.',
+    loginMessage: 'Use your email or Google account to continue.',
     walletChainType: 'ethereum-only',
   },
 };

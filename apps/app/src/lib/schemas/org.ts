@@ -96,6 +96,7 @@ export const orgMeSchema = z.object({
   userId: uuidSchema,
   role: orgRoleSchema,
   permissions: z.array(permissionSchema),
+  hasJobAccess: z.boolean(),
   name: z.string().nullable(),
   jobTitle: z.string().nullable(),
   email: z.string().nullable(),

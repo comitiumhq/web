@@ -1,6 +1,4 @@
-import { PageLoader } from '@comitium/ui/page-loader';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { OrgBalance } from '@/components/features/balance';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
 import { useCurrentOrg } from '@/hooks/use-current-org';
@@ -8,15 +6,22 @@ import { usePermissions } from '@/hooks/use-permissions';
 
 export const Route = createFileRoute('/org/$orgId/organization/funds')({
   ssr: false,
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: '/org/$orgId/organization/company',
+      params: { orgId: params.orgId },
+      replace: true,
+    });
+  },
   component: BalancePage,
 });
 
 function BalancePage() {
   const { orgId } = Route.useParams();
-  const { org, isLoading } = useCurrentOrg(orgId);
+  const { org } = useCurrentOrg(orgId);
 
-  if (isLoading || !org) {
-    return <PageLoader />;
+  if (!org) {
+    return null;
   }
 
   return <BalanceOrgAdminGuard org={org} />;
@@ -24,17 +29,10 @@ function BalancePage() {
 
 function BalanceOrgAdminGuard({ org }: { org: MyOrg }) {
   const { role, isLoading } = usePermissions();
-  const navigate = useNavigate();
   const isOrgAdmin = role === 'org_admin';
 
-  useEffect(() => {
-    if (!isLoading && !isOrgAdmin) {
-      navigate({ to: '/org/$orgId', params: { orgId: org.id } });
-    }
-  }, [isLoading, isOrgAdmin, navigate, org.id]);
-
   if (isLoading || !isOrgAdmin) {
-    return <PageLoader />;
+    return null;
   }
 
   return <OrgBalance org={org} />;

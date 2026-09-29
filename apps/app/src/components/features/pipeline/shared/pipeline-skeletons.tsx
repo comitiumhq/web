@@ -27,16 +27,7 @@ const KANBAN_COLUMN_SKELETONS = [
 
 type TableSkeletonVariant = Exclude<PipelineTab, 'active'>;
 type TableSkeletonScope = 'global' | 'job';
-type TableSkeletonColumn =
-  | 'candidate'
-  | 'job'
-  | 'status'
-  | 'deadline'
-  | 'criteria'
-  | 'date'
-  | 'outcome'
-  | 'reason'
-  | 'stage';
+type TableSkeletonColumn = 'candidate' | 'job' | 'status' | 'criteria' | 'date' | 'outcome' | 'reason' | 'stage';
 
 interface TableSkeletonColumnLayout {
   id: string;
@@ -255,15 +246,11 @@ function TableSkeletonCell({ column, rowIndex }: { column: TableSkeletonColumn; 
     return <Skeleton className={cn('h-6 rounded-4xl', rowIndex % 3 === 0 ? 'w-28' : 'w-36')} />;
   }
 
-  if (column === 'deadline') {
-    return <Skeleton className={cn(rowIndex % 3 === 1 ? 'h-3 w-3' : 'h-6 w-16 rounded-4xl')} />;
-  }
-
   if (column === 'criteria') {
     return <Skeleton className="h-6 w-10 rounded-4xl" />;
   }
 
-  const widths: Record<Exclude<TableSkeletonColumn, 'candidate' | 'status' | 'deadline' | 'criteria'>, string> = {
+  const widths: Record<Exclude<TableSkeletonColumn, 'candidate' | 'status' | 'criteria'>, string> = {
     job: rowIndex % 3 === 0 ? 'w-52' : 'w-44',
     date: 'w-14',
     outcome: rowIndex % 2 === 0 ? 'w-24' : 'w-28',
@@ -298,7 +285,6 @@ function getTableSkeletonLayout(
     namesMap: EMPTY_CANDIDATE_NAMES,
     orgId: '',
     showJob: false,
-    timezone: 'UTC',
     scope,
   }).map((column, index) => ({
     id: column.id ?? `column-${index}`,
@@ -312,7 +298,6 @@ function getTableSkeletonHeaderWidth(column: TableSkeletonColumn): string {
     candidate: 'w-20',
     job: 'w-8',
     status: 'w-12',
-    deadline: 'w-16',
     criteria: 'w-14',
     date: 'w-14',
     outcome: 'w-16',
@@ -324,13 +309,7 @@ function getTableSkeletonHeaderWidth(column: TableSkeletonColumn): string {
 }
 
 function getCandidateSkeletonColumnType(columnId?: string): TableSkeletonColumn {
-  if (
-    columnId === 'candidate' ||
-    columnId === 'job' ||
-    columnId === 'status' ||
-    columnId === 'deadline' ||
-    columnId === 'criteria'
-  ) {
+  if (columnId === 'candidate' || columnId === 'job' || columnId === 'status' || columnId === 'criteria') {
     return columnId;
   }
 
