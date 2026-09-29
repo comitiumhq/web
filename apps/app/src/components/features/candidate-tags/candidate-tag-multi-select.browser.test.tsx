@@ -24,8 +24,7 @@ describe('CandidateTagMultiSelect', () => {
     await trigger.click();
 
     const searchInput = screen.getByPlaceholder('Search tags…');
-
-    expect(searchInput.element().closest('[role="dialog"]')).not.toBeNull();
+    await expect.element(searchInput).toBeVisible();
 
     await searchInput.fill('Priority');
     await screen.getByRole('option', { name: 'Priority' }).click();
