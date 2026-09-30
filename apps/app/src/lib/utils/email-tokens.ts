@@ -92,7 +92,7 @@ function escapeHtmlText(value: string): string {
     .replaceAll("'", '&#39;');
 }
 
-/** Append email signature paragraphs to a body doc, separated by a blank paragraph. */
+/** Append an email signature as compact lines after the message body. */
 export function appendSignature(body: TipTapDoc | null, signature: TipTapDoc | null): TipTapDoc | null {
   if (!signature?.content?.length) {
     return body;
@@ -100,8 +100,20 @@ export function appendSignature(body: TipTapDoc | null, signature: TipTapDoc | n
 
   const bodyContent = body?.content ?? [{ type: 'paragraph' }];
 
+  const signatureContent = signature.content.every((node) => node.type === 'paragraph')
+    ? [
+        {
+          type: 'paragraph',
+          content: signature.content.flatMap((node, index) => [
+            ...(index > 0 ? [{ type: 'hardBreak' }] : []),
+            ...(node.content ?? []),
+          ]),
+        },
+      ]
+    : signature.content;
+
   return {
     type: 'doc',
-    content: [...bodyContent, { type: 'paragraph' }, ...signature.content],
+    content: [...bodyContent, ...signatureContent],
   };
 }

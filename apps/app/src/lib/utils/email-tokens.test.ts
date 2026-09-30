@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { containsUnresolvedTemplateToken, renderEmailHtml, renderEmailTemplate } from './email-tokens';
+import { appendSignature, containsUnresolvedTemplateToken, renderEmailHtml, renderEmailTemplate } from './email-tokens';
 
-describe('bulk-safe email token rendering', () => {
+describe('email composition utilities', () => {
   it('resolves each recipient context independently', () => {
     const template = {
       subject: 'Update for {{candidate_first_name}} — {{job_title}}',
@@ -30,5 +30,37 @@ describe('bulk-safe email token rendering', () => {
   it('detects unresolved placeholders, including unknown template tokens', () => {
     expect(containsUnresolvedTemplateToken('Hello {{unknown_token}}')).toBe(true);
     expect(containsUnresolvedTemplateToken('Hello Ada')).toBe(false);
+  });
+
+  it('appends signature paragraphs as compact lines', () => {
+    const body = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Thanks for applying.' }] }],
+    };
+    const signature = {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Illia Yablonski' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Founder, Comitium' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'comitium.co' }] },
+      ],
+    };
+
+    expect(appendSignature(body, signature)).toEqual({
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Thanks for applying.' }] },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Illia Yablonski' },
+            { type: 'hardBreak' },
+            { type: 'text', text: 'Founder, Comitium' },
+            { type: 'hardBreak' },
+            { type: 'text', text: 'comitium.co' },
+          ],
+        },
+      ],
+    });
   });
 });
