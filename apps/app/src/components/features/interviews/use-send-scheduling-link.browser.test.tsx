@@ -25,7 +25,10 @@ vi.mock('sonner', () => ({
 }));
 
 const vaultPublicKey = { v: 1, xwing: 'vault-key' } as PublicEncryptionKey;
+const FIRST_ACTIVITY_ID = '77777777-7777-4777-8777-777777777777';
+const SECOND_ACTIVITY_ID = '88888888-8888-4888-8888-888888888888';
 const draft = {
+  activityId: FIRST_ACTIVITY_ID,
   interviewId: '11111111-1111-4111-8111-111111111111',
   durationMinutes: 45,
   stageId: '22222222-2222-4222-8222-222222222222',
@@ -35,6 +38,11 @@ const draft = {
   messageDoc: { type: 'doc' as const, content: [] },
   messageHtml: '<p>Choose a time</p>',
   emailTemplateId: null,
+};
+const alternateDraft = {
+  ...draft,
+  activityId: SECOND_ACTIVITY_ID,
+  interviewId: '99999999-9999-4999-8999-999999999999',
 };
 
 function Harness({ applicantEmail = 'candidate@example.com' }: { applicantEmail?: string | null }) {
@@ -52,6 +60,9 @@ function Harness({ applicantEmail = 'candidate@example.com' }: { applicantEmail?
       <p>{isPending ? 'Sending' : 'Idle'}</p>
       <button type="button" onClick={() => void sendSchedulingLink(draft)}>
         Send link
+      </button>
+      <button type="button" onClick={() => void sendSchedulingLink(alternateDraft)}>
+        Send alternate link
       </button>
       <button
         type="button"
@@ -95,6 +106,7 @@ describe('useSendSchedulingLink', () => {
     expect(mocks.createLink).toHaveBeenCalledExactlyOnceWith({
       applicationId: '44444444-4444-4444-8444-444444444444',
       body: {
+        activityId: FIRST_ACTIVITY_ID,
         interviewId: draft.interviewId,
         durationMinutes: 45,
         stageId: draft.stageId,
@@ -127,6 +139,34 @@ describe('useSendSchedulingLink', () => {
 
     expect(mocks.createLink).toHaveBeenCalledTimes(1);
     expect(mocks.sendLink).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not reuse a pending link for a different activity', async () => {
+    mocks.createLink
+      .mockResolvedValueOnce({
+        data: { scheduleId: '66666666-6666-4666-8666-666666666666', url: 'https://schedule.example/first' },
+      })
+      .mockResolvedValueOnce({
+        data: { scheduleId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', url: 'https://schedule.example/second' },
+      });
+    mocks.sendLink.mockRejectedValueOnce(new Error('delivery failed')).mockResolvedValueOnce(undefined);
+
+    const screen = await render(<Harness />);
+
+    await screen.getByRole('button', { name: 'Send link' }).click();
+    await expect.element(screen.getByText('Idle')).toBeInTheDocument();
+    await screen.getByRole('button', { name: 'Send alternate link' }).click();
+    await vi.waitFor(() => expect(mocks.onSent).toHaveBeenCalledOnce());
+
+    expect(mocks.createLink).toHaveBeenCalledTimes(2);
+    expect(mocks.sendLink).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ scheduleId: '66666666-6666-4666-8666-666666666666' }),
+    );
+    expect(mocks.sendLink).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ scheduleId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }),
+    );
   });
 
   it('does not create duplicate schedules for concurrent submissions', async () => {

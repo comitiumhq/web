@@ -223,6 +223,7 @@ const interviewerInputSchema = z.object({
 });
 
 const scheduleInterviewBodySchema = z.object({
+  activityId: uuidSchema.optional(),
   interviewId: uuidSchema,
   interviewers: z.array(interviewerInputSchema).min(1),
   durationMinutes: z.number().int().min(15).max(180).optional(),
@@ -237,6 +238,7 @@ const scheduleInterviewBodySchema = z.object({
 export type ScheduleInterviewBody = z.infer<typeof scheduleInterviewBodySchema>;
 
 const createDirectBookingLinkBodySchema = z.object({
+  activityId: uuidSchema.optional(),
   interviewId: uuidSchema,
   interviewers: z.array(interviewerInputSchema).min(1),
   durationMinutes: z.number().int().min(15).max(180).optional(),

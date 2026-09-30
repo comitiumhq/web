@@ -1,6 +1,7 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
 import type {
   ApplicationProcessingStatus,
+  CandidateSheetStageActivity,
   CriteriaAssessment,
   CriterionSummary,
   ReviewStatus,
@@ -35,14 +36,13 @@ export interface CandidateCollaborationProps {
   applicationId: string | null;
   candidateId: string | null;
   orgId: string;
-  jobId: string;
-  currentStageId: string | null;
   candidateProfile: CandidateProfile | null;
   currentUserId: string;
   criterionSummary: CriterionSummary | null;
   criterionAssessments: CriteriaAssessment[];
   processing: ApplicationProcessingStatus | null;
   reviewStatus: ReviewStatus;
+  stageActivities: CandidateSheetStageActivity[];
   emails: EmailCollectionState;
   form: ApplicationFormState;
   vaultPublicKey: PublicEncryptionKey | null;
@@ -59,14 +59,13 @@ export function CandidateCollaboration({
   applicationId,
   candidateId,
   orgId,
-  jobId,
-  currentStageId,
   candidateProfile,
   currentUserId,
   criterionSummary,
   criterionAssessments,
   processing,
   reviewStatus,
+  stageActivities,
   emails,
   form,
   vaultPublicKey,
@@ -193,8 +192,7 @@ export function CandidateCollaboration({
                 applicationId={applicationId}
                 candidateId={candidateId}
                 orgId={orgId}
-                jobId={jobId}
-                currentStageId={currentStageId}
+                stageActivities={stageActivities}
                 currentUserId={currentUserId}
                 criterionSummary={criterionSummary}
                 criterionAssessments={criterionAssessments}

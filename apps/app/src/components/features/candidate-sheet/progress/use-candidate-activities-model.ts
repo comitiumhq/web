@@ -8,35 +8,31 @@ import {
   useQueryApplicationInterviewProgress,
   useQueryApplicationInterviews,
 } from '@/hooks/queries/use-query-interviews';
-import { useQueryStageActivities } from '@/hooks/queries/use-query-stage-activities';
 import type { PendingInterviewEvent } from '@/lib/interviews/feedback';
-import type { StageActivity } from '@/lib/schemas/stage-activities';
+import type { RuntimeStageActivity } from '@/lib/schemas/stage-activities';
 import { isDefined } from '@/lib/utils';
 
 import { getCandidateSheetEmptyActivityMessage } from '../model/candidate-sheet-action-state';
 
 interface UseCandidateActivitiesModelParams {
   applicationId: string | null;
-  currentStageId: string | null;
-  jobId: string;
   actionState: CandidateSheetActionState;
+  stageActivities: RuntimeStageActivity[];
   currentActivities: CandidateSheetCurrentActivity[];
 }
 
 export interface ActivitySourceIssue {
-  key: 'stage-activities' | 'interviews';
+  key: 'interviews';
   message: string;
   onRetry: () => void;
 }
 
 export function useCandidateActivitiesModel({
   applicationId,
-  currentStageId,
-  jobId,
   actionState,
+  stageActivities,
   currentActivities,
 }: UseCandidateActivitiesModelParams) {
-  const activitiesQuery = useQueryStageActivities(jobId, currentStageId);
   const interviewsQuery = useQueryApplicationInterviews(applicationId);
   const progressQuery = useQueryApplicationInterviewProgress(applicationId);
 
@@ -62,10 +58,10 @@ export function useCandidateActivitiesModel({
     }
 
     return getPendingActivities({
-      activities: activitiesQuery.data?.data ?? [],
+      activities: stageActivities,
       currentActivityById,
     });
-  }, [isCurrentWorkBlocked, activitiesQuery.data?.data, currentActivityById]);
+  }, [isCurrentWorkBlocked, stageActivities, currentActivityById]);
 
   const pendingInterviewEvents = useMemo<PendingInterviewFeedbackActivity[]>(() => {
     if (isCurrentWorkBlocked) {
@@ -99,10 +95,6 @@ export function useCandidateActivitiesModel({
     progressQuery.refetch();
   }, [progressQuery.refetch]);
 
-  const handleRetryStageActivities = useCallback(() => {
-    activitiesQuery.refetch();
-  }, [activitiesQuery.refetch]);
-
   const handleRetryInterviews = useCallback(() => {
     interviewsQuery.refetch();
   }, [interviewsQuery.refetch]);
@@ -111,16 +103,9 @@ export function useCandidateActivitiesModel({
     interviewsQuery.fetchNextPage();
   }, [interviewsQuery.fetchNextPage]);
 
-  const isActivitiesLoading =
-    !isCurrentWorkBlocked && [activitiesQuery.isLoading, interviewsQuery.isLoading].some(Boolean);
+  const isActivitiesLoading = !isCurrentWorkBlocked && interviewsQuery.isLoading;
 
   const sourceIssues = [
-    getSourceIssue(
-      !isCurrentWorkBlocked && activitiesQuery.isError,
-      'stage-activities',
-      activitiesQuery.data ? 'Stage activities may be out of date.' : 'Stage activities could not be loaded.',
-      handleRetryStageActivities,
-    ),
     getSourceIssue(
       !isCurrentWorkBlocked && interviewsQuery.isError,
       'interviews',
@@ -160,11 +145,11 @@ export function shouldShowCurrentWork(actionState: CandidateSheetActionState): b
 }
 
 interface GetPendingActivitiesParams {
-  activities: StageActivity[];
+  activities: RuntimeStageActivity[];
   currentActivityById: Map<string, CandidateSheetCurrentActivity>;
 }
 
-export function getPendingActivities({ activities, currentActivityById }: GetPendingActivitiesParams): StageActivity[] {
+export function getPendingActivities({ activities, currentActivityById }: GetPendingActivitiesParams) {
   return activities.filter((activity) => currentActivityById.has(activity.id));
 }
 
@@ -213,9 +198,9 @@ export function getPendingInterviewFeedback(
 }
 
 function findPrimaryActivity(
-  activities: StageActivity[],
+  activities: RuntimeStageActivity[],
   nextAction: CandidateSheetNextAction | null,
-): StageActivity | null {
+): RuntimeStageActivity | null {
   if (!nextAction || !('activityId' in nextAction)) {
     return null;
   }

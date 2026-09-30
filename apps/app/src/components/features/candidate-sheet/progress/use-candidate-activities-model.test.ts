@@ -1,11 +1,6 @@
 import type { CandidateSheetActionState, CandidateSheetCurrentActivity } from '@comitium/schemas/applications';
 import { describe, expect, it } from 'vitest';
-import type {
-  ApplicationReviewActivity,
-  ScheduleInterviewActivity,
-  SendEmailActivity,
-  StageActivity,
-} from '@/lib/schemas/stage-activities';
+import type { RuntimeStageActivity } from '@/lib/schemas/stage-activities';
 
 import {
   getPendingActivities,
@@ -22,7 +17,11 @@ const REVIEW_ACTIVITY_ID = '00000000-0000-4000-8000-000000000006';
 const EVENT_ID = '00000000-0000-4000-8000-000000000007';
 const NOW = '2026-07-21T10:00:00.000Z';
 
-function scheduleActivity(): ScheduleInterviewActivity {
+type RuntimeScheduleActivity = Extract<RuntimeStageActivity, { activityType: 'schedule_interview' }>;
+type RuntimeSendEmailActivity = Extract<RuntimeStageActivity, { activityType: 'send_email' }>;
+type RuntimeApplicationReviewActivity = Extract<RuntimeStageActivity, { activityType: 'application_review' }>;
+
+function scheduleActivity(): RuntimeScheduleActivity {
   return {
     id: SCHEDULE_ACTIVITY_ID,
     stageId: STAGE_ID,
@@ -31,13 +30,13 @@ function scheduleActivity(): ScheduleInterviewActivity {
     interviewId: INTERVIEW_ID,
     interviewTitle: 'Technical interview',
     durationMinutes: 45,
-    defaultInterviewers: null,
+    defaultInterviewers: [],
     createdAt: NOW,
     updatedAt: NOW,
   };
 }
 
-function emailActivity(id: string): SendEmailActivity {
+function emailActivity(id: string): RuntimeSendEmailActivity {
   return {
     id,
     stageId: STAGE_ID,
@@ -50,7 +49,7 @@ function emailActivity(id: string): SendEmailActivity {
   };
 }
 
-function reviewActivity(): ApplicationReviewActivity {
+function reviewActivity(): RuntimeApplicationReviewActivity {
   return {
     id: REVIEW_ACTIVITY_ID,
     stageId: STAGE_ID,
@@ -64,7 +63,7 @@ function reviewActivity(): ApplicationReviewActivity {
   };
 }
 
-function pendingActivities(activities: StageActivity[], currentActivities: CandidateSheetCurrentActivity[]) {
+function pendingActivities(activities: RuntimeStageActivity[], currentActivities: CandidateSheetCurrentActivity[]) {
   const currentActivityById = new Map(
     currentActivities.flatMap((activity) => {
       if (activity.kind === 'interview_feedback') {
@@ -85,9 +84,17 @@ describe('getPendingActivities', () => {
     const secondEmail = emailActivity(SECOND_EMAIL_ACTIVITY_ID);
     const review = reviewActivity();
     const projected: CandidateSheetCurrentActivity[] = [
-      { kind: 'schedule_interview', activityId: SCHEDULE_ACTIVITY_ID, canAct: true },
+      {
+        kind: 'schedule_interview',
+        activityId: SCHEDULE_ACTIVITY_ID,
+        canAct: true,
+      },
       { kind: 'send_email', activityId: EMAIL_ACTIVITY_ID, canAct: true },
-      { kind: 'send_email', activityId: SECOND_EMAIL_ACTIVITY_ID, canAct: true },
+      {
+        kind: 'send_email',
+        activityId: SECOND_EMAIL_ACTIVITY_ID,
+        canAct: true,
+      },
     ];
 
     expect(pendingActivities([schedule, firstEmail, secondEmail, review], projected)).toEqual([
@@ -102,7 +109,11 @@ describe('getPendingActivities', () => {
     const second = emailActivity(SECOND_EMAIL_ACTIVITY_ID);
     const projected: CandidateSheetCurrentActivity[] = [
       { kind: 'send_email', activityId: EMAIL_ACTIVITY_ID, canAct: true },
-      { kind: 'send_email', activityId: SECOND_EMAIL_ACTIVITY_ID, canAct: true },
+      {
+        kind: 'send_email',
+        activityId: SECOND_EMAIL_ACTIVITY_ID,
+        canAct: true,
+      },
     ];
 
     expect(pendingActivities([first, second], projected)).toEqual([first, second]);

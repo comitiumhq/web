@@ -52,7 +52,6 @@ interface CurrentActivitiesSectionProps {
 }
 
 const ACTIVITY_SOURCE_TITLES: Record<ActivitySourceIssue['key'], string> = {
-  'stage-activities': 'Stage activities unavailable',
   interviews: 'Interview status unavailable',
 };
 

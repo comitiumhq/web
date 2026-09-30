@@ -2,6 +2,7 @@ import type {
   CandidateSheetActionState,
   CandidateSheetCapabilities,
   CandidateSheetCurrentActivity,
+  CandidateSheetStageActivity,
 } from '@comitium/schemas/applications';
 import { ScrollArea } from '@comitium/ui/scroll-area';
 import type { PendingInterviewEvent } from '@/lib/interviews/feedback';
@@ -18,10 +19,9 @@ import { useCandidateActivitiesModel } from './use-candidate-activities-model';
 interface CandidateActivitiesProps {
   applicationId: string | null;
   orgId: string;
-  currentStageId: string | null;
-  jobId: string;
   capabilities: CandidateSheetCapabilities['consideration'];
   actionState: CandidateSheetActionState;
+  stageActivities: CandidateSheetStageActivity[];
   currentActivities: CandidateSheetCurrentActivity[];
   onSchedule: () => void;
   onCreateDirectBookingLink: () => void;
@@ -35,10 +35,9 @@ interface CandidateActivitiesProps {
 export function CandidateActivities({
   applicationId,
   orgId,
-  currentStageId,
-  jobId,
   capabilities,
   actionState,
+  stageActivities,
   currentActivities,
   onSchedule,
   onCreateDirectBookingLink,
@@ -50,9 +49,8 @@ export function CandidateActivities({
 }: CandidateActivitiesProps) {
   const activities = useCandidateActivitiesModel({
     applicationId,
-    currentStageId,
-    jobId,
     actionState,
+    stageActivities,
     currentActivities,
   });
 

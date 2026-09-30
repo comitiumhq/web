@@ -271,7 +271,10 @@ export function CandidateSheet({
   const applicationDisplayName = displayName ?? 'Candidate';
   const candidateSubtitle =
     decryptedProfile?.currentCompany?.trim() || decryptedProfile?.currentTitle?.trim() || decryptedEmail;
-  const { actionState, capabilities, currentActivities, hiringTeam } = application.considerationContext;
+
+  const { actionState, capabilities, currentActivities, hiringTeam, stageActivities } =
+    application.considerationContext;
+
   const headerPending = { isChangingStage, isTerminalActionPending };
   const currentUserId = user?.id ?? '';
   const isOnHiringTeam = hiringTeam.some((member) => member.userId === currentUserId);
@@ -382,10 +385,9 @@ export function CandidateSheet({
     <CandidateActivities
       applicationId={application.id}
       orgId={orgId}
-      currentStageId={application.currentStageId}
-      jobId={effectiveJobId}
       capabilities={capabilities.consideration}
       actionState={actionState}
+      stageActivities={stageActivities}
       currentActivities={currentActivities}
       onSchedule={handleOpenSchedule}
       onCreateDirectBookingLink={handleOpenDirectBookingLink}
@@ -412,13 +414,12 @@ export function CandidateSheet({
     applicationId: application.id,
     candidateId: application.candidateId ?? null,
     orgId,
-    jobId: effectiveJobId,
-    currentStageId: application.currentStageId,
     candidateProfile: decryptedProfile,
     criterionSummary: application.criterionSummary,
     criterionAssessments: application.criterionAssessments,
     processing: application.processing,
     reviewStatus: application.reviewStatus,
+    stageActivities,
     emails: emailCollection,
     form: {
       submission: formSubmission ?? null,
@@ -522,6 +523,7 @@ export function CandidateSheet({
         orgId={orgId}
         currentStageId={application.currentStageId}
         candidateEmail={decryptedEmail}
+        prefillActivityId={activityPrefill?.activityId ?? null}
         prefillInterviewId={activityPrefill?.interviewId ?? null}
         prefillDefaultInterviewers={activityPrefill?.defaultInterviewers ?? null}
       />
@@ -537,6 +539,7 @@ export function CandidateSheet({
         jobTitle={effectiveJobTitle}
         vaultPublicKey={vaultKeyData?.vaultPublicKey ?? null}
         vaultKeyVersion={vaultKeyData?.keyVersion ?? null}
+        prefillActivityId={activityPrefill?.activityId ?? null}
         prefillInterviewId={activityPrefill?.interviewId ?? null}
         prefillDefaultInterviewers={activityPrefill?.defaultInterviewers ?? null}
       />

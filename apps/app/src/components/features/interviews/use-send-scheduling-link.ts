@@ -6,9 +6,10 @@ import { useCreateDirectBookingLink, useSendDirectBookingLink } from '@/hooks/mu
 import { prepareSchedulingLinkEmail } from '@/lib/applications/communication/direct-booking-link-email';
 import type { CreateDirectBookingLinkResponse } from '@/lib/schemas/interviews';
 
-type PendingLink = CreateDirectBookingLinkResponse['data'] & { applicationId: string };
+type PendingLink = CreateDirectBookingLinkResponse['data'] & { commandKey: string };
 
 export interface SchedulingLinkDraft {
+  activityId?: string;
   interviewId: string;
   durationMinutes: number;
   stageId: string;
@@ -65,13 +66,15 @@ export function useSendSchedulingLink({
       setIsPreparing(true);
 
       try {
-        let link = pendingLink?.applicationId === applicationId ? pendingLink : null;
+        const commandKey = schedulingCommandKey(applicationId, applicantEmail, draft);
+        let link = pendingLink?.commandKey === commandKey ? pendingLink : null;
 
         if (!link) {
           try {
             const result = await createLink({
               applicationId,
               body: {
+                ...(draft.activityId ? { activityId: draft.activityId } : {}),
                 interviewId: draft.interviewId,
                 durationMinutes: draft.durationMinutes,
                 stageId: draft.stageId,
@@ -80,7 +83,8 @@ export function useSendSchedulingLink({
                 interviewers: draft.interviewers,
               },
             });
-            link = { ...result.data, applicationId };
+
+            link = { ...result.data, commandKey };
             setPendingLink(link);
           } catch {
             return;
@@ -128,4 +132,17 @@ export function useSendSchedulingLink({
     sendSchedulingLink,
     isPending: isCreating || isSending || isPreparing,
   };
+}
+
+function schedulingCommandKey(applicationId: string, applicantEmail: string, draft: SchedulingLinkDraft): string {
+  return JSON.stringify({
+    applicationId,
+    activityId: draft.activityId ?? null,
+    interviewId: draft.interviewId,
+    durationMinutes: draft.durationMinutes,
+    stageId: draft.stageId,
+    timeZone: draft.timeZone,
+    applicantEmail,
+    interviewers: draft.interviewers,
+  });
 }
