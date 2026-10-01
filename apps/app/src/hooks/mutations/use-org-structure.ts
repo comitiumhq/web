@@ -20,7 +20,6 @@ import type {
   UpdateOrgLocationBody,
 } from '@/lib/schemas/org-structure';
 import { invalidateWorkspaceSetup } from './invalidate-workspace-setup';
-import { useContractAuthorityMutation } from './use-contract-authority-mutation';
 
 function invalidateOrgStructure(queryClient: ReturnType<typeof useQueryClient>, orgId: string) {
   queryClient.invalidateQueries({ queryKey: qk.org.departmentsRoot(orgId) });
@@ -93,12 +92,9 @@ export function useUpdateOrgDepartment() {
 
 export function useArchiveOrgDepartment() {
   const queryClient = useQueryClient();
-  const executeAuthorityMutation = useContractAuthorityMutation();
 
   return useMutation({
-    mutationFn: async ({ orgId, id }: IdParams) => {
-      await executeAuthorityMutation((authorityProof) => archiveOrgDepartment(orgId, id, authorityProof));
-    },
+    mutationFn: ({ orgId, id }: IdParams) => archiveOrgDepartment(orgId, id),
 
     onSuccess: (_, { orgId }) => {
       toast.success('Department archived');
@@ -112,12 +108,9 @@ export function useArchiveOrgDepartment() {
 
 export function useRestoreOrgDepartment() {
   const queryClient = useQueryClient();
-  const executeAuthorityMutation = useContractAuthorityMutation();
 
   return useMutation({
-    mutationFn: async ({ orgId, id }: IdParams) => {
-      await executeAuthorityMutation((authorityProof) => restoreOrgDepartment(orgId, id, authorityProof));
-    },
+    mutationFn: ({ orgId, id }: IdParams) => restoreOrgDepartment(orgId, id),
 
     onSuccess: (_, { orgId }) => {
       toast.success('Department restored');

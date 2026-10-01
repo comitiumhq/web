@@ -48,6 +48,7 @@ export interface UseDirectBookingLinkDialogParams {
   jobTitle: string | null;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
+  prefillActivityId?: string | null;
   prefillInterviewId?: string | null;
   prefillDefaultInterviewers?: DefaultInterviewer[] | null;
 }
@@ -63,6 +64,7 @@ export function useDirectBookingLinkDialog({
   jobTitle,
   vaultPublicKey,
   vaultKeyVersion,
+  prefillActivityId,
   prefillInterviewId,
   prefillDefaultInterviewers,
 }: UseDirectBookingLinkDialogParams) {
@@ -226,6 +228,7 @@ export function useDirectBookingLinkDialog({
       }
 
       await sendSchedulingLink({
+        activityId: prefillActivityId ?? undefined,
         interviewId: data.interviewId,
         durationMinutes: data.durationMinutes,
         stageId: data.stageId,
@@ -240,7 +243,15 @@ export function useDirectBookingLinkDialog({
         emailTemplateId: selectedTemplateId || null,
       });
     },
-    [candidateEmail, interviewers, selectedTemplateId, vaultKeyVersion, vaultPublicKey, sendSchedulingLink],
+    [
+      candidateEmail,
+      interviewers,
+      prefillActivityId,
+      selectedTemplateId,
+      vaultKeyVersion,
+      vaultPublicKey,
+      sendSchedulingLink,
+    ],
   );
 
   return {

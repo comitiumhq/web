@@ -175,6 +175,53 @@ const candidateSheetFeedbackProgressSchema = z.object({
   currentUserSubmitted: z.boolean(),
 });
 
+const candidateSheetActivityMemberSchema = z.object({
+  userId: uuidSchema,
+  name: z.string().nullable(),
+  email: z.string().nullable(),
+  isActive: z.boolean(),
+});
+
+export const candidateSheetStageActivitySchema = z.discriminatedUnion('activityType', [
+  z.object({
+    id: uuidSchema,
+    stageId: uuidSchema,
+    activityType: z.literal('schedule_interview'),
+    activityOrder: z.number().int().nonnegative(),
+    interviewId: uuidSchema,
+    interviewTitle: z.string(),
+    durationMinutes: z.number().int().positive(),
+    defaultInterviewers: z.array(
+      candidateSheetActivityMemberSchema.extend({ role: z.enum(['interviewer', 'shadow', 'lead']) }),
+    ),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+  z.object({
+    id: uuidSchema,
+    stageId: uuidSchema,
+    activityType: z.literal('send_email'),
+    activityOrder: z.number().int().nonnegative(),
+    emailTemplateId: uuidSchema,
+    emailTemplateName: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+  z.object({
+    id: uuidSchema,
+    stageId: uuidSchema,
+    activityType: z.literal('application_review'),
+    activityOrder: z.number().int().nonnegative(),
+    reviewers: z.array(candidateSheetActivityMemberSchema),
+    feedbackFormId: uuidSchema.nullable(),
+    feedbackFormTitle: z.string().nullable(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+]);
+
+export type CandidateSheetStageActivity = z.infer<typeof candidateSheetStageActivitySchema>;
+
 const candidateSheetCurrentActivitySchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('schedule_interview'),
@@ -237,6 +284,7 @@ export const candidateSheetConsiderationContextSchema = z.object({
   }),
   capabilities: candidateSheetCapabilitiesSchema,
   actionState: candidateSheetActionStateSchema,
+  stageActivities: z.array(candidateSheetStageActivitySchema),
   currentActivities: z.array(candidateSheetCurrentActivitySchema),
 });
 

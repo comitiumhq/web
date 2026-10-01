@@ -85,6 +85,7 @@ function makeApplication(overrides: Partial<ApplicationApiResponse> = {}): Appli
         blockedReason: null,
         nextAction: null,
       },
+      stageActivities: [],
       currentActivities: [],
     },
     ...overrides,

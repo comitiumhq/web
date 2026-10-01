@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { InterviewStatus } from '@/lib/schemas/interviews';
 import type { ReviewStatus } from '@/lib/schemas/pipeline';
 
-import { getReviewBadge } from './index';
+import { getActivityBadge, getReviewBadge, getStageAgeBadge } from './index';
 
 function reviewStatus(overrides: Partial<ReviewStatus>): ReviewStatus {
   return {
@@ -67,5 +68,52 @@ describe('getReviewBadge', () => {
       label: 'In review · 1/2',
       variant: 'warning',
     });
+  });
+});
+
+describe('getActivityBadge', () => {
+  it('shows the earliest unfinished interview step before pending feedback', () => {
+    const badge = getActivityBadge({
+      reviewStatus: reviewStatus({
+        totalReviewers: 1,
+        currentUserHasPendingReview: true,
+      }),
+      interviewStatus: InterviewStatus.NEEDS_SCHEDULING,
+      interviewScheduledAt: null,
+    });
+
+    expect(badge).toMatchObject({
+      label: 'Needs scheduling',
+      variant: 'warning',
+    });
+  });
+
+  it('shows pending feedback after the interview is complete', () => {
+    const badge = getActivityBadge({
+      reviewStatus: reviewStatus({
+        totalReviewers: 1,
+        currentUserHasPendingReview: true,
+      }),
+      interviewStatus: InterviewStatus.COMPLETED,
+      interviewScheduledAt: '2026-10-01T09:00:00.000Z',
+    });
+
+    expect(badge).toMatchObject({
+      label: 'Waiting on feedback',
+      variant: 'destructive',
+    });
+  });
+});
+
+describe('getStageAgeBadge', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('warns after three days and becomes critical after seven days', () => {
+    vi.setSystemTime(new Date('2026-10-08T12:00:00.000Z'));
+
+    expect(getStageAgeBadge('2026-10-05T12:00:00.000Z')).toMatchObject({ variant: 'warning' });
+    expect(getStageAgeBadge('2026-10-01T12:00:00.000Z')).toMatchObject({ variant: 'destructive' });
   });
 });

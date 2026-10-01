@@ -31,17 +31,19 @@ interface ScheduleInterviewDialogProps {
   orgId: string;
   currentStageId?: string | null;
   candidateEmail?: string | null;
+  prefillActivityId?: string | null;
   prefillInterviewId?: string | null;
   prefillDefaultInterviewers?: DefaultInterviewer[] | null;
 }
 
 interface InterviewTypePickerProps {
   control: Control<FormData>;
+  disabled: boolean;
   options: readonly ComboboxOption[];
   onValueChange: (value: string | null) => void;
 }
 
-function InterviewTypePicker({ control, options, onValueChange }: InterviewTypePickerProps) {
+function InterviewTypePicker({ control, disabled, options, onValueChange }: InterviewTypePickerProps) {
   return (
     <FormField
       control={control}
@@ -60,6 +62,7 @@ function InterviewTypePicker({ control, options, onValueChange }: InterviewTypeP
               searchPlaceholder="Search interview types…"
               emptyMessage="No interview types found."
               clearLabel="Clear interview type"
+              disabled={disabled}
             />
           </FormControl>
           <FormMessage />
@@ -76,6 +79,7 @@ export function ScheduleInterviewDialog({
   orgId,
   currentStageId,
   candidateEmail,
+  prefillActivityId,
   prefillInterviewId,
   prefillDefaultInterviewers,
 }: ScheduleInterviewDialogProps) {
@@ -186,6 +190,7 @@ export function ScheduleInterviewDialog({
       }
 
       const body: ScheduleInterviewBody = {
+        ...(prefillActivityId ? { activityId: prefillActivityId } : {}),
         interviewId: data.interviewId,
         durationMinutes: data.durationMinutes,
         mode: 'manual',
@@ -213,7 +218,7 @@ export function ScheduleInterviewDialog({
         },
       );
     },
-    [interviewers, applicationId, schedule, onOpenChange, candidateEmail],
+    [interviewers, applicationId, schedule, onOpenChange, candidateEmail, prefillActivityId],
   );
 
   const handleCancel = useCallback(() => onOpenChange(false), [onOpenChange]);
@@ -251,9 +256,14 @@ export function ScheduleInterviewDialog({
 
   const interviewTypeControl = useMemo(
     () => (
-      <InterviewTypePicker control={form.control} options={interviewTypeOptions} onValueChange={handleTemplateChange} />
+      <InterviewTypePicker
+        control={form.control}
+        disabled={Boolean(prefillActivityId)}
+        options={interviewTypeOptions}
+        onValueChange={handleTemplateChange}
+      />
     ),
-    [form.control, handleTemplateChange, interviewTypeOptions],
+    [form.control, handleTemplateChange, interviewTypeOptions, prefillActivityId],
   );
   return (
     <>

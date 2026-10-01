@@ -1,5 +1,6 @@
 import type {
   ApplicationProcessingStatus,
+  CandidateSheetStageActivity,
   CriteriaAssessment,
   CriterionSummary,
   ReviewStatus,
@@ -11,7 +12,6 @@ import { useCallback, useMemo } from 'react';
 import { useQueryFeedbackSubmissions } from '@/hooks/queries/use-query-feedback-submissions';
 import { useQueryApplicationInterviews } from '@/hooks/queries/use-query-interviews';
 import { useQueryOrgTeamMap } from '@/hooks/queries/use-query-org-team';
-import { useQueryStageActivities } from '@/hooks/queries/use-query-stage-activities';
 import type { InterviewEventRef } from '@/lib/interviews/feedback';
 import type { FeedbackSubmission } from '@/lib/schemas/feedback-submissions';
 import type { ApplicationReviewActivity } from '@/lib/schemas/stage-activities';
@@ -34,8 +34,7 @@ interface FeedbackTabProps {
   applicationId: string | null;
   candidateId: string | null;
   orgId: string;
-  jobId: string;
-  currentStageId: string | null;
+  stageActivities: CandidateSheetStageActivity[];
   currentUserId: string;
   criterionSummary: CriterionSummary | null;
   criterionAssessments: CriteriaAssessment[];
@@ -51,8 +50,7 @@ export function FeedbackTab({
   applicationId,
   candidateId,
   orgId,
-  jobId,
-  currentStageId,
+  stageActivities,
   currentUserId,
   criterionSummary,
   criterionAssessments,
@@ -74,12 +72,6 @@ export function FeedbackTab({
     isFetchNextPageError,
   } = useQueryFeedbackSubmissions(applicationId ?? undefined);
   const {
-    data: stageActivities,
-    isLoading: isStageActivitiesLoading,
-    isError: isStageActivitiesError,
-    refetch: refetchStageActivities,
-  } = useQueryStageActivities(jobId, currentStageId);
-  const {
     data: interviewsData,
     isLoading: isInterviewsLoading,
     isError: isInterviewsError,
@@ -92,11 +84,8 @@ export function FeedbackTab({
   );
 
   const reviewActivities = useMemo<ApplicationReviewActivity[]>(
-    () =>
-      (stageActivities?.data ?? []).filter(
-        (a): a is ApplicationReviewActivity => a.activityType === 'application_review',
-      ),
-    [stageActivities?.data],
+    () => stageActivities.filter((a): a is ApplicationReviewActivity => a.activityType === 'application_review'),
+    [stageActivities],
   );
 
   const schedules = useMemo(() => interviewsData?.data ?? [], [interviewsData?.data]);
@@ -105,19 +94,19 @@ export function FeedbackTab({
     () => buildGroups(reviewActivities, schedules, liveSubmissions, currentUserId, access),
     [reviewActivities, schedules, liveSubmissions, currentUserId, access],
   );
+
   const handleLoadMore = useCallback(() => {
     fetchNextPage();
   }, [fetchNextPage]);
+
   const handleRetry = useCallback(() => {
-    void Promise.all([refetchSubmissions(), refetchStageActivities(), refetchInterviews()]);
-  }, [refetchInterviews, refetchStageActivities, refetchSubmissions]);
+    void Promise.all([refetchSubmissions(), refetchInterviews()]);
+  }, [refetchInterviews, refetchSubmissions]);
+
   const hasCriteriaEvaluation = Boolean(criterionSummary && criterionAssessments.length > 0);
-  const isInitialLoading =
-    (isLoading && !submissions) ||
-    (isStageActivitiesLoading && !stageActivities) ||
-    (isInterviewsLoading && !interviewsData);
-  const isInitialError =
-    (isError && !submissions) || (isStageActivitiesError && !stageActivities) || (isInterviewsError && !interviewsData);
+  const isInitialLoading = (isLoading && !submissions) || (isInterviewsLoading && !interviewsData);
+  const isInitialError = (isError && !submissions) || (isInterviewsError && !interviewsData);
+
   const feedbackState = getFeedbackState(
     isInitialLoading,
     isInitialError,

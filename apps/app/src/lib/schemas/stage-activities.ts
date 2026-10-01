@@ -1,3 +1,4 @@
+import type { CandidateSheetStageActivity } from '@comitium/schemas/applications';
 import { formOptionSchema } from '@comitium/schemas/forms/form-definitions';
 import { uuidSchema } from '@comitium/schemas/public';
 import { z } from 'zod';
@@ -76,6 +77,8 @@ const stageActivitySchema = z.discriminatedUnion('activityType', [
 ]);
 
 export type StageActivity = z.infer<typeof stageActivitySchema>;
+
+export type RuntimeStageActivity = CandidateSheetStageActivity;
 
 export type StageActivityOwner =
   | { kind: 'job'; jobId: string }

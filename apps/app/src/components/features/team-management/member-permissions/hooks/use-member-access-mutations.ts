@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { showMutationError } from '@/hooks/mutations/mutation-error';
-import { useContractAuthorityMutation } from '@/hooks/mutations/use-contract-authority-mutation';
 import { qk } from '@/hooks/query-keys';
 import {
   createMemberDepartmentGrant,
@@ -56,14 +55,10 @@ function invalidateMemberAccess(
 
 export function useCreateMemberDepartmentGrant() {
   const queryClient = useQueryClient();
-  const executeAuthorityMutation = useContractAuthorityMutation();
 
   return useMutation({
-    mutationFn: async ({ orgId, userId, body }: MemberDepartmentGrantCreateParams) => {
-      await executeAuthorityMutation((authorityProof) =>
-        createMemberDepartmentGrant(orgId, userId, body, authorityProof),
-      );
-    },
+    mutationFn: ({ orgId, userId, body }: MemberDepartmentGrantCreateParams) =>
+      createMemberDepartmentGrant(orgId, userId, body),
 
     onSuccess: (_, { orgId, userId, body }) => {
       toast.success('Department Access granted');
@@ -77,14 +72,10 @@ export function useCreateMemberDepartmentGrant() {
 
 export function useReplaceMemberDepartmentGrant() {
   const queryClient = useQueryClient();
-  const executeAuthorityMutation = useContractAuthorityMutation();
 
   return useMutation({
-    mutationFn: async ({ orgId, userId, grantId, body }: MemberDepartmentGrantReplaceParams) => {
-      await executeAuthorityMutation((authorityProof) =>
-        replaceMemberDepartmentGrant(orgId, userId, grantId, body, authorityProof),
-      );
-    },
+    mutationFn: ({ orgId, userId, grantId, body }: MemberDepartmentGrantReplaceParams) =>
+      replaceMemberDepartmentGrant(orgId, userId, grantId, body),
 
     onSuccess: (_, { orgId, userId, departmentId }) => {
       toast.success('Access role updated');
@@ -98,14 +89,10 @@ export function useReplaceMemberDepartmentGrant() {
 
 export function useRevokeMemberDepartmentGrant() {
   const queryClient = useQueryClient();
-  const executeAuthorityMutation = useContractAuthorityMutation();
 
   return useMutation({
-    mutationFn: async ({ orgId, userId, grantId }: MemberDepartmentGrantRevokeParams) => {
-      await executeAuthorityMutation((authorityProof) =>
-        revokeMemberDepartmentGrant(orgId, userId, grantId, authorityProof),
-      );
-    },
+    mutationFn: ({ orgId, userId, grantId }: MemberDepartmentGrantRevokeParams) =>
+      revokeMemberDepartmentGrant(orgId, userId, grantId),
 
     onSuccess: (_, { orgId, userId, departmentId }) => {
       toast.success('Department Access revoked');

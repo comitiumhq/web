@@ -29,6 +29,7 @@ export function DirectBookingLinkDialog({
   vaultPublicKey,
   vaultKeyVersion,
   prefillInterviewId,
+  prefillActivityId,
   prefillDefaultInterviewers,
 }: UseDirectBookingLinkDialogParams) {
   const dialog = useDirectBookingLinkDialog({
@@ -43,6 +44,7 @@ export function DirectBookingLinkDialog({
     vaultPublicKey,
     vaultKeyVersion,
     prefillInterviewId,
+    prefillActivityId,
     prefillDefaultInterviewers,
   });
 
@@ -84,6 +86,7 @@ export function DirectBookingLinkDialog({
                         searchPlaceholder="Search interview types…"
                         emptyMessage="No interview types found."
                         clearLabel="Clear interview type"
+                        disabled={dialog.isPending || Boolean(prefillActivityId)}
                       />
                     </FormControl>
                     <FormMessage />

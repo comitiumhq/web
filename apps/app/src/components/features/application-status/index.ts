@@ -10,8 +10,8 @@ import {
   isWithinDays,
 } from '@/lib/utils';
 
-const STAGE_AGE_WARNING_DAYS = 7;
-const STAGE_AGE_CRITICAL_DAYS = 14;
+const STAGE_AGE_WARNING_DAYS = 3;
+const STAGE_AGE_CRITICAL_DAYS = 7;
 const RESPONSE_DUE_SOON_DAYS = 1;
 
 type InterviewBadge = { variant: StatusBadgeProps['variant']; label: string; tooltip: string };
@@ -109,7 +109,13 @@ export interface ApplicationActivityStatusInput {
 }
 
 export function getActivityBadge(input: ApplicationActivityStatusInput): StatusBadgeProps | null {
-  return getReviewBadge(input.reviewStatus) ?? getInterviewBadge(input.interviewStatus, input.interviewScheduledAt);
+  const interviewBadge = getInterviewBadge(input.interviewStatus, input.interviewScheduledAt);
+
+  if (input.interviewStatus !== null && input.interviewStatus !== InterviewStatus.COMPLETED) {
+    return interviewBadge;
+  }
+
+  return getReviewBadge(input.reviewStatus) ?? interviewBadge;
 }
 
 export type ResponseUrgency = 'overdue' | 'due_soon' | 'upcoming';

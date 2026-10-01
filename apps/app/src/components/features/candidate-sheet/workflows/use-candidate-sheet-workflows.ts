@@ -53,6 +53,7 @@ export function useCandidateSheetWorkflows({
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [directBookingOpen, setDirectBookingOpen] = useState(false);
   const [activityPrefill, setActivityPrefill] = useState<{
+    activityId: string;
     interviewId: string;
     defaultInterviewers: DefaultInterviewer[] | null;
   } | null>(null);
@@ -90,6 +91,7 @@ export function useCandidateSheetWorkflows({
 
   const handleScheduleActivity = useCallback((activity: ScheduleInterviewActivity) => {
     setActivityPrefill({
+      activityId: activity.id,
       interviewId: activity.interviewId,
       defaultInterviewers: activity.defaultInterviewers,
     });
@@ -103,6 +105,7 @@ export function useCandidateSheetWorkflows({
 
   const handleCreateDirectBookingLinkFromActivity = useCallback((activity: ScheduleInterviewActivity) => {
     setActivityPrefill({
+      activityId: activity.id,
       interviewId: activity.interviewId,
       defaultInterviewers: activity.defaultInterviewers,
     });
