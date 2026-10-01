@@ -102,4 +102,24 @@ describe('TimelineEventRow', () => {
     await expect.element(screen.getByText('Application created', { exact: true })).toBeVisible();
     await expect.element(screen.getByText('by Ada Lovelace', { exact: true })).toBeVisible();
   });
+
+  it('renders a readable candidate profile update label', async () => {
+    const profileEvent: ActivityFeedRow = {
+      ...event,
+      type: 'candidate_profile_updated',
+      payload: { kind: 'generic' },
+    };
+
+    const screen = await render(
+      <TooltipProvider>
+        <TimelineEventRow
+          event={profileEvent}
+          selectedApplicationId={profileEvent.applicationId}
+          timeZone="Europe/Warsaw"
+        />
+      </TooltipProvider>,
+    );
+
+    await expect.element(screen.getByText('Candidate profile updated', { exact: true })).toBeVisible();
+  });
 });

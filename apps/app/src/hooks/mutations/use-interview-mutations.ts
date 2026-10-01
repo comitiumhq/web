@@ -102,6 +102,7 @@ export function useSendDirectBookingLink() {
     onSuccess: (_, { applicationId }) => {
       toast.success('Scheduling link is being sent');
       invalidateInterviewCaches(queryClient, applicationId);
+      queryClient.invalidateQueries({ queryKey: qk.application.emails(applicationId) });
     },
 
     onError: (error: Error) => {

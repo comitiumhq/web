@@ -178,6 +178,7 @@ async function invalidateApplicationOutcomeQueries(
     qk.application.otherApplications(params.applicationId),
     qk.application.emails(params.applicationId),
     qk.application.feedbackSubmissions(params.applicationId),
+    qk.application.interviews(params.applicationId),
     qk.application.interviewProgress(params.applicationId),
     qk.candidate.activityRoot(),
     qk.pipeline.root(),

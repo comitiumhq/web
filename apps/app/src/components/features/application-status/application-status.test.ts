@@ -103,6 +103,19 @@ describe('getActivityBadge', () => {
       variant: 'destructive',
     });
   });
+
+  it.each([InterviewStatus.CANCELLED, InterviewStatus.NO_SHOW])(
+    'does not present a finished ad hoc interview as pending scheduling (%s)',
+    (interviewStatus) => {
+      const badge = getActivityBadge({
+        reviewStatus: reviewStatus({}),
+        interviewStatus,
+        interviewScheduledAt: null,
+      });
+
+      expect(badge).toBeNull();
+    },
+  );
 });
 
 describe('getStageAgeBadge', () => {

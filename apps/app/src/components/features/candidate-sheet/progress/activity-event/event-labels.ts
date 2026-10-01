@@ -29,6 +29,7 @@ const EVENT_LABELS: Partial<Record<ActivityEventType, string>> = {
   candidate_file_added: 'Candidate file added',
   candidate_file_updated: 'Candidate file updated',
   candidate_file_removed: 'Candidate file removed',
+  candidate_profile_updated: 'Candidate profile updated',
 };
 
 export function getEventLabel(event: ActivityFeedRow): string {

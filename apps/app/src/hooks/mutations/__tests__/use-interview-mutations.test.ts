@@ -188,6 +188,19 @@ describe('interview mutations', () => {
     },
   );
 
+  it('refreshes application emails after a direct booking link is queued', () => {
+    const options = getOptions(useSendDirectBookingLink);
+    const variables = {
+      applicationId: APPLICATION_ID,
+      scheduleId: SCHEDULE_ID,
+      body: { content: { ct: 'ciphertext' }, deliveryGrant: { deliveryGrantId: 'grant', deliveryGrantKey: {} } },
+    };
+
+    options.onSuccess(undefined, variables as never);
+
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: qk.application.emails(APPLICATION_ID) });
+  });
+
   it('creates a direct booking link and refreshes projections without a premature success toast', async () => {
     const variables = {
       applicationId: APPLICATION_ID,

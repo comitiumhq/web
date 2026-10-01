@@ -16,7 +16,7 @@ const RESPONSE_DUE_SOON_DAYS = 1;
 
 type InterviewBadge = { variant: StatusBadgeProps['variant']; label: string; tooltip: string };
 
-const INTERVIEW_BADGES: Record<InterviewStatusValue, InterviewBadge> = {
+const INTERVIEW_BADGES: Record<InterviewStatusValue, InterviewBadge | null> = {
   [InterviewStatus.NEEDS_SCHEDULING]: {
     variant: 'warning',
     label: 'Needs scheduling',
@@ -34,16 +34,8 @@ const INTERVIEW_BADGES: Record<InterviewStatusValue, InterviewBadge> = {
     label: 'Needs decision',
     tooltip: 'Interview complete. Choose the next step',
   },
-  [InterviewStatus.CANCELLED]: {
-    variant: 'warning',
-    label: 'Needs scheduling',
-    tooltip: 'Interview was cancelled. Schedule a new time',
-  },
-  [InterviewStatus.NO_SHOW]: {
-    variant: 'warning',
-    label: 'Needs scheduling',
-    tooltip: 'Candidate did not attend. Schedule a new time',
-  },
+  [InterviewStatus.CANCELLED]: null,
+  [InterviewStatus.NO_SHOW]: null,
 };
 
 export function getReviewBadge(review: ReviewStatus): StatusBadgeProps | null {
@@ -93,6 +85,10 @@ function getInterviewBadge(status: InterviewStatusValue | null, scheduledAt: str
 
   const badge = INTERVIEW_BADGES[status];
 
+  if (!badge) {
+    return null;
+  }
+
   if ((status === InterviewStatus.SCHEDULED || status === InterviewStatus.IN_PROGRESS) && scheduledAt) {
     const date = formatCompactDate(scheduledAt);
 
@@ -111,7 +107,7 @@ export interface ApplicationActivityStatusInput {
 export function getActivityBadge(input: ApplicationActivityStatusInput): StatusBadgeProps | null {
   const interviewBadge = getInterviewBadge(input.interviewStatus, input.interviewScheduledAt);
 
-  if (input.interviewStatus !== null && input.interviewStatus !== InterviewStatus.COMPLETED) {
+  if (interviewBadge && input.interviewStatus !== InterviewStatus.COMPLETED) {
     return interviewBadge;
   }
 

@@ -22,6 +22,7 @@ export function useStageChange() {
     onSuccess: (_, variables) => {
       invalidateApplicationPipelineStatus(queryClient, variables.applicationId, variables.jobId);
       queryClient.invalidateQueries({ queryKey: qk.application.feedbackSubmissions(variables.applicationId) });
+      queryClient.invalidateQueries({ queryKey: qk.application.interviews(variables.applicationId) });
       queryClient.invalidateQueries({ queryKey: qk.application.interviewProgress(variables.applicationId) });
       queryClient.invalidateQueries({ queryKey: qk.candidate.activityRoot() });
       queryClient.invalidateQueries({ queryKey: qk.stageActivities.root() });

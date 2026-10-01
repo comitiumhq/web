@@ -1,5 +1,6 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { qk } from '@/hooks/query-keys';
 
 const mocks = vi.hoisted(() => ({
   archiveApplication: vi.fn(),
@@ -243,6 +244,9 @@ describe('application terminal action completion', () => {
     await options.onSuccess({ status: 'completed' }, params);
 
     expect(mocks.invalidateQueries).toHaveBeenCalled();
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: qk.application.interviews(params.applicationId),
+    });
     expect(mocks.invalidateQueries.mock.invocationCallOrder.at(-1)).toBeLessThan(
       mocks.toastSuccess.mock.invocationCallOrder[0],
     );
