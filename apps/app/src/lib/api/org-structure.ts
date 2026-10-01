@@ -1,5 +1,4 @@
 import { successSchema } from '@comitium/schemas/public';
-import { contractAuthorityMutationResultSchema } from '@/lib/schemas/contract-authority';
 import {
   type CreateMemberDepartmentGrantBody,
   type CreateOrgDepartmentBody,
@@ -15,7 +14,6 @@ import {
 } from '@/lib/schemas/org-structure';
 
 import { api } from './client';
-import { type ContractAuthorityProofInput, withContractAuthorityProof } from './contract-authority';
 
 interface ListParams {
   includeArchived?: boolean;
@@ -41,37 +39,20 @@ export function updateOrgDepartment(orgId: string, departmentId: string, body: U
   return api.patch(`/orgs/${orgId}/departments/${departmentId}`, body, orgDepartmentSchema);
 }
 
-export function archiveOrgDepartment(orgId: string, departmentId: string, authorityProof: ContractAuthorityProofInput) {
-  return api.post(
-    `/orgs/${orgId}/departments/${departmentId}/archive`,
-    withContractAuthorityProof({}, authorityProof),
-    contractAuthorityMutationResultSchema,
-  );
+export function archiveOrgDepartment(orgId: string, departmentId: string) {
+  return api.post(`/orgs/${orgId}/departments/${departmentId}/archive`, undefined, successSchema);
 }
 
-export function restoreOrgDepartment(orgId: string, departmentId: string, authorityProof: ContractAuthorityProofInput) {
-  return api.post(
-    `/orgs/${orgId}/departments/${departmentId}/restore`,
-    withContractAuthorityProof({}, authorityProof),
-    contractAuthorityMutationResultSchema,
-  );
+export function restoreOrgDepartment(orgId: string, departmentId: string) {
+  return api.post(`/orgs/${orgId}/departments/${departmentId}/restore`, undefined, successSchema);
 }
 
 export function getMemberAccess(orgId: string, userId: string) {
   return api.get(`/orgs/${orgId}/members/${userId}/access`, memberAccessResponseSchema);
 }
 
-export function createMemberDepartmentGrant(
-  orgId: string,
-  userId: string,
-  body: CreateMemberDepartmentGrantBody,
-  authorityProof: ContractAuthorityProofInput,
-) {
-  return api.post(
-    `/orgs/${orgId}/members/${userId}/department-grants`,
-    withContractAuthorityProof(body, authorityProof),
-    contractAuthorityMutationResultSchema,
-  );
+export function createMemberDepartmentGrant(orgId: string, userId: string, body: CreateMemberDepartmentGrantBody) {
+  return api.post(`/orgs/${orgId}/members/${userId}/department-grants`, body, successSchema);
 }
 
 export function replaceMemberDepartmentGrant(
@@ -79,26 +60,12 @@ export function replaceMemberDepartmentGrant(
   userId: string,
   grantId: string,
   body: ReplaceMemberDepartmentGrantBody,
-  authorityProof: ContractAuthorityProofInput,
 ) {
-  return api.patch(
-    `/orgs/${orgId}/members/${userId}/department-grants/${grantId}`,
-    withContractAuthorityProof(body, authorityProof),
-    contractAuthorityMutationResultSchema,
-  );
+  return api.patch(`/orgs/${orgId}/members/${userId}/department-grants/${grantId}`, body, successSchema);
 }
 
-export function revokeMemberDepartmentGrant(
-  orgId: string,
-  userId: string,
-  grantId: string,
-  authorityProof: ContractAuthorityProofInput,
-) {
-  return api.delete(
-    `/orgs/${orgId}/members/${userId}/department-grants/${grantId}`,
-    withContractAuthorityProof({}, authorityProof),
-    contractAuthorityMutationResultSchema,
-  );
+export function revokeMemberDepartmentGrant(orgId: string, userId: string, grantId: string) {
+  return api.delete(`/orgs/${orgId}/members/${userId}/department-grants/${grantId}`, undefined, successSchema);
 }
 
 export function getOrgLocations(orgId: string, params: ListParams = {}) {
