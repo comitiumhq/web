@@ -202,6 +202,7 @@ export function JobBoard({ api, selectedPosting = null, filters = {}, resolveApp
     salaryMin: filters.salaryMin,
     salaryMax: filters.salaryMax,
     sort: filters.sort,
+    skills: filters.skills?.split(',').filter(Boolean),
     limit: JOBS_PAGE_LIMIT,
   });
 

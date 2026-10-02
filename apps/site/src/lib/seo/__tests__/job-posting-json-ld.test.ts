@@ -10,6 +10,8 @@ const baseJob: CareerJob = {
   canonicalUrl: '/careers/acme/jobs/senior-engineer',
   applicationCapacityAvailable: true,
   title: 'Senior Engineer',
+  skills: [],
+  skillsRevision: 0,
   socialDescription: 'Build useful systems at Acme.',
   status: 'open',
   createdAt: '2026-06-08T10:00:00.000Z',

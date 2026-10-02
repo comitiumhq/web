@@ -35,7 +35,7 @@ export function JobBoardHeader({ api, filters, onFiltersChange }: JobBoardHeader
         <div className="flex flex-col gap-2 sm:flex-row">
           <SearchInput value={filters.search} onChange={handleSearchChange} />
           <LocationInput api={api} value={filters.location} onChange={handleLocationChange} />
-          <FiltersPopover filters={filters} onFiltersChange={onFiltersChange} />
+          <FiltersPopover api={api} filters={filters} onFiltersChange={onFiltersChange} />
         </div>
       </div>
     </div>

@@ -17,10 +17,13 @@ import { Separator } from '@comitium/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@comitium/ui/toggle-group';
 import { ArrowCounterClockwiseIcon, SlidersHorizontalIcon } from '@phosphor-icons/react';
 import { useCallback, useEffect, useState } from 'react';
+import type { PublicJobsApi } from '../../../api';
+import { SkillsFilter } from './skills-filter';
 import type { JobBoardFilters } from './types';
 import { getAdvancedFilterBadges } from './utils';
 
 interface FiltersPopoverProps {
+  api: PublicJobsApi;
   filters: JobBoardFilters;
   onFiltersChange: (filters: JobBoardFilters) => void;
 }
@@ -33,6 +36,7 @@ function getFilterFields(filters: JobBoardFilters) {
     salaryMin: filters.salaryMin,
     salaryMax: filters.salaryMax,
     sort: filters.sort ?? 'recommended',
+    skills: filters.skills,
   };
 }
 
@@ -66,7 +70,7 @@ function parseAnnualSalaryInputValue(value: string): number | undefined {
   return Math.round(parsed);
 }
 
-export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps) {
+export function FiltersPopover({ api, filters, onFiltersChange }: FiltersPopoverProps) {
   const [open, setOpen] = useState(false);
   const [pendingFilters, setPendingFilters] = useState(() => getFilterFields(filters));
 
@@ -83,7 +87,8 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
     !!pendingFilters.employmentType ||
     !!pendingFilters.category ||
     !!pendingFilters.salaryMin ||
-    !!pendingFilters.salaryMax;
+    !!pendingFilters.salaryMax ||
+    !!pendingFilters.skills;
 
   const handleClear = useCallback(() => {
     onFiltersChange({
@@ -99,6 +104,7 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
       salaryMin: undefined,
       salaryMax: undefined,
       sort: filters.sort ?? 'recommended',
+      skills: undefined,
     });
     setOpen(false);
   }, [filters.location, filters.search, filters.sort, onFiltersChange]);
@@ -158,6 +164,8 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
     }));
   }, []);
 
+  const selectedSkillIds = pendingFilters.skills?.split(',').filter(Boolean) ?? [];
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -170,7 +178,10 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[26rem] max-w-[calc(100vw-2rem)] gap-0 p-1">
+      <PopoverContent
+        align="end"
+        className="max-h-[calc(100dvh-6rem)] w-[26rem] max-w-[calc(100vw-2rem)] gap-0 overflow-y-auto p-1"
+      >
         <div className="flex flex-col">
           <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-3 px-3 py-3">
             <div className="min-w-0">
@@ -203,6 +214,18 @@ export function FiltersPopover({ filters, onFiltersChange }: FiltersPopoverProps
                 clearLabel="All categories"
               />
             </div>
+          </div>
+
+          <Separator className="bg-separator" />
+
+          <div className="px-3 py-3">
+            <SkillsFilter
+              api={api}
+              ids={selectedSkillIds}
+              onChange={(ids) =>
+                setPendingFilters((current) => ({ ...current, skills: ids.length ? ids.join(',') : undefined }))
+              }
+            />
           </div>
 
           <Separator className="bg-separator" />

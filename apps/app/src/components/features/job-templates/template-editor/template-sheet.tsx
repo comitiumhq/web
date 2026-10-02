@@ -79,11 +79,13 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
     save,
     discard,
     description,
+    skills,
     formId,
     criteria,
     interviewPlanId,
     hiringTeam,
     handleDescriptionChange,
+    handleSkillsChange,
     handleFormIdChange,
     handleCriteriaChange,
     handleInterviewPlanChange,
@@ -119,7 +121,7 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
     );
   }
 
-  const currentTitle = watchedTitle ?? form.getValues('title') ?? '';
+  const currentTitle = watchedTitle || form.getValues('title') || '';
   const displayTitle = currentTitle || (template?.title ?? '');
   const trimmedTitle = currentTitle.trim();
   const canSave = trimmedTitle.length > 0 && (isNew || isDirty) && !isSaving;
@@ -163,6 +165,8 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
                 owner={{ kind: 'job_template' }}
                 description={description}
                 onDescriptionChange={handleDescriptionChange}
+                skills={skills}
+                onSkillsChange={handleSkillsChange}
                 formId={formId}
                 onFormIdChange={handleFormIdChange}
               />

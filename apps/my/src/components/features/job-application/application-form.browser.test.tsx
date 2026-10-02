@@ -153,6 +153,7 @@ const jobData: JobApplicationData = {
   id: '44444444-4444-4444-8444-444444444444',
   postingId: '55555555-5555-4555-8555-555555555555',
   orgId: '66666666-6666-4666-8666-666666666666',
+  skillsRevision: 0,
 };
 
 const policy: CareerJob['recruitingPrivacy'] = {

@@ -1,5 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { JobPosting } from '@comitium/schemas/jobs';
+import type { SkillRequirement } from '@comitium/schemas/skills';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Card, CardContent } from '@comitium/ui/card';
@@ -21,6 +22,7 @@ import {
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
 import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
+import { toSkillSelections } from '@/lib/jobs/skills';
 import { Permission } from '@/lib/schemas/org';
 
 import { isValidApplicationCapacity } from './application-capacity';
@@ -31,6 +33,7 @@ import { PostingDescriptionEditor } from './posting-description-editor';
 import { type PostingTab, PostingTabs } from './posting-tabs';
 import { PublishValidationBanner, type PublishValidationError } from './publish-validation-banner';
 import { ResponseCommitmentStatus } from './response-commitment-status';
+import { SkillsEditor } from './skills-editor';
 
 const UNPUBLISH_DESCRIPTION =
   'The Posting will be removed from job boards and stop accepting new applications. Existing candidates will remain in the Pipeline.';
@@ -50,6 +53,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const { canOnJob, isLoading: permissionsLoading } = useJobPermissions(jobId);
   const [applicationCapacity, setApplicationCapacity] = useState<number | null>(null);
   const [descriptionDraft, setDescriptionDraft] = useState<TipTapDoc | null>(null);
+  const [skillsDraft, setSkillsDraft] = useState<SkillRequirement[] | null>(null);
   const [descriptionHasChanged, setDescriptionHasChanged] = useState(false);
   const [activeTab, setActiveTab] = useState<PostingTab>('description');
   const [publishErrors, setPublishErrors] = useState<PublishValidationError<PostingTab>[]>([]);
@@ -90,16 +94,21 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const canReleaseFunds = canOnJob(Permission.JOB_CLOSE);
   const canPublish = canPublishPosting && postingAllowsPublication && !permissionsLoading;
 
-  const capacityHasChanged = applicationCapacity !== posting.applicationCapacity;
-  const capacityIsValid = isValidApplicationCapacity(applicationCapacity);
-  const capacityAllowsSave = capacityHasChanged && capacityIsValid && !updatePosting.isPending;
-  const canSaveCapacity = canEdit && capacityAllowsSave;
   const currentDescription = descriptionHasChanged ? descriptionDraft : posting.description;
-  const descriptionIsPending = updatePosting.isPending;
+  const currentSkills = skillsDraft ?? posting.skills;
+  const capacityHasChanged = applicationCapacity !== posting.applicationCapacity;
+  const skillsHaveChanged = skillsDraft !== null;
+  const hasRetiredSkills = currentSkills.some((skill) => skill.status === 'retired');
+  const hasUnsavedPostingChanges = descriptionHasChanged || skillsHaveChanged || capacityHasChanged;
+
+  const isSavingPosting = updatePosting.isPending;
+  const canSaveChanges = canEdit && !isSavingPosting;
   const canSaveDescription =
-    canEdit && descriptionHasChanged && Boolean(richTextToPlainText(currentDescription)) && !descriptionIsPending;
+    canSaveChanges && descriptionHasChanged && Boolean(richTextToPlainText(currentDescription));
+  const canSaveSkills = canSaveChanges && skillsHaveChanged && !hasRetiredSkills;
+  const canSaveCapacity = canSaveChanges && capacityHasChanged && isValidApplicationCapacity(applicationCapacity);
+
   const candidatePostingUrl = getCandidatePostingUrl(job.canonicalUrl);
-  const hasUnsavedPostingChanges = descriptionHasChanged || capacityHasChanged;
 
   const handleCopyPostingLink = async () => {
     if (!candidatePostingUrl) {
@@ -138,6 +147,18 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     });
 
     setDescriptionHasChanged(false);
+  };
+
+  const handleSaveSkills = async () => {
+    if (!canSaveSkills) {
+      return;
+    }
+
+    await updatePosting.mutateAsync({
+      expectedVersion: posting.version,
+      skills: toSkillSelections(currentSkills),
+    });
+    setSkillsDraft(null);
   };
 
   const handleSaveApplicationForm = async (formId: string) => {
@@ -238,13 +259,29 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
                 content={currentDescription}
                 onChange={canEdit ? handleDescriptionChange : undefined}
                 readOnly={!canEdit}
-                disabled={descriptionIsPending}
+                disabled={isSavingPosting}
               />
               {canEdit && descriptionHasChanged && (
                 <div className="flex justify-end">
                   <Button size="sm" onClick={() => void handleSaveDescription()} disabled={!canSaveDescription}>
-                    {descriptionIsPending && <Spinner data-icon="inline-start" />}
-                    {descriptionIsPending ? 'Saving...' : 'Save changes'}
+                    {isSavingPosting && <Spinner data-icon="inline-start" />}
+                    {isSavingPosting ? 'Saving...' : 'Save changes'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          }
+          skills={
+            <div className="space-y-3">
+              <SkillsEditor value={currentSkills} onChange={setSkillsDraft} disabled={!canEdit || isSavingPosting} />
+              {skillsHaveChanged && hasRetiredSkills && (
+                <p className="text-copy-13 text-destructive">Remove or replace retired skills before saving.</p>
+              )}
+              {canEdit && skillsHaveChanged && (
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => void handleSaveSkills()} disabled={!canSaveSkills}>
+                    {isSavingPosting && <Spinner data-icon="inline-start" />}
+                    {isSavingPosting ? 'Saving...' : 'Save skills'}
                   </Button>
                 </div>
               )}
@@ -283,12 +320,12 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
                       setApplicationCapacity(value);
                       setPublishErrors([]);
                     }}
-                    disabled={!canEdit || updatePosting.isPending}
+                    disabled={!canEdit || isSavingPosting}
                   />
                   {canEdit && capacityHasChanged && (
                     <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
-                      {updatePosting.isPending && <Spinner data-icon="inline-start" />}
-                      {updatePosting.isPending ? 'Saving...' : 'Save capacity'}
+                      {isSavingPosting && <Spinner data-icon="inline-start" />}
+                      {isSavingPosting ? 'Saving...' : 'Save capacity'}
                     </Button>
                   )}
                 </div>

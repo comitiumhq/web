@@ -17,6 +17,7 @@ export const jobsSearchSchema = z.object({
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   sort: z.enum(PUBLIC_JOB_SORT_VALUES).optional(),
+  skills: z.string().optional(),
 });
 
 export type JobsSearch = z.infer<typeof jobsSearchSchema>;

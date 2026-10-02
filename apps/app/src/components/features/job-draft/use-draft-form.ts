@@ -1,5 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
+import type { SkillRequirement } from '@comitium/schemas/skills';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -11,6 +12,7 @@ import { type DraftEditorState, draftToEditorState, prepareDraftSave } from './d
 export function useDraftForm(orgId: string, jobId: string) {
   const { data: draft, isLoading, error } = useQueryJobEditor(orgId, jobId);
   const [description, setDescription] = useState<TipTapDoc | null>(null);
+  const [skills, setSkills] = useState<SkillRequirement[]>([]);
   const [formId, setFormId] = useState<string | null>(null);
   const [interviewPlanId, setInterviewPlanId] = useState<string | null>(null);
   const [criteria, setCriteria] = useState<EvaluationCriterion[]>([]);
@@ -35,6 +37,7 @@ export function useDraftForm(orgId: string, jobId: string) {
       form.reset(snapshot.values);
       isApplyingSnapshotRef.current = false;
       setDescription(snapshot.description);
+      setSkills(snapshot.skills);
       setFormId(snapshot.formId);
       setCriteria(snapshot.criteria);
       setInterviewPlanId(snapshot.interviewPlanId);
@@ -80,12 +83,13 @@ export function useDraftForm(orgId: string, jobId: string) {
     (): DraftEditorState => ({
       values: { ...form.getValues() },
       description,
+      skills: [...skills],
       formId,
       criteria: [...criteria],
       interviewPlanId,
       hiringTeam: [...hiringTeam],
     }),
-    [criteria, description, form, formId, hiringTeam, interviewPlanId],
+    [criteria, description, form, formId, hiringTeam, interviewPlanId, skills],
   );
 
   const isDirty = form.formState.isDirty || nonFormDirty;
@@ -136,6 +140,14 @@ export function useDraftForm(orgId: string, jobId: string) {
     [markNonFormDirty],
   );
 
+  const handleSkillsChange = useCallback(
+    (updated: SkillRequirement[]) => {
+      setSkills(updated);
+      markNonFormDirty();
+    },
+    [markNonFormDirty],
+  );
+
   const handleFormIdChange = useCallback(
     (next: string | null) => {
       setFormId(next);
@@ -178,11 +190,13 @@ export function useDraftForm(orgId: string, jobId: string) {
     isSaving,
     save,
     description,
+    skills,
     formId,
     criteria,
     interviewPlanId,
     hiringTeam,
     handleDescriptionChange,
+    handleSkillsChange,
     handleFormIdChange,
     handleCriteriaChange,
     handleInterviewPlanChange,

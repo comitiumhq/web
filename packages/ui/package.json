@@ -76,6 +76,7 @@
     "./combobox": "./src/components/combobox.tsx",
     "./section-header": "./src/components/section-header.tsx",
     "./selection-card": "./src/components/selection-card.tsx",
+    "./skill-search-input": "./src/components/skill-search-input.tsx",
     "./select": "./src/components/select.tsx",
     "./separator": "./src/components/separator.tsx",
     "./settings-nav-link": "./src/components/settings-nav-link.tsx",

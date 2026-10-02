@@ -16,6 +16,7 @@ export interface UseQueryJobsParams {
   salaryMin?: number;
   salaryMax?: number;
   sort?: PublicJobSort;
+  skills?: string[];
   enabled?: boolean;
 }
 
@@ -31,6 +32,7 @@ export function useQueryJobs(api: PublicJobsApi, params: UseQueryJobsParams = {}
     salaryMin,
     salaryMax,
     sort,
+    skills,
     enabled = true,
   } = params;
 
@@ -47,6 +49,7 @@ export function useQueryJobs(api: PublicJobsApi, params: UseQueryJobsParams = {}
       salaryMin,
       salaryMax,
       sort,
+      skills,
     });
   };
 
@@ -61,6 +64,7 @@ export function useQueryJobs(api: PublicJobsApi, params: UseQueryJobsParams = {}
       salaryMin,
       salaryMax,
       sort,
+      skills,
       limit,
     }),
     queryFn: fetchJobs,

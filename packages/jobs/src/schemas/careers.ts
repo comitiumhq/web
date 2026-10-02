@@ -55,6 +55,7 @@ const recruitingPrivacySchema = z.object({
 
 export const careerJobSchema = careerJobListItemSchema.omit({ orgSlug: true }).extend({
   orgId: z.string(),
+  skillsRevision: z.number().int().min(0),
   org: careerOrgSchema,
   description: tipTapDocSchema.nullable(),
   status: jobStatusSchema,

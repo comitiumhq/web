@@ -39,15 +39,13 @@ const criteriaAssessmentItemSchema = z.object({
 export type CriteriaAssessment = z.infer<typeof criteriaAssessmentItemSchema>;
 export type CriterionEvidence = z.infer<typeof criterionEvidenceSchema>;
 
-const escoConceptUriSchema = z.url().startsWith('http://data.europa.eu/esco/');
-const onetSoftwareSkillIdSchema = z.string().regex(/^urn:onet:software:[0-9a-f]{64}$/);
-const skillConceptIdSchema = z.union([escoConceptUriSchema, onetSoftwareSkillIdSchema]);
+const taxonomyConceptIdSchema = z.uuid();
 
 export const applicationSearchProjectionSchema = z
   .object({
     schemaVersion: z.literal(1),
-    skillIds: z.array(skillConceptIdSchema).max(100),
-    occupationIds: z.array(escoConceptUriSchema).max(30),
+    skillIds: z.array(taxonomyConceptIdSchema).max(100),
+    occupationIds: z.array(taxonomyConceptIdSchema).max(30),
   })
   .strict();
 

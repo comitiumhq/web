@@ -40,6 +40,8 @@ function DraftPostingPage({ jobId }: { jobId: string }) {
         owner={{ kind: 'job', jobId }}
         description={draftForm.description}
         onDescriptionChange={draftForm.handleDescriptionChange}
+        skills={draftForm.skills}
+        onSkillsChange={draftForm.handleSkillsChange}
         formId={draftForm.formId}
         onFormIdChange={draftForm.handleFormIdChange}
         applicationCapacity={applicationCapacity}

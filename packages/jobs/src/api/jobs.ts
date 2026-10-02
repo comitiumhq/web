@@ -1,5 +1,6 @@
 import { dataArraySchema } from '@comitium/schemas/public';
 import { type GetJobsParams, jobsResponseSchema, locationItemSchema } from '@comitium/schemas/public-jobs';
+import { skillLookupResponseSchema, skillSearchResponseSchema } from '@comitium/schemas/skills';
 
 import type { PublicJobsTransport } from './types';
 
@@ -49,6 +50,10 @@ export function createJobsApi(transport: PublicJobsTransport) {
       searchParams.append('sort', params.sort);
     }
 
+    if (params.skills?.length) {
+      searchParams.append('skills', params.skills.join(','));
+    }
+
     return transport.get(`/jobs?${searchParams.toString()}`, jobsResponseSchema);
   }
 
@@ -56,5 +61,15 @@ export function createJobsApi(transport: PublicJobsTransport) {
     return transport.get('/jobs/locations', dataArraySchema(locationItemSchema)).then((res) => res.data);
   }
 
-  return { getJobs, getLocations };
+  function searchSkills(query: string, page = 0, scope: 'all' | 'published' = 'all') {
+    const params = new URLSearchParams({ q: query, page: String(page), scope });
+
+    return transport.get(`/skills?${params.toString()}`, skillSearchResponseSchema);
+  }
+
+  function getSkillsByIds(ids: string[]) {
+    return transport.get(`/skills/lookup?ids=${encodeURIComponent(ids.join(','))}`, skillLookupResponseSchema);
+  }
+
+  return { getJobs, getLocations, searchSkills, getSkillsByIds };
 }

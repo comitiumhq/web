@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('react-hook-form', () => ({
-  useWatch: () => undefined,
+  useWatch: () => '',
 }));
 
 vi.mock('@comitium/ui/feature-sheet', () => ({

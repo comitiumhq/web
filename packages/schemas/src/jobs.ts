@@ -11,6 +11,7 @@ import {
   locationEntrySchema,
   responseCommitmentStatusSchema,
 } from './public-jobs';
+import { type SkillSelection, skillRequirementSchema } from './skills';
 
 // --- Evaluation criteria ---
 
@@ -118,6 +119,7 @@ const jobApplicationDataBaseSchema = z.object({
   id: uuidSchema,
   postingId: uuidSchema,
   orgId: z.string(),
+  skillsRevision: z.number().int().min(0),
 });
 
 export type JobApplicationData = z.infer<typeof jobApplicationDataBaseSchema>;
@@ -175,6 +177,7 @@ export const jobEditorSchema = z.object({
   archivedAt: z.string().nullable(),
   title: z.string(),
   description: tipTapDocSchema.nullable(),
+  skills: z.array(skillRequirementSchema),
   departmentId: uuidSchema.nullable(),
   locationId: uuidSchema.nullable(),
   location: z.array(locationEntrySchema).nullable(),
@@ -239,6 +242,7 @@ export const jobPostingSchema = z.object({
   slug: z.string(),
   status: jobPostingStatusSchema,
   description: tipTapDocSchema.nullable(),
+  skills: z.array(skillRequirementSchema),
   form: z
     .object({
       id: uuidSchema,
@@ -289,6 +293,7 @@ export type UpdateJobEditorData = {
   expectedVersion: number;
   title?: string;
   description?: TipTapDoc | null;
+  skills?: SkillSelection[];
   departmentId?: string;
   locationId?: string;
   locationType?: string | null;
@@ -306,6 +311,7 @@ export type UpdateJobEditorData = {
 export type UpdateJobPostingData = {
   expectedVersion: number;
   description?: TipTapDoc | null;
+  skills?: SkillSelection[];
   formId?: string | null;
   applicationCapacity?: number | null;
 };

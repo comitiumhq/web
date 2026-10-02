@@ -3,15 +3,23 @@ import type { ReactNode } from 'react';
 
 interface PostingTabsProps {
   description: ReactNode;
+  skills: ReactNode;
   applicationForm: ReactNode;
   capacity?: ReactNode;
   value?: PostingTab;
   onValueChange?: (value: PostingTab) => void;
 }
 
-export type PostingTab = 'description' | 'application-form' | 'capacity';
+export type PostingTab = 'description' | 'skills' | 'application-form' | 'capacity';
 
-export function PostingTabs({ description, applicationForm, capacity, value, onValueChange }: PostingTabsProps) {
+export function PostingTabs({
+  description,
+  skills,
+  applicationForm,
+  capacity,
+  value,
+  onValueChange,
+}: PostingTabsProps) {
   return (
     <Tabs
       defaultValue="description"
@@ -23,6 +31,9 @@ export function PostingTabs({ description, applicationForm, capacity, value, onV
         <TabsList variant="line" className="min-w-max justify-start">
           <TabsTrigger value="description" className="flex-none">
             Description
+          </TabsTrigger>
+          <TabsTrigger value="skills" className="flex-none">
+            Skills
           </TabsTrigger>
           <TabsTrigger value="application-form" className="flex-none">
             Application form
@@ -36,6 +47,7 @@ export function PostingTabs({ description, applicationForm, capacity, value, onV
       </div>
 
       <TabsContent value="description">{description}</TabsContent>
+      <TabsContent value="skills">{skills}</TabsContent>
       <TabsContent value="application-form">{applicationForm}</TabsContent>
       {capacity !== undefined ? <TabsContent value="capacity">{capacity}</TabsContent> : null}
     </Tabs>

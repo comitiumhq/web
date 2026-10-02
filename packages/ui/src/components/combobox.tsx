@@ -21,6 +21,7 @@ export interface ComboboxProps extends SelectionFieldCommonProps {
   onValueChange: (value: string | null) => void;
   clearable?: boolean;
   closeOnSelect?: boolean;
+  serverFiltered?: boolean;
   unknownValueLabel?: string;
 }
 
@@ -50,6 +51,7 @@ export const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(functi
     startContent,
     clearable = true,
     closeOnSelect = true,
+    serverFiltered = false,
     name,
     required,
     ...inputProps
@@ -83,7 +85,7 @@ export const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(functi
     <ComboboxPrimitive.Root
       items={optionGroups ?? optionValues}
       itemToStringLabel={(optionValue) => optionMap.get(optionValue)?.label ?? unknownValueLabel ?? optionValue}
-      filter={(optionValue, query) => optionMatchesQuery(optionMap.get(optionValue), query)}
+      filter={(optionValue, query) => serverFiltered || optionMatchesQuery(optionMap.get(optionValue), query)}
       value={value}
       onValueChange={handleValueChange}
       open={open}

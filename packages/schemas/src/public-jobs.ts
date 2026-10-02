@@ -1,8 +1,8 @@
 import { z } from 'zod';
-
 import { tipTapDocSchema } from './common';
 import type { PublicJobSort } from './job-enums';
 import { paginatedWithTotalSchema, uuidSchema } from './public';
+import { skillDisplaySchema } from './skills';
 
 const compensationTierSchema = z.object({
   title: z.string().optional(),
@@ -68,6 +68,7 @@ export const jobListItemSchema = z.object({
   applicationCapacityAvailable: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
+  skills: z.array(skillDisplaySchema),
   socialDescription: z.string().nullable(),
   status: jobStatusSchema,
   responseDeadlineDays: z.number().nullable(),
@@ -99,6 +100,7 @@ const jobSchema = z.object({
   updatedAt: z.string(),
   title: z.string().nullable(),
   description: tipTapDocSchema.nullable(),
+  skills: z.array(skillDisplaySchema),
   location: z.array(locationEntrySchema).nullable(),
   employmentType: z.string().nullable(),
   locationType: z.string().nullable(),
@@ -130,4 +132,5 @@ export type GetJobsParams = {
   salaryMin?: number;
   salaryMax?: number;
   sort?: PublicJobSort;
+  skills?: string[];
 };

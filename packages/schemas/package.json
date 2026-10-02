@@ -36,6 +36,7 @@
     "./product-errors": "./src/product-errors.ts",
     "./public": "./src/public.ts",
     "./public-jobs": "./src/public-jobs.ts",
+    "./skills": "./src/skills.ts",
     "./transaction-errors": "./src/transaction-errors.ts",
     "./vault": "./src/vault.ts"
   },

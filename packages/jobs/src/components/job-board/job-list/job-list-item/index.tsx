@@ -6,6 +6,7 @@ import { formatRelativeTime } from '@comitium/ui/date';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { formatCompensationCompact } from '@comitium/ui/salary';
 import { BriefcaseIcon, MapPinIcon } from '@phosphor-icons/react';
+import { RequiredSkillPreview } from '../../../required-skill-preview';
 
 interface JobListItemProps {
   job: JobListItemType;
@@ -83,6 +84,7 @@ export function JobListItem({ job, isSelected, isLast, onClick }: JobListItemPro
               </Badge>
             </div>
           )}
+          <RequiredSkillPreview skills={job.skills} />
         </div>
       </div>
     </button>

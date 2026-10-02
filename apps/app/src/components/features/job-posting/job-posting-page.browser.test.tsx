@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => ({
       content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build reliable systems.' }] }],
     },
     form: { id: 'form-1', title: 'Default Application Form', isArchived: false },
+    skills: [],
     applicationCapacity: 25 as number | null,
     completedApplicationCount: 4,
     commitment: null as null | {
@@ -116,6 +117,7 @@ beforeEach(() => {
       content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build reliable systems.' }] }],
     },
     form: { id: 'form-1', title: 'Default Application Form', isArchived: false },
+    skills: [],
     applicationCapacity: 25,
     completedApplicationCount: 4,
     commitment: null,
