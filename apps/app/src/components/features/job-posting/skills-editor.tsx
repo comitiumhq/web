@@ -1,4 +1,4 @@
-import type { SkillRequirement } from '@comitium/schemas/skills';
+import { MAX_POSTING_SKILLS, type SkillRequirement } from '@comitium/schemas/skills';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { SkillSearchInput } from '@comitium/ui/skill-search-input';
@@ -18,8 +18,14 @@ interface SkillsEditorProps {
 
 export function SkillsEditor({ value, onChange, disabled = false }: SkillsEditorProps) {
   const selectedIds = value.map((skill) => skill.skillId);
+  const atLimit = value.length >= MAX_POSTING_SKILLS;
+  const excessSkillCount = value.length - MAX_POSTING_SKILLS;
 
   function addSkill(skill: { id: string; label: string }) {
+    if (atLimit) {
+      return;
+    }
+
     onChange([...value, { skillId: skill.id, label: skill.label, required: true, status: 'active' }]);
   }
 
@@ -36,7 +42,8 @@ export function SkillsEditor({ value, onChange, disabled = false }: SkillsEditor
       return;
     }
 
-    const reordered = applyDndReorder(value, (skill) => skill.skillId, event.operation.source, event.operation.target);
+    const { source, target } = event.operation;
+    const reordered = applyDndReorder(value, (skill) => skill.skillId, source, target);
 
     if (reordered) {
       onChange(reordered);
@@ -47,7 +54,7 @@ export function SkillsEditor({ value, onChange, disabled = false }: SkillsEditor
     <div className="max-w-3xl space-y-6">
       <div className="space-y-3">
         <p className="text-copy-13 text-muted-foreground">
-          Add the skills this role needs. You can mark any skill optional.
+          Up to {MAX_POSTING_SKILLS} skills, shown to candidates in this order.
         </p>
 
         {!disabled && (
@@ -57,16 +64,22 @@ export function SkillsEditor({ value, onChange, disabled = false }: SkillsEditor
               onSelect={addSkill}
               excludeIds={selectedIds}
               placeholder="Search and add skills"
+              disabled={atLimit}
             />
           </div>
+        )}
+
+        {!disabled && excessSkillCount > 0 && (
+          <p className="text-copy-12 text-destructive" role="alert">
+            Remove {excessSkillCount} skills before saving.
+          </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h3 className="text-label-14 font-medium">Selected skills{value.length > 0 ? ` (${value.length})` : ''}</h3>
-          {!disabled && value.length > 1 && <span className="text-copy-12 text-muted-foreground">Drag to reorder</span>}
-        </div>
+        <h3 className="text-label-14 font-medium">
+          Selected skills ({value.length}/{MAX_POSTING_SKILLS})
+        </h3>
 
         {value.length === 0 ? (
           <div className="rounded-xl border border-dashed border-separator px-4 py-5 text-copy-13 text-muted-foreground">
@@ -115,18 +128,20 @@ function SkillRow({ skill, index, count, disabled, onRequiredChange, onRemove }:
         isDragging && 'relative z-50 bg-popover shadow-lg ring-1 ring-primary/30',
       )}
     >
-      {canReorder && (
-        <Button
-          ref={handleRef}
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="shrink-0 cursor-grab touch-none text-muted-foreground active:cursor-grabbing"
-          aria-label={`Reorder ${skill.label}`}
-        >
-          <DotsSixVerticalIcon />
-        </Button>
-      )}
+      <Button
+        ref={handleRef}
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className={cn(
+          'shrink-0 cursor-grab touch-none text-muted-foreground active:cursor-grabbing',
+          !canReorder && 'invisible',
+        )}
+        aria-label={`Reorder ${skill.label}`}
+        inert={!canReorder}
+      >
+        <DotsSixVerticalIcon />
+      </Button>
 
       <div className="flex min-w-40 flex-1 flex-wrap items-center gap-2">
         <span className="text-label-14">{skill.label}</span>
@@ -134,12 +149,12 @@ function SkillRow({ skill, index, count, disabled, onRequiredChange, onRemove }:
       </div>
 
       {disabled ? (
-        <Badge variant="secondary">{skill.required ? 'Required' : 'Optional'}</Badge>
+        <Badge variant="secondary">{skill.required ? 'Required' : 'Preferred'}</Badge>
       ) : (
         <div className="flex items-center gap-1">
           <ToggleGroup
             type="single"
-            value={skill.required ? 'required' : 'optional'}
+            value={skill.required ? 'required' : 'preferred'}
             onValueChange={(next) => {
               if (next) {
                 onRequiredChange(skill.skillId, next === 'required');
@@ -151,7 +166,7 @@ function SkillRow({ skill, index, count, disabled, onRequiredChange, onRemove }:
             spacing={0}
           >
             <ToggleGroupItem value="required">Required</ToggleGroupItem>
-            <ToggleGroupItem value="optional">Optional</ToggleGroupItem>
+            <ToggleGroupItem value="preferred">Preferred</ToggleGroupItem>
           </ToggleGroup>
 
           <Button

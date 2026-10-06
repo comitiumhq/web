@@ -106,7 +106,11 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
 
       <ScrollArea className="flex-1 h-0">
         <div className="flex flex-col gap-6 px-5 py-5">
-          <SkillRequirements skills={job.skills} />
+          {job.skills.length > 0 && (
+            <div className={job.description ? 'border-b border-separator pb-5' : undefined}>
+              <SkillRequirements skills={job.skills} />
+            </div>
+          )}
           {job.description && <JobDescription description={job.description} />}
         </div>
       </ScrollArea>

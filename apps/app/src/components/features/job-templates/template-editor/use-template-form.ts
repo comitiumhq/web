@@ -1,6 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
-import type { SkillRequirement } from '@comitium/schemas/skills';
+import { MAX_POSTING_SKILLS, type SkillRequirement } from '@comitium/schemas/skills';
 import { richTextToPlainText } from '@comitium/ui/rich-text';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { useCreateJobTemplate, useUpdateJobTemplate } from '@/hooks/mutations/use-job-template-mutations';
 import { useQueryJobTemplate } from '@/hooks/queries/use-query-job-templates';
 import { buildCompensation } from '@/lib/jobs/compensation';
-import { toSkillSelections } from '@/lib/jobs/skills';
+import { POSTING_SKILL_LIMIT_MESSAGE, toSkillSelections } from '@/lib/jobs/skills';
 import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
 import type { CreateJobTemplateBody } from '@/lib/schemas/job-templates';
 
@@ -107,6 +107,11 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
     if (!trimmedTitle) {
       toast.error('Title is required');
 
+      return;
+    }
+
+    if (skills.length > MAX_POSTING_SKILLS) {
+      toast.error(POSTING_SKILL_LIMIT_MESSAGE);
       return;
     }
 

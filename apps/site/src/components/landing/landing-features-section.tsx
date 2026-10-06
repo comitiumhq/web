@@ -102,7 +102,7 @@ export function LandingFeaturesSection({ earlyAccessUrl }: { earlyAccessUrl: str
             </Moment>
 
             <Moment
-              title="Protect data at every step."
+              title="Protect data at every step"
               description="From application to offer, sensitive content is protected with end-to-end encryption."
               className="md:h-[30rem]"
               visualClassName="md:flex md:flex-1 md:aspect-auto md:items-center md:justify-center md:[&>div]:aspect-[18/13] md:[&>div]:h-full md:[&>div]:w-auto md:[&>div]:scale-[1.1]"

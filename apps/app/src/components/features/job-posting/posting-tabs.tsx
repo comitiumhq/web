@@ -12,6 +12,8 @@ interface PostingTabsProps {
 
 export type PostingTab = 'description' | 'skills' | 'application-form' | 'capacity';
 
+const SHOW_SKILLS_TAB = false;
+
 export function PostingTabs({
   description,
   skills,
@@ -32,9 +34,11 @@ export function PostingTabs({
           <TabsTrigger value="description" className="flex-none">
             Description
           </TabsTrigger>
-          <TabsTrigger value="skills" className="flex-none">
-            Skills
-          </TabsTrigger>
+          {SHOW_SKILLS_TAB && (
+            <TabsTrigger value="skills" className="flex-none">
+              Skills
+            </TabsTrigger>
+          )}
           <TabsTrigger value="application-form" className="flex-none">
             Application form
           </TabsTrigger>
@@ -47,7 +51,7 @@ export function PostingTabs({
       </div>
 
       <TabsContent value="description">{description}</TabsContent>
-      <TabsContent value="skills">{skills}</TabsContent>
+      {SHOW_SKILLS_TAB && <TabsContent value="skills">{skills}</TabsContent>}
       <TabsContent value="application-form">{applicationForm}</TabsContent>
       {capacity !== undefined ? <TabsContent value="capacity">{capacity}</TabsContent> : null}
     </Tabs>

@@ -1,4 +1,4 @@
-import type { SkillRequirement } from '@comitium/schemas/skills';
+import { MAX_POSTING_SKILLS, type SkillRequirement } from '@comitium/schemas/skills';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -59,14 +59,16 @@ function TestEditor({ initialSkills = [REACT, TYPESCRIPT] }: { initialSkills?: S
 }
 
 describe('SkillsEditor', () => {
-  it('adds a searched skill to the ordered list', async () => {
+  it('adds and removes a searched skill', async () => {
     const screen = await render(<TestEditor initialSkills={[]} />);
 
     await screen.getByRole('combobox', { name: 'Search and add skills' }).fill('Angular');
     await screen.getByRole('option', { name: /Angular/ }).click();
 
     await expect.element(screen.getByLabelText('Skill order')).toHaveTextContent('Angular');
-    await expect.element(screen.getByRole('button', { name: 'Reorder Angular' })).not.toBeInTheDocument();
+    await screen.getByRole('button', { name: 'Remove Angular' }).click();
+
+    await expect.element(screen.getByLabelText('Skill order')).toBeEmptyDOMElement();
   });
 
   it('shows JavaScript next to Java and keeps it available after Java is selected', async () => {
@@ -81,6 +83,34 @@ describe('SkillsEditor', () => {
 
     await input.fill('javas');
     await expect.element(screen.getByRole('option', { name: /JavaScript/ })).toBeVisible();
+  });
+
+  it('stops adding skills at the limit and allows another after removal', async () => {
+    const initialSkills = [
+      REACT,
+      ...Array.from({ length: MAX_POSTING_SKILLS - 1 }, (_, index) => ({
+        ...TYPESCRIPT,
+        skillId: `skill-${index}`,
+      })),
+    ];
+    const screen = await render(<TestEditor initialSkills={initialSkills} />);
+    const input = screen.getByRole('combobox', { name: 'Search and add skills' });
+
+    await expect.element(input).toBeDisabled();
+
+    await screen.getByRole('button', { name: 'Remove React' }).click();
+
+    await expect.element(input).toBeEnabled();
+  });
+
+  it('marks a single skill as preferred', async () => {
+    const screen = await render(<TestEditor initialSkills={[REACT]} />);
+    const importance = screen.getByRole('group', { name: 'Importance for React' });
+
+    await expect.element(importance.getByRole('radio', { name: 'Required' })).toBeChecked();
+    await importance.getByRole('radio', { name: 'Preferred' }).click();
+
+    await expect.element(importance.getByRole('radio', { name: 'Preferred' })).toBeChecked();
   });
 
   it('reorders selected skills with the keyboard drag handle', async () => {

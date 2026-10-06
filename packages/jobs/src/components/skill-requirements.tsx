@@ -1,43 +1,36 @@
 import type { SkillDisplay } from '@comitium/schemas/skills';
 import { Badge } from '@comitium/ui/badge';
 
+const SKILL_BADGE_CLASS = 'h-auto min-h-6 max-w-full px-2 py-0.5 text-label-12 font-normal whitespace-normal';
+
+function SkillBadge({ skill }: { skill: SkillDisplay }) {
+  return (
+    <Badge
+      variant={skill.required ? 'secondary' : 'outline'}
+      className={skill.required ? SKILL_BADGE_CLASS : `${SKILL_BADGE_CLASS} bg-transparent text-muted-foreground`}
+    >
+      <span className="min-w-0 break-words">{skill.label}</span>
+      {!skill.required && <span className="sr-only">(preferred)</span>}
+    </Badge>
+  );
+}
+
 export function SkillRequirements({ skills }: { skills: SkillDisplay[] }) {
   if (skills.length === 0) {
     return null;
   }
 
-  const required = skills.filter((skill) => skill.required);
-  const optional = skills.filter((skill) => !skill.required);
-
   return (
-    <section aria-label="Skills" className="space-y-4">
-      <h2 className="text-heading-18">Skills</h2>
+    <section aria-label="Skills" className="space-y-3">
+      <h2 className="text-label-16 font-medium">Skills</h2>
 
-      {required.length > 0 && (
-        <div>
-          <h3 className="mb-2 text-label-13 font-medium">Required</h3>
-          <div className="flex flex-wrap gap-2">
-            {required.map((skill) => (
-              <Badge key={skill.skillId} variant="secondary" className="text-label-12 font-normal">
-                {skill.label}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {optional.length > 0 && (
-        <div>
-          <h3 className="mb-2 text-label-13 font-medium text-muted-foreground">Optional</h3>
-          <div className="flex flex-wrap gap-2">
-            {optional.map((skill) => (
-              <Badge key={skill.skillId} variant="outline" className="text-label-12 font-normal">
-                {skill.label}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+      <ul className="flex flex-wrap gap-2">
+        {skills.map((skill) => (
+          <li key={skill.skillId} className="max-w-full">
+            <SkillBadge skill={skill} />
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

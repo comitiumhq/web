@@ -130,7 +130,7 @@ describe('JobPostingPage', () => {
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await expect.element(screen.getByTestId('description-editor')).toHaveAttribute('data-read-only', 'false');
-    await expect.element(screen.getByText('Ready for candidates')).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('tab', { name: 'Skills' })).not.toBeInTheDocument();
     await expect.element(screen.getByRole('button', { name: 'Edit description' })).not.toBeInTheDocument();
 
     await screen.getByRole('button', { name: 'Update description' }).click();
@@ -190,25 +190,6 @@ describe('JobPostingPage', () => {
     await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).not.toBeInTheDocument();
   });
 
-  it('shows an active response commitment without another add action', async () => {
-    mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, allowedActions: [] } };
-    mocks.posting = {
-      ...mocks.posting,
-      status: 'published',
-      commitment: {
-        status: 'active',
-        responseDeadlineDays: 7,
-        pendingApplicationResponses: 0,
-        canSettle: false,
-      },
-    };
-    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
-
-    await expect.element(screen.getByText('Published')).toBeInTheDocument();
-    await screen.getByRole('button', { name: 'Posting actions' }).click();
-    await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).not.toBeInTheDocument();
-  });
-
   it('allows a completed active response commitment to settle without unpublishing the Posting', async () => {
     mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, allowedActions: ['settle_commitment'] } };
     mocks.posting = {
@@ -249,19 +230,19 @@ describe('JobPostingPage', () => {
     await expect.element(screen.getByRole('button', { name: 'Change form' })).not.toBeInTheDocument();
 
     await screen.getByRole('tab', { name: 'Capacity' }).click();
-    await expect.element(screen.getByRole('button', { name: 'Save capacity' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Save changes' })).not.toBeInTheDocument();
     await expect.element(screen.getByLabelText('Maximum applications')).toBeDisabled();
     await expect.element(screen.getByRole('button', { name: 'Publish' })).toBeDisabled();
   });
 
-  it('shows the capacity save action only after the value changes', async () => {
+  it('enables the capacity save action only after the value changes', async () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await screen.getByRole('tab', { name: 'Capacity' }).click();
-    await expect.element(screen.getByRole('button', { name: 'Save capacity' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
     await screen.getByLabelText('Maximum applications').fill('30');
 
-    await expect.element(screen.getByRole('button', { name: 'Save capacity' })).toBeEnabled();
+    await expect.element(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled();
   });
 });

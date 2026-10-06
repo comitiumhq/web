@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { uuidSchema } from './public';
 
+export const MAX_POSTING_SKILLS = 10;
+
 export const skillSelectionSchema = z.object({
   skillId: uuidSchema,
   required: z.boolean(),

@@ -32,14 +32,14 @@
 
 ## Features
 
-- **Verified identity:** Zero-knowledge verification with [zkPassport](https://zkpassport.id/) to protect hiring from identity fraud and spam
 - **Applicant tracking:** Job postings, application forms, candidate profiles, and Kanban/table pipeline views
-- **Structured hiring:** Interview plans, stage-based activities, application reviews, scorecards, and feedback
 - **Candidate management:** Notes, candidate email, forms, activity history, tags, and bulk actions
+- **Structured hiring:** Interview plans, stage-based activities, application reviews, scorecards, and feedback
 - **Interview scheduling:** Calendar integration, interviewer availability, booking links, time zones, and conflict detection
 - **Candidate experience:** Job discovery, application tracking, and self-scheduling
 - **Admin & access:** RBAC, team invites, custom fields, and reusable templates
-- **Privacy & security:** PQ E2EE for candidate PII, organization vaults, and open-weight AI models
+- **Identity verification:** Zero-knowledge verification to protect hiring from identity fraud and spam
+- **Privacy & security:** PQ E2EE for candidate PII and organization vaults
 
 ## Screenshots
 

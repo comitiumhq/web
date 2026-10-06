@@ -1,11 +1,13 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
-import type { SkillRequirement } from '@comitium/schemas/skills';
+import { MAX_POSTING_SKILLS, type SkillRequirement } from '@comitium/schemas/skills';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { useSaveJobEditor } from '@/components/features/job-settings/use-save-job-editor';
 import { useQueryJobEditor } from '@/hooks/queries/use-query-job-editor';
+import { POSTING_SKILL_LIMIT_MESSAGE } from '@/lib/jobs/skills';
 import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
 import { type DraftEditorState, draftToEditorState, prepareDraftSave } from './draft-editor-state';
 
@@ -108,6 +110,11 @@ export function useDraftForm(orgId: string, jobId: string) {
       return null;
     }
 
+    if (skills.length > MAX_POSTING_SKILLS) {
+      toast.error(POSTING_SKILL_LIMIT_MESSAGE);
+      return null;
+    }
+
     if (!isDirty) {
       return versionRef.current;
     }
@@ -130,7 +137,7 @@ export function useDraftForm(orgId: string, jobId: string) {
     } catch {
       return null;
     }
-  }, [applySnapshot, currentSnapshot, form, isDirty, persistDraft]);
+  }, [applySnapshot, currentSnapshot, form, isDirty, persistDraft, skills.length]);
 
   const handleDescriptionChange = useCallback(
     (content: TipTapDoc) => {

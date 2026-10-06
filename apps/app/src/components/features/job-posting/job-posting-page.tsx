@@ -1,6 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { JobPosting } from '@comitium/schemas/jobs';
-import type { SkillRequirement } from '@comitium/schemas/skills';
+import { MAX_POSTING_SKILLS, type SkillRequirement } from '@comitium/schemas/skills';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Card, CardContent } from '@comitium/ui/card';
@@ -105,7 +105,8 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const canSaveChanges = canEdit && !isSavingPosting;
   const canSaveDescription =
     canSaveChanges && descriptionHasChanged && Boolean(richTextToPlainText(currentDescription));
-  const canSaveSkills = canSaveChanges && skillsHaveChanged && !hasRetiredSkills;
+  const canSaveSkills =
+    canSaveChanges && skillsHaveChanged && !hasRetiredSkills && currentSkills.length <= MAX_POSTING_SKILLS;
   const canSaveCapacity = canSaveChanges && capacityHasChanged && isValidApplicationCapacity(applicationCapacity);
 
   const candidatePostingUrl = getCandidatePostingUrl(job.canonicalUrl);
@@ -308,12 +309,9 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
             </Card>
           }
           capacity={
-            <Card>
-              <CardContent>
-                <div className="space-y-5">
-                  <p className="text-copy-13 text-muted-foreground">
-                    {applicationCountLabel(posting.completedApplicationCount, posting.applicationCapacity)}
-                  </p>
+            <div className="space-y-3">
+              <Card>
+                <CardContent>
                   <ApplicationCapacityControl
                     value={applicationCapacity}
                     onChange={(value) => {
@@ -322,15 +320,17 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
                     }}
                     disabled={!canEdit || isSavingPosting}
                   />
-                  {canEdit && capacityHasChanged && (
-                    <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
-                      {isSavingPosting && <Spinner data-icon="inline-start" />}
-                      {isSavingPosting ? 'Saving...' : 'Save capacity'}
-                    </Button>
-                  )}
+                </CardContent>
+              </Card>
+              {canEdit && (
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
+                    {isSavingPosting && <Spinner data-icon="inline-start" />}
+                    {isSavingPosting ? 'Saving...' : 'Save changes'}
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           }
         />
       </PageContainer>
@@ -386,14 +386,4 @@ function getCandidatePostingUrl(canonicalUrl: string | null): string | null {
   const canonical = new URL(canonicalUrl, candidateOrigin);
 
   return new URL(`${canonical.pathname}${canonical.search}${canonical.hash}`, candidateOrigin).toString();
-}
-
-function applicationCountLabel(completedCount: number, capacity: number | null): string {
-  const applicationLabel = completedCount === 1 ? 'application' : 'applications';
-
-  if (capacity === null) {
-    return `${completedCount} ${applicationLabel} received`;
-  }
-
-  return `${completedCount} of ${capacity} applications received`;
 }
