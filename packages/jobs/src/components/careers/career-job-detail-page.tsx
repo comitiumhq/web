@@ -19,6 +19,7 @@ import type { ElementType, ReactNode } from 'react';
 import { getPublicApplicationAvailability, type PublicApplicationAvailability } from '../../application/availability';
 import type { CareerJob } from '../../schemas/careers';
 import { JobDescription } from '../job-board/job-detail/description';
+import { SkillRequirements } from '../skill-requirements';
 
 type DetailIcon = ElementType<{ className?: string }>;
 type CareerJobDetailTab = 'overview' | 'apply';
@@ -177,7 +178,13 @@ export function CareerJobDetailPage({
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
             <div className="min-w-0">
               <TabsContent value="overview" className="mt-0">
-                <Card className="p-5 sm:p-6">
+                <Card className="gap-5 p-5 sm:p-6">
+                  {job.skills.length > 0 && (
+                    <div className="border-b border-separator pb-5">
+                      <SkillRequirements skills={job.skills} />
+                    </div>
+                  )}
+
                   {job.description ? (
                     <JobDescription description={job.description} className="text-copy-14" />
                   ) : (

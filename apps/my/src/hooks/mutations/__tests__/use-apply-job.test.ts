@@ -184,6 +184,19 @@ describe('useApplyJob', () => {
     );
   });
 
+  it('reloads changed Posting skills and tells the applicant to review them', async () => {
+    const options = getMutationOptions();
+
+    await options.onError(new SignatureError(409, 'Posting skills changed', 'POSTING_SKILLS_CHANGED'));
+
+    expect(mocks.routerInvalidate).toHaveBeenCalledOnce();
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['careers'], refetchType: 'none' });
+    expect(mocks.toastError).toHaveBeenCalledWith(
+      'The skills for this role changed. Review the updated requirements before submitting again.',
+      { id: 'apply-job' },
+    );
+  });
+
   it('describes preparation failures without wallet terminology', async () => {
     const options = getMutationOptions();
 

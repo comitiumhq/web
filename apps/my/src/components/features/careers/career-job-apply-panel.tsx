@@ -85,6 +85,7 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
       id: job.id,
       postingId: job.postingId,
       orgId: job.orgId,
+      skillsRevision: job.skillsRevision,
     };
   }, [job]);
 

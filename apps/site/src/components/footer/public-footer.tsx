@@ -1,10 +1,9 @@
-import { Button } from '@comitium/ui/button';
 import { ComitiumLogo } from '@comitium/ui/comitium-logo';
 import { PageContainer } from '@comitium/ui/page-container';
-import { GithubLogoIcon, XLogoIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
 
 const FOUNDER_X_URL = 'https://x.com/0xilroy';
+const FOUNDER_LINKEDIN_URL = 'https://www.linkedin.com/in/illia-yablonski/';
 const GITHUB_URL = 'https://github.com/comitiumhq';
 
 export function PublicFooter() {
@@ -16,29 +15,37 @@ export function PublicFooter() {
             <ComitiumLogo />
           </Link>
 
-          <nav className="flex items-center gap-1" aria-label="Social links">
-            <Button asChild variant="outline" size="icon-sm">
-              <a
-                href={FOUNDER_X_URL}
-                target="_blank"
-                rel="me noreferrer"
-                aria-label="0xilroy on X"
-                title="0xilroy on X"
-              >
-                <XLogoIcon className="size-5" aria-hidden="true" />
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="icon-sm">
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="me noreferrer"
-                aria-label="Comitium on GitHub"
-                title="Comitium on GitHub"
-              >
-                <GithubLogoIcon className="size-5" aria-hidden="true" />
-              </a>
-            </Button>
+          <nav className="flex items-center" aria-label="Social links">
+            <a
+              href={FOUNDER_X_URL}
+              target="_blank"
+              rel="me noreferrer"
+              aria-label="0xilroy on X"
+              title="0xilroy on X"
+              className="inline-flex size-9 items-center justify-center rounded-md transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <img src="/social/x.svg" alt="" className="size-5 dark:invert" />
+            </a>
+            <a
+              href={FOUNDER_LINKEDIN_URL}
+              target="_blank"
+              rel="me noreferrer"
+              aria-label="Illia Yablonski on LinkedIn"
+              title="Illia Yablonski on LinkedIn"
+              className="inline-flex size-9 items-center justify-center rounded-md transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <img src="/social/linkedin.svg" alt="" className="size-5" />
+            </a>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="me noreferrer"
+              aria-label="Comitium on GitHub"
+              title="Comitium on GitHub"
+              className="inline-flex size-9 items-center justify-center rounded-md transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <img src="/social/github.svg" alt="" className="size-5 dark:invert" />
+            </a>
           </nav>
         </div>
 

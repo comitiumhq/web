@@ -55,6 +55,10 @@ function getApplyErrorMessage(error: unknown): string {
     return 'The hiring organization changed its AI-assisted evaluation setting. Review the updated choice before submitting again.';
   }
 
+  if (error._tag === 'SignatureError' && error.apiCode === API_ERROR_CODES.postingSkillsChanged) {
+    return 'The skills for this role changed. Review the updated requirements before submitting again.';
+  }
+
   if (error._tag === 'SignatureError') {
     return 'Application submission could not be prepared. Please try again.';
   }
@@ -159,7 +163,8 @@ export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequi
       if (
         isJobError(error) &&
         error._tag === 'SignatureError' &&
-        error.apiCode === API_ERROR_CODES.aiCriteriaEvaluationPolicyChanged
+        (error.apiCode === API_ERROR_CODES.aiCriteriaEvaluationPolicyChanged ||
+          error.apiCode === API_ERROR_CODES.postingSkillsChanged)
       ) {
         await queryClient.invalidateQueries({ queryKey: qk.careers.all(), refetchType: 'none' });
         await router.invalidate();

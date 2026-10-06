@@ -1,5 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
+import { MAX_POSTING_SKILLS, type SkillRequirement } from '@comitium/schemas/skills';
 import { richTextToPlainText } from '@comitium/ui/rich-text';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -8,6 +9,7 @@ import { toast } from 'sonner';
 import { useCreateJobTemplate, useUpdateJobTemplate } from '@/hooks/mutations/use-job-template-mutations';
 import { useQueryJobTemplate } from '@/hooks/queries/use-query-job-templates';
 import { buildCompensation } from '@/lib/jobs/compensation';
+import { POSTING_SKILL_LIMIT_MESSAGE, toSkillSelections } from '@/lib/jobs/skills';
 import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
 import type { CreateJobTemplateBody } from '@/lib/schemas/job-templates';
 
@@ -25,6 +27,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
   const { data: template, isLoading, error } = useQueryJobTemplate(orgId, templateId ?? undefined);
 
   const [description, setDescription] = useState<TipTapDoc | null>(null);
+  const [skills, setSkills] = useState<SkillRequirement[]>([]);
   const [formId, setFormId] = useState<string | null>(null);
   const [interviewPlanId, setInterviewPlanId] = useState<string | null>(null);
   const [criteria, setCriteria] = useState<EvaluationCriterion[]>([]);
@@ -61,6 +64,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
 
     form.reset(formValues);
     setDescription((template.description as TipTapDoc) ?? null);
+    setSkills(template.skills);
     setFormId(template.formId ?? null);
     setCriteria((template.criteria as EvaluationCriterion[]) ?? []);
     setInterviewPlanId(template.interviewPlanId);
@@ -71,6 +75,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
   const resetToEmpty = useCallback(() => {
     form.reset(EMPTY_FORM_VALUES);
     setDescription(null);
+    setSkills([]);
     setFormId(null);
     setCriteria([]);
     setInterviewPlanId(null);
@@ -105,6 +110,11 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
       return;
     }
 
+    if (skills.length > MAX_POSTING_SKILLS) {
+      toast.error(POSTING_SKILL_LIMIT_MESSAGE);
+      return;
+    }
+
     const baseBody = {
       departmentId: shouldSendDepartment ? (v.departmentId ?? null) : undefined,
       locationId: shouldSendLocation ? (v.locationId ?? null) : undefined,
@@ -112,6 +122,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
       category: v.category,
       compensation: buildCompensation(v) ?? undefined,
       description: descriptionContent,
+      skills: toSkillSelections(skills),
       formId,
       criteria: validCriteria,
       hiringTeam: hiringTeam.map((member) => ({ userId: member.userId, role: member.role })),
@@ -132,6 +143,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
   }, [
     form,
     description,
+    skills,
     formId,
     criteria,
     interviewPlanId,
@@ -154,6 +166,11 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
 
   const handleDescriptionChange = useCallback((content: TipTapDoc) => {
     setDescription(content);
+    setNonFormDirty(true);
+  }, []);
+
+  const handleSkillsChange = useCallback((updated: SkillRequirement[]) => {
+    setSkills(updated);
     setNonFormDirty(true);
   }, []);
 
@@ -191,11 +208,13 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
     save,
     discard,
     description,
+    skills,
     formId,
     criteria,
     interviewPlanId,
     hiringTeam,
     handleDescriptionChange,
+    handleSkillsChange,
     handleFormIdChange,
     handleCriteriaChange,
     handleInterviewPlanChange,

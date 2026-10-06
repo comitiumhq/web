@@ -20,7 +20,7 @@ export function getMyApplicationStatus(jobId: string) {
   return api.get(`/applications/me/jobs/${encodeURIComponent(jobId)}/status`, myApplicationStatusSchema);
 }
 
-export function prepareApplication(body: { jobPostingId: string; formId: string }) {
+export function prepareApplication(body: { jobPostingId: string; formId: string; skillsRevision: number }) {
   return api.post('/applications/prepare', body, applicationPreparationResultSchema);
 }
 

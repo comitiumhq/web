@@ -12,6 +12,7 @@ describe('jobListItemSchema', () => {
       canonicalUrl: '/careers/acme/jobs/protocol-engineer',
       applicationCapacityAvailable: true,
       title: 'Protocol Engineer',
+      skills: [],
       description: null,
       socialDescription: null,
       status: 'open',

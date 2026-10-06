@@ -27,6 +27,14 @@ describe('job draft utils', () => {
         {
           values: { ...baseValues, title: '  People Lead  ' },
           description,
+          skills: [
+            {
+              skillId: '99999999-9999-4999-8999-999999999999',
+              label: 'Communication',
+              required: true,
+              status: 'active',
+            },
+          ],
           formId: '33333333-3333-4333-8333-333333333333',
           criteria: [
             {
@@ -69,6 +77,7 @@ describe('job draft utils', () => {
         ],
       },
       description,
+      skills: [{ skillId: '99999999-9999-4999-8999-999999999999', required: true }],
       formId: '33333333-3333-4333-8333-333333333333',
       applicationCapacity: null,
       criteria: [
@@ -94,6 +103,7 @@ describe('job draft utils', () => {
       {
         values,
         description: null,
+        skills: [],
         formId: null,
         criteria: [],
         interviewPlanId: null,
@@ -120,6 +130,7 @@ describe('job draft utils', () => {
       category: null,
       compensation: null,
       description: null,
+      skills: [],
       formId: null,
       applicationCapacity: null,
       criteria: null,

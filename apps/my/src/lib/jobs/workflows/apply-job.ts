@@ -160,6 +160,7 @@ export function applyJobWorkflow(params: ApplyJobWorkflowParams): ResultAsync<Ap
   return ResultAsync.fromPromise(
     prepareApplication({
       jobPostingId: jobData.postingId,
+      skillsRevision: jobData.skillsRevision,
       formId,
     }),
     toSignatureError,

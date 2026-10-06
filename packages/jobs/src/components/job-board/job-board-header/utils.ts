@@ -44,5 +44,13 @@ export function getAdvancedFilterBadges(filters: JobBoardFilters): ActiveFilterB
     badges.push({ label: salaryLabel, key: 'salary' });
   }
 
+  if (filters.skills) {
+    const count = filters.skills.split(',').filter(Boolean).length;
+
+    if (count > 0) {
+      badges.push({ label: `${count} skill${count === 1 ? '' : 's'}`, key: 'skills' });
+    }
+  }
+
   return badges;
 }

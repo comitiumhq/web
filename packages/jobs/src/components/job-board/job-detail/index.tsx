@@ -6,6 +6,7 @@ import { ScrollArea } from '@comitium/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { BriefcaseIcon, ClockIcon, MapPinIcon } from '@phosphor-icons/react';
 import { getPublicApplicationAvailability } from '../../../application/availability';
+import { SkillRequirements } from '../../skill-requirements';
 import { formatResponseWindow } from '../metadata-labels';
 import { JobActions } from './actions';
 import { ApplyButton } from './apply-button';
@@ -27,6 +28,7 @@ type JobDetailData = Pick<
   | 'canonicalUrl'
   | 'title'
   | 'description'
+  | 'skills'
   | 'location'
   | 'employmentType'
   | 'locationType'
@@ -104,6 +106,11 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
 
       <ScrollArea className="flex-1 h-0">
         <div className="flex flex-col gap-6 px-5 py-5">
+          {job.skills.length > 0 && (
+            <div className={job.description ? 'border-b border-separator pb-5' : undefined}>
+              <SkillRequirements skills={job.skills} />
+            </div>
+          )}
           {job.description && <JobDescription description={job.description} />}
         </div>
       </ScrollArea>

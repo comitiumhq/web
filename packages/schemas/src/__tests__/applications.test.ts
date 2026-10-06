@@ -11,8 +11,8 @@ import {
   finalizeApplicationInputSchema,
 } from '../applications';
 
-const ESCO_OCCUPATION_ID = 'http://data.europa.eu/esco/occupation/software-engineer';
-const ONET_SOFTWARE_ID = 'urn:onet:software:275976081ce1abf67779eb3c388b5e14531082e52137502e264776e1a6a11595';
+const OCCUPATION_ID = '01999c64-6000-7000-8000-000000000001';
+const SKILL_ID = '01999c64-6000-7000-8000-000000000002';
 const UUID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const HASH = `0x${'1'.repeat(64)}`;
 
@@ -34,21 +34,21 @@ function mockWrappedKey(): WrappedKey {
 }
 
 describe('applicationSearchProjectionSchema', () => {
-  it('accepts the combined ESCO and O*NET projection contract', () => {
+  it('accepts Comitium concept IDs', () => {
     const result = applicationSearchProjectionSchema.safeParse({
       schemaVersion: 1,
-      skillIds: [ONET_SOFTWARE_ID],
-      occupationIds: [ESCO_OCCUPATION_ID],
+      skillIds: [SKILL_ID],
+      occupationIds: [OCCUPATION_ID],
     });
 
     expect(result.success).toBe(true);
   });
 
-  it('rejects O*NET occupation IDs', () => {
+  it('rejects source-specific IDs', () => {
     const invalidOccupation = applicationSearchProjectionSchema.safeParse({
       schemaVersion: 1,
       skillIds: [],
-      occupationIds: [ONET_SOFTWARE_ID],
+      occupationIds: ['urn:onet:software:275976081ce1abf67779eb3c388b5e14531082e52137502e264776e1a6a11595'],
     });
 
     expect(invalidOccupation.success).toBe(false);

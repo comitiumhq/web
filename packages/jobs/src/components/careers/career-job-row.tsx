@@ -7,6 +7,7 @@ import { BriefcaseIcon, CaretRightIcon, MapPinIcon } from '@phosphor-icons/react
 import { Link } from '@tanstack/react-router';
 import { memo } from 'react';
 import type { CareerJobListItem } from '../../schemas/careers';
+import { RequiredSkillPreview } from '../required-skill-preview';
 
 interface CareerJobRowProps {
   job: CareerJobListItem;
@@ -64,6 +65,7 @@ export const CareerJobRow = memo(function CareerJobRow({ job, isLast }: CareerJo
               </Badge>
             </div>
           )}
+          <RequiredSkillPreview skills={job.skills} />
         </div>
 
         <CaretRightIcon className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5" />

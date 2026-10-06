@@ -66,6 +66,7 @@ function runWorkflow(overrides: Partial<ApplyJobWorkflowParams> = {}) {
       id: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
       postingId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
       orgId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+      skillsRevision: 0,
     },
     walletReady: true,
     formId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
