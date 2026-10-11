@@ -5,7 +5,6 @@ import { isReservedCareersSlug } from '@/lib/careers/slugs';
 
 const ORG_PROFILE_NAME_MAX_LENGTH = 255;
 const ORG_PROFILE_DESCRIPTION_MAX_LENGTH = 1000;
-export const ORG_PROFILE_LOGO_MAX_LENGTH = 150;
 const ORG_PROFILE_WEBSITE_MAX_LENGTH = 255;
 const ORG_CAREERS_SLUG_MAX_LENGTH = 80;
 

@@ -33,9 +33,11 @@ export function getAdvancedFilterBadges(filters: JobBoardFilters): ActiveFilterB
   if (filters.locationType) {
     badges.push({ label: getLabel(LOCATION_TYPES, filters.locationType), key: 'locationType' });
   }
+
   if (filters.employmentType) {
     badges.push({ label: getLabel(EMPLOYMENT_TYPES, filters.employmentType), key: 'employmentType' });
   }
+
   if (filters.category) {
     badges.push({ label: getLabel(CATEGORIES, filters.category), key: 'category' });
   }

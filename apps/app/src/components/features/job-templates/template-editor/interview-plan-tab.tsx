@@ -41,6 +41,7 @@ export const InterviewPlanTab = memo(function InterviewPlanTab({
 
     onSelectTemplate(effectiveSelectedId);
   }, [effectiveSelectedId, onSelectTemplate, selectedTemplateId]);
+
   const selectedPlanId = effectiveSelectedId ?? undefined;
   const { data: selectedPlanDetail, isLoading: isSelectedPlanLoading } = useQueryInterviewPlan(orgId, selectedPlanId);
 

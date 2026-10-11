@@ -38,21 +38,11 @@ export type CompanyInfo = z.infer<typeof companyInfoSchema>;
 export const jobStatusSchema = z.enum(['draft', 'open', 'closed']);
 export type JobStatus = z.infer<typeof jobStatusSchema>;
 
-export const responseCommitmentStatusSchema = z.enum(['active', 'stopped', 'settled']);
-
-const jobLifecycleActionSchema = z.enum([
-  'open_job',
-  'publish_posting',
-  'activate_commitment',
-  'settle_commitment',
-  'close_job',
-  'reopen_as_draft',
-]);
+const jobLifecycleActionSchema = z.enum(['open_job', 'publish_posting', 'close_job', 'reopen_as_draft']);
 
 export type JobLifecycleAction = z.infer<typeof jobLifecycleActionSchema>;
 
 export const jobLifecycleSchema = z.object({
-  commitmentFinalizationPending: z.boolean(),
   activeApplications: z.number().int().nonnegative(),
   allowedActions: z.array(jobLifecycleActionSchema),
 });
@@ -71,7 +61,6 @@ export const jobListItemSchema = z.object({
   skills: z.array(skillDisplaySchema),
   socialDescription: z.string().nullable(),
   status: jobStatusSchema,
-  responseDeadlineDays: z.number().nullable(),
   createdAt: z.string(),
   location: z.array(locationEntrySchema).nullable(),
   locationType: z.string().nullable(),
@@ -94,7 +83,6 @@ const jobSchema = z.object({
   canonicalUrl: z.string(),
   applicationCapacityAvailable: z.boolean(),
   orgId: z.string(),
-  responseDeadlineDays: z.number().nullable(),
   status: jobStatusSchema,
   createdAt: z.string(),
   updatedAt: z.string(),

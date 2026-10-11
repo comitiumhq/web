@@ -1,11 +1,5 @@
 import type { JobSummary } from '@comitium/schemas/jobs';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@comitium/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { CaretDownIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
@@ -34,8 +28,7 @@ export function JobLifecycleMenu({ job, orgId, actionsDisabled = false }: JobLif
   }
 
   const isOpenAvailable = canRunJobLifecycleAction(job.lifecycle, 'open_job');
-  const isCommitmentSettlementAvailable = canRunJobLifecycleAction(job.lifecycle, 'settle_commitment');
-  const isCloseAvailable = canRunJobLifecycleAction(job.lifecycle, 'close_job') || isCommitmentSettlementAvailable;
+  const isCloseAvailable = canRunJobLifecycleAction(job.lifecycle, 'close_job');
   const isReopenAvailable = canRunJobLifecycleAction(job.lifecycle, 'reopen_as_draft');
 
   if (isAccessLoading) {
@@ -45,12 +38,12 @@ export function JobLifecycleMenu({ job, orgId, actionsDisabled = false }: JobLif
   const canOpen = isOpenAvailable && canOnJob(Permission.JOB_EDIT);
   const canClose = isCloseAvailable && canOnJob(Permission.JOB_CLOSE);
   const canReopen = isReopenAvailable && canOnJob(Permission.JOB_EDIT);
-  const canViewBlockedClose = job.status === 'open' && !isCloseAvailable && canOnJob(Permission.JOB_CLOSE);
+
   const handleOpenJob = () => {
     openJob({ orgId, jobId: job.id });
   };
 
-  if (!canOpen && !canClose && !canReopen && !canViewBlockedClose) {
+  if (!canOpen && !canClose && !canReopen) {
     return <JobStatusBadge status={job.status} />;
   }
 
@@ -81,16 +74,6 @@ export function JobLifecycleMenu({ job, orgId, actionsDisabled = false }: JobLif
               Close job
             </DropdownMenuItem>
           )}
-          {canViewBlockedClose ? (
-            <>
-              <DropdownMenuItem disabled>Close job</DropdownMenuItem>
-              <DropdownMenuLabel className="max-w-64 whitespace-normal">
-                {job.lifecycle.commitmentFinalizationPending
-                  ? 'Wait for the current commitment operation to finish.'
-                  : 'Respond to all committed applications before closing.'}
-              </DropdownMenuLabel>
-            </>
-          ) : null}
           {canReopen && <DropdownMenuItem onSelect={() => setReopenDialogOpen(true)}>Reopen as Draft</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -103,7 +86,6 @@ export function JobLifecycleMenu({ job, orgId, actionsDisabled = false }: JobLif
           jobTitle={job.title}
           orgId={orgId}
           expectedVersion={job.version}
-          commitmentSettlementRequired={isCommitmentSettlementAvailable}
           activeApplications={job.lifecycle.activeApplications}
         />
       )}

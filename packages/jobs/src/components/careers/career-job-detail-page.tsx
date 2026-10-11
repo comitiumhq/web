@@ -6,14 +6,7 @@ import { PageContainer } from '@comitium/ui/page-container';
 import { formatCompensationSalary, hasCompensation } from '@comitium/ui/salary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import {
-  ArrowLeftIcon,
-  BriefcaseIcon,
-  BuildingsIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  MapPinIcon,
-} from '@phosphor-icons/react';
+import { ArrowLeftIcon, BriefcaseIcon, BuildingsIcon, CurrencyDollarIcon, MapPinIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
 import type { ElementType, ReactNode } from 'react';
 import { getPublicApplicationAvailability, type PublicApplicationAvailability } from '../../application/availability';
@@ -35,16 +28,6 @@ interface DetailItem {
   icon: DetailIcon;
   label: string;
   value: string | null;
-}
-
-function formatResponseDeadline(days: number | null): string | null {
-  if (days === null) {
-    return null;
-  }
-
-  const noun = days === 1 ? 'day' : 'days';
-
-  return `${days} ${noun} to respond`;
 }
 
 function renderDetailItem(item: DetailItem) {
@@ -118,11 +101,6 @@ export function CareerJobDetailPage({
       icon: BriefcaseIcon,
       label: 'Employment',
       value: job.employmentType ? formatEmploymentType(job.employmentType) : null,
-    },
-    {
-      icon: ClockIcon,
-      label: 'Response target',
-      value: formatResponseDeadline(job.responseDeadlineDays),
     },
   ];
   const detailItemNodes = detailItems.map(renderDetailItem);

@@ -7,7 +7,7 @@ import {
   CriteriaBadge,
   getCriteriaLabel as getPipelineCriteriaLabel,
 } from '@/components/features/pipeline/shared/criteria-badge';
-import { getApplicationReviewUrgencyState } from '@/components/features/pipeline/shared/pipeline-status';
+import { getCardUrgencyState } from '@/components/features/pipeline/shared/pipeline-status';
 import { UrgencyStripe } from '@/components/features/pipeline/shared/urgency-stripe';
 import type { PipelineCandidate } from '@/lib/schemas/pipeline';
 import { formatCompactDate, formatElapsedDaysSince, formatRelativeTime, getCandidateDisplayName } from '@/lib/utils';
@@ -62,18 +62,18 @@ export function CandidateIdentityCell({
     profile,
   });
   const candidateSubtitle = getCandidateSubtitle(candidate, profile, showJob);
-  const urgency = showUrgencyStripe
-    ? getApplicationReviewUrgencyState(candidate.isResponded, candidate.responseDeadline)
-    : null;
+  const urgency = getCardUrgencyState({
+    reviewStatus: candidate.reviewStatus,
+    interviewStatus: candidate.interviewStatus,
+    interviewScheduledAt: candidate.interviewScheduledAt,
+    stageSince: getStageSince(candidate.currentStageEnteredAt, candidate.appliedAt),
+  });
 
   return (
     <div className="min-w-0">
-      {urgency && <UrgencyStripe level={urgency.level} reason={urgency.reason} />}
+      {showUrgencyStripe && urgency && <UrgencyStripe level={urgency.level} reason={urgency.reason} />}
       <p className="truncate text-label-14 text-foreground">{candidateName}</p>
-      <p className="mt-1 truncate text-label-12 text-muted-foreground">
-        {candidateSubtitle}
-        {candidate.duplicateAttemptCount > 0 ? ` · ${candidate.duplicateAttemptCount + 1} application attempts` : ''}
-      </p>
+      <p className="mt-1 truncate text-label-12 text-muted-foreground">{candidateSubtitle}</p>
     </div>
   );
 }

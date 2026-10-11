@@ -1,10 +1,10 @@
 import { createAuthAccountApi } from '@comitium/auth/account-api';
+import { normalizeAddress } from '@comitium/auth/address';
 import { useCryptoResetListener } from '@comitium/auth/use-crypto-reset-listener';
 import { CryptoUnlockContext } from '@comitium/auth/use-crypto-unlock';
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
 import { useSession } from '@comitium/auth/use-session';
 import { useAccount, useSignMessage } from '@comitium/auth/use-wallet';
-import { normalizeAddress } from '@comitium/chain/address';
 import { CryptoProxy } from '@comitium/crypto';
 import type { WrappedPersonalKey } from '@comitium/schemas/auth';
 import { logger } from '@comitium/ui/logger';
@@ -32,6 +32,7 @@ function isActiveForUnlockTarget(
 
 export function CryptoUnlockProvider({ children }: CryptoUnlockProviderProps) {
   useCryptoResetListener(subscribeToCryptoReset);
+
   const { signMessage } = useSignMessage();
   const { address, wallet } = useAccount();
   const { user } = useSession();

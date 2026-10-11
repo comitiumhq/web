@@ -59,8 +59,10 @@ export function ProfilePhotoField({ disabled, imageSrc, maxSize, name, email, on
       }
 
       const validationError = validateImageUpload(file, ACCEPTED_AVATAR_TYPES, maxSize);
+
       if (validationError) {
         setError(validationError);
+
         return;
       }
 

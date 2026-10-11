@@ -23,6 +23,7 @@ export function usePipelineBulkSelection(
     (updater) => {
       setRowSelection((current) => {
         const next = functionalUpdate(updater, current);
+
         return reconcilePipelineBulkSelection(next, applicationIds, maxItems);
       });
     },
@@ -33,6 +34,7 @@ export function usePipelineBulkSelection(
 
   const removeCompleted = useCallback((completedApplicationIds: readonly string[]) => {
     const completed = new Set(completedApplicationIds);
+
     setRowSelection((current) =>
       Object.fromEntries(Object.entries(current).filter(([applicationId]) => !completed.has(applicationId))),
     );

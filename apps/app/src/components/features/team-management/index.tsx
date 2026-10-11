@@ -2,7 +2,6 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { PageHeader } from '@comitium/ui/page-header';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useCallback, useState } from 'react';
-import { useOrgTreasury } from '@/hooks/queries/use-org-treasury';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
 import { useQueryOrgInvites } from '@/hooks/queries/use-query-org-invites';
 import { useQueryOrgTeam } from '@/hooks/queries/use-query-org-team';
@@ -22,8 +21,6 @@ export function TeamManagement({ org }: TeamManagementProps) {
   const canManageTeam = can(Permission.ORG_MEMBER_WRITE);
   const { data: members, isLoading, error } = useQueryOrgTeam(org.id);
   const { data: invites } = useQueryOrgInvites(canManageTeam ? org.id : undefined);
-  const { treasury } = useOrgTreasury(org.id);
-  const currentTreasury = treasury?.currentTreasury ?? null;
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
@@ -65,12 +62,7 @@ export function TeamManagement({ org }: TeamManagementProps) {
         />
       </section>
 
-      <MemberPermissionsSheet
-        org={org}
-        userId={selectedUserId}
-        currentTreasury={currentTreasury}
-        onOpenChange={handleMemberSheetOpenChange}
-      />
+      <MemberPermissionsSheet org={org} userId={selectedUserId} onOpenChange={handleMemberSheetOpenChange} />
 
       {canManageTeam && <InviteSheet orgId={org.id} open={inviteDialogOpen} onOpenChange={setInviteDialogOpen} />}
     </div>

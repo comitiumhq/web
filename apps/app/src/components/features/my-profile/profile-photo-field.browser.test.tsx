@@ -39,7 +39,9 @@ describe('ProfilePhotoField', () => {
     (screen.getByRole('button', { name: 'Save photo' }).element() as HTMLButtonElement).click();
 
     expect(onChange).toHaveBeenCalledOnce();
+
     const upload = onChange.mock.calls[0]?.[0];
+
     expect(upload.file).toMatchObject({ name: file.name, size: file.size, type: file.type });
     expect(upload.crop).toEqual({
       x: expect.any(Number),
@@ -93,6 +95,7 @@ describe('ProfilePhotoField', () => {
     if (!input) {
       throw new Error('Expected the profile photo input to render');
     }
+
     const clickInput = vi.spyOn(input, 'click').mockImplementation(() => undefined);
 
     await screen.getByRole('button', { name: 'Change profile photo' }).click();

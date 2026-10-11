@@ -261,7 +261,6 @@ export function PipelineView({
       <CandidateSheet
         applicationId={selectedApplicationId}
         jobId={job.id}
-        onchainCommitmentId={job.onchainCommitmentId}
         orgId={org.id}
         stages={pipeline.stages}
         jobTitle={job.title}

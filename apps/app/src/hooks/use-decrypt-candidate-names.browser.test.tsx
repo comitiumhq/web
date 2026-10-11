@@ -72,7 +72,9 @@ describe('useDecryptCandidateNames', () => {
   it('ignores an old organization decrypt that finishes after the route changes', async () => {
     const orgA = deferred<unknown>();
     const orgB = deferred<unknown>();
+
     mocks.decryptApplication.mockReturnValueOnce(orgA.promise).mockReturnValueOnce(orgB.promise);
+
     const hook = await renderHook(
       (props?: { applications: ReturnType<typeof application>[]; orgId: string }) => {
         if (!props) {
@@ -108,6 +110,7 @@ describe('useDecryptCandidateNames', () => {
 
   it('decrypts a new ciphertext instead of reusing a cached profile for the same candidate', async () => {
     mocks.decryptApplication.mockResolvedValueOnce(profile('First')).mockResolvedValueOnce(profile('Updated'));
+
     const hook = await renderHook(
       (props?: { applications: ReturnType<typeof application>[] }) => {
         if (!props) {
@@ -128,9 +131,11 @@ describe('useDecryptCandidateNames', () => {
 
   it('clears decrypted names when the crypto session is no longer active', async () => {
     mocks.decryptApplication.mockResolvedValue(profile('Visible'));
+
     const hook = await renderHook(() =>
       useDecryptCandidateNames([application('candidate-clear', 'ciphertext')], 'org-clear'),
     );
+
     await vi.waitFor(() => expect(hook.result.current.get('candidate-clear')?.firstName).toBe('Visible'));
 
     mocks.isCryptoActive = false;

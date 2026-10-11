@@ -1,20 +1,18 @@
-import { getErrorMessage } from './error';
-
-export type JobError = ContractError | ValidationError | EncryptionError | SignatureError | TransactionError;
+export type JobError = VaultError | ValidationError | EncryptionError | ApplicationRequestError;
 
 export function isJobError(error: unknown): error is JobError {
   return error instanceof Error && '_tag' in error;
 }
 
-export class ContractError extends Error {
-  readonly _tag = 'ContractError';
+export class VaultError extends Error {
+  readonly _tag = 'VaultError';
 
   constructor(
     public readonly operation: string,
     public readonly cause: unknown,
   ) {
-    super(`Contract operation failed: ${operation}`);
-    this.name = 'ContractError';
+    super(`Vault operation failed: ${operation}`);
+    this.name = 'VaultError';
   }
 }
 
@@ -42,30 +40,17 @@ export class EncryptionError extends Error {
   }
 }
 
-export class SignatureError extends Error {
-  readonly _tag = 'SignatureError';
+export class ApplicationRequestError extends Error {
+  readonly _tag = 'ApplicationRequestError';
 
   constructor(
     public readonly httpStatus: number,
     public readonly message: string,
     public readonly apiCode?: string,
   ) {
-    super(`Signature request failed: ${message}`);
-    this.name = 'SignatureError';
+    super(`Application request failed: ${message}`);
+    this.name = 'ApplicationRequestError';
   }
 }
 
-export class TransactionError extends Error {
-  readonly _tag = 'TransactionError';
-
-  constructor(
-    public readonly operation: string,
-    public readonly cause: unknown,
-  ) {
-    const causeMessage = getErrorMessage(cause, String(cause));
-    super(`Transaction failed: ${operation} - ${causeMessage}`);
-    this.name = 'TransactionError';
-  }
-}
-
-export type ApplicationResult = { kind: 'completed' } | { kind: 'confirmed' | 'confirming'; operationId: string };
+export type ApplicationResult = { kind: 'completed' };

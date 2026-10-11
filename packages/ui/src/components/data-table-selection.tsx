@@ -27,6 +27,7 @@ export function limitDataTableRowSelection<TData extends RowData>(
 
   return (row: Row<TData>) => {
     const allowed = typeof enabled === 'function' ? enabled(row) : true;
+
     return allowed && (row.getIsSelected() || selectedRowCount < maxSelectedRows);
   };
 }
@@ -82,6 +83,7 @@ function getHeaderSelectionTargets<TData extends RowData>(
   if (!maxSelectedRows) return selectableRows;
 
   const unselectedRows = selectableRows.filter((row) => !row.getIsSelected());
+
   return [...selectedRows, ...unselectedRows].slice(0, maxSelectedRows);
 }
 
@@ -92,6 +94,7 @@ function getHeaderSelectionState<TData extends RowData>(
   const allTargetRowsSelected = targetRows.length > 0 && targetRows.every((row) => row.getIsSelected());
 
   if (allTargetRowsSelected) return true;
+
   if (selectedRowCount > 0) return 'indeterminate';
 
   return false;

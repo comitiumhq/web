@@ -1,28 +1,14 @@
 import { KANBAN_CARD_SURFACE_CLASS, KanbanCardBody } from '@comitium/ui/kanban';
-import type { StatusBadgeProps } from '@comitium/ui/status-badge';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { type MouseEvent, memo, type PointerEvent, useCallback, useRef } from 'react';
-import { getActivityBadge, getResponseDeadlineBadge } from '@/components/features/application-status';
+import { getActivityBadge } from '@/components/features/application-status';
 import type { KanbanApplication } from '@/lib/schemas/pipeline';
-import { cn, formatElapsedDaysSince, getCandidateDisplayName } from '@/lib/utils';
+import { cn, getCandidateDisplayName } from '@/lib/utils';
 
 import { getCardUrgencyState, toCardStatusInput } from './pipeline-status';
 import { UrgencyStripe } from './urgency-stripe';
 
 const CLICK_DRAG_THRESHOLD_PX = 6;
-
-const DEADLINE_TEXT_COLOR: Partial<Record<NonNullable<StatusBadgeProps['variant']>, string>> = {
-  destructive: 'text-destructive-text',
-  warning: 'text-warning-text',
-};
-
-function getDeadlineColor(badge: StatusBadgeProps | null): string {
-  if (!badge?.variant) {
-    return 'text-muted-foreground';
-  }
-
-  return DEADLINE_TEXT_COLOR[badge.variant] ?? 'text-muted-foreground';
-}
 
 interface PointerStart {
   x: number;
@@ -61,9 +47,7 @@ export const KanbanCard = memo(function KanbanCard({
   const statusInput = toCardStatusInput(application);
 
   const activityBadge = getActivityBadge(statusInput);
-  const deadlineBadge = getResponseDeadlineBadge(application.isResponded, application.responseDeadline);
   const { level: urgency, reason: urgencyTitle } = getCardUrgencyState(statusInput);
-  const stageElapsed = formatElapsedDaysSince(statusInput.stageSince);
 
   const setCardRef = useCallback(
     (node: HTMLButtonElement | null) => {
@@ -105,6 +89,7 @@ export const KanbanCard = memo(function KanbanCard({
       if (event.defaultPrevented || isDragging || suppressClickRef.current) {
         event.preventDefault();
         suppressClickRef.current = false;
+
         return;
       }
 
@@ -118,23 +103,6 @@ export const KanbanCard = memo(function KanbanCard({
     candidateId: application.candidateId,
     fallbackName: decryptedName,
   });
-
-  const deadlineColor = getDeadlineColor(deadlineBadge);
-  const hasFooter = Boolean(stageElapsed || deadlineBadge || application.duplicateAttemptCount > 0);
-
-  const footer = hasFooter ? (
-    <>
-      {stageElapsed && <span>In stage {stageElapsed}</span>}
-      {stageElapsed && deadlineBadge && <span> · </span>}
-      {deadlineBadge && <span className={deadlineColor}>{deadlineBadge.label}</span>}
-      {(stageElapsed || deadlineBadge) && application.duplicateAttemptCount > 0 && <span> · </span>}
-      {application.duplicateAttemptCount > 0 && (
-        <span>
-          {application.duplicateAttemptCount + 1} attempt{application.duplicateAttemptCount === 0 ? '' : 's'}
-        </span>
-      )}
-    </>
-  ) : null;
 
   return (
     <button
@@ -157,7 +125,7 @@ export const KanbanCard = memo(function KanbanCard({
         },
       )}
     >
-      <KanbanCardBody name={displayName} company={company} status={activityBadge} footer={footer} />
+      <KanbanCardBody name={displayName} company={company} status={activityBadge} footer={null} />
       <UrgencyStripe level={urgency} reason={urgencyTitle} side="left" />
     </button>
   );

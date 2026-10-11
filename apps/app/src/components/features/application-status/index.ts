@@ -1,18 +1,10 @@
 import type { StatusBadgeProps } from '@comitium/ui/status-badge';
 import { InterviewStatus, type InterviewStatusValue } from '@/lib/schemas/interviews';
 import type { ReviewStatus } from '@/lib/schemas/pipeline';
-import {
-  formatCompactDate,
-  formatDate,
-  formatElapsedDaysSince,
-  getElapsedDaysSince,
-  isPastDate,
-  isWithinDays,
-} from '@/lib/utils';
+import { formatCompactDate, formatDate, formatElapsedDaysSince, getElapsedDaysSince } from '@/lib/utils';
 
 const STAGE_AGE_WARNING_DAYS = 3;
 const STAGE_AGE_CRITICAL_DAYS = 7;
-const RESPONSE_DUE_SOON_DAYS = 1;
 
 type InterviewBadge = { variant: StatusBadgeProps['variant']; label: string; tooltip: string };
 
@@ -112,80 +104,6 @@ export function getActivityBadge(input: ApplicationActivityStatusInput): StatusB
   }
 
   return getReviewBadge(input.reviewStatus) ?? interviewBadge;
-}
-
-export type ResponseUrgency = 'overdue' | 'due_soon' | 'upcoming';
-export type ApplicationReviewRowUrgency = 'overdue' | 'due_soon' | 'none';
-
-export function getResponseUrgency(responseDeadline: string | null): ResponseUrgency | null {
-  if (responseDeadline === null) {
-    return null;
-  }
-
-  if (isPastDate(responseDeadline)) {
-    return 'overdue';
-  }
-
-  if (isWithinDays(responseDeadline, RESPONSE_DUE_SOON_DAYS)) {
-    return 'due_soon';
-  }
-
-  return 'upcoming';
-}
-
-const RESPONSE_URGENCY_VARIANT: Record<ResponseUrgency, NonNullable<StatusBadgeProps['variant']>> = {
-  overdue: 'destructive',
-  due_soon: 'warning',
-  upcoming: 'secondary',
-};
-
-export function getResponseUrgencyVariant(urgency: ResponseUrgency): NonNullable<StatusBadgeProps['variant']> {
-  return RESPONSE_URGENCY_VARIANT[urgency];
-}
-
-export function getApplicationReviewRowUrgency(
-  isResponded: boolean,
-  responseDeadline: string | null,
-): ApplicationReviewRowUrgency {
-  if (isResponded) {
-    return 'none';
-  }
-
-  const urgency = getResponseUrgency(responseDeadline);
-
-  if (urgency === 'overdue' || urgency === 'due_soon') {
-    return urgency;
-  }
-
-  return 'none';
-}
-
-export function getResponseDeadlineBadge(
-  isResponded: boolean,
-  responseDeadline: string | null,
-): StatusBadgeProps | null {
-  if (isResponded) {
-    return null;
-  }
-
-  const urgency = getResponseUrgency(responseDeadline);
-
-  if (urgency === null) {
-    return null;
-  }
-
-  const date = formatCompactDate(responseDeadline);
-  const variant = getResponseUrgencyVariant(urgency);
-
-  if (urgency === 'overdue') {
-    return { variant, label: 'Overdue', tooltip: `Make a decision by ${date}` };
-  }
-
-  if (urgency === 'due_soon') {
-    return { variant, label: 'Due soon', tooltip: `Make a decision by ${date}` };
-  }
-
-  return { variant, label: `Due ${date}`, tooltip: `Make a decision by ${date}` };
 }
 
 interface StageAge {

@@ -52,6 +52,7 @@ export function OpenJobSettingsPage({ org, jobId, initialTab }: OpenJobSettingsP
     }
 
     const values = form.getValues();
+
     try {
       const result = await saveSettings(prepareJobSettingsUpdate(values, version));
 

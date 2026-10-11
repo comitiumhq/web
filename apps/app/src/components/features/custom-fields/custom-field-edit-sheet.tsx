@@ -123,6 +123,7 @@ export function CustomFieldEditSheet({ orgId, field, open, onOpenChange }: Custo
 
       if (Object.keys(body).length === 0) {
         onOpenChange(false);
+
         return;
       }
 

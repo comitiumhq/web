@@ -134,6 +134,7 @@ describe('FormRenderer', () => {
     const screen = await render(<Harness />);
 
     const nameInputs = screen.getByPlaceholder('Type your answer...');
+
     await nameInputs.nth(0).fill('Alex');
     await nameInputs.nth(1).fill('Morgan');
     await screen.getByPlaceholder('name@example.com').fill('candidate@example.com');
@@ -145,6 +146,7 @@ describe('FormRenderer', () => {
     await screen.getByRole('button', { name: 'Submit' }).click();
 
     const output = screen.getByRole('status');
+
     await expect.element(output).toHaveTextContent(`"${ids.firstName}":"Alex"`);
     await expect.element(output).toHaveTextContent(`"${ids.lastName}":"Morgan"`);
     await expect.element(output).toHaveTextContent(`"${ids.email}":"candidate@example.com"`);

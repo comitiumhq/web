@@ -59,7 +59,6 @@ export const careerJobSchema = careerJobListItemSchema.omit({ orgSlug: true }).e
   org: careerOrgSchema,
   description: tipTapDocSchema.nullable(),
   status: jobStatusSchema,
-  responseDeadlineDays: z.number().nullable(),
   category: z.string().nullable(),
   companyInfo: companyInfoSchema.nullable(),
   recruitingPrivacy: recruitingPrivacySchema,

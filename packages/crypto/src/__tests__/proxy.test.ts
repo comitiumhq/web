@@ -153,6 +153,7 @@ describe('CryptoProxy', () => {
       it('all method calls share the same Worker', async () => {
         mockProxy.encryptApplication.mockResolvedValue({});
         mockProxy.encryptEmailContent.mockResolvedValue({});
+
         const recipients: RecipientDescriptor[] = [
           { recipient: 'org_vault', publicKey: TEST_PUBLIC_KEY, keyVersion: 1 },
         ];
@@ -183,6 +184,7 @@ describe('CryptoProxy', () => {
         const sign = mockSignMessage('0xsig');
 
         await CryptoProxy.ensureSignature(sign, TEST_ADDRESS);
+
         const sig2 = await CryptoProxy.ensureSignature(sign, TEST_ADDRESS);
 
         expect(sign).toHaveBeenCalledTimes(2);
@@ -270,6 +272,7 @@ describe('CryptoProxy', () => {
     describe('unlock', () => {
       it('gets signature and delegates to Worker', async () => {
         mockProxy.unlock.mockResolvedValue(undefined);
+
         const sign = mockSignMessage('0xsig');
         const encryptedKey = mockEncryptedKey();
         const getUserKeyShare = mockGetUserKeyShare();
@@ -285,6 +288,7 @@ describe('CryptoProxy', () => {
 
       it('uses remembered-device unlock without signing when available', async () => {
         mockProxy.tryUnlockWithRememberedDevice.mockResolvedValue(true);
+
         const sign = mockSignMessage('0xsig');
         const encryptedKey = mockEncryptedKey();
         const getUserKeyShare = mockGetUserKeyShare();
@@ -323,6 +327,7 @@ describe('CryptoProxy', () => {
         );
 
         const sign2 = mockSignMessage();
+
         await CryptoProxy.unlock(sign2, mockEncryptedKey(), '0xaddr', TEST_PUBLIC_KEY, mockGetUserKeyShare());
 
         expect(sign2).not.toHaveBeenCalled();
@@ -332,6 +337,7 @@ describe('CryptoProxy', () => {
       it('clears and unlocks again when session identity changes', async () => {
         mockProxy.unlock.mockResolvedValue(undefined);
         mockProxy.clear.mockResolvedValue(undefined);
+
         const encryptedKey = mockEncryptedKey();
 
         await CryptoProxy.unlock(
@@ -367,6 +373,7 @@ describe('CryptoProxy', () => {
         const workerUnlockPromise = new Promise<void>((resolve) => {
           resolveWorkerUnlock = resolve;
         });
+
         mockProxy.unlock.mockReturnValue(workerUnlockPromise);
 
         const sign = mockSignMessage('0xsig');
@@ -383,6 +390,7 @@ describe('CryptoProxy', () => {
 
       it('notifies subscribers on unlock', async () => {
         const listener = vi.fn();
+
         CryptoProxy.subscribe(listener);
 
         mockProxy.unlock.mockResolvedValue(undefined);
@@ -427,6 +435,7 @@ describe('CryptoProxy', () => {
 
       it('does not notify subscribers if unlock fails', async () => {
         const listener = vi.fn();
+
         CryptoProxy.subscribe(listener);
 
         mockProxy.unlock.mockRejectedValue(new Error('fail'));
@@ -489,6 +498,7 @@ describe('CryptoProxy', () => {
         );
 
         const listener = vi.fn();
+
         CryptoProxy.subscribe(listener);
 
         mockProxy.clear.mockResolvedValue(undefined);
@@ -499,14 +509,17 @@ describe('CryptoProxy', () => {
 
       it('clears cached signature — forces new wallet popup on next unlock', async () => {
         mockProxy.unlock.mockResolvedValue(undefined);
+
         const sign1 = mockSignMessage('0xsig1');
         const encryptedKey = mockEncryptedKey();
+
         await CryptoProxy.unlock(sign1, encryptedKey, '0xaddr', TEST_PUBLIC_KEY, mockGetUserKeyShare());
 
         mockProxy.clear.mockResolvedValue(undefined);
         await CryptoProxy.clear();
 
         const sign2 = mockSignMessage('0xsig2');
+
         mockProxy.unlock.mockResolvedValue(undefined);
         await CryptoProxy.unlock(sign2, encryptedKey, '0xaddr', TEST_PUBLIC_KEY, mockGetUserKeyShare());
 
@@ -564,6 +577,7 @@ describe('CryptoProxy', () => {
       it('unsubscribed listener is not called', async () => {
         const listener = vi.fn();
         const unsub = CryptoProxy.subscribe(listener);
+
         unsub();
 
         mockProxy.unlock.mockResolvedValue(undefined);
@@ -583,6 +597,7 @@ describe('CryptoProxy', () => {
       it('encryptFile uses Comlink.transfer for zero-copy', async () => {
         const input = new Uint8Array([1, 2, 3]);
         const encrypted = new Uint8Array([4, 5, 6]);
+
         mockProxy.encryptFile.mockResolvedValue(encrypted);
 
         await CryptoProxy.encryptFile(TEST_PUBLIC_KEY, 1, input, TEST_CONTEXT);
@@ -596,6 +611,7 @@ describe('CryptoProxy', () => {
         const overlayRecipients: RecipientDescriptor[] = [
           { recipient: 'processor:grant-1', publicKey: OTHER_PUBLIC_KEY, keyVersion: 1 },
         ];
+
         mockProxy.encryptFileWithOverlays.mockResolvedValue(encrypted);
 
         const result = await CryptoProxy.encryptFileWithOverlays(
@@ -620,7 +636,9 @@ describe('CryptoProxy', () => {
       it('decryptFile uses Comlink.transfer for zero-copy', async () => {
         const blob = new Uint8Array([10, 20]);
         const decrypted = new Uint8Array([1, 2]);
+
         mockProxy.decryptFile.mockResolvedValue(decrypted);
+
         const wrapped = mockVaultKey({ ek: 'w' });
 
         await CryptoProxy.decryptFile(blob, '1', wrapped, TEST_CONTEXT);

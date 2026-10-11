@@ -12,6 +12,7 @@ const UUID_SCOPE_SALT_LENGTH_BYTES = UUID_LENGTH_BYTES * 2;
 
 export function createUuidScopeSalt(primaryId: string, secondaryId?: string): Uint8Array {
   const salt = new Uint8Array(UUID_SCOPE_SALT_LENGTH_BYTES);
+
   salt.set(uuidToBytes(primaryId));
 
   if (isDefined(secondaryId)) {

@@ -68,6 +68,7 @@ export function useCreateCandidateTag() {
   return useMutation({
     mutationFn: async ({ orgId, label, vaultPublicKey, vaultKeyVersion, wrappedVaultKey }: CreateTagParams) => {
       await ensureUnlocked();
+
       const body = await buildEncryptedLabel(orgId, label, vaultPublicKey, vaultKeyVersion, wrappedVaultKey);
 
       return createCandidateTag(orgId, body);
@@ -95,6 +96,7 @@ export function useRenameCandidateTag() {
   return useMutation({
     mutationFn: async ({ orgId, tagId, label, vaultPublicKey, vaultKeyVersion, wrappedVaultKey }: RenameTagParams) => {
       await ensureUnlocked();
+
       const body = await buildEncryptedLabel(orgId, label, vaultPublicKey, vaultKeyVersion, wrappedVaultKey);
 
       return updateCandidateTag(orgId, tagId, body);

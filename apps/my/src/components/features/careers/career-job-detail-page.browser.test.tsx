@@ -25,7 +25,6 @@ const capacityReachedJob: CareerJob = {
   },
   socialDescription: null,
   status: 'open',
-  responseDeadlineDays: null,
   createdAt: '2026-09-21T10:00:00.000Z',
   location: null,
   locationType: null,

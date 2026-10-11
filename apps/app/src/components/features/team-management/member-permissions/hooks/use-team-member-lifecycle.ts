@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { useContractAuthorityMutation } from '@/hooks/mutations/use-contract-authority-mutation';
 import { qk } from '@/hooks/query-keys';
 import { deactivateTeamMember, reactivateTeamMember } from '@/lib/api/orgs-team';
 
@@ -12,11 +11,10 @@ interface MemberLifecycleParams {
 
 export function useDeactivateMember() {
   const queryClient = useQueryClient();
-  const executeAuthorityMutation = useContractAuthorityMutation();
 
   return useMutation({
     mutationFn: async ({ orgId, userId }: MemberLifecycleParams) => {
-      await executeAuthorityMutation((authorityProof) => deactivateTeamMember(orgId, userId, authorityProof));
+      await deactivateTeamMember(orgId, userId);
     },
     onSuccess: (_, { orgId, userId }) => {
       toast.success('Member deactivated');
@@ -33,11 +31,10 @@ export function useDeactivateMember() {
 
 export function useReactivateMember() {
   const queryClient = useQueryClient();
-  const executeAuthorityMutation = useContractAuthorityMutation();
 
   return useMutation({
     mutationFn: async ({ orgId, userId }: MemberLifecycleParams) => {
-      await executeAuthorityMutation((authorityProof) => reactivateTeamMember(orgId, userId, authorityProof));
+      await reactivateTeamMember(orgId, userId);
     },
     onSuccess: (_, { orgId, userId }) => {
       toast.success('Member reactivated');

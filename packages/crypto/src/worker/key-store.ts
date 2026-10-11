@@ -56,6 +56,7 @@ export class KeyStore {
 
       if (this.generation !== generation) {
         vaultKey.fill(0);
+
         throw new Error('Crypto session cleared while unwrapping vault key');
       }
 

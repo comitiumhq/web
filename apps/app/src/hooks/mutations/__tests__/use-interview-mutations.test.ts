@@ -105,6 +105,7 @@ describe('interview mutations', () => {
   it('schedules through the API, reports both accepted states, and refreshes every affected projection', async () => {
     const options = getOptions(useScheduleInterview);
     const variables = { applicationId: APPLICATION_ID, body: scheduleBody };
+
     mocks.scheduleInterview.mockResolvedValue({ status: 'needs_scheduling' });
 
     await options.mutationFn(variables as never);
@@ -177,6 +178,7 @@ describe('interview mutations', () => {
     '$name through its API and refreshes the interview projections',
     async ({ setup, api, variables, apiArgs, successMessage }) => {
       api.mockResolvedValue({ success: true });
+
       const options = getOptions(setup);
 
       await options.mutationFn(variables as never);
@@ -212,7 +214,9 @@ describe('interview mutations', () => {
         timeZone: 'Europe/Warsaw',
       },
     };
+
     mocks.createDirectBookingLink.mockResolvedValue({ data: { scheduleId: SCHEDULE_ID } });
+
     const options = getOptions(useCreateDirectBookingLink);
 
     await options.mutationFn(variables as never);
@@ -226,6 +230,7 @@ describe('interview mutations', () => {
   it('lets availability conflicts stay in the scheduling UI and reports other errors', () => {
     const error = new Error('Slot is no longer available');
     const scheduleOptions = getOptions(useScheduleInterview);
+
     mocks.hasApiErrorCode.mockReturnValue(true);
 
     scheduleOptions.onError(error);
@@ -233,6 +238,7 @@ describe('interview mutations', () => {
     expect(mocks.toastError).not.toHaveBeenCalled();
 
     const createLinkOptions = getOptions(useCreateDirectBookingLink);
+
     createLinkOptions.onError(error);
     expect(mocks.toastError).not.toHaveBeenCalled();
 

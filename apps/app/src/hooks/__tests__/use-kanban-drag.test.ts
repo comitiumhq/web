@@ -83,6 +83,7 @@ describe('useKanbanDrag', () => {
     expect(handleDragEnd('source-stage', 'destination-stage', 'application-1')).toBe(true);
 
     expect(mocks.setQueryData).toHaveBeenCalledExactlyOnceWith(KANBAN_QUERY_KEY, expect.any(Function));
+
     const update = mocks.setQueryData.mock.calls[0]?.[1] as (old: KanbanResponse) => KanbanResponse;
     const next = update({ stages, archivedCount: 0 });
 
@@ -116,11 +117,14 @@ describe('useKanbanDrag', () => {
 
   it('invalidates optimistic state and explains a concurrent stage conflict', () => {
     const { handleDragEnd } = setup();
+
     mocks.hasApiErrorCode.mockReturnValue(true);
 
     handleDragEnd('source-stage', 'destination-stage', 'application-1');
+
     const options = mocks.changeStage.mock.calls[0]?.[1] as { onError: (error: Error) => void };
     const error = new Error('conflict');
+
     options.onError(error);
 
     expect(mocks.invalidateQueries).toHaveBeenCalledExactlyOnceWith({ queryKey: KANBAN_QUERY_KEY });
@@ -132,7 +136,9 @@ describe('useKanbanDrag', () => {
     const { handleDragEnd } = setup();
 
     handleDragEnd('source-stage', 'destination-stage', 'application-1');
+
     const options = mocks.changeStage.mock.calls[0]?.[1] as { onError: (error: Error) => void };
+
     options.onError(new Error('network failure'));
 
     expect(mocks.invalidateQueries).toHaveBeenCalledExactlyOnceWith({ queryKey: KANBAN_QUERY_KEY });

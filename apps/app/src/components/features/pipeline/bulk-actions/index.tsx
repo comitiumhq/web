@@ -69,6 +69,7 @@ export function BulkOperations({
     () => selectedApplications.map((application) => application.id),
     [selectedApplications],
   );
+
   const handleSheetOpenChange = (open: boolean) => {
     if (!open) {
       setActiveAction(null);

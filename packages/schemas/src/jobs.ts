@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { type TipTapDoc, tipTapDocSchema } from './common';
-import { preparedRelayedOnchainOperationSchema } from './onchain-operations';
-import { addressSchema, paginatedSchema, uuidSchema, walletAddressSchema } from './public';
+import { paginatedSchema, uuidSchema } from './public';
 import {
   type CompensationConfig,
   compensationConfigSchema,
@@ -9,7 +8,6 @@ import {
   jobStatusSchema,
   type LocationEntry,
   locationEntrySchema,
-  responseCommitmentStatusSchema,
 } from './public-jobs';
 import { type SkillSelection, skillRequirementSchema } from './skills';
 
@@ -32,25 +30,13 @@ const jobPostingStatusSchema = z.enum(['published', 'unpublished']);
 
 export const jobSummarySchema = z.object({
   id: z.string(),
-  responseCommitmentId: uuidSchema.nullable(),
-  commitmentStatus: responseCommitmentStatusSchema.nullable(),
   postingStatus: jobPostingStatusSchema.nullable(),
   lifecycle: jobLifecycleSchema,
-  chainId: z.number().nullable(),
-  responseCommitmentContract: addressSchema.nullable(),
-  onchainCommitmentId: z.number().nullable(),
   orgId: z.string(),
-  orgOnChainId: z.number().nullable(),
-  creatorAddress: walletAddressSchema.nullable(),
-  stake: z.string().nullable(),
-  responseDeadlineDays: z.number().nullable(),
   status: jobStatusSchema,
   archivedAt: z.string().nullable(),
   version: z.number().int().min(0),
   totalApplications: z.number(),
-  respondedApplications: z.number(),
-  onTimeResponses: z.number(),
-  txHash: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
   title: z.string().nullable(),
@@ -66,8 +52,6 @@ export const jobSummarySchema = z.object({
 export type JobSummary = z.infer<typeof jobSummarySchema>;
 
 // --- Lifecycle operations ---
-
-export const preparedOnchainOperationSchema = preparedRelayedOnchainOperationSchema;
 
 export const jobLifecycleMutationResponseSchema = z.object({
   version: z.number().int().min(0),
@@ -139,13 +123,8 @@ const hiringTeamSummarySchema = z.object({
 
 const orgJobListItemSchema = z.object({
   id: z.string(),
-  responseCommitmentId: uuidSchema.nullable(),
-  commitmentStatus: responseCommitmentStatusSchema.nullable(),
   postingStatus: jobPostingStatusSchema.nullable(),
   lifecycle: jobLifecycleSchema,
-  chainId: z.number().nullable(),
-  responseCommitmentContract: addressSchema.nullable(),
-  onchainCommitmentId: z.number().nullable(),
   title: z.string().nullable(),
   departmentId: uuidSchema.nullable(),
   departmentName: z.string().nullable(),
@@ -156,7 +135,6 @@ const orgJobListItemSchema = z.object({
   employmentType: z.string().nullable(),
   interviewPlanId: uuidSchema.nullable().default(null),
   interviewPlanName: z.string().nullable().default(null),
-  stake: z.string().nullable(),
   status: jobStatusSchema,
   archivedAt: z.string().nullable(),
   createdAt: z.string(),
@@ -253,16 +231,6 @@ export const jobPostingSchema = z.object({
   applicationCapacity: z.number().int().min(1).max(1000).nullable(),
   completedApplicationCount: z.number().int().nonnegative(),
   availability: z.enum(['accepting', 'capacity-reached', 'unavailable']),
-  commitment: z
-    .object({
-      status: responseCommitmentStatusSchema,
-      responseDeadlineDays: z.number().int().positive(),
-      stake: z.string(),
-      feeAmount: z.string(),
-      canSettle: z.boolean(),
-      pendingApplicationResponses: z.number().int().nonnegative(),
-    })
-    .nullable(),
   publishedAt: z.string().nullable(),
   unpublishedAt: z.string().nullable(),
   version: z.number().int().min(0),
@@ -270,10 +238,7 @@ export const jobPostingSchema = z.object({
 
 export type JobPosting = z.infer<typeof jobPostingSchema>;
 
-export const unpublishJobPostingResponseSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('completed'), posting: jobPostingSchema }),
-  z.object({ kind: z.literal('prepared'), operation: preparedRelayedOnchainOperationSchema }),
-]);
+export const unpublishJobPostingResponseSchema = z.object({ kind: z.literal('completed'), posting: jobPostingSchema });
 
 // --- API input types ---
 
@@ -318,12 +283,6 @@ export type UpdateJobPostingData = {
 
 export type PublishJobPostingData = {
   expectedVersion: number;
-};
-
-export type PrepareCommitmentParams = {
-  expectedVersion: number;
-  stake: string;
-  feeTier: number;
 };
 
 export const updateJobEditorResponseSchema = z.object({

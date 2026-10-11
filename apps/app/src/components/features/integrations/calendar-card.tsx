@@ -22,7 +22,9 @@ function consumeOAuthCallbackFlag(): boolean {
   }
 
   params.delete(OAUTH_CALLBACK_FLAG);
+
   const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}${window.location.hash}`;
+
   window.history.replaceState({}, '', next);
 
   return true;

@@ -24,10 +24,9 @@ import { getMemberPermissionsState } from './member-permissions-state';
 interface UseMemberPermissionsModelParams {
   org: MyOrg;
   userId: string;
-  currentTreasury: string | null;
 }
 
-export function useMemberPermissionsModel({ org, userId, currentTreasury }: UseMemberPermissionsModelParams) {
+export function useMemberPermissionsModel({ org, userId }: UseMemberPermissionsModelParams) {
   const { can, role: callerRole } = usePermissions();
   const { data: caller } = useQueryOrgMe(org.id);
   const canManageAccess = can(Permission.ACCESS_ROLE_WRITE);
@@ -72,7 +71,6 @@ export function useMemberPermissionsModel({ org, userId, currentTreasury }: UseM
       member,
       callerId: caller?.userId ?? null,
       callerRole,
-      currentTreasury,
       canManageAccess,
       canManageRole,
       activeOrgAdminCount,
@@ -82,7 +80,6 @@ export function useMemberPermissionsModel({ org, userId, currentTreasury }: UseM
     member,
     caller?.userId,
     callerRole,
-    currentTreasury,
     canManageAccess,
     canManageRole,
     activeOrgAdminCount,
@@ -97,12 +94,6 @@ export function useMemberPermissionsModel({ org, userId, currentTreasury }: UseM
       const role = nextRole as OrgRole;
 
       if (member === null || role === member.role) {
-        return;
-      }
-
-      if (memberState?.isCurrentTreasuryAdmin && role !== 'org_admin') {
-        toast.error('This admin holds protected organization responsibilities, so their role cannot be changed.');
-
         return;
       }
 
@@ -201,12 +192,6 @@ export function useMemberPermissionsModel({ org, userId, currentTreasury }: UseM
 
   const handleDeactivate = useCallback(() => {
     if (member === null) {
-      return;
-    }
-
-    if (memberState?.isCurrentTreasuryAdmin) {
-      toast.error('This admin holds protected organization responsibilities, so they cannot be deactivated.');
-
       return;
     }
 

@@ -208,6 +208,7 @@ export function JobsListContent({
     if (canCreateJob) {
       setCreateDialogOpen(true);
     }
+
     setCreateDialogPending(false);
   }, [canCreateJob, createDialogPending, creationContext, isCreationContextFetching]);
 

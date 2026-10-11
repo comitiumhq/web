@@ -1,4 +1,4 @@
-Comitium provides recruiting software for organizations and candidates. This Privacy Notice explains how personal data is handled across our websites, accounts, organization workspaces, job pages, application flows, communications, scheduling features, and blockchain-enabled services.
+Comitium provides recruiting software for organizations and candidates. This Privacy Notice explains how personal data is handled across our websites, accounts, organization workspaces, job pages, application flows, communications, and scheduling features.
 
 Different parties decide how personal data is used in different parts of the Service. An organization using Comitium for recruitment (an "Organization") normally controls the recruitment data in its workspace. Comitium controls the data needed to provide, secure, and support the Service itself.
 
@@ -19,17 +19,15 @@ Comitium is the controller when we decide how personal data is used to create an
 The data depends on how you use Comitium and may include:
 
 - **Recruitment data:** identity and contact details, resumes, application answers, candidate profiles, attachments, messages, notes, interview and scheduling records, feedback, evaluations, hiring stages, and decisions.
-- **Account and service data:** authentication details, wallet addresses, profile information, organization membership and roles, sessions, settings, support communications, and connection details for features you choose to use.
+- **Account and service data:** authentication details, encryption-key identifiers, profile information, organization membership and roles, sessions, settings, support communications, and connection details for features you choose to use.
 - **Technical and security data:** IP address, browser and device information, request timing, and security events needed to deliver, troubleshoot, and protect the Service.
-- **Public network data:** wallet addresses and transaction or event data recorded on Base, and public organization or job information distributed through IPFS.
+- **Public Organization data:** organization names, descriptions, logos, websites, and published job information.
 
 Where resume processing is enabled, Comitium may also maintain limited structured professional information, such as skills and job-criteria results, to support recruiting search and review.
 
-Base records are public, maintained independently of Comitium, and generally cannot be changed or deleted by us. Private recruitment content is not intentionally published on-chain. Copies of public IPFS content may remain available from other network participants after Comitium stops hosting it.
-
 ## Where data comes from
 
-We receive personal data directly from visitors, account holders, candidates, and Organization members. An Organization may also create or import candidate records. Other sources include services a user chooses to connect, public blockchains, and information generated when a device interacts with the Service.
+We receive personal data directly from visitors, account holders, candidates, and Organization members. An Organization may also create or import candidate records. Other sources include services a user chooses to connect and information generated when a device interacts with the Service.
 
 ## How we use personal data
 
@@ -46,7 +44,7 @@ Where Comitium is the controller, we use personal data:
 
 Some Organizations enable AI-assisted recruiting features. On their instructions, these features may structure professional information, compare it with Organization-defined criteria, and support search. The output assists authorized reviewers; Comitium does not use solely automated processing to make hiring decisions with legal or similarly significant effects. Any available choice about this processing is explained in the application flow. Private recruitment data is not used to train general-purpose AI models. An Organization's use of those features is governed by the [AI Feature Terms](/ai-terms).
 
-Information marked as required is needed to create an account, submit an application, authorize a transaction, or provide another requested feature. Without it, that part of the Service may not work. Organizations separately decide which application information they require.
+Information marked as required is needed to create an account, submit an application, or provide another requested feature. Without it, that part of the Service may not work. Organizations separately decide which application information they require.
 
 ## Google API Services
 
@@ -60,7 +58,7 @@ Private recruitment content submitted through Comitium's web application is encr
 
 Requested features such as resume analysis and message delivery use only the content needed to complete that action and do not create a separate unencrypted stored copy.
 
-Account, permission, routing, and public-network data must remain available to operate the relevant parts of the Service. Our [Encryption documentation](/encryption) explains these boundaries and the key design in more detail.
+Account, permission, routing, and public Organization data must remain available to operate the relevant parts of the Service. Our [Encryption documentation](/encryption) explains these boundaries and the key design in more detail.
 
 ## When we share personal data
 
@@ -71,7 +69,6 @@ We disclose data only where needed to operate the Service, follow an Organizatio
 - the Organization and its authorized users;
 - infrastructure, storage, security, authentication, email, scheduling, calendar, and processing providers;
 - integrations enabled by an organization or user;
-- public blockchain and decentralized-storage infrastructure for information intentionally submitted to those networks;
 - professional advisers, authorities, or courts where disclosure is necessary; and
 - a successor involved in a merger, acquisition, financing, reorganization, or sale, subject to appropriate safeguards.
 
@@ -85,7 +82,7 @@ Organizations decide how long to keep the recruitment data they control and can 
 
 For data controlled by Comitium, we keep it only for as long as needed to provide and secure the Service, maintain required business records, comply with legal obligations, resolve disputes, and enforce agreements.
 
-Access, correction, export, and deletion requests can be sent to [legal@comitium.co](mailto:legal@comitium.co). We act on verified requests and Organization instructions. Deleted data may remain in protected backups until those backups are overwritten in the ordinary cycle, or where retention is required by law. Comitium cannot erase records maintained by a public blockchain, and public IPFS content may remain available from other participants.
+Access, correction, export, and deletion requests can be sent to [legal@comitium.co](mailto:legal@comitium.co). We act on verified requests and Organization instructions. Deleted data may remain in protected backups until those backups are overwritten in the ordinary cycle, or where retention is required by law.
 
 ## Cookies and browser storage
 

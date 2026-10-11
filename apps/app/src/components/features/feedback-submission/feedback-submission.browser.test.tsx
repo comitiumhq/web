@@ -203,6 +203,7 @@ describe('FeedbackSubmissionPanel', () => {
   it('fails closed when answer encryption fails', async () => {
     mocks.encryptApplication.mockReset();
     mocks.encryptApplication.mockRejectedValue(new Error('encryption failed'));
+
     const screen = await render(<Harness />);
 
     await screen.getByRole('textbox').nth(0).fill('Share with the team');

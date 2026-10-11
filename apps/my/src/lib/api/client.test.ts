@@ -2,6 +2,7 @@ import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 const API_URL = 'https://api.comitium.test/v1';
+
 vi.stubEnv('VITE_API', API_URL);
 
 const { api, registerApiAuthTokenProvider } = await import('./client');
@@ -23,7 +24,9 @@ describe('site API credential transport', () => {
         headers: { 'Content-Type': 'application/json' },
       }),
     );
+
     vi.stubGlobal('fetch', fetchMock);
+
     const tokenProvider = vi.fn().mockResolvedValue({ accessToken: 'access', identityToken: 'identity' });
     unregisterTokenProvider = registerApiAuthTokenProvider(tokenProvider);
 
@@ -37,7 +40,9 @@ describe('site API credential transport', () => {
         headers: expect.any(Headers),
       }),
     );
+
     const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+
     expect(headers.has('Authorization')).toBe(false);
     expect(headers.has('privy-id-token')).toBe(false);
   });
@@ -49,6 +54,7 @@ describe('site API credential transport', () => {
         headers: { 'Content-Type': 'application/json' },
       }),
     );
+
     vi.stubGlobal('fetch', fetchMock);
     unregisterTokenProvider = registerApiAuthTokenProvider(async () => ({
       accessToken: 'access',
@@ -64,7 +70,9 @@ describe('site API credential transport', () => {
         headers: expect.any(Headers),
       }),
     );
+
     const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+
     expect(headers.get('Authorization')).toBe('Bearer access');
     expect(headers.get('privy-id-token')).toBe('identity');
   });

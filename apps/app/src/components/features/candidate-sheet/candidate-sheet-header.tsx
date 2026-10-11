@@ -6,7 +6,7 @@ import { getStageSince } from '@/components/features/application-status';
 import { TagSelector } from '@/components/features/candidate-tags/tag-selector';
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';
 import type { InterviewStatusValue } from '@/lib/schemas/interviews';
-import type { InterviewStage, ReviewStatus, StageType } from '@/lib/schemas/pipeline';
+import type { InterviewStage, ReviewStatus } from '@/lib/schemas/pipeline';
 
 import { CandidateSheetHeaderActions } from './candidate-sheet-header-actions';
 import { CandidateSheetHeaderStatus } from './candidate-sheet-header-status';
@@ -21,8 +21,6 @@ interface CandidateSheetHeaderProps {
   candidateId: string | null;
   displayName: string;
   subtitle: string | null;
-  isResponded: boolean;
-  responseDeadline: string | null;
   appliedAt: string | null;
   currentStageId: string | null;
   currentStageEnteredAt: string | null;
@@ -39,8 +37,6 @@ interface CandidateSheetHeaderProps {
   capabilities: CandidateSheetCapabilities;
   tagIds: string[];
   reviewStatus: ReviewStatus;
-  duplicateOfApplicationId: string | null;
-  onOpenPrimaryApplication: () => void;
 }
 
 export function CandidateSheetHeader({
@@ -48,8 +44,6 @@ export function CandidateSheetHeader({
   candidateId,
   displayName,
   subtitle,
-  isResponded,
-  responseDeadline,
   appliedAt,
   currentStageId,
   currentStageEnteredAt,
@@ -66,13 +60,10 @@ export function CandidateSheetHeader({
   capabilities,
   tagIds,
   reviewStatus,
-  duplicateOfApplicationId,
-  onOpenPrimaryApplication,
 }: CandidateSheetHeaderProps) {
   const { runUnlocked } = useEncryptionUnlocked(orgId);
   const handleEmail = useCallback(() => runUnlocked(onEmail), [runUnlocked, onEmail]);
   const handleArchive = useCallback(() => runUnlocked(onArchive), [onArchive, runUnlocked]);
-  const currentStageType = getCurrentStageType(stages, currentStageId);
   const stageSince = getStageSince(currentStageEnteredAt, appliedAt);
 
   return (
@@ -88,10 +79,7 @@ export function CandidateSheetHeader({
                 reviewStatus={reviewStatus}
                 interviewStatus={interviewStatus}
                 interviewScheduledAt={interviewScheduledAt}
-                currentStageType={currentStageType}
                 stageSince={stageSince}
-                isResponded={isResponded}
-                responseDeadline={responseDeadline}
                 terminalOutcome={terminalOutcome}
               />
 
@@ -116,26 +104,16 @@ export function CandidateSheetHeader({
               stages={stages}
               isChangingStage={pending.isChangingStage}
               isTerminalActionPending={pending.isTerminalActionPending}
-              duplicateOfApplicationId={duplicateOfApplicationId}
               onStageChange={onStageChange}
               onEmail={handleEmail}
               onArchive={handleArchive}
               onReopenToStage={onReopenToStage}
-              onOpenPrimaryApplication={onOpenPrimaryApplication}
             />
           </div>
         </div>
       </div>
     </SheetHeader>
   );
-}
-
-function getCurrentStageType(stages: InterviewStage[] | null, currentStageId: string | null): StageType | null {
-  if (!stages || !currentStageId) {
-    return null;
-  }
-
-  return stages.find((stage) => stage.id === currentStageId)?.stageType ?? null;
 }
 
 interface CandidateHeaderMetadataProps {

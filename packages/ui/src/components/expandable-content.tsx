@@ -87,6 +87,7 @@ function ExpandableFrame({
     }
 
     const observer = new ResizeObserver(measureOverflow);
+
     observer.observe(content);
 
     return () => observer.disconnect();

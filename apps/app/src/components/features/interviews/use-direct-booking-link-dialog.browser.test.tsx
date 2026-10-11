@@ -218,6 +218,7 @@ describe('useDirectBookingLinkDialog', () => {
       (props?: UseDirectBookingLinkDialogParams) => useDirectBookingLinkDialog(props ?? params()),
       { initialProps: params() },
     );
+
     hook.result.current.handleTemplateChange(TEMPLATE_ID);
     hook.result.current.handleInterviewersChange([selectedInterviewer]);
     await vi.waitFor(() => expect(hook.result.current.interviewers).toHaveLength(1));
@@ -239,6 +240,7 @@ describe('useDirectBookingLinkDialog', () => {
       content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Choose a time' }] }],
     };
     const hook = await renderHook(() => useDirectBookingLinkDialog(params()));
+
     hook.result.current.handleTemplateChange(TEMPLATE_ID);
     hook.result.current.handleInterviewersChange([selectedInterviewer]);
     await vi.waitFor(() => expect(hook.result.current.interviewers).toHaveLength(1));

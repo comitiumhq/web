@@ -30,6 +30,7 @@ export function useProjectApplicationFormSearch({
   useEffect(() => {
     if (storedVersion === FORM_FIELD_PROJECTION_VERSION) {
       attemptedApplicationIdRef.current = applicationId;
+
       return;
     }
 

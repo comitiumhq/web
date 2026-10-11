@@ -43,7 +43,7 @@ describe('JSON-LD builders', () => {
         name: 'Acme',
         path: '/careers/acme',
         website: 'https://acme.example',
-        logo: 'ipfs://bafybeigdyrzt',
+        logo: 'invalid-logo-url',
       }),
     ).toEqual({
       '@context': 'https://schema.org',
@@ -57,7 +57,7 @@ describe('JSON-LD builders', () => {
 
   it('accepts only crawlable HTTP(S) URLs', () => {
     expect(getWebUrl('https://cdn.example/logo.png')).toBe('https://cdn.example/logo.png');
-    expect(getWebUrl('ipfs://bafybeigdyrzt')).toBeUndefined();
+    expect(getWebUrl('invalid-logo-url')).toBeUndefined();
     expect(getWebUrl('/relative/logo.png')).toBeUndefined();
   });
 

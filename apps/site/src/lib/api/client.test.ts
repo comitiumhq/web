@@ -2,6 +2,7 @@ import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 const API_URL = 'https://api.comitium.test/v1';
+
 vi.stubEnv('VITE_API', API_URL);
 
 const { api } = await import('./client');
@@ -17,6 +18,7 @@ describe('public site API transport', () => {
         headers: { 'Content-Type': 'application/json' },
       }),
     );
+
     vi.stubGlobal('fetch', fetchMock);
 
     await api.get('/jobs', z.object({ ok: z.boolean() }));

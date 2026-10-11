@@ -3,128 +3,52 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   closeJob: vi.fn(),
   invalidateQueries: vi.fn(),
-  mutationOptions: null as object | null,
-  observe: vi.fn(),
   onCompleted: vi.fn(),
-  prepareJobClose: vi.fn(),
-  requireConnectedWallet: vi.fn(),
-  submitAndConfirm: vi.fn(),
-  useAccount: vi.fn(),
-  useActiveWallet: vi.fn(),
-  useMutation: vi.fn((options: object) => {
-    mocks.mutationOptions = options;
-
-    return { mutate: vi.fn(), isPending: false };
-  }),
+  mutationOptions: null as object | null,
 }));
 
 vi.mock('@tanstack/react-query', () => ({
-  useMutation: mocks.useMutation,
+  useMutation: (options: object) => {
+    mocks.mutationOptions = options;
+
+    return { mutate: vi.fn(), isPending: false };
+  },
   useQueryClient: () => ({ invalidateQueries: mocks.invalidateQueries }),
 }));
-
-vi.mock('sonner', () => ({
-  toast: { error: vi.fn(), info: vi.fn(), loading: vi.fn(), success: vi.fn() },
-}));
-
-vi.mock('@comitium/chain/use-onchain-settlement-observer', () => ({
-  useOnchainSettlementObserver: () => ({ observe: mocks.observe, isConfirming: false }),
-}));
-
-vi.mock('@/lib/api/jobs', () => ({
-  closeJob: mocks.closeJob,
-  prepareJobClose: mocks.prepareJobClose,
-}));
-
-vi.mock('@/lib/onchain-operation-signatures', () => ({
-  submitAndConfirmPreparedRelayedOperation: mocks.submitAndConfirm,
-}));
-
-vi.mock('@comitium/auth/use-wallet', () => ({
-  useAccount: mocks.useAccount,
-  useActiveWallet: mocks.useActiveWallet,
-}));
-
-vi.mock('@comitium/auth/require-wallet-account', () => ({
-  requireConnectedWallet: mocks.requireConnectedWallet,
-}));
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), loading: vi.fn(), success: vi.fn() } }));
+vi.mock('@/lib/api/jobs', () => ({ closeJob: mocks.closeJob }));
 
 import { useCloseJob } from '../use-close-job';
 
-const params = {
-  orgId: '11111111-1111-4111-8111-111111111111',
-  jobId: '22222222-2222-4222-8222-222222222222',
-  closeReasonId: '33333333-3333-4333-8333-333333333333',
-  expectedVersion: 1,
-  commitmentSettlementRequired: true,
-};
-const prepared = { operationId: '44444444-4444-4444-8444-444444444444' };
-
-type CloseResult =
-  | { kind: 'closed' }
-  | { kind: 'settlement'; prepared: typeof prepared; state: 'completed' | 'confirmed' | 'confirming' };
-
-type MutationOptions = {
-  mutationFn: (input: typeof params) => Promise<CloseResult>;
-  onSuccess: (result: CloseResult, input: typeof params) => Promise<void>;
+const params = { orgId: 'org-1', jobId: 'job-1', closeReasonId: 'reason-1', expectedVersion: 1 };
+type Options = {
+  mutationFn: (input: typeof params) => Promise<{ version: number }>;
+  onSuccess: (result: { version: number }, input: typeof params) => Promise<void>;
 };
 
-function options(): MutationOptions {
+function options(): Options {
   useCloseJob({ onCompleted: mocks.onCompleted });
 
-  return mocks.mutationOptions as MutationOptions;
+  return mocks.mutationOptions as Options;
 }
 
 describe('useCloseJob', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.mutationOptions = null;
-    mocks.useAccount.mockReturnValue({ isConnected: true });
-    mocks.useActiveWallet.mockReturnValue({ getAccount: vi.fn() });
-    mocks.requireConnectedWallet.mockReturnValue({ account: { address: '0x1' } });
-    mocks.prepareJobClose.mockResolvedValue(prepared);
-    mocks.submitAndConfirm.mockResolvedValue({ kind: 'confirmed' });
     mocks.closeJob.mockResolvedValue({ version: 2 });
   });
+  it('closes with the selected reason and expected version', async () => {
+    const result = await options().mutationFn(params);
 
-  it('prepares a durable Job close before submitting Commitment settlement', async () => {
-    let confirm = () => {};
-    mocks.submitAndConfirm.mockReturnValue(
-      new Promise((resolve) => {
-        confirm = () => resolve({ kind: 'confirmed' });
-      }),
-    );
-    const pending = options().mutationFn(params);
-
-    await vi.waitFor(() => expect(mocks.submitAndConfirm).toHaveBeenCalledOnce());
-    expect(mocks.closeJob).not.toHaveBeenCalled();
-    expect(mocks.prepareJobClose).toHaveBeenCalledExactlyOnceWith(
-      params.jobId,
-      params.expectedVersion,
-      params.closeReasonId,
-    );
-    confirm();
-
-    await expect(pending).resolves.toEqual({ kind: 'settlement', prepared, state: 'confirmed' });
+    expect(result).toEqual({ version: 2 });
+    expect(mocks.closeJob).toHaveBeenCalledExactlyOnceWith(params.jobId, 1, params.closeReasonId);
   });
-
-  it('closes a Job without a live Commitment directly', async () => {
-    const directParams = { ...params, commitmentSettlementRequired: false };
-    const result = await options().mutationFn(directParams);
-
-    expect(result).toEqual({ kind: 'closed' });
-    expect(mocks.requireConnectedWallet).not.toHaveBeenCalled();
-    expect(mocks.closeJob).toHaveBeenCalledExactlyOnceWith(params.jobId, params.expectedVersion, params.closeReasonId);
-  });
-
-  it('does not issue a second close request after durable settlement completion', async () => {
-    mocks.submitAndConfirm.mockResolvedValue({ kind: 'completed' });
+  it('refreshes job and pipeline after closing', async () => {
     const mutation = options();
-    const result = await mutation.mutationFn(params);
 
-    await mutation.onSuccess(result, params);
-
-    expect(mocks.closeJob).not.toHaveBeenCalled();
+    await mutation.onSuccess(await mutation.mutationFn(params), params);
+    expect(mocks.closeJob).toHaveBeenCalledOnce();
+    expect(mocks.invalidateQueries).toHaveBeenCalled();
     expect(mocks.onCompleted).toHaveBeenCalledOnce();
   });
 });

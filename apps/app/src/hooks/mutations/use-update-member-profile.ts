@@ -15,6 +15,7 @@ export function useUpdateMemberProfile(orgId: string, options?: { silent?: boole
       if (!silent) {
         toast.success('Profile updated');
       }
+
       queryClient.invalidateQueries({ queryKey: qk.org.permissions(orgId) });
     },
     onError: (error: Error) => {

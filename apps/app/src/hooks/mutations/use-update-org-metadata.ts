@@ -1,10 +1,8 @@
-import { normalizeIpfsUri, requireIpfsUri } from '@comitium/schemas/ipfs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { updateOrgProfile } from '@/lib/api/orgs';
-import { uploadFile } from '@/lib/ipfs/storage';
+import { updateOrgProfile, uploadOrgLogo } from '@/lib/api/orgs';
 import type { MyOrg, OrgDetails } from '@/lib/schemas/org';
-import { ORG_PROFILE_LOGO_MAX_LENGTH, orgSettingsSchema } from '@/lib/schemas/org-settings-form';
+import { orgSettingsSchema } from '@/lib/schemas/org-settings-form';
 import { qk } from '../query-keys';
 import { invalidateWorkspaceSetup } from './invalidate-workspace-setup';
 
@@ -29,27 +27,23 @@ export function useUpdateOrgMetadata(orgId: string) {
         website: data.website,
       });
 
-      let logoCid = normalizeIpfsUri(data.existingLogo, { maxLength: ORG_PROFILE_LOGO_MAX_LENGTH });
+      let logo = data.existingLogo;
 
       if (data.logoFile) {
-        const file = data.logoFile;
-        const uploadedLogoUri = await uploadFile(orgId, file);
+        const uploaded = await uploadOrgLogo(orgId, data.logoFile);
 
-        logoCid = requireIpfsUri(uploadedLogoUri, {
-          maxLength: ORG_PROFILE_LOGO_MAX_LENGTH,
-          message: 'Uploaded logo returned an invalid IPFS URI',
-        });
+        logo = uploaded.logo;
       }
 
       await updateOrgProfile(orgId, {
         name: profile.name,
         careersSlug: profile.careersSlug,
         description: profile.description,
-        logo: logoCid,
+        logo,
         website: profile.website,
       });
 
-      return { ...profile, logo: logoCid };
+      return { ...profile, logo };
     },
     onMutate: async () => {
       toast.loading('Saving organization profile...', { id: 'update-org' });

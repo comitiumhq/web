@@ -35,6 +35,7 @@ describe('performCryptoReset', () => {
       'BroadcastChannel',
       class {
         postMessage(): void {}
+
         close(): void {}
       },
     );
@@ -47,6 +48,7 @@ describe('performCryptoReset', () => {
 
   it('keeps crypto terminal and allows cleanup retry when backend logout fails', async () => {
     stubIndexedDb(true);
+
     const logout = vi.fn().mockRejectedValue(new Error('backend down'));
     const clearClientState = vi.fn();
 
@@ -60,6 +62,7 @@ describe('performCryptoReset', () => {
 
   it('does not reload when database deletion fails', async () => {
     stubIndexedDb(false);
+
     const logout = vi.fn().mockResolvedValue(undefined);
     const clearClientState = vi.fn();
 
@@ -79,12 +82,15 @@ describe('performCryptoReset', () => {
 
       return request;
     });
+
     vi.stubGlobal('indexedDB', { deleteDatabase });
+
     const onDatabaseBlocked = vi.fn();
     const logout = vi.fn().mockResolvedValue(undefined);
     const clearClientState = vi.fn();
 
     const reset = performCryptoReset({ returnTo: '/jobs', logout, clearClientState, onDatabaseBlocked });
+
     await vi.waitFor(() => expect(onDatabaseBlocked).toHaveBeenCalledTimes(1));
 
     expect(deleteDatabase).toHaveBeenCalledTimes(1);
@@ -102,7 +108,9 @@ describe('performCryptoReset', () => {
 
       return request;
     });
+
     vi.stubGlobal('indexedDB', { deleteDatabase });
+
     const logout = vi.fn().mockResolvedValue(undefined);
     const clearClientState = vi.fn();
 
@@ -142,6 +150,7 @@ describe('performCryptoReset', () => {
     );
 
     stubIndexedDb(true);
+
     const logout = vi.fn().mockResolvedValue(undefined);
     const disconnectWallet = vi.fn().mockResolvedValue(undefined);
     const clearClientState = vi.fn();

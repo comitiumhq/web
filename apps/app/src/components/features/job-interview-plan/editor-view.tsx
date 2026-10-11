@@ -79,6 +79,7 @@ export function InterviewPlanEditorView({
 
     for (const activity of activities) {
       const existing = map.get(activity.stageId) ?? [];
+
       existing.push(activity);
       map.set(activity.stageId, existing);
     }
@@ -108,6 +109,7 @@ export function InterviewPlanEditorView({
 
       if (hasConfiguredActivities) {
         setPendingPlanId(planId);
+
         return;
       }
 

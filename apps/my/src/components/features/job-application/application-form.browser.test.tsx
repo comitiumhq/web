@@ -235,9 +235,11 @@ describe('ApplicationForm', () => {
     await expect
       .element(screen.getByRole('heading', { name: 'Resume processing and AI assistance' }))
       .toBeInTheDocument();
+
     const optOut = screen.getByRole('checkbox', {
       name: 'Do not use AI-assisted evaluation for my application',
     });
+
     await expect.element(optOut).not.toBeChecked();
     await optOut.click();
     await expect.element(optOut).toBeChecked();
@@ -267,6 +269,7 @@ describe('ApplicationForm', () => {
     await expect.element(screen.getByRole('button', { name: 'Continue' })).not.toBeInTheDocument();
 
     const nameInputs = screen.getByPlaceholder('Type your answer...');
+
     await nameInputs.nth(0).fill('Ada');
     await nameInputs.nth(1).fill('Lovelace');
     await screen.getByPlaceholder('name@example.com').fill('ada@example.com');
@@ -313,6 +316,7 @@ describe('ApplicationForm', () => {
     await expect.element(screen.getByPlaceholder('name@example.com')).toBeInTheDocument();
     await expect.element(submitButton).toHaveAttribute('aria-disabled', 'true');
     await submitButton.hover();
+
     const tooltip = screen.getByRole('tooltip');
 
     await expect.element(tooltip).toHaveTextContent('Complete ZK Identity before submitting this application.');

@@ -144,6 +144,7 @@ export async function decryptFileWithVaultKey(
   context: CryptoContextInput,
 ): Promise<Uint8Array> {
   const { metadata, ciphertext } = unpackEncryptedBlob(blob);
+
   validateFileMetadata(metadata, context);
 
   const key = metadata.keys.find((candidate) => candidate.recipient === 'org_vault');

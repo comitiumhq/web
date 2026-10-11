@@ -21,7 +21,6 @@ const EVENT_LABELS: Partial<Record<ActivityEventType, string>> = {
   feedback_edited: 'Feedback edited',
   feedback_deleted: 'Feedback deleted',
   application_created: 'Application created',
-  application_responded: 'Application responded',
   application_outcome_recorded: 'Application closed',
   application_outcome_reopened: 'Application reopened',
   note_added: 'Note added',

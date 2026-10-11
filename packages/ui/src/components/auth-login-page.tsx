@@ -117,13 +117,17 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
 
   const sendCode = useCallback(async () => {
     const normalizedEmail = email.trim();
+
     setError(null);
     setPendingAction('email');
+
     const result = await onSendCode(normalizedEmail);
+
     setPendingAction(null);
 
     if (!result.ok) {
       setError({ message: result.error, method: 'email' });
+
       return;
     }
 
@@ -147,11 +151,13 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
 
       setError(null);
       setPendingAction('code');
+
       const result = await onVerifyCode(verificationCode);
 
       if (!result.ok) {
         setPendingAction(null);
         setError({ message: result.error, method: 'email' });
+
         return;
       }
 
@@ -181,6 +187,7 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
   const handleGoogleLogin = useCallback(async () => {
     setError(null);
     setPendingAction('google');
+
     const result = await onGoogleLogin();
 
     if (!result.ok) {
@@ -192,6 +199,7 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
   const handlePasskeyLogin = useCallback(async () => {
     setError(null);
     setPendingAction('passkey');
+
     const result = await onPasskeyLogin();
 
     if (!result.ok) {

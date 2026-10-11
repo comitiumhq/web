@@ -130,6 +130,7 @@ describe('useSendSchedulingLink', () => {
 
   it('reuses the pending link after a send failure instead of creating another schedule', async () => {
     mocks.sendLink.mockRejectedValueOnce(new Error('delivery failed')).mockResolvedValueOnce(undefined);
+
     const screen = await render(<Harness />);
 
     await screen.getByRole('button', { name: 'Send link' }).click();
@@ -171,11 +172,13 @@ describe('useSendSchedulingLink', () => {
 
   it('does not create duplicate schedules for concurrent submissions', async () => {
     let resolveCreate: (value: { data: { scheduleId: string; url: string } }) => void = () => undefined;
+
     mocks.createLink.mockReturnValue(
       new Promise((resolve) => {
         resolveCreate = resolve;
       }),
     );
+
     const screen = await render(<Harness />);
 
     await screen.getByRole('button', { name: 'Send twice' }).click();

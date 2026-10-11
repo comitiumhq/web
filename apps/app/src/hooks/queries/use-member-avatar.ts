@@ -16,6 +16,7 @@ export function useMemberAvatar(avatarUrl?: string | null): string | null {
   useEffect(() => {
     if (!hasAvatar) {
       setObjectUrl(null);
+
       return;
     }
 
@@ -24,6 +25,7 @@ export function useMemberAvatar(avatarUrl?: string | null): string | null {
     }
 
     const nextObjectUrl = URL.createObjectURL(data);
+
     setObjectUrl(nextObjectUrl);
 
     return () => URL.revokeObjectURL(nextObjectUrl);

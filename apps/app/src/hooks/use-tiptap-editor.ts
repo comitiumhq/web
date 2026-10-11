@@ -7,7 +7,9 @@ import { useEffect, useState } from 'react';
 function getActivePageEditor(editor: Editor): Editor | null {
   const storage = editor.storage as unknown as Record<string, unknown>;
   const pages = storage.pages as { activeEditor?: Editor | null } | undefined;
+
   if (!pages || !('activeEditor' in pages)) return null;
+
   return pages.activeEditor ?? null;
 }
 
@@ -24,6 +26,7 @@ export function useTiptapEditor(providedEditor?: Editor | null): {
   useEffect(() => {
     if (!mainEditor) {
       setStorageEditor(null);
+
       return;
     }
 
@@ -46,6 +49,7 @@ export function useTiptapEditor(providedEditor?: Editor | null): {
     const handleDestroy = () => setStorageEditor(null);
 
     storageEditor.on('destroy', handleDestroy);
+
     return () => {
       storageEditor.off('destroy', handleDestroy);
     };

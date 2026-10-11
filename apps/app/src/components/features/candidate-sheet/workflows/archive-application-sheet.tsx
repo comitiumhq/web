@@ -57,7 +57,6 @@ interface ArchiveApplicationSheetProps {
   candidateEmail: string | null;
   candidateFirstName?: string | null;
   jobTitle: string | null;
-  isResponded: boolean;
   canSendEmail: boolean;
 }
 
@@ -89,12 +88,11 @@ export function ArchiveApplicationSheet({
   candidateEmail,
   candidateFirstName,
   jobTitle,
-  isResponded,
   canSendEmail,
 }: ArchiveApplicationSheetProps) {
   const editorRef = useRef<RichTextEditorHandle>(null);
   const sheetContentRef = useRef<HTMLDivElement>(null);
-  const [shouldSendEmail, setShouldSendEmail] = useState(!isResponded);
+  const [shouldSendEmail, setShouldSendEmail] = useState(false);
   const {
     data: reasonsResponse,
     isLoading: isLoadingReasons,
@@ -112,12 +110,12 @@ export function ArchiveApplicationSheet({
   });
   const archiveReasonId = form.watch('archiveReasonId');
   const subject = form.watch('subject');
-  const emailIsRequired = !isResponded;
-  const showEmailFields = emailIsRequired || (canSendEmail && shouldSendEmail);
   const selectedReason = useMemo(
     () => reasons.find((reason) => reason.id === archiveReasonId) ?? null,
     [archiveReasonId, reasons],
   );
+  const emailIsRequired = selectedReason?.outcome === 'employer_rejected';
+  const showEmailFields = emailIsRequired || (canSendEmail && shouldSendEmail);
   const useCase = selectedReason ? OUTCOME_TEMPLATE_USE_CASE[selectedReason.outcome] : undefined;
   const {
     templates,
@@ -197,10 +195,10 @@ export function ArchiveApplicationSheet({
         archiveReasonId: '',
         subject: '',
       });
-      setShouldSendEmail(!isResponded);
+      setShouldSendEmail(false);
       resetTemplate();
     }
-  }, [form, isResponded, open, resetTemplate]);
+  }, [form, open, resetTemplate]);
 
   const handleReasonChange = useCallback(
     (value: string | null) => {
@@ -314,13 +312,11 @@ export function ArchiveApplicationSheet({
             className="flex min-h-0 flex-1 flex-col"
           >
             <FeatureSheetBody className="flex flex-col gap-5">
-              {isResponded && canSendEmail && (
+              {!emailIsRequired && canSendEmail && (
                 <div className="flex items-center justify-between gap-4 rounded-xl border border-border px-4 py-3">
                   <div>
                     <Label htmlFor="archive-send-email">Send email to candidate</Label>
-                    <p className="text-copy-12 text-muted-foreground">
-                      Optional because this application has already received a response.
-                    </p>
+                    <p className="text-copy-12 text-muted-foreground">Optional for withdrawal or no contact.</p>
                   </div>
                   <Switch
                     id="archive-send-email"

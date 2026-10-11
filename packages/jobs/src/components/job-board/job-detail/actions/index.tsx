@@ -11,6 +11,7 @@ interface JobActionsProps {
 export function JobActions({ jobUrl }: JobActionsProps) {
   const handleShare = useCallback(async () => {
     const url = `${window.location.origin}${jobUrl}`;
+
     await navigator.clipboard.writeText(url);
     toast.success('Link copied to clipboard!');
   }, [jobUrl]);

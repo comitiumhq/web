@@ -138,6 +138,7 @@ describe('AuthLoginSurface intent boundaries', () => {
 
   it('does not fall back to signup after a failed passkey sign-in', async () => {
     mocks.loginWithPasskey.mockRejectedValueOnce(new Error('Unknown passkey'));
+
     const screen = await renderSurface('sign-in');
 
     await screen.getByRole('button', { name: 'Continue with a passkey' }).click();
@@ -150,6 +151,7 @@ describe('AuthLoginSurface intent boundaries', () => {
 
   it('keeps an unknown email on Sign in behind a generic product error', async () => {
     mocks.loginWithCode.mockRejectedValueOnce(new Error('Account not found'));
+
     const screen = await renderSurface('sign-in');
 
     await screen.getByPlaceholder('Email address').fill('unknown@example.com');

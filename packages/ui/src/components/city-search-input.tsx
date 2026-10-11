@@ -97,6 +97,7 @@ export function CitySearchInput({
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const nextValue = event.target.value;
+
       setInputValue(nextValue);
       onTextChange?.(nextValue);
       setOpen(true);
@@ -115,6 +116,7 @@ export function CitySearchInput({
   const handleSelect = useCallback(
     (city: City) => {
       const label = formatCityLabel(city);
+
       setInputValue(label);
       setOpen(false);
       setSearchQuery('');

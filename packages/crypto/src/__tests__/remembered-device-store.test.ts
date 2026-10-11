@@ -70,6 +70,7 @@ describe('RememberedDeviceStore', () => {
 
   it('loads a usable record without cleanup', async () => {
     const record = await createRecord();
+
     idbKeyvalMock.get.mockResolvedValue(record);
 
     const loaded = await store.load(TEST_PARAMS);
@@ -91,6 +92,7 @@ describe('RememberedDeviceStore', () => {
 
   it('deletes expired records before returning null', async () => {
     const record = await createRecord({ expiresAt: new Date(Date.now() - 1_000).toISOString() });
+
     idbKeyvalMock.get.mockResolvedValue(record);
     idbKeyvalMock.del.mockResolvedValue(undefined);
 
@@ -102,6 +104,7 @@ describe('RememberedDeviceStore', () => {
 
   it('deletes records with mismatched wallet binding before returning null', async () => {
     const record = await createRecord({ walletAddress: OTHER_ADDRESS });
+
     idbKeyvalMock.get.mockResolvedValue(record);
     idbKeyvalMock.del.mockResolvedValue(undefined);
 
@@ -113,6 +116,7 @@ describe('RememberedDeviceStore', () => {
 
   it('deletes records with mismatched personal public key before returning null', async () => {
     const record = await createRecord({ personalPublicKey: OTHER_PUBLIC_KEY });
+
     idbKeyvalMock.get.mockResolvedValue(record);
     idbKeyvalMock.del.mockResolvedValue(undefined);
 
@@ -124,6 +128,7 @@ describe('RememberedDeviceStore', () => {
 
   it('deletes records with mismatched wrapped-key fingerprint before returning null', async () => {
     const record = await createRecord({ wrappedPersonalKeyFingerprint: 'c'.repeat(64) });
+
     idbKeyvalMock.get.mockResolvedValue(record);
     idbKeyvalMock.del.mockResolvedValue(undefined);
 
@@ -135,6 +140,7 @@ describe('RememberedDeviceStore', () => {
 
   it('deletes records with malformed public keys before returning null', async () => {
     const record = await createRecord({ personalPublicKey: 'not-a-public-key' as never });
+
     idbKeyvalMock.get.mockResolvedValue(record);
     idbKeyvalMock.del.mockResolvedValue(undefined);
 
@@ -146,6 +152,7 @@ describe('RememberedDeviceStore', () => {
 
   it('deletes records with malformed AES-GCM IVs before returning null', async () => {
     const record = await createRecord({ iv: 'AQIDBA==' });
+
     idbKeyvalMock.get.mockResolvedValue(record);
     idbKeyvalMock.del.mockResolvedValue(undefined);
 
@@ -161,6 +168,7 @@ describe('RememberedDeviceStore', () => {
       'decrypt',
     ]);
     const record = await createRecord({ deviceUnlockKey: extractableKey });
+
     idbKeyvalMock.get.mockResolvedValue(record);
     idbKeyvalMock.del.mockResolvedValue(undefined);
 
@@ -172,6 +180,7 @@ describe('RememberedDeviceStore', () => {
 
   it('deletes non-canonical address records before returning null', async () => {
     const record = await createRecord({ walletAddress: TEST_ADDRESS.toUpperCase() as Address });
+
     idbKeyvalMock.get.mockResolvedValue(record);
     idbKeyvalMock.del.mockResolvedValue(undefined);
 

@@ -25,6 +25,7 @@ describe('updateOrgProfile', () => {
       state: 'completed',
       organizationId: '00000000-0000-0000-0000-000000000001',
     });
+
     const payload = {
       name: 'Example Company',
       careersSlug: 'example-company',
@@ -47,6 +48,7 @@ describe('member avatar API', () => {
   it('uploads the selected image as multipart form data', async () => {
     const file = new File(['image'], 'avatar.png', { type: 'image/png' });
     const crop = { x: 0.1, y: 0.2, width: 0.5, height: 0.5 };
+
     mockUpload.mockResolvedValue({ avatarUrl: '/orgs/org-id/members/user-id/avatar/version-id' });
 
     await uploadMemberAvatar('org-id', { file, crop });
@@ -56,7 +58,9 @@ describe('member avatar API', () => {
       expect.any(FormData),
       expect.anything(),
     );
+
     const formData = mockUpload.mock.calls[0]?.[1];
+
     expect(formData?.get('file')).toBe(file);
     expect(formData?.get('crop')).toBe(JSON.stringify(crop));
   });

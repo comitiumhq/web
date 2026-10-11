@@ -28,9 +28,7 @@ describe('API wrapper response validation', () => {
   it('accepts an empty successful command response without parsing JSON', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 202 })));
 
-    await expect(
-      api.post<void>('/onchain-operations/operation-id/wallet-submit', undefined, null),
-    ).resolves.toBeUndefined();
+    await expect(api.post<void>('/test/empty', undefined, null)).resolves.toBeUndefined();
   });
 
   it('accepts the session user shape returned by the API', async () => {

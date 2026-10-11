@@ -18,7 +18,6 @@ export type CandidateResponse = z.infer<typeof candidateSchema>;
 
 const candidateApplicationTargetSchema = z.object({
   id: uuidSchema,
-  onchainCommitmentId: z.number().int().nullable(),
   title: z.string().nullable(),
   departmentName: z.string().nullable(),
 });
@@ -38,7 +37,6 @@ export const considerCandidateForJobResponseSchema = z.object({
     currentStageId: uuidSchema.nullable(),
     appliedAt: z.string().nullable(),
     createdAt: z.string(),
-    isResponded: z.boolean(),
   }),
   duplicate: z.boolean(),
 });
@@ -172,7 +170,6 @@ const candidateFileSchema = z.object({
   source: z.enum(['public_apply', 'recruiter_upload', 'email_import', 'api_import', 'provider_import']),
   isCurrentResume: z.boolean(),
   applicationId: uuidSchema.nullable(),
-  onchainCommitmentId: z.number().int().nullable(),
   jobTitle: z.string().nullable(),
   appliedAt: z.string().nullable(),
   createdAt: z.string(),

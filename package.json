@@ -22,15 +22,14 @@
     "start:site": "bun run --filter @comitium/site start",
     "start:my": "bun run --filter @comitium/my start",
     "start:app": "bun run --filter @comitium/app start",
-    "test": "bun run --filter './apps/*' --filter @comitium/auth --filter @comitium/ui --filter @comitium/schemas --filter @comitium/chain --filter @comitium/crypto test",
-    "test:coverage": "bun run --filter './apps/*' --filter @comitium/auth --filter @comitium/ui --filter @comitium/schemas --filter @comitium/chain --filter @comitium/crypto test:coverage",
+    "test": "bun run --filter './apps/*' --filter @comitium/auth --filter @comitium/ui --filter @comitium/schemas --filter @comitium/crypto test",
+    "test:coverage": "bun run --filter './apps/*' --filter @comitium/auth --filter @comitium/ui --filter @comitium/schemas --filter @comitium/crypto test:coverage",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome lint .",
     "typecheck": "bun run --filter '@comitium/*' typecheck",
     "check": "biome ci .",
-    "knip": "knip --no-gitignore",
-    "contracts:generate": "bun run --filter @comitium/chain contracts:generate"
+    "knip": "knip --no-gitignore"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.6",

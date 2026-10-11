@@ -70,6 +70,7 @@ export function BulkEmailContentFields({ draft, disabled }: { draft: BulkEmailDr
 
 function getTemplatePlaceholder(draft: BulkEmailDraftController) {
   if (draft.templatesError) return 'Templates unavailable';
+
   if (draft.templateOptions.length === 0) return 'No matching templates';
 
   return 'Select a template (optional)';

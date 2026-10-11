@@ -3,11 +3,9 @@ import { Badge } from '@comitium/ui/badge';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { formatCompensationSalary, hasCompensation } from '@comitium/ui/salary';
 import { ScrollArea } from '@comitium/ui/scroll-area';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { BriefcaseIcon, ClockIcon, MapPinIcon } from '@phosphor-icons/react';
+import { BriefcaseIcon, MapPinIcon } from '@phosphor-icons/react';
 import { getPublicApplicationAvailability } from '../../../application/availability';
 import { SkillRequirements } from '../../skill-requirements';
-import { formatResponseWindow } from '../metadata-labels';
 import { JobActions } from './actions';
 import { ApplyButton } from './apply-button';
 import { JobCompany } from './company';
@@ -23,7 +21,6 @@ type JobDetailData = Pick<
   Job | JobListItem,
   | 'id'
   | 'applicationCapacityAvailable'
-  | 'responseDeadlineDays'
   | 'status'
   | 'canonicalUrl'
   | 'title'
@@ -45,8 +42,6 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
   const salary = hasCompensation(job.compensation) ? formatCompensationSalary(job.compensation) : null;
   const applicationAvailability = getPublicApplicationAvailability(job);
   const canApply = applicationAvailability === 'accepting' && applyUrl !== null;
-  const responseWindow = job.responseDeadlineDays === null ? null : formatResponseWindow(job.responseDeadlineDays);
-  const responseWindowLabel = responseWindow ? `${responseWindow} to respond` : null;
 
   return (
     <div className="flex flex-col overflow-hidden lg:h-full">
@@ -89,17 +84,6 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
               <BriefcaseIcon data-icon="inline-start" />
               {formatEmploymentType(job.employmentType)}
             </Badge>
-          )}
-          {responseWindow && responseWindowLabel && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="outline" className={JOB_FACT_VALUE_BADGE_CLASS} aria-label={responseWindowLabel}>
-                  <ClockIcon data-icon="inline-start" />
-                  {responseWindow}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>{responseWindowLabel}</TooltipContent>
-            </Tooltip>
           )}
         </div>
       </div>

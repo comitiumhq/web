@@ -17,10 +17,6 @@ import { type StageType, stageTypeSchema } from './stages';
 
 export type { StageType } from './stages';
 
-const pipelineResponseStatusSchema = z.enum(['needs_response', 'overdue', 'due_soon', 'responded', 'no_commitment']);
-
-type PipelineResponseStatus = z.infer<typeof pipelineResponseStatusSchema>;
-
 // --- Pipeline stages & metadata ---
 
 // Base stage (per-job pipeline — no stageType in response)
@@ -60,8 +56,6 @@ const kanbanApplicationSchema = z.object({
   candidateId: z.string().nullable(),
   candidateProfile: encryptedEnvelopeSchema.nullable(),
   appliedAt: z.string(),
-  responseDeadline: z.string().nullable(),
-  isResponded: z.boolean(),
   terminalOutcome: applicationTerminalOutcomeSchema.nullable(),
   terminalOutcomeAt: z.string().nullable(),
   currentStageId: z.string(),
@@ -73,7 +67,6 @@ const kanbanApplicationSchema = z.object({
   interviewStatus: interviewStatusEnum.nullable(),
   interviewScheduledAt: z.string().nullable(),
   reviewStatus: reviewStatusSchema,
-  duplicateAttemptCount: z.number().int().nonnegative(),
 });
 
 export type KanbanApplication = z.infer<typeof kanbanApplicationSchema>;
@@ -100,7 +93,6 @@ const archivedApplicationSchema = z.object({
   candidateId: z.string().nullable(),
   candidateProfile: encryptedEnvelopeSchema.nullable(),
   appliedAt: z.string(),
-  isResponded: z.boolean(),
   terminalOutcome: applicationTerminalOutcomeSchema,
   terminalOutcomeAt: z.string(),
   searchProjection: applicationSearchProjectionSchema.nullable(),
@@ -111,7 +103,6 @@ const archivedApplicationSchema = z.object({
   archiveReasonLabel: z.string().nullable(),
   archiveReasonType: archiveReasonTypeSchema.nullable(),
   tagIds: z.array(uuidSchema),
-  duplicateAttemptCount: z.number().int().nonnegative(),
 });
 
 export type ArchivedApplication = z.infer<typeof archivedApplicationSchema>;
@@ -161,7 +152,6 @@ const cursorPaginationSchema = z.object({
 
 const pipelineJobSchema = z.object({
   id: z.string(),
-  onchainCommitmentId: z.number().nullable(),
   status: jobStatusSchema,
   lifecycle: jobLifecycleSchema,
   title: z.string().nullable(),
@@ -186,11 +176,8 @@ const pipelineCandidateSchema = z.object({
   candidateId: z.string().nullable(),
   candidateProfile: encryptedEnvelopeSchema.nullable(),
   jobId: z.string(),
-  onchainCommitmentId: z.number().nullable(),
   jobTitle: z.string().nullable(),
   appliedAt: z.string(),
-  responseDeadline: z.string().nullable(),
-  isResponded: z.boolean(),
   terminalOutcome: applicationTerminalOutcomeSchema.nullable(),
   terminalOutcomeAt: z.string().nullable(),
   currentStageId: z.string().nullable(),
@@ -209,7 +196,6 @@ const pipelineCandidateSchema = z.object({
   updatedAt: z.string().nullable(),
   tagIds: z.array(uuidSchema),
   reviewStatus: reviewStatusSchema,
-  duplicateAttemptCount: z.number().int().nonnegative(),
 });
 
 export type PipelineCandidate = z.infer<typeof pipelineCandidateSchema>;
@@ -331,7 +317,6 @@ export interface PipelineCandidatesFilters extends Omit<KanbanFilters, 'stage' |
   stageType?: StageType;
   view?: PipelineView;
   assignedToMe?: boolean;
-  responseStatus?: PipelineResponseStatus;
   sort?: PipelineCandidateSort;
   direction?: PipelineSortDirection;
   limit?: number;

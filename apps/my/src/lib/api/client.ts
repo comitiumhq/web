@@ -157,7 +157,9 @@ async function putBlob<T>(url: string, body: Blob, uploadToken: string, schema?:
 }
 
 function deleteRequest<T>(url: string, schema?: ResponseSchema<T>): Promise<T>;
+
 function deleteRequest<T>(url: string, body: unknown, schema: ResponseSchema<T>): Promise<T>;
+
 function deleteRequest<T>(url: string, bodyOrSchema?: unknown, schema?: ResponseSchema<T>): Promise<T> {
   if (schema) {
     return request<T>(url, 'DELETE', bodyOrSchema, schema);

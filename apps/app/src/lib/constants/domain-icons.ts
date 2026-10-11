@@ -12,5 +12,4 @@ export {
   NetworkIcon as DepartmentsAndTeamsIcon,
   SlidersHorizontalIcon as JobSettingsIcon,
   UsersThreeIcon as HiringTeamIcon,
-  WalletIcon as CommitmentFundsIcon,
 } from '@phosphor-icons/react';

@@ -127,9 +127,7 @@ beforeEach(() => {
 
 describe('useMemberPermissionsModel mutation ordering', () => {
   it('prepares Vault Access before promoting a member to organization admin', async () => {
-    const hook = await renderHook(() =>
-      useMemberPermissionsModel({ org, userId: MEMBER_USER_ID, currentTreasury: null }),
-    );
+    const hook = await renderHook(() => useMemberPermissionsModel({ org, userId: MEMBER_USER_ID }));
 
     await hook.result.current.actions.handleRoleChange('org_admin');
 
@@ -147,9 +145,8 @@ describe('useMemberPermissionsModel mutation ordering', () => {
 
   it('aborts role mutation when Vault Access preparation fails', async () => {
     mocks.ensureVaultGrant.mockRejectedValue(new Error('vault unavailable'));
-    const hook = await renderHook(() =>
-      useMemberPermissionsModel({ org, userId: MEMBER_USER_ID, currentTreasury: null }),
-    );
+
+    const hook = await renderHook(() => useMemberPermissionsModel({ org, userId: MEMBER_USER_ID }));
 
     await hook.result.current.actions.handleRoleChange('org_admin');
 
@@ -158,9 +155,7 @@ describe('useMemberPermissionsModel mutation ordering', () => {
   });
 
   it('prepares Vault Access before creating department access', async () => {
-    const hook = await renderHook(() =>
-      useMemberPermissionsModel({ org, userId: MEMBER_USER_ID, currentTreasury: null }),
-    );
+    const hook = await renderHook(() => useMemberPermissionsModel({ org, userId: MEMBER_USER_ID }));
 
     await expect(hook.result.current.actions.handleAddGrant('department-1', 'hiring_member')).resolves.toBe(true);
 
@@ -177,14 +172,11 @@ describe('useMemberPermissionsModel mutation ordering', () => {
   it.each([
     ['self', () => ({ callerUserId: MEMBER_USER_ID, member: member() })],
     ['last organization admin', () => ({ callerUserId: CALLER_USER_ID, member: member({ role: 'org_admin' }) })],
-    ['treasury admin', () => ({ callerUserId: CALLER_USER_ID, member: member({ role: 'org_admin' }) })],
-  ])('does not deactivate the protected %s', async (scenario, arrange) => {
+  ])('does not deactivate the protected %s', async (_scenario, arrange) => {
     const state = arrange();
     mocks.callerUserId = state.callerUserId;
     mocks.member = state.member;
-    const currentTreasury =
-      scenario === 'treasury admin' ? MEMBER_ADDRESS : '0x2222222222222222222222222222222222222222';
-    const hook = await renderHook(() => useMemberPermissionsModel({ org, userId: MEMBER_USER_ID, currentTreasury }));
+    const hook = await renderHook(() => useMemberPermissionsModel({ org, userId: MEMBER_USER_ID }));
 
     hook.result.current.actions.handleDeactivate();
 

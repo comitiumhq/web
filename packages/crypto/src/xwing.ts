@@ -90,6 +90,7 @@ export function encapsulateXWing(publicKey: PublicEncryptionKey): {
   }
 
   const sharedSecret = new Uint8Array(result.sharedSecret);
+
   assertXWingSharedSecretBytes(sharedSecret);
 
   return {
@@ -125,6 +126,7 @@ export function decapsulateXWing(
   }
 
   const sharedSecret = new Uint8Array(ml_kem768_x25519.decapsulate(concatBytes(kemCt, epk), privateKey));
+
   assertXWingSharedSecretBytes(sharedSecret);
 
   return {

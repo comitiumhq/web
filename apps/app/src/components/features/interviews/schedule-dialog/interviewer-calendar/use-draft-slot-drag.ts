@@ -176,6 +176,7 @@ export function useDraftSlotDrag({
       capturePointer(event.currentTarget, event.pointerId);
 
       calendarRef.current?.setAttribute('data-draft-dragging', 'true');
+
       const originMinutes = getZonedMinutes(value, timeZone);
 
       dragRef.current = {
@@ -199,6 +200,7 @@ export function useDraftSlotDrag({
       }
 
       event.preventDefault();
+
       const nextMinutes = getDraftMinutesFromPointer(
         drag.originMinutes,
         event.clientY - drag.originClientY,

@@ -55,7 +55,9 @@ describe('crypto integration', () => {
 
       // --- Applicant encrypts resume PDF ---
       const resumePdf = new Uint8Array(500);
+
       crypto.getRandomValues(resumePdf);
+
       const encryptedResume = await encryptFileWithVaultKey(vault.publicKey, 1, resumePdf, resumeContext);
 
       // --- Org owner unwraps vault key (requires personal key) ---
@@ -79,7 +81,7 @@ describe('crypto integration', () => {
       const vault = generateVaultKeyPair();
       const applicant = generatePersonalKeyPair();
 
-      // --- Org sends response email ---
+      // --- Org sends candidate email ---
       const emailContent = {
         text: 'Thank you for applying! We would like to schedule an interview.',
         status: 'accepted',
@@ -210,6 +212,7 @@ describe('crypto integration', () => {
       const vault2 = generateVaultKeyPair();
 
       const resumePdf = new Uint8Array(256);
+
       crypto.getRandomValues(resumePdf);
 
       const blob = await encryptFileWithVaultKey(vault1.publicKey, 1, resumePdf, resumeContext);

@@ -122,6 +122,7 @@ export function useBulkOperation({ orgId, operationType, targetIds, open, onSett
 
     if (operationId && !hasApiErrorStatus(operationQuery.error, 404)) {
       operationQuery.refetch();
+
       return;
     }
 
@@ -147,6 +148,7 @@ export function useBulkOperation({ orgId, operationType, targetIds, open, onSett
         if (!lifecycle.isCurrentOperation(operationReference)) return null;
 
         const { excludedItemIds, ...parameters } = input;
+
         lifecycle.markCommitMayBeAccepted();
 
         const committed = await commitDraft.mutateAsync({
@@ -156,6 +158,7 @@ export function useBulkOperation({ orgId, operationType, targetIds, open, onSett
         });
 
         lifecycle.markCommitResolved();
+
         return committed;
       } catch (error) {
         const status = getErrorStatus(error);
@@ -167,6 +170,7 @@ export function useBulkOperation({ orgId, operationType, targetIds, open, onSett
         }
 
         setOperationError(getProductErrorMessage(error, 'The bulk action could not be started.'));
+
         return null;
       }
     },
@@ -203,6 +207,7 @@ function isDefinitiveCommitRejection(status: number | null) {
 
 function getBulkOperationError(operationError: string | null, queryFailed: boolean) {
   if (operationError) return operationError;
+
   if (queryFailed) return 'The latest bulk action status could not be loaded.';
 
   return null;

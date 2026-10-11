@@ -1,9 +1,7 @@
-import { dataArraySchema, dataSchema } from '@comitium/schemas/public';
-import { contractAuthorityMutationResultSchema } from '@/lib/schemas/contract-authority';
+import { dataArraySchema, dataSchema, successSchema } from '@comitium/schemas/public';
 import { type OrgRole, orgTeamMemberSchema, teamCalendarStatusSchema } from '@/lib/schemas/org';
 
 import { api } from './client';
-import { type ContractAuthorityProofInput, withContractAuthorityProof } from './contract-authority';
 
 export function getOrgTeam(orgId: string) {
   return api.get(`/orgs/${orgId}/team`, dataArraySchema(orgTeamMemberSchema));
@@ -22,27 +20,14 @@ export function changeTeamMemberRole(
   userId: string,
   role: OrgRole,
   vaultGrant?: { wrappedVaultKey: unknown },
-  authorityProof: ContractAuthorityProofInput = null,
 ) {
-  return api.patch(
-    `/orgs/${orgId}/team/${userId}/role`,
-    withContractAuthorityProof({ role, vaultGrant }, authorityProof),
-    contractAuthorityMutationResultSchema,
-  );
+  return api.patch(`/orgs/${orgId}/team/${userId}/role`, { role, vaultGrant }, successSchema);
 }
 
-export function deactivateTeamMember(orgId: string, userId: string, authorityProof: ContractAuthorityProofInput) {
-  return api.patch(
-    `/orgs/${orgId}/team/${userId}/deactivate`,
-    withContractAuthorityProof({}, authorityProof),
-    contractAuthorityMutationResultSchema,
-  );
+export function deactivateTeamMember(orgId: string, userId: string) {
+  return api.patch(`/orgs/${orgId}/team/${userId}/deactivate`, {}, successSchema);
 }
 
-export function reactivateTeamMember(orgId: string, userId: string, authorityProof: ContractAuthorityProofInput) {
-  return api.patch(
-    `/orgs/${orgId}/team/${userId}/reactivate`,
-    withContractAuthorityProof({}, authorityProof),
-    contractAuthorityMutationResultSchema,
-  );
+export function reactivateTeamMember(orgId: string, userId: string) {
+  return api.patch(`/orgs/${orgId}/team/${userId}/reactivate`, {}, successSchema);
 }

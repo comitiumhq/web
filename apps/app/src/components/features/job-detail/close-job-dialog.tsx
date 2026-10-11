@@ -1,4 +1,3 @@
-import { ActionConfirmationNotice, getActionConfirmationPresentation } from '@comitium/ui/action-confirmation';
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
 import { Combobox } from '@comitium/ui/combobox';
@@ -14,7 +13,6 @@ interface CloseJobDialogProps {
   jobTitle: string | null;
   orgId: string;
   expectedVersion: number;
-  commitmentSettlementRequired: boolean;
   activeApplications: number;
 }
 
@@ -25,7 +23,6 @@ export function CloseJobDialog({
   jobTitle,
   orgId,
   expectedVersion,
-  commitmentSettlementRequired,
   activeApplications,
 }: CloseJobDialogProps) {
   const [reasonId, setReasonId] = useState('');
@@ -37,21 +34,12 @@ export function CloseJobDialog({
     onOpenChange(false);
   }, [onOpenChange]);
 
-  const {
-    run: runClose,
-    isPending,
-    isConfirming,
-  } = useCloseJob({
+  const { run: runClose, isPending } = useCloseJob({
     onCompleted: handleCompleted,
   });
   const hasActiveApplications = activeApplications > 0;
-  const isActionPending = isPending || isConfirming;
-  const action = getActionConfirmationPresentation({
-    idleLabel: 'Close job',
-    pendingLabel: 'Closing...',
-    isPending,
-    isConfirming,
-  });
+  const isActionPending = isPending;
+  const actionLabel = isPending ? 'Closing...' : 'Close job';
 
   const handleClose = useCallback(() => {
     if (!reasonId || isActionPending) {
@@ -63,9 +51,8 @@ export function CloseJobDialog({
       jobId,
       closeReasonId: reasonId,
       expectedVersion,
-      commitmentSettlementRequired,
     });
-  }, [commitmentSettlementRequired, expectedVersion, isActionPending, jobId, orgId, reasonId, runClose]);
+  }, [expectedVersion, isActionPending, jobId, orgId, reasonId, runClose]);
 
   const handleOpenChange = useCallback(
     (value: boolean) => {
@@ -126,8 +113,6 @@ export function CloseJobDialog({
             Closing stops new applications. Existing applications remain available, and you can reopen the same job
             later.
           </p>
-
-          {isConfirming && <ActionConfirmationNotice />}
         </div>
 
         <DialogFooter>
@@ -135,7 +120,7 @@ export function CloseJobDialog({
             Cancel
           </Button>
           <Button onClick={handleClose} disabled={!reasonId || isActionPending}>
-            {action.label}
+            {actionLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

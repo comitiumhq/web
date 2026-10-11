@@ -98,10 +98,12 @@ describe('AvailablePublicSchedule', () => {
     await screen.getByRole('button', { name: 'Confirm booking' }).click();
 
     expect(mocks.bookSlot).toHaveBeenCalledTimes(1);
+
     const [variables, callbacks] = mocks.bookSlot.mock.calls[0] as [
       { token: string; body: { start: string; timeZone: string } },
       MutationCallbacks,
     ];
+
     expect(variables).toMatchObject({
       token: 'schedule-token',
       body: { start: slot.start },
@@ -121,7 +123,9 @@ describe('AvailablePublicSchedule', () => {
 
     await screen.getByRole('button', { name: 'Select first slot' }).click();
     await screen.getByRole('button', { name: 'Confirm booking' }).click();
+
     const callbacks = mocks.bookSlot.mock.calls[0][1] as MutationCallbacks;
+
     callbacks.onError(new Error('That time was just booked.'));
 
     await expect.element(screen.getByText('Choose a time')).toBeInTheDocument();

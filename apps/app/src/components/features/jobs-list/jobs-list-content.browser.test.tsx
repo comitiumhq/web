@@ -82,6 +82,7 @@ it('keeps every Jobs create entry disabled until the preceding setup steps are c
   );
 
   const createButton = screen.getByRole('button', { name: 'New Job' });
+
   await expect.element(createButton).toHaveAttribute('aria-disabled', 'true');
   createButton.element().focus();
   expect(document.activeElement).toBe(createButton.element());

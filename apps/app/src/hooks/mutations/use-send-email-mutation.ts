@@ -39,6 +39,7 @@ export function useSendEmailMutation() {
         toast.success('Email sent', { id: toastId });
       } catch (error) {
         toast.error('Failed to send email. Please try again.', { id: toastId });
+
         throw error;
       }
     },

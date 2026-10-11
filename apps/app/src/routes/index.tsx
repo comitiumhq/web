@@ -39,6 +39,7 @@ function AuthenticatedAppEntry() {
 
     if (preferredOrg) {
       navigate({ to: '/org/$orgId', params: { orgId: preferredOrg.id }, replace: true });
+
       return;
     }
 
@@ -46,6 +47,7 @@ function AuthenticatedAppEntry() {
 
     if (createdOrganizationId) {
       navigate({ to: '/org/$orgId', params: { orgId: createdOrganizationId }, replace: true });
+
       return;
     }
 

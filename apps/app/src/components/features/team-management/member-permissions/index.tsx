@@ -22,15 +22,14 @@ import { useMemberPermissionsModel } from './use-member-permissions-model';
 interface MemberPermissionsSheetProps {
   org: MyOrg;
   userId: string | null;
-  currentTreasury: string | null;
   onOpenChange: (open: boolean) => void;
 }
 
-export function MemberPermissionsSheet({ org, userId, currentTreasury, onOpenChange }: MemberPermissionsSheetProps) {
+export function MemberPermissionsSheet({ org, userId, onOpenChange }: MemberPermissionsSheetProps) {
   return (
     <Sheet open={userId !== null} onOpenChange={onOpenChange}>
       <FeatureSheetContent size="form">
-        {userId !== null && <MemberPermissionsContent org={org} userId={userId} currentTreasury={currentTreasury} />}
+        {userId !== null && <MemberPermissionsContent org={org} userId={userId} />}
       </FeatureSheetContent>
     </Sheet>
   );
@@ -39,7 +38,6 @@ export function MemberPermissionsSheet({ org, userId, currentTreasury, onOpenCha
 interface MemberPermissionsContentProps {
   org: MyOrg;
   userId: string;
-  currentTreasury: string | null;
 }
 
 const EMPTY_PROFILE_VALUE = 'Not set';
@@ -49,8 +47,8 @@ const ORG_ROLE_LABELS: Record<OrgRole, string> = {
   org_member: 'Member',
 };
 
-function MemberPermissionsContent({ org, userId, currentTreasury }: MemberPermissionsContentProps) {
-  const model = useMemberPermissionsModel({ org, userId, currentTreasury });
+function MemberPermissionsContent({ org, userId }: MemberPermissionsContentProps) {
+  const model = useMemberPermissionsModel({ org, userId });
   const { member, memberState } = model;
 
   if (member === null || memberState === null) {
@@ -129,7 +127,6 @@ function MemberPermissionsContent({ org, userId, currentTreasury }: MemberPermis
               canManageRole={memberState.canManageRole}
               isSelf={memberState.isSelf}
               isLastActiveAdmin={memberState.isLastActiveAdmin}
-              isCurrentTreasuryAdmin={memberState.isCurrentTreasuryAdmin}
               disabled={memberState.editsDisabled || model.pending.changeRole}
               onChange={model.actions.handleRoleChange}
             />

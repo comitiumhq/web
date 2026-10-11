@@ -24,11 +24,13 @@ export async function prepareArchiveEmailPayloads(
 
   if (!draftResult.draft) {
     toast.error(draftResult.error ?? 'Enter the candidate email.');
+
     return null;
   }
 
   if (!params.vaultKey) {
     toast.error('Organization encryption keys are unavailable.');
+
     return null;
   }
 
@@ -43,12 +45,14 @@ export async function prepareArchiveEmailPayloads(
 
     if (prepared.error) {
       params.onError(prepared.error);
+
       return null;
     }
 
     return prepared.payloads;
   } catch (error) {
     params.onError(getProductErrorMessage(error, 'The encrypted emails could not be prepared.'));
+
     return null;
   }
 }

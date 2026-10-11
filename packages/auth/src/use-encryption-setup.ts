@@ -1,9 +1,9 @@
-import { normalizeAddress } from '@comitium/chain/address';
 import { CryptoProxy } from '@comitium/crypto';
 import { hasEncryptionKeyBundle } from '@comitium/crypto/key-bundle';
 import type { PublicEncryptionKey } from '@comitium/crypto/schemas';
 import type { User, UserKeyShare } from '@comitium/schemas/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { normalizeAddress } from './address';
 
 import { useAccount, useSignMessage } from './use-wallet';
 

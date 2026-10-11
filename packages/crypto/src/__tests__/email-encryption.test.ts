@@ -227,6 +227,7 @@ describe('email-encryption', () => {
       };
 
       await expect(decryptEmailContentWithVaultKey(tampered, keys.vaultPrivateKey, emailContext)).rejects.toThrow();
+
       // Applicant side should still work (its DEK wrapper is untouched)
       const applicantDecrypted = await decryptEmailContentWithPersonalKey(
         tampered,

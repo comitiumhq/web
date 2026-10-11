@@ -1,20 +1,13 @@
 import {
   type ConnectedWallet,
   usePrivy,
-  useSendTransaction as usePrivySendTransaction,
   useSignMessage as usePrivySignMessage,
-  useSignTypedData as usePrivySignTypedData,
   useWallets,
 } from '@privy-io/react-auth';
 import { useCallback, useMemo } from 'react';
 import type { Address, Hex } from 'viem';
 
-import {
-  type CanonicalWallet,
-  isCanonicalLinkedWallet,
-  type WalletAccount,
-  type WalletConnectionStatus,
-} from './wallet';
+import { type CanonicalWallet, isCanonicalLinkedWallet, type WalletConnectionStatus } from './wallet';
 
 function getCanonicalConnectedWallet(wallets: ConnectedWallet[], address: string): ConnectedWallet | null {
   return (
@@ -48,8 +41,6 @@ function getConnectionStatus(params: {
 export function useAccount() {
   const { authenticated, ready, user } = usePrivy();
   const { ready: walletsReady, wallets } = useWallets();
-  const { sendTransaction } = usePrivySendTransaction();
-  const { signTypedData } = usePrivySignTypedData();
   const linkedWallet = user?.linkedAccounts.find(isCanonicalLinkedWallet) ?? null;
   const connectedWallet = linkedWallet ? getCanonicalConnectedWallet(wallets, linkedWallet.address) : null;
 
@@ -63,30 +54,8 @@ export function useAccount() {
     return {
       id: linkedWallet.id,
       address,
-      sendTransaction: async (input) => {
-        const result = await sendTransaction(input, { address, sponsor: true });
-
-        return result.hash;
-      },
-      signTypedData: async (input) => {
-        const result = await signTypedData(input, { address });
-
-        return result.signature as Hex;
-      },
-      switchChain: (chainId) => connectedWallet.switchChain(chainId),
     };
-  }, [authenticated, connectedWallet, linkedWallet, sendTransaction, signTypedData]);
-
-  const account = useMemo<WalletAccount | null>(() => {
-    if (!wallet) {
-      return null;
-    }
-
-    return {
-      address: wallet.address,
-      signTypedData: wallet.signTypedData,
-    };
-  }, [wallet]);
+  }, [authenticated, connectedWallet, linkedWallet]);
 
   const connectionStatus = getConnectionStatus({
     authenticated,
@@ -98,7 +67,6 @@ export function useAccount() {
   return {
     address: wallet?.address,
     isConnected: wallet !== null,
-    account,
     wallet,
     connectionStatus,
   };

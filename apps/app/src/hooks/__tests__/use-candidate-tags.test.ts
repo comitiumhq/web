@@ -83,6 +83,7 @@ describe('decryptTag', () => {
 
   it('forwards envelope, orgId and wrapped key to CryptoProxy', async () => {
     mockDecrypt.mockResolvedValueOnce({ label: 'x' });
+
     const tag = rawTag('t1');
 
     await decryptTag(tag, ORG_ID, wrappedKey);
@@ -116,6 +117,7 @@ describe('decryptTag', () => {
 
   it('preserves isArchived, creator user and timestamps from raw tag', async () => {
     mockDecrypt.mockResolvedValueOnce({ label: 'Archived Tag' });
+
     const tag = rawTag('t1', {
       isArchived: true,
       createdBy: OTHER_CREATOR_USER_ID,

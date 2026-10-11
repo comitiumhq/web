@@ -87,10 +87,6 @@ function buildPipelineCandidatesQuery(filters: PipelineCandidatesFilters): strin
     params.set('direction', filters.direction);
   }
 
-  if (filters.responseStatus) {
-    params.set('responseStatus', filters.responseStatus);
-  }
-
   if (filters.limit) {
     params.set('limit', String(filters.limit));
   }
