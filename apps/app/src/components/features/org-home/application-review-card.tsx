@@ -7,10 +7,8 @@ import { StatusBadge, type StatusBadgeProps } from '@comitium/ui/status-badge';
 import { CaretRightIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
 import { memo, useCallback } from 'react';
-import { getActivityBadge, getResponseDeadlineBadge } from '@/components/features/application-status';
+import { getActivityBadge } from '@/components/features/application-status';
 import { CriteriaBadge, getCriteriaLabel } from '@/components/features/pipeline/shared/criteria-badge';
-import { getApplicationReviewUrgencyState } from '@/components/features/pipeline/shared/pipeline-status';
-import { UrgencyStripe } from '@/components/features/pipeline/shared/urgency-stripe';
 import type { PipelineCandidate } from '@/lib/schemas/pipeline';
 import { cn, getCandidateDisplayName } from '@/lib/utils';
 import { HomeCard, HomeCardHeader } from './home-card';
@@ -101,7 +99,6 @@ const ApplicationReviewRow = memo(function ApplicationReviewRow({
   const primaryBadge = getApplicationReviewPrimaryBadge(candidate);
   const hasCriteriaBadge = getCriteriaLabel(candidate) !== '—';
   const hasSignals = primaryBadge !== null || hasCriteriaBadge;
-  const urgency = getApplicationReviewUrgencyState(candidate.isResponded, candidate.responseDeadline);
   const handleClick = useCallback(() => {
     onOpen(candidate);
   }, [candidate, onOpen]);
@@ -115,7 +112,6 @@ const ApplicationReviewRow = memo(function ApplicationReviewRow({
         'w-full grid-cols-1 text-left sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center',
       )}
     >
-      <UrgencyStripe level={urgency.level} reason={urgency.reason} />
       <span className="min-w-0">
         <span className="block truncate text-label-14">{name}</span>
         <span className="block truncate text-copy-14 text-muted-foreground">{candidate.jobTitle}</span>
@@ -141,5 +137,5 @@ function getApplicationReviewPrimaryBadge(candidate: PipelineCandidate): StatusB
     return activityBadge;
   }
 
-  return getResponseDeadlineBadge(candidate.isResponded, candidate.responseDeadline);
+  return null;
 }

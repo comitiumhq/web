@@ -27,22 +27,18 @@ const draftJob = {
   archivedAt: null,
   version: 2,
   lifecycle: {
-    commitmentFinalizationPending: false,
     activeApplications: 0,
     allowedActions: ['open_job', 'publish_posting'],
   },
 } as JobSummary;
 
-const openJobWithPendingCommitmentResponses = {
+const openJobWithApplications = {
   ...draftJob,
   status: 'open',
-  commitmentStatus: 'active',
   totalApplications: 2,
-  respondedApplications: 0,
   lifecycle: {
-    commitmentFinalizationPending: false,
     activeApplications: 2,
-    allowedActions: [],
+    allowedActions: ['close_job'],
   },
 } as JobSummary;
 
@@ -60,12 +56,11 @@ describe('JobLifecycleMenu', () => {
     expect(mocks.openJob).toHaveBeenCalledExactlyOnceWith({ orgId: 'org-1', jobId: 'job-1' });
   });
 
-  it('explains why an Open Job with unanswered committed applications cannot be closed', async () => {
-    const screen = await render(<JobLifecycleMenu job={openJobWithPendingCommitmentResponses} orgId="org-1" />);
+  it('allows closing an Open Job while existing applications remain active', async () => {
+    const screen = await render(<JobLifecycleMenu job={openJobWithApplications} orgId="org-1" />);
 
     await screen.getByRole('button', { name: 'open job status' }).click();
 
-    await expect.element(screen.getByRole('menuitem', { name: 'Close job' })).toBeDisabled();
-    await expect.element(screen.getByText('Respond to all committed applications before closing.')).toBeVisible();
+    await expect.element(screen.getByRole('menuitem', { name: 'Close job' })).toBeEnabled();
   });
 });

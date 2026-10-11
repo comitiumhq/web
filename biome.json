@@ -13,7 +13,6 @@
       "!apps/*/src/generated/**",
       "apps/*/vite.config.ts",
       "apps/*/vite-plugins/**/*.ts",
-      "apps/*/wagmi.config.ts",
       "apps/*/package.json",
       "apps/*/tsconfig.json",
       "packages/*/src/**",

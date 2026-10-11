@@ -23,6 +23,7 @@ export async function decryptFeedbackBuckets(
       wrappedVaultKey,
       feedbackAnswerBucketContext(orgId, applicationId, formId, bucket.visibility),
     );
+
     Object.assign(merged, decrypted);
   }
 
@@ -44,6 +45,7 @@ export async function decryptAnswerBuckets(
       wrappedVaultKey,
       applicationAnswerBucketContext(orgId, formId, bucket.visibility),
     );
+
     Object.assign(merged, decrypted);
   }
 

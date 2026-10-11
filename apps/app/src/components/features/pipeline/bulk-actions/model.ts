@@ -74,7 +74,9 @@ export function getTargetLabel(target: PipelineBulkTarget) {
 
 function getTargetJobTitle(target: PipelineBulkTarget) {
   if (target.pipelineApplication?.jobTitle) return target.pipelineApplication.jobTitle;
+
   if (target.application?.jobTitle) return target.application.jobTitle;
+
   if (target.application?.jobId) return `Job ${shortId(target.application.jobId)}`;
 
   return 'Job unavailable';

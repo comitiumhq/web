@@ -17,7 +17,6 @@ describe('email_bounced timeline event', () => {
       jobTitle: 'Product Designer',
       actor: {
         userId: null,
-        externalWallet: null,
         name: null,
         avatarUrl: null,
       },

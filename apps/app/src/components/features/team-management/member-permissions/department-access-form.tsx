@@ -64,6 +64,7 @@ export function DepartmentAccessForm({
       {option.label}
     </SelectItem>
   ));
+
   return (
     <>
       <PopoverHeader>

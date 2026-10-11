@@ -4,10 +4,7 @@ import type { EmailDeliveryGrantSubmission } from '@/lib/schemas/emails';
 
 import { api } from './client';
 
-const archiveApplicationResponseSchema = z.discriminatedUnion('status', [
-  z.object({ status: z.literal('accepted'), operationId: z.guid() }).strict(),
-  z.object({ status: z.literal('completed') }).strict(),
-]);
+const archiveApplicationResponseSchema = z.object({ status: z.literal('completed') }).strict();
 
 const reopenApplicationResponseSchema = z.object({
   status: z.literal('completed'),

@@ -32,14 +32,6 @@ export function isApiError(error: unknown, predicate?: (error: ApiError) => bool
   return error instanceof ApiError && (!predicate || predicate(error));
 }
 
-export function isTransientApiError(error: unknown): boolean {
-  if (error instanceof TypeError || hasName(error, 'AbortError') || hasName(error, 'TimeoutError')) {
-    return true;
-  }
-
-  return isApiError(error, ({ status }) => status === 429 || status >= 500);
-}
-
 export function hasApiErrorCode(error: unknown, code: ApiErrorCode | readonly ApiErrorCode[]): boolean {
   return isApiError(error, (apiError) => {
     if (Array.isArray(code)) {
@@ -101,8 +93,4 @@ export function parseApiErrorPayload(data: unknown): {
     ...(code.success ? { code: code.data } : {}),
     ...(isRecord(details) ? { details } : {}),
   };
-}
-
-function hasName(error: unknown, name: string): boolean {
-  return isRecord(error) && Reflect.get(error, 'name') === name;
 }

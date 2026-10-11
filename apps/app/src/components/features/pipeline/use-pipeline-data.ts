@@ -60,11 +60,8 @@ export function usePipelineData(
         candidateId: app.candidateId,
         candidateProfile: app.candidateProfile,
         jobId: job.id,
-        onchainCommitmentId: job.onchainCommitmentId,
         jobTitle: job.title,
         appliedAt: app.appliedAt,
-        responseDeadline: app.responseDeadline,
-        isResponded: app.isResponded,
         terminalOutcome: app.terminalOutcome,
         terminalOutcomeAt: app.terminalOutcomeAt,
         currentStageId: app.currentStageId,
@@ -83,7 +80,6 @@ export function usePipelineData(
         updatedAt: app.updatedAt,
         tagIds: app.tagIds,
         reviewStatus: app.reviewStatus,
-        duplicateAttemptCount: app.duplicateAttemptCount,
       })),
     );
   }, [job, filteredStages]);

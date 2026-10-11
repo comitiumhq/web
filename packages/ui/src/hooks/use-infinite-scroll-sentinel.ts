@@ -32,6 +32,7 @@ export function useInfiniteScrollSentinel({
       },
       { rootMargin },
     );
+
     observer.observe(target);
 
     return () => observer.disconnect();

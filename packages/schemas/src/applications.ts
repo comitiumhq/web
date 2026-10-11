@@ -3,10 +3,9 @@ import { z } from 'zod';
 import { archiveReasonTypeSchema } from './archive-reason-type';
 import { encryptedEnvelopeSchema } from './common';
 import { interviewStatusEnum } from './interview-status';
-import { userWalletAuthorizationPayloadSchema } from './onchain-operations';
 import { PROCESSOR_RECIPIENT_REGEX } from './patterns';
-import { addressSchema, bytes32HexSchema, nonZeroBytes32HexSchema, uuidSchema, walletAddressSchema } from './public';
-import { companyInfoSchema, jobStatusSchema, locationEntrySchema, responseCommitmentStatusSchema } from './public-jobs';
+import { bytes32HexSchema, uuidSchema } from './public';
+import { companyInfoSchema, jobStatusSchema, locationEntrySchema } from './public-jobs';
 import { vaultKeySchema } from './vault';
 
 const criterionAssessmentVerdictSchema = z.enum(['met', 'not_met', 'undecided']);
@@ -69,48 +68,29 @@ const applicationProcessingStatusSchema = z.object({
 
 export type ApplicationProcessingStatus = z.infer<typeof applicationProcessingStatusSchema>;
 
-const applicationResponseKindSchema = z.enum([
-  'rejection_sent',
-  'interview_scheduled',
-  'availability_requested',
-  'assessment_requested',
-]);
-
 export const applicationTerminalOutcomeSchema = z.enum([
   'hired',
   'employer_rejected',
   'candidate_withdrew',
   'candidate_unresponsive',
   'transferred',
-  'employer_deadline_expired',
   'imported_terminal_unknown',
 ]);
 
 export type ApplicationTerminalOutcome = z.infer<typeof applicationTerminalOutcomeSchema>;
-
-const applicationResponseCommitmentStatusSchema = z.enum([
-  'pending_signature',
-  'submitted',
-  'confirmed',
-  'failed',
-  'expired',
-]);
 
 // --- Other applications (cross-job sidebar) ---
 
 const otherApplicationSummarySchema = z.object({
   id: z.string(),
   jobId: z.string(),
-  onchainCommitmentId: z.number().nullable(),
   jobTitle: z.string().nullable(),
   appliedAt: z.string(),
   currentStageId: z.string().nullable(),
   terminalOutcome: applicationTerminalOutcomeSchema.nullable(),
   terminalOutcomeAt: z.string().nullable(),
   currentStageName: z.string().nullable(),
-  isResponded: z.boolean(),
   archivedAt: z.string().nullable(),
-  duplicateAttemptCount: z.number().int().nonnegative(),
 });
 
 export type OtherApplicationSummary = z.infer<typeof otherApplicationSummarySchema>;
@@ -124,7 +104,6 @@ const candidateSheetNextActionSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('submit_feedback'), activityId: uuidSchema, interviewId: uuidSchema.nullable() }),
   z.object({ kind: z.literal('make_stage_decision'), activityId: uuidSchema }),
   z.object({ kind: z.literal('send_email'), activityId: uuidSchema }),
-  z.object({ kind: z.literal('respond_to_application'), responseDeadline: z.string().nullable() }),
   z.object({ kind: z.literal('reopen_consideration'), targetStageId: uuidSchema.nullable() }),
   z.object({ kind: z.literal('open_offer'), offerId: uuidSchema }),
 ]);
@@ -162,7 +141,7 @@ const candidateSheetActionStateSchema = z.object({
     'complete',
     'no_action',
   ]),
-  blockedReason: z.enum(['commitment_settling', 'terminal_consideration', 'identity_processing']).nullable(),
+  blockedReason: z.enum(['terminal_consideration', 'identity_processing']).nullable(),
   nextAction: candidateSheetNextActionSchema.nullable(),
 });
 
@@ -311,7 +290,6 @@ export const applicationSchema = z.object({
   criterionSummary: criterionSummarySchema.nullable(),
   criterionAssessments: z.array(criteriaAssessmentItemSchema),
   appliedAt: z.string(),
-  responseDeadline: z.string().nullable(),
   currentStageId: z.string().nullable(),
   currentStageEnteredAt: z.string().nullable(),
   interviewStatus: interviewStatusEnum.nullable(),
@@ -324,15 +302,11 @@ export const applicationSchema = z.object({
   archiveReasonId: z.string().nullable(),
   archiveReasonLabel: z.string().nullable(),
   archiveReasonType: archiveReasonTypeSchema.nullable(),
-  isResponded: z.boolean(),
-  respondedAt: z.string().nullable(),
   hasResume: z.boolean(),
   resumeFileId: uuidSchema.nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
   tagIds: z.array(uuidSchema),
-  duplicateAttemptCount: z.number().int().nonnegative(),
-  duplicateOfApplicationId: uuidSchema.nullable(),
   considerationContext: candidateSheetConsiderationContextSchema,
 });
 
@@ -349,43 +323,8 @@ export const otherApplicationsResponseSchema = z.object({
 
 export type OtherApplicationsResponse = z.infer<typeof otherApplicationsResponseSchema>;
 
-const duplicateApplicationAttemptSchema = z.object({
-  id: uuidSchema,
-  candidateId: uuidSchema.nullable(),
-  candidateProfile: encryptedEnvelopeSchema.nullable(),
-  onchainApplicationId: bytes32HexSchema,
-  applicantAddress: walletAddressSchema,
-  responseCommitmentId: uuidSchema,
-  commitmentStatus: applicationResponseCommitmentStatusSchema,
-  appliedAt: z.string(),
-  responseDeadline: z.string().nullable(),
-  isResponded: z.boolean(),
-  respondedAt: z.string().nullable(),
-  currentStageId: uuidSchema.nullable(),
-  terminalOutcome: applicationTerminalOutcomeSchema.nullable(),
-  terminalOutcomeAt: z.string().nullable(),
-});
-
-export type DuplicateApplicationAttempt = z.infer<typeof duplicateApplicationAttemptSchema>;
-
-export const duplicateApplicationAttemptsResponseSchema = z.object({
-  data: z.array(duplicateApplicationAttemptSchema),
-  total: z.number().int().nonnegative(),
-  pagination: z.object({
-    nextCursor: z.string().nullable(),
-    hasMore: z.boolean(),
-  }),
-});
-
-export type DuplicateApplicationAttemptsResponse = z.infer<typeof duplicateApplicationAttemptsResponseSchema>;
-
-// --- My applications (applicant view) ---
-
 const myApplicationJobSchema = z.object({
   id: z.string(),
-  onchainCommitmentId: z.number().nullable(),
-  chainId: z.number().nullable(),
-  responseCommitmentContract: addressSchema.nullable(),
   orgSlug: z.string().nullable(),
   postingSlug: z.string().nullable(),
   canonicalUrl: z.string().nullable(),
@@ -394,23 +333,17 @@ const myApplicationJobSchema = z.object({
   location: z.array(locationEntrySchema).nullable(),
   locationType: z.string().nullable(),
   status: z.string().nullable(),
-  commitmentStatus: responseCommitmentStatusSchema.nullable(),
 });
 
 const candidateApplicationStatusSchema = z.object({
-  state: z.enum(['submitted', 'in_process', 'action_needed', 'application_closed']),
+  state: z.enum(['submitted', 'application_closed']),
   reason: z.enum([
+    'application_submitted',
     'application_archived',
-    'awaiting_response',
+    'hired',
     'candidate_withdrew',
     'candidate_unresponsive',
-    'employer_deadline_expired',
-    'hired',
-    'job_closed',
     'rejected_by_org',
-    'response_overdue',
-    'response_received',
-    'response_window_closed',
     'transferred',
   ]),
   needsAction: z.boolean(),
@@ -418,15 +351,10 @@ const candidateApplicationStatusSchema = z.object({
 
 export const myApplicationSchema = z.object({
   id: z.string(),
-  applicationId: bytes32HexSchema.nullable(),
   jobId: z.string(),
   archivedAt: z.string().nullable().optional().default(null),
   archiveReasonType: archiveReasonTypeSchema.nullable().optional().default(null),
   appliedAt: z.string().nullable(),
-  isResponded: z.boolean(),
-  respondedAt: z.string().nullable(),
-  responseKind: applicationResponseKindSchema.nullable().optional().default(null),
-  responseDeadline: z.string().nullable(),
   terminalOutcome: applicationTerminalOutcomeSchema.nullable(),
   terminalOutcomeAt: z.string().nullable(),
   candidateStatus: candidateApplicationStatusSchema,
@@ -501,15 +429,6 @@ export const applicationPrepareSchema = z
     kind: z.literal('prepared'),
     applicationId: uuidSchema,
     formSnapshotHash: bytes32HexSchema,
-    commitment: z
-      .object({
-        chainId: z.number().int().positive(),
-        contract: walletAddressSchema,
-        commitmentId: z.number().int().nonnegative(),
-        jobUuid: uuidSchema,
-      })
-      .strict()
-      .nullable(),
     processingGrant: z
       .object({
         id: uuidSchema,
@@ -523,19 +442,9 @@ export const applicationPrepareSchema = z
 
 export type ApplicationPrepare = z.infer<typeof applicationPrepareSchema>;
 
-const userWalletApplicationRequestSchema = userWalletAuthorizationPayloadSchema.extend({
-  operationId: uuidSchema,
-});
-
-export type UserWalletApplicationRequest = z.infer<typeof userWalletApplicationRequestSchema>;
-
-export const applicationSubmitDispositionSchema = z.union([
-  z.object({ state: z.literal('wallet_confirmation'), operation: userWalletApplicationRequestSchema }).strict(),
-  z.object({ state: z.literal('confirming'), operationId: uuidSchema }).strict(),
-  z.object({ state: z.literal('completed'), operationId: uuidSchema }).strict(),
-  z.object({ state: z.literal('completed'), applicationId: uuidSchema }).strict(),
-  z.object({ state: z.literal('try_again'), operationId: uuidSchema }).strict(),
-]);
+export const applicationSubmitDispositionSchema = z
+  .object({ state: z.literal('completed'), applicationId: uuidSchema })
+  .strict();
 
 export type ApplicationSubmitDisposition = z.infer<typeof applicationSubmitDispositionSchema>;
 
@@ -595,23 +504,8 @@ const finalizeApplicationBaseSchema = z
   })
   .strict();
 
-export const offchainFinalizeApplicationInputSchema = finalizeApplicationBaseSchema;
-
-export const responseCommitmentFinalizeApplicationInputSchema = finalizeApplicationBaseSchema.extend({
-  applicationId: bytes32HexSchema,
-  applicationSalt: nonZeroBytes32HexSchema,
-});
-
-export const finalizeApplicationInputSchema = z.union([
-  offchainFinalizeApplicationInputSchema,
-  responseCommitmentFinalizeApplicationInputSchema,
-]);
-
+export const finalizeApplicationInputSchema = finalizeApplicationBaseSchema;
 export type FinalizeApplicationInput = z.infer<typeof finalizeApplicationInputSchema>;
-export type OffchainFinalizeApplicationInput = z.infer<typeof offchainFinalizeApplicationInputSchema>;
-export type ResponseCommitmentFinalizeApplicationInput = z.infer<
-  typeof responseCommitmentFinalizeApplicationInputSchema
->;
 
 export const applicationFileReservationSchema = z
   .object({ fileId: uuidSchema, uploadToken: z.string(), expiresAt: z.string() })

@@ -44,6 +44,7 @@ export interface UseBlockquoteConfig {
  */
 export function canToggleBlockquote(editor: Editor | null, turnInto = true): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!isNodeInSchema('blockquote', editor) || isNodeTypeSelected(editor, ['image'])) return false;
 
   if (!turnInto) {
@@ -74,6 +75,7 @@ export function canToggleBlockquote(editor: Editor | null, turnInto = true): boo
  */
 export function toggleBlockquote(editor: Editor | null): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!canToggleBlockquote(editor)) return false;
 
   try {
@@ -103,6 +105,7 @@ export function toggleBlockquote(editor: Editor | null): boolean {
         editor,
         node: state.selection.$anchor.node(1),
       })?.pos;
+
       if (!isValidPosition(pos)) return false;
 
       tr = tr.setSelection(NodeSelection.create(state.doc, pos));
@@ -228,9 +231,11 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
     if (!editor) return false;
 
     const success = toggleBlockquote(editor);
+
     if (success) {
       onToggled?.();
     }
+
     return success;
   }, [editor, onToggled]);
 

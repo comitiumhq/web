@@ -4,6 +4,7 @@ import { usePrefersReducedMotion } from './use-prefers-reduced-motion';
 
 const DotLottiePlayer = lazy(async () => {
   const { DotLottieReact } = await import('@lottiefiles/dotlottie-react');
+
   return { default: DotLottieReact };
 });
 
@@ -27,17 +28,20 @@ export function LandingLottieVisual({ src, poster }: LandingLottieVisualProps) {
 
   useEffect(() => {
     const illustration = illustrationRef.current;
+
     if (!illustration) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) setHasEnteredView(true);
+
         setIsInView(entry.intersectionRatio >= 0.3);
       },
       { threshold: 0.3 },
     );
 
     observer.observe(illustration);
+
     return () => observer.disconnect();
   }, []);
 
@@ -46,6 +50,7 @@ export function LandingLottieVisual({ src, poster }: LandingLottieVisualProps) {
 
     const syncPlayback = () => {
       setPlayerReady(player.isLoaded);
+
       if (isInView && !reduceMotion) {
         player.play();
       } else {

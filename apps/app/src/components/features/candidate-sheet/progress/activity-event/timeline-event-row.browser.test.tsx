@@ -23,7 +23,6 @@ const event: ActivityFeedRow = {
   jobTitle: 'Product Engineer',
   actor: {
     userId: '44444444-4444-4444-8444-444444444444',
-    externalWallet: null,
     name: 'Ada Lovelace',
     avatarUrl: '/orgs/org/members/user/avatar/version',
   },
@@ -61,7 +60,6 @@ describe('TimelineEventRow', () => {
       actorRole: 'applicant',
       actor: {
         userId: '77777777-7777-4777-8777-777777777777',
-        externalWallet: null,
         name: null,
         avatarUrl: null,
       },

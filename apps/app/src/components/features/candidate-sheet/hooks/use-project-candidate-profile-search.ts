@@ -32,6 +32,7 @@ export function useProjectCandidateProfileSearch({
   useEffect(() => {
     if (storedVersion === CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION) {
       attemptedCandidateIdRef.current = candidateId;
+
       return;
     }
 

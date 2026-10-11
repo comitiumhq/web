@@ -71,7 +71,6 @@ export function OrgHomePage({ org }: OrgHomePageProps) {
     (candidate: PipelineCandidate): CandidateSheetSelection => ({
       id: candidate.id,
       jobId: candidate.jobId,
-      onchainCommitmentId: candidate.onchainCommitmentId,
       jobTitle: candidate.jobTitle,
       stages: [],
     }),
@@ -104,7 +103,6 @@ export function OrgHomePage({ org }: OrgHomePageProps) {
     setSelectedApplication({
       id: application.id,
       jobId: application.jobId,
-      onchainCommitmentId: application.onchainCommitmentId,
       jobTitle: application.jobTitle,
       stages: [],
     });

@@ -53,6 +53,7 @@ export function TemplateInterviewPlan({ orgId, templateId, selectedPlanId, isArc
   const handlePlanChange = useCallback(
     (planId: string) => {
       const previousPlanId = localPlanId;
+
       setLocalPlanId(planId);
       updateTemplate.mutate(
         { orgId, templateId, body: { interviewPlanId: planId } },

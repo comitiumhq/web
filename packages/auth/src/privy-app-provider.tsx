@@ -1,11 +1,5 @@
 import type { User } from '@comitium/schemas/auth';
-import {
-  type PrivyClientConfig,
-  PrivyProvider,
-  useAuthorizationSignature,
-  useIdentityToken,
-  usePrivy,
-} from '@privy-io/react-auth';
+import { type PrivyClientConfig, PrivyProvider, useIdentityToken, usePrivy } from '@privy-io/react-auth';
 import { useTheme } from 'next-themes';
 import { type ReactNode, useEffect, useMemo, useRef } from 'react';
 
@@ -18,14 +12,12 @@ interface ApiAuthTokens {
 }
 
 type RegisterApiAuthTokenProvider = (provider: () => Promise<ApiAuthTokens>) => () => void;
-type RegisterWalletAuthorizationProvider = (provider: (payload: Uint8Array) => Promise<string>) => () => void;
 
 interface PrivyAppProviderProps {
   children: ReactNode;
   getSession: () => Promise<User | null>;
   onWalletProvisioningError?: (message: string) => void;
   registerApiAuthTokenProvider: RegisterApiAuthTokenProvider;
-  registerWalletAuthorizationProvider: RegisterWalletAuthorizationProvider;
   sessionQueryKey: (privyUserId: string | null) => readonly unknown[];
   staleTime: number;
 }
@@ -35,7 +27,6 @@ export function PrivyAppProvider({
   getSession,
   onWalletProvisioningError,
   registerApiAuthTokenProvider,
-  registerWalletAuthorizationProvider,
   sessionQueryKey,
   staleTime,
 }: PrivyAppProviderProps) {
@@ -53,10 +44,7 @@ export function PrivyAppProvider({
 
   return (
     <PrivyProvider appId={PRIVY_APP_ID} config={config}>
-      <PrivyApiBridge
-        registerApiAuthTokenProvider={registerApiAuthTokenProvider}
-        registerWalletAuthorizationProvider={registerWalletAuthorizationProvider}
-      />
+      <PrivyApiBridge registerApiAuthTokenProvider={registerApiAuthTokenProvider} />
       <AccountReadinessProvider
         getSession={getSession}
         sessionQueryKey={sessionQueryKey}
@@ -71,26 +59,14 @@ export function PrivyAppProvider({
 
 interface PrivyApiBridgeProps {
   registerApiAuthTokenProvider: RegisterApiAuthTokenProvider;
-  registerWalletAuthorizationProvider: RegisterWalletAuthorizationProvider;
 }
 
-function PrivyApiBridge({ registerApiAuthTokenProvider, registerWalletAuthorizationProvider }: PrivyApiBridgeProps) {
+function PrivyApiBridge({ registerApiAuthTokenProvider }: PrivyApiBridgeProps) {
   const { authenticated, getAccessToken, ready } = usePrivy();
   const { identityToken } = useIdentityToken();
-  const { generateAuthorizationSignature } = useAuthorizationSignature();
-  const authState = useRef({ authenticated, generateAuthorizationSignature, getAccessToken, identityToken, ready });
+  const authState = useRef({ authenticated, getAccessToken, identityToken, ready });
 
-  authState.current = { authenticated, generateAuthorizationSignature, getAccessToken, identityToken, ready };
-
-  useEffect(
-    () =>
-      registerWalletAuthorizationProvider(async (payload) => {
-        const result = await authState.current.generateAuthorizationSignature(payload);
-
-        return result.signature;
-      }),
-    [registerWalletAuthorizationProvider],
-  );
+  authState.current = { authenticated, getAccessToken, identityToken, ready };
 
   useEffect(() => {
     if (PRIVY_AUTH_TRANSPORT !== 'headers') {

@@ -302,6 +302,7 @@ export function getJobsColumns({
   };
 
   const columns: ColumnDef<JobsRow>[] = [jobColumn, candidatesColumn, teamColumn, interviewPlanColumn];
+
   columns.push(statusColumn, postingColumn, updatedColumn, actionsColumn);
 
   return columns;

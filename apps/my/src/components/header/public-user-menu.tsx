@@ -35,6 +35,7 @@ const menuItemClassName = 'h-10 gap-2 px-3 text-sm';
 
 export function PublicUserMenu(props: PublicUserMenuProps) {
   const { stage } = useAccountReadiness();
+
   useCryptoResetListener(subscribeToCryptoReset);
 
   if (!props.isSignedIn || !props.user) {

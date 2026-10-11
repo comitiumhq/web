@@ -9,7 +9,6 @@ import {
   jobPostingSchema,
   jobSummarySchema,
   orgJobsResponseSchema,
-  type PrepareCommitmentParams,
   type PublishJobPostingData,
   reopenJobAsDraftResponseSchema,
   type UpdateJobEditorData,
@@ -17,7 +16,6 @@ import {
   unpublishJobPostingResponseSchema,
   updateJobEditorResponseSchema,
 } from '@comitium/schemas/jobs';
-import { preparedRelayedOnchainOperationSchema } from '@comitium/schemas/onchain-operations';
 import { successSchema } from '@comitium/schemas/public';
 
 import { api } from './client';
@@ -26,24 +24,12 @@ export function getJobSummary(id: string) {
   return api.get(`/jobs/${id}/summary`, jobSummarySchema);
 }
 
-export function prepareJobSettlement(jobId: string) {
-  return api.post(`/jobs/${jobId}/settle/prepare`, {}, preparedRelayedOnchainOperationSchema);
-}
-
 export function closeJob(jobId: string, expectedVersion: number, closeReasonId: string) {
   return api.post(`/jobs/${jobId}/close`, { expectedVersion, closeReasonId }, jobLifecycleMutationResponseSchema);
 }
 
 export function openJob(jobId: string) {
   return api.post(`/jobs/${jobId}/open`, {}, jobLifecycleMutationResponseSchema);
-}
-
-export function prepareJobClose(jobId: string, expectedVersion: number, closeReasonId: string) {
-  return api.post(
-    `/jobs/${jobId}/close/prepare`,
-    { expectedVersion, closeReasonId },
-    preparedRelayedOnchainOperationSchema,
-  );
 }
 
 export function reopenJobAsDraft(jobId: string) {
@@ -163,8 +149,4 @@ export function unpublishJobPosting(orgId: string, jobId: string, expectedVersio
     { expectedVersion },
     unpublishJobPostingResponseSchema,
   );
-}
-
-export function prepareCommitment(orgId: string, jobId: string, data: PrepareCommitmentParams) {
-  return api.post(`/orgs/${orgId}/jobs/${jobId}/commitment/prepare`, data, preparedRelayedOnchainOperationSchema);
 }

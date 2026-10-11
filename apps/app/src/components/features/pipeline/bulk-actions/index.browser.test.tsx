@@ -54,6 +54,7 @@ describe('BulkOperations', () => {
 
   it('does not open any bulk action until encrypted organization data is unlocked', async () => {
     mocks.runUnlocked.mockResolvedValue(undefined);
+
     const selected = [{ id: 'application-a' } as PipelineCandidate];
     const screen = await render(
       <BulkOperations

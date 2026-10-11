@@ -5,6 +5,7 @@ type LogMeta = unknown;
 function writeError(message: string, meta?: LogMeta): void {
   if (!isDefined(meta)) {
     console.error(message);
+
     return;
   }
 
@@ -14,6 +15,7 @@ function writeError(message: string, meta?: LogMeta): void {
 function writeWarn(message: string, meta?: LogMeta): void {
   if (!isDefined(meta)) {
     console.warn(message);
+
     return;
   }
 

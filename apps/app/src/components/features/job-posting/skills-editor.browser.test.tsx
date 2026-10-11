@@ -117,6 +117,7 @@ describe('SkillsEditor', () => {
     const screen = await render(<TestEditor />);
 
     const handle = screen.getByRole('button', { name: 'Reorder React' });
+
     handle.element().focus();
     await userEvent.keyboard('{Space}');
     await userEvent.keyboard('{ArrowDown}');

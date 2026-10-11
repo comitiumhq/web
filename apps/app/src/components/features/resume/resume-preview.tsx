@@ -81,6 +81,7 @@ function ResumePdfViewer({
 
   const file = useMemo(() => {
     const buffer = new ArrayBuffer(pdfData.byteLength);
+
     new Uint8Array(buffer).set(pdfData);
 
     return { data: buffer };
@@ -91,6 +92,7 @@ function ResumePdfViewer({
     setIsDocumentLoading(true);
 
     const url = URL.createObjectURL(new Blob([file.data], { type: 'application/pdf' }));
+
     setPdfUrl(url);
 
     return () => URL.revokeObjectURL(url);

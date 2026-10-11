@@ -60,6 +60,7 @@ function createWrapper(client: QueryClient) {
 
 function createQueryClient(initialUser?: User) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
   client.setQueryDefaults(SESSION_QUERY_KEY, {
     queryFn: () => client.getQueryData<User | null>(SESSION_QUERY_KEY) ?? null,
   });
@@ -108,6 +109,7 @@ describe('useEncryptionSetup', () => {
     const client = createQueryClient();
     const initializeEncryptionKeyBundle = vi.fn(async () => {
       client.setQueryData(SESSION_QUERY_KEY, readyUser);
+
       throw new Error('response lost after commit');
     });
     const hook = await renderHook(

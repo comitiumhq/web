@@ -44,6 +44,7 @@ export function DraftPostingActions({ jobId }: DraftPostingActionsProps) {
 
     if (!posting) {
       toast.error('Posting settings could not be loaded');
+
       return;
     }
 

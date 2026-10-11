@@ -30,14 +30,13 @@ const baseJob: CareerJob = {
     careersSlug: 'acme',
     name: 'Acme',
     description: null,
-    logo: 'ipfs://bafybeigdyrzt',
+    logo: 'invalid-logo-url',
     website: 'https://acme.example',
   },
   description: {
     type: 'doc',
     content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build useful things.' }] }],
   },
-  responseDeadlineDays: 5,
   category: 'engineering',
   recruitingPrivacy: {
     controllerName: 'Acme',

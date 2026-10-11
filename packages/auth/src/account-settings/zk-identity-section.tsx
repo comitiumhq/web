@@ -46,6 +46,7 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
 
       if (status.status === 'verified') {
         queryClient.setQueryData(queryKey, status);
+
         return;
       }
 
@@ -118,11 +119,13 @@ export function ZkIdentitySection({ api, queryKey }: { api: ZkIdentityApi; query
   }
 
   let completionFailure: string | null = null;
+
   if (completeAttempt.data?.status === 'failed') {
     completionFailure = FAILURE_MESSAGES[completeAttempt.data.failureCode];
   } else if (completeAttempt.isError) {
     completionFailure = 'Could not finish verification. Try again when you are ready.';
   }
+
   const prompt = isDefined(completionFailure)
     ? {
         action: 'Try again',

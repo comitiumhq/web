@@ -203,6 +203,7 @@ export function ScheduleInterviewDialog({
           role: interviewer.role,
         })),
       };
+
       schedule(
         { applicationId, body },
         {
@@ -265,6 +266,7 @@ export function ScheduleInterviewDialog({
     ),
     [form.control, handleTemplateChange, interviewTypeOptions, prefillActivityId],
   );
+
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>

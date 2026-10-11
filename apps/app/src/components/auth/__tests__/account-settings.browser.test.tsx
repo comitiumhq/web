@@ -24,6 +24,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@privy-io/react-auth', () => ({
   useLinkAccount: (callbacks?: LinkAccountCallbacks) => {
     mocks.googleCallbacks = callbacks;
+
     return { linkGoogle: mocks.linkGoogle };
   },
   useLinkEmail: () => ({
@@ -226,6 +227,7 @@ describe('AuthenticationSettingsPage linked-method controls', () => {
     await screen.getByRole('button', { name: 'Remove Google' }).click();
 
     const dialog = screen.getByRole('dialog');
+
     await expect.element(dialog.getByRole('alert')).toHaveTextContent('We could not remove Google. Try again.');
     await expect.element(dialog.getByRole('button', { name: 'Remove Google' })).toBeEnabled();
   });

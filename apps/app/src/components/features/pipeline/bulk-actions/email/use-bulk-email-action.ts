@@ -67,11 +67,13 @@ export function useBulkEmailAction(props: PipelineBulkActionSheetProps) {
 
     if (!draftResult.draft) {
       toast.error(draftResult.error ?? 'Enter the email content.');
+
       return;
     }
 
     if (!vaultQuery.data) {
       toast.error('Organization encryption keys are unavailable.');
+
       return;
     }
 
@@ -86,6 +88,7 @@ export function useBulkEmailAction(props: PipelineBulkActionSheetProps) {
 
       if (prepared.error) {
         setPreparationError(prepared.error);
+
         return;
       }
 

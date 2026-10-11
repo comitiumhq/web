@@ -1,5 +1,5 @@
-import type { LinkedAccountWithMetadata, SignTypedDataParams, WalletWithMetadata } from '@privy-io/react-auth';
-import type { Address, Hex } from 'viem';
+import type { LinkedAccountWithMetadata, WalletWithMetadata } from '@privy-io/react-auth';
+import type { Address } from 'viem';
 import { z } from 'zod';
 
 export type CanonicalLinkedWallet = WalletWithMetadata & { id: string; walletIndex: 0 };
@@ -19,22 +19,9 @@ export function isCanonicalLinkedWallet(account: LinkedAccountWithMetadata): acc
   );
 }
 
-export type WalletTransactionRequest = {
-  chainId: number;
-  to: Address;
-  data?: Hex;
-  value?: bigint;
-};
-
-export type WalletAccount = {
-  address: Address;
-  signTypedData: (input: SignTypedDataParams) => Promise<Hex>;
-};
-
-export type CanonicalWallet = WalletAccount & {
+export type CanonicalWallet = {
   id: string;
-  sendTransaction: (input: WalletTransactionRequest) => Promise<Hex>;
-  switchChain: (chainId: number) => Promise<void>;
+  address: Address;
 };
 
 export type WalletConnectionStatus = 'unknown' | 'connecting' | 'connected' | 'disconnected';

@@ -27,8 +27,6 @@ export interface Stats {
 
 const STATUS_META: Record<ApplicationLifecycle, { label: string; variant: StatusVariant }> = {
   submitted: { label: 'Submitted', variant: 'secondary' },
-  in_process: { label: 'In process', variant: 'info' },
-  action_needed: { label: 'Action needed', variant: 'warning' },
   application_closed: { label: 'Application closed', variant: 'outline' },
 };
 
@@ -60,11 +58,6 @@ const TERMINAL_OUTCOME_META: Record<
     label: APPLICATION_TERMINAL_OUTCOME_LABEL.transferred,
     variant: 'info',
     description: 'The employer moved your candidacy to another role.',
-  },
-  employer_deadline_expired: {
-    label: APPLICATION_TERMINAL_OUTCOME_LABEL.employer_deadline_expired,
-    variant: 'warning',
-    description: 'The employer did not complete this hiring process before its deadline.',
   },
   imported_terminal_unknown: {
     label: APPLICATION_TERMINAL_OUTCOME_LABEL.imported_terminal_unknown,
@@ -129,8 +122,6 @@ export function matchesApplicationFilter(app: MyApplicationResponse, filter: App
 }
 
 export function getApplicationStatusDescription(app: MyApplicationResponse): string {
-  const status = getApplicationStatus(app);
-
   if (app.terminalOutcome) {
     const description = TERMINAL_OUTCOME_META[app.terminalOutcome].description;
 
@@ -141,22 +132,7 @@ export function getApplicationStatusDescription(app: MyApplicationResponse): str
     return description;
   }
 
-  switch (status.reason) {
-    case 'response_received':
-      return 'Recruiting process is active.';
-    case 'response_overdue':
-      return 'Response window passed.';
-    case 'response_window_closed':
-      return 'The employer response window has closed.';
-    case 'awaiting_response':
-      if (app.responseDeadline) {
-        return `Employer response due by ${formatDate(app.responseDeadline)}.`;
-      }
-
-      return 'Waiting for employer response.';
-    default:
-      return 'Recruiting process is active.';
-  }
+  return 'Application submitted. The employer will contact you about next steps.';
 }
 
 export function calculateStats(applications: MyApplicationResponse[]): Stats {

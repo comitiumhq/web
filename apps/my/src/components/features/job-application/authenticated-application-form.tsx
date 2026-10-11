@@ -113,7 +113,7 @@ function NewApplicationForm({
   });
 
   const { form, handleApplicationCompleted, prepareSubmission } = controller;
-  const { submit, isPending, isConfirming } = useApplyJob({
+  const { submit, isPending } = useApplyJob({
     onCompleted: handleApplicationCompleted,
     onZkIdentityRequired: () => setNeedsZkIdentity(true),
   });
@@ -137,7 +137,7 @@ function NewApplicationForm({
     [applyForm.form.id, hasVerifiedZkIdentity, jobData, prepareSubmission, submit],
   );
 
-  const isSubmitting = form.formState.isSubmitting || isPending || isConfirming;
+  const isSubmitting = form.formState.isSubmitting || isPending;
   const identityRequirementMessage = zkIdentityQuery.isError
     ? 'ZK Identity status could not be loaded.'
     : 'Complete ZK Identity before submitting this application.';

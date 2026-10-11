@@ -44,6 +44,7 @@ function createBulkOperationLifecycle(initialRequestKey: string) {
 
     beginDraftCreation() {
       state.createAttempt += 1;
+
       return state.createAttempt;
     },
 
@@ -55,6 +56,7 @@ function createBulkOperationLifecycle(initialRequestKey: string) {
       if (state.createAttempt !== attempt) return false;
 
       state.currentReference = reference;
+
       return true;
     },
 
@@ -83,6 +85,7 @@ function createBulkOperationLifecycle(initialRequestKey: string) {
       if (state.settledOperationId === operationId) return false;
 
       state.settledOperationId = operationId;
+
       return true;
     },
   };

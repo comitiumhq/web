@@ -11,9 +11,8 @@ const mocks = vi.hoisted(() => ({
   job: {
     canonicalUrl: 'https://jobs.example.test/careers/acme/jobs/backend-engineer',
     lifecycle: {
-      commitmentFinalizationPending: false,
       activeApplications: 0,
-      allowedActions: ['close_job', 'activate_commitment'],
+      allowedActions: ['close_job', 'publish_posting'],
     },
     status: 'open' as 'open' | 'closed',
     title: 'Backend Engineer',
@@ -29,15 +28,8 @@ const mocks = vi.hoisted(() => ({
     skills: [],
     applicationCapacity: 25 as number | null,
     completedApplicationCount: 4,
-    commitment: null as null | {
-      status: 'active' | 'stopped' | 'settled';
-      responseDeadlineDays: number;
-      pendingApplicationResponses: number;
-      canSettle: boolean;
-    },
     version: 7,
   },
-  release: vi.fn(),
   publish: vi.fn(),
   unpublish: vi.fn(),
   update: vi.fn(),
@@ -64,11 +56,6 @@ vi.mock('./posting-description-editor', () => ({
 
 vi.mock('@/hooks/mutations/use-job-posting-mutations', () => ({
   usePublishJobPosting: () => ({ isPending: false, mutate: mocks.publish }),
-  useReleaseCommitmentFunds: () => ({
-    isPending: false,
-    isConfirming: false,
-    mutate: mocks.release,
-  }),
   useUnpublishJobPosting: () => ({ isPending: false, mutate: mocks.unpublish }),
   useUpdateJobPosting: () => ({ isPending: false, mutate: mocks.update, mutateAsync: mocks.updateAsync }),
 }));
@@ -102,9 +89,8 @@ beforeEach(() => {
   mocks.job = {
     canonicalUrl: 'https://jobs.example.test/careers/acme/jobs/backend-engineer',
     lifecycle: {
-      commitmentFinalizationPending: false,
       activeApplications: 0,
-      allowedActions: ['close_job', 'activate_commitment'],
+      allowedActions: ['close_job', 'publish_posting'],
     },
     status: 'open',
     title: 'Backend Engineer',
@@ -120,7 +106,6 @@ beforeEach(() => {
     skills: [],
     applicationCapacity: 25,
     completedApplicationCount: 4,
-    commitment: null,
     version: 7,
   };
 });
@@ -173,6 +158,7 @@ describe('JobPostingPage', () => {
     await screen.getByRole('menuitem', { name: 'Unpublish' }).click();
 
     const dialog = screen.getByRole('dialog');
+
     await expect.element(dialog.getByRole('heading', { name: 'Unpublish this Posting?' })).toBeInTheDocument();
     await dialog.getByRole('button', { name: 'Unpublish' }).click();
 
@@ -180,35 +166,6 @@ describe('JobPostingPage', () => {
       7,
       expect.objectContaining({ onSuccess: expect.any(Function) }),
     );
-  });
-
-  it('does not expose commitment activation', async () => {
-    mocks.posting = { ...mocks.posting, status: 'published' };
-    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
-
-    await screen.getByRole('button', { name: 'Posting actions' }).click();
-    await expect.element(screen.getByRole('menuitem', { name: 'Add commitment' })).not.toBeInTheDocument();
-  });
-
-  it('allows a completed active response commitment to settle without unpublishing the Posting', async () => {
-    mocks.job = { ...mocks.job, lifecycle: { ...mocks.job.lifecycle, allowedActions: ['settle_commitment'] } };
-    mocks.posting = {
-      ...mocks.posting,
-      status: 'published',
-      commitment: {
-        status: 'active',
-        responseDeadlineDays: 7,
-        pendingApplicationResponses: 0,
-        canSettle: true,
-      },
-    };
-    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
-
-    await expect.element(screen.getByRole('button', { name: 'Release funds' })).toBeEnabled();
-    await screen.getByRole('button', { name: 'Release funds' }).click();
-
-    expect(mocks.release).toHaveBeenCalledOnce();
-    expect(mocks.unpublish).not.toHaveBeenCalled();
   });
 
   it('opens the canonical Posting path in the candidate app', async () => {

@@ -65,6 +65,7 @@ export const MARK_SHORTCUT_KEYS: Record<Mark, string> = {
  */
 export function canToggleMark(editor: Editor | null, type: Mark): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!isMarkInSchema(type, editor) || isNodeTypeSelected(editor, ['image'])) return false;
 
   return editor.can().toggleMark(type);
@@ -75,6 +76,7 @@ export function canToggleMark(editor: Editor | null, type: Mark): boolean {
  */
 export function isMarkActive(editor: Editor | null, type: Mark): boolean {
   if (!editor || !editor.isEditable) return false;
+
   return editor.isActive(type);
 }
 
@@ -83,6 +85,7 @@ export function isMarkActive(editor: Editor | null, type: Mark): boolean {
  */
 export function toggleMark(editor: Editor | null, type: Mark): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!canToggleMark(editor, type)) return false;
 
   return editor.chain().focus().toggleMark(type).run();
@@ -183,9 +186,11 @@ export function useMark(config: UseMarkConfig) {
     if (!editor) return false;
 
     const success = toggleMark(editor, type);
+
     if (success) {
       onToggled?.();
     }
+
     return success;
   }, [editor, type, onToggled]);
 

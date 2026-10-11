@@ -162,6 +162,7 @@ export function CreateJobDialog({ orgId, open, onOpenChange }: CreateJobDialogPr
 
       if (hasTemplate) {
         submitFromTemplate();
+
         return;
       }
 

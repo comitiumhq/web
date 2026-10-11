@@ -69,6 +69,7 @@ describe('EncryptionSetupGate', () => {
   it('allows a different user to start its own setup', async () => {
     const initialize = vi.fn().mockResolvedValue(undefined);
     const screen = await render(gate(initialize));
+
     await vi.waitFor(() => expect(initialize).toHaveBeenCalledTimes(1));
 
     mocks.session = { isSessionLoading: false, user: user('user-2', false) };

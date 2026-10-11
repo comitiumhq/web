@@ -18,14 +18,11 @@ jobs:
     timeout-minutes: 15
     env:
       VITE_ENVIRONMENT: development
-      VITE_CHAIN: testnet
       VITE_API: https://api.example.invalid
       VITE_APP_ORIGIN: https://app.example.invalid
       VITE_MY_ORIGIN: https://my.example.invalid
       VITE_PUBLIC_SITE_ORIGIN: https://example.invalid
       VITE_PRIVY_APP_ID: ci-placeholder
-      VITE_BASE_RPC_URL: https://base-sepolia-rpc.example.invalid
-      VITE_FILEBASE_GATEWAY_BASE_URL: https://gateway.example.invalid
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 

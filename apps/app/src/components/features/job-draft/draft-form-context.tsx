@@ -59,10 +59,12 @@ export function DraftFormProvider({ orgId, jobId, children }: DraftFormProviderP
 
       if (errors.length > 0) {
         setPublishErrors(errors);
+
         return false;
       }
 
       setPublishErrors([]);
+
       return true;
     },
     [

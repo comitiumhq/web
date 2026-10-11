@@ -50,8 +50,6 @@ Customer gives Comitium general written authorization to use the subprocessors m
 
 Comitium will give reasonable advance notice before adding or replacing a subprocessor that will process Customer Personal Data. Customer may object during the notice period on reasonable data-protection grounds by contacting [legal@comitium.co](mailto:legal@comitium.co). If the parties cannot resolve the objection, Customer's sole remedy is to stop using the affected feature or terminate the affected Service before the change takes effect.
 
-Public blockchain and IPFS networks are decentralized public infrastructure, not subprocessors controlled by Comitium. Customer instructs Comitium to publish the public Organization, transaction, and response-commitment information submitted to those networks through the Service. Protected recruitment content is not intentionally published to them.
-
 ## International transfers
 
 Comitium may process Customer Personal Data in the European Economic Area and in other countries where authorized subprocessors operate. Where Applicable Data Protection Law requires a transfer safeguard, Comitium will use an applicable adequacy decision, the relevant standard contractual clauses, or another lawful mechanism. Customer authorizes those transfers and will provide information reasonably needed for their implementation.
@@ -60,7 +58,7 @@ Comitium may process Customer Personal Data in the European Economic Area and in
 
 During use of the Service, Customer may request export or deletion of Customer Personal Data through [legal@comitium.co](mailto:legal@comitium.co). When the affected Service ends, Comitium will, at Customer's choice, return or delete Customer Personal Data unless law requires retention. If Customer chooses return, Comitium will delete controlled copies after completing the return. Residual backup copies will remain protected and be removed through the ordinary backup cycle.
 
-Comitium will stop controlled hosting or pinning of public IPFS content when instructed, but cannot delete copies retained by independent network participants or alter immutable blockchain records. End-to-end encryption may require a Customer user with vault access to unlock protected content before it can be exported in readable form.
+End-to-end encryption may require a Customer user with vault access to unlock protected content before it can be exported in readable form.
 
 ## Compliance information and audits
 
@@ -98,7 +96,7 @@ The limitation of liability and other liability provisions in the Terms of Use a
 
 **Data subjects:** candidates, applicants, prospective candidates, referees, Customer personnel, interviewers, recruiters, hiring managers, and other people whose information Customer lawfully submits.
 
-**Personal data:** identity and contact details; resumes and work history; application answers and attachments; candidate profiles; communications; interview and scheduling details; assessments, notes, feedback, and hiring-stage information; account, permission, audit, device, and security metadata; wallet addresses and related public transaction metadata.
+**Personal data:** identity and contact details; resumes and work history; application answers and attachments; candidate profiles; communications; interview and scheduling details; assessments, notes, feedback, and hiring-stage information; account, permission, audit, device, and security metadata; authentication and encryption-key identifiers.
 
 The Service does not require Customer to collect special-category data. If Customer chooses to configure or submit it, Customer is responsible for establishing a lawful basis and applying appropriate safeguards.
 
@@ -112,7 +110,7 @@ Comitium's current measures include:
 - encrypted transport and protections for infrastructure and backups;
 - Organization-scoped access controls, role permissions, and encrypted vault access for authorized users;
 - purpose-bound, time-limited authorization controls for requested service operations;
-- separation of public blockchain and IPFS information from protected recruitment content;
+- separation of public Organization information from protected recruitment content;
 - minimized operational logs, security monitoring, dependency maintenance, and incident handling;
 - restricted infrastructure access and confidentiality obligations; and
 - backup and recovery procedures appropriate to the Service.
@@ -123,12 +121,8 @@ These measures may evolve as technology and risk change, provided the overall pr
 
 - **Cloudflare, Inc.**: edge hosting, security, API runtime, object storage, queues, email routing, and AI infrastructure.
 - **Hetzner Online GmbH**: database, application, and self-hosted scheduling infrastructure.
-- **Horkos, LLC d/b/a Privy**: authentication and embedded-wallet infrastructure.
+- **Horkos, LLC d/b/a Privy**: authentication and infrastructure for access to encryption keys.
 - **Plus Five Five, Inc. d/b/a Resend**: outbound email delivery and delivery status.
-- **Filebase, Inc.**: distribution of public Organization information through IPFS.
-- **Alchemy Insights, Inc.**: blockchain RPC access for public Base operations and metadata.
-
-The public Base and IPFS networks are not controlled subprocessors.
 
 Customer-authorized integrations, including Google Calendar and Google Meet, are used at Customer's direction and may also be governed by Customer's or the user's separate relationship with the provider.
 

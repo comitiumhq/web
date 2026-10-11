@@ -48,6 +48,7 @@ describe('stage change', () => {
   it('refreshes interviews after the server finalizes terminal stage workflows', async () => {
     mocks.changeStage.mockResolvedValue({ success: true });
     useStageChange();
+
     const options = mocks.mutationOptions as MutationOptions;
 
     await options.mutationFn(params);

@@ -1,4 +1,3 @@
-import { activeChain } from '@comitium/chain/chains';
 import type { PrivyClientConfig } from '@privy-io/react-auth';
 
 if (!import.meta.env.VITE_PRIVY_APP_ID) {
@@ -34,8 +33,6 @@ export const PRIVY_AUTH_TRANSPORT = resolvePrivyAuthTransport(
 
 export const privyConfig: PrivyClientConfig = {
   loginMethods: ['email', 'google'],
-  supportedChains: [activeChain],
-  defaultChain: activeChain,
   embeddedWallets: {
     ethereum: {
       createOnLogin: 'off',

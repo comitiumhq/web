@@ -8,7 +8,6 @@ import {
 import { uuidSchema } from '@comitium/schemas/public';
 import { locationEntrySchema } from '@comitium/schemas/public-jobs';
 import { z } from 'zod';
-import { isDefined } from '@/lib/utils';
 
 /**
  * Schema for editable Job settings shared by drafts, open Jobs, and templates.
@@ -38,15 +37,3 @@ export const CreateDraftDialogSchema = JobSettingsFormSchema.pick({
 });
 
 export type CreateDraftDialogData = z.infer<typeof CreateDraftDialogSchema>;
-
-export const ResponseCommitmentFormSchema = z.object({
-  employerStake: z
-    .number({
-      error: (issue) => (isDefined(issue.input) ? 'Must be a number' : 'Refundable stake is required'),
-    })
-    .int('Must be a whole number')
-    .min(1, 'Minimum deposit is $1'),
-  feeTier: z.number().int().min(0).max(9),
-});
-
-export type ResponseCommitmentFormData = z.infer<typeof ResponseCommitmentFormSchema>;

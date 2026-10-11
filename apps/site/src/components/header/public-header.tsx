@@ -10,6 +10,7 @@ export function PublicHeader() {
 
   useEffect(() => {
     const scrollContainer = document.querySelector<HTMLElement>('[data-app-scroll-container]');
+
     if (!scrollContainer) return;
 
     const updateHeaderSurface = () => setIsScrolled(scrollContainer.scrollTop > 16);

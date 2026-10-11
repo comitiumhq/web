@@ -59,7 +59,9 @@ export const BlockquoteButton = forwardRef<HTMLButtonElement, BlockquoteButtonPr
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
+
         if (event.defaultPrevented) return;
+
         handleToggle();
       },
       [handleToggle, onClick],

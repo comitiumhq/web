@@ -44,6 +44,7 @@ export const ImageUploader = ({
       }
 
       const validationError = validateImageUpload(file, acceptedTypes, maxSize);
+
       if (validationError) {
         setError(validationError);
 
@@ -73,7 +74,9 @@ export const ImageUploader = ({
       }
 
       setIsDragging(false);
+
       const file = e.dataTransfer.files[0];
+
       handleFileSelect(file);
     },
     [handleFileSelect, disabled],
@@ -100,6 +103,7 @@ export const ImageUploader = ({
   const handleFileInput = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0] ?? null;
+
       handleFileSelect(file);
       e.target.value = '';
     },

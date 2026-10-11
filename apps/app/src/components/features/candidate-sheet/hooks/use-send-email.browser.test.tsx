@@ -64,6 +64,7 @@ function Harness({
     vaultKeyVersion: keyVersion,
     applicantEmail,
   });
+
   const send = () => sendEmail({ ...emailData, onError, onSuccess });
 
   return (
@@ -109,6 +110,7 @@ describe('useSendEmail', () => {
     mocks.assertEncryptionKeyBundle.mockImplementation(() => {
       throw new Error('Encryption key bundle is incomplete');
     });
+
     const onError = vi.fn();
     const screen = await render(<Harness onError={onError} />);
 
@@ -122,11 +124,13 @@ describe('useSendEmail', () => {
 
   it('does not start two recipient lookups for one in-flight send', async () => {
     let resolveRecipient: (value: { publicKey: PublicEncryptionKey }) => void = () => undefined;
+
     mocks.getRecipientKey.mockReturnValue(
       new Promise((resolve) => {
         resolveRecipient = resolve;
       }),
     );
+
     const screen = await render(<Harness />);
 
     await screen.getByRole('button', { name: 'Send twice' }).click();
@@ -145,6 +149,7 @@ describe('useSendEmail', () => {
     expect(mocks.sendEmailMutation).toHaveBeenCalledTimes(1);
 
     const callbacks = mocks.sendEmailMutation.mock.calls[0][1] as { onSuccess: () => void };
+
     callbacks.onSuccess();
 
     await expect.element(screen.getByText('Idle')).toBeInTheDocument();

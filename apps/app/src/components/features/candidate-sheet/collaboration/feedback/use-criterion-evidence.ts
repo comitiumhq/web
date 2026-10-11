@@ -41,6 +41,7 @@ export function useCriterionEvidence({
     }
 
     let cancelled = false;
+
     setState({ status: 'loading' });
 
     CryptoProxy.decryptApplication(

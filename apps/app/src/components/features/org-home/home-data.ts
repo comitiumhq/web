@@ -1,6 +1,5 @@
 import { compareDatesAsc, compareDatesDesc } from '@comitium/ui/date';
 import { differenceInCalendarDays, format, isSameDay, parseISO } from 'date-fns';
-import { getApplicationReviewRowUrgency } from '@/components/features/application-status';
 import { InterviewStatus, type MyInterview } from '@/lib/schemas/interviews';
 import type { PipelineCandidate, PipelineJob } from '@/lib/schemas/pipeline';
 
@@ -102,10 +101,6 @@ export function getAttentionCounts({
   };
 }
 
-function isApplicationReviewCandidateOverdue(candidate: PipelineCandidate): boolean {
-  return getApplicationReviewRowUrgency(candidate.isResponded, candidate.responseDeadline) === 'overdue';
-}
-
 function formatAttentionTotalCount(total: number, reviewCount: number | null): string {
   if (isLimitedReviewQueueCount(reviewCount)) {
     return `${total}+`;
@@ -155,34 +150,5 @@ function compareHomeInterviews(a: MyInterview, b: MyInterview): number {
 }
 
 function compareApplicationReviewCandidate(a: PipelineCandidate, b: PipelineCandidate): number {
-  const overdueComparison =
-    Number(isApplicationReviewCandidateOverdue(b)) - Number(isApplicationReviewCandidateOverdue(a));
-
-  if (overdueComparison !== 0) {
-    return overdueComparison;
-  }
-
-  const deadlineComparison = compareNullableDeadlines(a.responseDeadline, b.responseDeadline);
-
-  if (deadlineComparison !== 0) {
-    return deadlineComparison;
-  }
-
   return compareDatesDesc(a.appliedAt, b.appliedAt);
-}
-
-function compareNullableDeadlines(a: string | null, b: string | null): number {
-  if (a === null && b === null) {
-    return 0;
-  }
-
-  if (a === null) {
-    return 1;
-  }
-
-  if (b === null) {
-    return -1;
-  }
-
-  return compareDatesAsc(a, b);
 }

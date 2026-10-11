@@ -51,6 +51,7 @@ function OrganizationOnboardingBoundary() {
         params: { orgId: createdOrganizationId },
         replace: true,
       });
+
       return;
     }
 
@@ -58,6 +59,7 @@ function OrganizationOnboardingBoundary() {
 
     if (organizationId) {
       navigate({ to: '/org/$orgId', params: { orgId: organizationId }, replace: true });
+
       return;
     }
 

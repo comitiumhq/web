@@ -19,8 +19,6 @@
     "./privy-config": "./src/privy-config.ts",
     "./privy-app-provider": "./src/privy-app-provider.tsx",
     "./privy-account": "./src/privy-account.ts",
-    "./require-wallet-account": "./src/require-wallet-account.ts",
-    "./send-calls": "./src/send-calls.ts",
     "./session-recovery": "./src/session-recovery.tsx",
     "./storage": "./src/storage.ts",
     "./use-account-readiness": "./src/use-account-readiness.ts",
@@ -31,9 +29,8 @@
     "./use-is-crypto-active": "./src/use-is-crypto-active.ts",
     "./use-session": "./src/use-session.ts",
     "./use-wallet": "./src/use-wallet.ts",
-    "./user-wallet-operation": "./src/user-wallet-operation.ts",
     "./wallet": "./src/wallet.ts",
-    "./wallet-transport": "./src/wallet-transport.ts"
+    "./address": "./src/address.ts"
   },
   "scripts": {
     "test": "vitest",
@@ -41,12 +38,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@comitium/chain": "workspace:*",
     "@comitium/crypto": "workspace:*",
     "@comitium/schemas": "workspace:*",
     "@comitium/ui": "workspace:*",
     "@phosphor-icons/react": "2.1.10",
-    "@scure/base": "2.0.0",
     "@privy-io/react-auth": "3.35.1",
     "@tanstack/react-query": "5.90.21",
     "@zkpassport/sdk": "0.17.1",

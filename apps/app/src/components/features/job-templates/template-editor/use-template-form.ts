@@ -112,6 +112,7 @@ export function useTemplateForm(orgId: string, templateId: string | null, option
 
     if (skills.length > MAX_POSTING_SKILLS) {
       toast.error(POSTING_SKILL_LIMIT_MESSAGE);
+
       return;
     }
 

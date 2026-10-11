@@ -53,6 +53,7 @@ export function canSetLink(editor: Editor | null): boolean {
   // The third argument 'true' checks whether the current selection is inside an image caption, and prevents setting a link there
   // If the selection is inside an image caption, we can't set a link
   if (isNodeTypeSelected(editor, ['image'], true)) return false;
+
   try {
     return editor.can().setMark('link');
   } catch {
@@ -65,6 +66,7 @@ export function canSetLink(editor: Editor | null): boolean {
  */
 export function isLinkActive(editor: Editor | null): boolean {
   if (!editor || !editor.isEditable) return false;
+
   return editor.isActive('link');
 }
 
@@ -119,10 +121,12 @@ export function useLinkHandler(props: LinkHandlerProps) {
 
     const updateLinkState = () => {
       const { href } = editor.getAttributes('link');
+
       setUrl(href || '');
     };
 
     editor.on('selectionUpdate', updateLinkState);
+
     return () => {
       editor.off('selectionUpdate', updateLinkState);
     };
@@ -151,6 +155,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
 
   const removeLink = useCallback(() => {
     if (!editor) return;
+
     editor.chain().focus().extendMarkRange('link').unsetLink().setMeta('preventAutolink', true).run();
     setUrl('');
   }, [editor]);

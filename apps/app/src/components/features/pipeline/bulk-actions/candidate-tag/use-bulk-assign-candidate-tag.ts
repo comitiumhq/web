@@ -81,7 +81,9 @@ export function useBulkAssignCandidateTag(props: PipelineBulkActionSheetProps) {
 
 function getTagPlaceholder(loading: boolean, hasError: boolean, optionCount: number) {
   if (loading) return 'Loading tags...';
+
   if (hasError) return 'Tags unavailable';
+
   if (optionCount === 0) return 'No active tags';
 
   return 'Select tags';

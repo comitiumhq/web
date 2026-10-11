@@ -29,6 +29,7 @@ export function useCalendarGrid(calendarRef: RefObject<HTMLDivElement | null>, e
     updateCalendarGrid();
 
     const observer = new MutationObserver(updateCalendarGrid);
+
     observer.observe(calendar, { childList: true, subtree: true });
 
     return () => observer.disconnect();

@@ -33,6 +33,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   if (needsSessionRecovery) {
     const recoveryReturnTo = returnTo ? buildAuthRoute('/login', returnTo) : '/login';
+
     return <AuthSessionRecovery returnTo={recoveryReturnTo} />;
   }
 

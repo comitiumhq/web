@@ -4,7 +4,6 @@ type ActivityActionKind = 'review_application' | 'schedule_interview' | 'send_em
 type BlockedReason = NonNullable<CandidateSheetActionState['blockedReason']>;
 
 const EMPTY_ACTIVITY_MESSAGES: Record<BlockedReason, string> = {
-  commitment_settling: 'The public commitment is settling.',
   terminal_consideration: 'Application is closed.',
   identity_processing: 'Candidate profile is still processing.',
 };

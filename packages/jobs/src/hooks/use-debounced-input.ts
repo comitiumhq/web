@@ -21,6 +21,7 @@ export function useDebouncedInput({ externalValue, delay = 300, onChange, skipRe
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
+
       return;
     }
 
@@ -29,6 +30,7 @@ export function useDebouncedInput({ externalValue, delay = 300, onChange, skipRe
     debounceRef.current = setTimeout(() => {
       if (skipRef?.current) {
         skipRef.current = false;
+
         return;
       }
 

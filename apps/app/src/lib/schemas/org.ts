@@ -131,7 +131,6 @@ export type WorkspaceSetup = z.infer<typeof workspaceSetupSchema>;
 
 export const myOrgSchema = z.object({
   id: uuidSchema,
-  orgId: z.number().nullable(),
   domain: z.string().nullable(),
   name: z.string().nullable(),
   logo: z.string().nullable(),
@@ -147,7 +146,6 @@ export type MyOrg = z.infer<typeof myOrgSchema>;
 
 export const orgDetailsSchema = z.object({
   id: uuidSchema,
-  orgId: z.number().nullable(),
   name: z.string().nullable(),
   logo: z.string().nullable(),
   description: z.string().nullable(),
@@ -164,36 +162,13 @@ export const updateOrgProfileResponseSchema = z.object({
   organizationId: uuidSchema,
 });
 
-export type PrepareOrgContentUriUpdateData = {
+export type UpdateOrgProfileData = {
   name: string;
   careersSlug: string;
   description: string;
   logo: string | null;
   website: string;
 };
-
-export const orgTreasuryStatusSchema = z.discriminatedUnion('status', [
-  z.object({
-    status: z.literal('ready'),
-    currentTreasury: walletAddressSchema,
-    pendingTransfer: z
-      .object({
-        proposedTreasury: walletAddressSchema,
-        accepted: z.boolean(),
-      })
-      .nullable(),
-    viewerIsCurrentTreasury: z.boolean(),
-    viewerCanFinalizeTreasuryTransfer: z.boolean(),
-    viewerCanCancelTreasuryTransfer: z.boolean(),
-  }),
-  z.object({
-    status: z.literal('missing_projection'),
-  }),
-]);
-
-export type OrgTreasuryStatus = z.infer<typeof orgTreasuryStatusSchema>;
-
-// --- Org ID by on-chain ID ---
 
 // --- Team members ---
 
@@ -292,38 +267,6 @@ export const acceptInviteSchema = z.object({
   orgId: z.string(),
 });
 
-// --- Funds ---
-
-const balanceEventTypeSchema = z.enum(['deposit', 'withdraw', 'commitment_funded', 'commitment_settled']);
-export type BalanceEventType = z.infer<typeof balanceEventTypeSchema>;
-
-const balanceEventDetailsSchema = z.union([
-  z.object({ amount: z.string() }),
-  z.object({ commitmentId: z.number(), stakeAmount: z.string(), feeAmount: z.string() }),
-  z.object({ commitmentId: z.number(), returnAmount: z.string(), slashedAmount: z.string() }),
-]);
-
-export type BalanceEventDetails = z.infer<typeof balanceEventDetailsSchema>;
-
-const balanceEventSchema = z.object({
-  id: z.string(),
-  eventType: balanceEventTypeSchema,
-  details: balanceEventDetailsSchema,
-  blockNumber: z.string(),
-  txHash: z.string(),
-  createdAt: z.string(),
-});
-
-export type BalanceEvent = z.infer<typeof balanceEventSchema>;
-
-export const balanceHistorySchema = z.object({
-  data: z.array(balanceEventSchema),
-  pagination: z.object({
-    nextCursor: z.string().nullable(),
-    hasMore: z.boolean(),
-  }),
-});
-
 // --- Organization creation ---
 
 export const orgCreationStatusSchema = z.discriminatedUnion('status', [
@@ -388,21 +331,3 @@ const updateMemberProfileSchema = z.object({
 });
 
 export type UpdateMemberProfileData = z.infer<typeof updateMemberProfileSchema>;
-
-// --- Funds event type guards ---
-
-export function isDepositOrWithdraw(details: BalanceEventDetails): details is { amount: string } {
-  return 'amount' in details;
-}
-
-export function isCommitmentFunded(
-  details: BalanceEventDetails,
-): details is { commitmentId: number; stakeAmount: string; feeAmount: string } {
-  return 'stakeAmount' in details;
-}
-
-export function isCommitmentSettled(
-  details: BalanceEventDetails,
-): details is { commitmentId: number; returnAmount: string; slashedAmount: string } {
-  return 'returnAmount' in details;
-}

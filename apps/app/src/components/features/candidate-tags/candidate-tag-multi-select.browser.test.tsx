@@ -24,6 +24,7 @@ describe('CandidateTagMultiSelect', () => {
     await trigger.click();
 
     const searchInput = screen.getByPlaceholder('Search tags…');
+
     await expect.element(searchInput).toBeVisible();
 
     await searchInput.fill('Priority');

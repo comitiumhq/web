@@ -206,6 +206,7 @@ async function unwrapPersonalKeyWrappingKey(
 ): Promise<Uint8Array> {
   assertSignatureShareWrapper(wrapper);
   assertWrapperSalt(wrapper.salt);
+
   const signatureWrappingKey = await deriveWalletSignatureWrappingKey(signature, address, keyShare, wrapper.salt, [
     'decrypt',
   ]);

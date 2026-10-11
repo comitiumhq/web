@@ -40,6 +40,7 @@ export interface UseHeadingDropdownMenuConfig {
  */
 export function getActiveHeadingLevel(editor: Editor | null, levels: Level[] = [1, 2, 3, 4, 5, 6]): Level | undefined {
   if (!editor || !editor.isEditable) return undefined;
+
   return levels.find((level) => isHeadingActive(editor, level));
 }
 

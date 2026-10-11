@@ -52,6 +52,7 @@ export function extractSubmissionFieldProjectionSources(
     switch (reusableField.valueKind) {
       case 'boolean': {
         const value = parseAnswer(booleanAnswerSchema, question, answer);
+
         fieldValues.push({ ...fieldValueIdentity, ordinal: 0, kind: 'boolean', value });
         break;
       }
@@ -68,6 +69,7 @@ export function extractSubmissionFieldProjectionSources(
 
       case 'number': {
         const value = parseNumericAnswer(question, answer);
+
         fieldValues.push({
           ...fieldValueIdentity,
           ordinal: 0,
@@ -79,6 +81,7 @@ export function extractSubmissionFieldProjectionSources(
 
       case 'timestamp': {
         const value = parseAnswer(dateAnswerSchema, question, answer);
+
         fieldValues.push({ ...fieldValueIdentity, ordinal: 0, kind: 'timestamp', value });
         break;
       }
@@ -107,6 +110,7 @@ function parseNumericAnswer(question: SubmissionQuestion, answer: unknown): numb
   }
 
   const option = parseAnswer(z.string(), question, answer);
+
   return parseAnswer(numberAnswerSchema, question, optionValueMap[option]);
 }
 

@@ -15,7 +15,6 @@ import { DraftSectionSkeleton } from '@/components/features/job-draft/draft-sect
 import { getMyOrigin } from '@/config/site';
 import {
   usePublishJobPosting,
-  useReleaseCommitmentFunds,
   useUnpublishJobPosting,
   useUpdateJobPosting,
 } from '@/hooks/mutations/use-job-posting-mutations';
@@ -32,7 +31,6 @@ import { PostingActionsMenu } from './posting-actions-menu';
 import { PostingDescriptionEditor } from './posting-description-editor';
 import { type PostingTab, PostingTabs } from './posting-tabs';
 import { PublishValidationBanner, type PublishValidationError } from './publish-validation-banner';
-import { ResponseCommitmentStatus } from './response-commitment-status';
 import { SkillsEditor } from './skills-editor';
 
 const UNPUBLISH_DESCRIPTION =
@@ -49,7 +47,6 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const updatePosting = useUpdateJobPosting({ orgId, jobId });
   const publishPosting = usePublishJobPosting({ orgId, jobId });
   const unpublishPosting = useUnpublishJobPosting({ orgId, jobId });
-  const releaseCommitmentFunds = useReleaseCommitmentFunds({ orgId, jobId });
   const { canOnJob, isLoading: permissionsLoading } = useJobPermissions(jobId);
   const [applicationCapacity, setApplicationCapacity] = useState<number | null>(null);
   const [descriptionDraft, setDescriptionDraft] = useState<TipTapDoc | null>(null);
@@ -82,16 +79,13 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     );
   }
 
-  const commitment = posting.commitment;
   const isPostingPublished = posting.status === 'published';
   const isJobClosed = job.status === 'closed';
-  const isCommitmentFinalizing = job.lifecycle.commitmentFinalizationPending;
-  const postingAllowsPublication = !isPostingPublished && job.status === 'open' && !isCommitmentFinalizing;
+  const postingAllowsPublication = !isPostingPublished && job.status === 'open';
 
   const canEdit = !isJobClosed && canOnJob(Permission.JOB_EDIT);
   const canPublishPosting = canOnJob(Permission.JOB_PUBLISH);
   const canUnpublishPosting = canOnJob(Permission.JOB_UNPUBLISH);
-  const canReleaseFunds = canOnJob(Permission.JOB_CLOSE);
   const canPublish = canPublishPosting && postingAllowsPublication && !permissionsLoading;
 
   const currentDescription = descriptionHasChanged ? descriptionDraft : posting.description;
@@ -176,6 +170,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     if (errors.length > 0) {
       setPublishErrors(errors);
       setActiveTab(errors[0].target);
+
       return;
     }
 
@@ -242,14 +237,6 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
             )}
           </div>
         </div>
-
-        <ResponseCommitmentStatus
-          commitment={commitment}
-          isPostingPublished={isPostingPublished}
-          canReleaseFunds={canReleaseFunds}
-          isReleasing={releaseCommitmentFunds.isPending || releaseCommitmentFunds.isConfirming}
-          onRelease={() => releaseCommitmentFunds.mutate()}
-        />
 
         <PostingTabs
           value={activeTab}

@@ -56,7 +56,7 @@ describe('applicationSearchProjectionSchema', () => {
 });
 
 describe('criterionSummarySchema', () => {
-  it('accepts counts scoped by the containing application response', () => {
+  it('accepts counts scoped by the containing application', () => {
     const result = criterionSummarySchema.safeParse({
       totalCount: 3,
       metCount: 2,
@@ -125,8 +125,8 @@ describe('candidateSheetConsiderationContextSchema', () => {
         status: 'action_required',
         blockedReason: null,
         nextAction: {
-          kind: 'respond_to_application',
-          responseDeadline: '2026-07-20T10:00:00.000Z',
+          kind: 'send_email',
+          activityId: UUID,
         },
       },
       stageActivities: [],
@@ -136,7 +136,7 @@ describe('candidateSheetConsiderationContextSchema', () => {
     expect(result.attribution.sourceName).toBe('Referral');
     expect(result.hiringTeam[0]?.name).toBe('Nolan Price');
     expect(result.capabilities.candidate.canEditProfile).toBe(true);
-    expect(result.actionState.nextAction?.kind).toBe('respond_to_application');
+    expect(result.actionState.nextAction?.kind).toBe('send_email');
   });
 });
 
@@ -146,7 +146,6 @@ describe('application submission contracts', () => {
       kind: 'prepared',
       formSnapshotHash: HASH,
       applicationId: UUID,
-      commitment: null,
       processingGrant: {
         id: UUID,
         processorPublicKey: mockPublicEncryptionKey(),
@@ -173,22 +172,13 @@ describe('application submission contracts', () => {
     expect(prepared.vaultKey.keyVersion).toBe(1);
   });
 
-  it('accepts executable and pending product dispositions', () => {
-    const executable = applicationSubmitDispositionSchema.parse({
-      state: 'wallet_confirmation',
-      operation: {
-        operationId: UUID,
-        requestId: UUID,
-        authorizationPayload: 'YXV0aG9yaXphdGlvbi1wYXlsb2Fk',
-      },
-    });
-    const pending = applicationSubmitDispositionSchema.parse({
-      state: 'confirming',
-      operationId: UUID,
+  it('accepts a completed submission with its authoritative Application ID', () => {
+    const completed = applicationSubmitDispositionSchema.parse({
+      state: 'completed',
+      applicationId: UUID,
     });
 
-    expect(executable.state).toBe('wallet_confirmation');
-    expect(pending.state).toBe('confirming');
+    expect(completed).toEqual({ state: 'completed', applicationId: UUID });
   });
 
   it('accepts an existing server-side submission after reload', () => {
@@ -196,15 +186,15 @@ describe('application submission contracts', () => {
       kind: 'existing',
       applicationId: UUID,
       disposition: {
-        state: 'confirming',
-        operationId: UUID,
+        state: 'completed',
+        applicationId: UUID,
       },
     });
 
     expect(result.kind).toBe('existing');
   });
 
-  it('finalizes typed application identities', () => {
+  it('finalizes encrypted application inputs', () => {
     const wrapped = mockWrappedKey();
     const envelopeKey = {
       recipient: 'org_vault' as const,
@@ -224,8 +214,6 @@ describe('application submission contracts', () => {
     };
     const profileEnvelope = { ...envelope, purpose: 'candidate_profile_input' as const };
     const input = finalizeApplicationInputSchema.parse({
-      applicationId: HASH,
-      applicationSalt: `0x${'3'.repeat(64)}`,
       formSnapshotHash: HASH,
       candidateIdentityInputs: [{ questionId: UUID, envelope }],
       candidateProfileInput: profileEnvelope,
