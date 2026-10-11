@@ -10,6 +10,7 @@
   "exports": {
     "./accordion": "./src/components/accordion.tsx",
     "./action-confirmation": "./src/components/action-confirmation.tsx",
+    "./activity-feed": "./src/components/activity-feed.tsx",
     "./alert": "./src/components/alert.tsx",
     "./autocomplete": "./src/components/autocomplete.tsx",
     "./application-outcome-labels": "./src/lib/application-outcome-labels.ts",
@@ -56,6 +57,7 @@
     "./initials-avatar": "./src/components/initials-avatar.tsx",
     "./inline-empty-state": "./src/components/inline-empty-state.tsx",
     "./input": "./src/components/input.tsx",
+    "./kanban": "./src/components/kanban.tsx",
     "./input-group": "./src/components/input-group.tsx",
     "./input-otp": "./src/components/input-otp.tsx",
     "./label": "./src/components/label.tsx",
@@ -64,6 +66,7 @@
     "./page-container": "./src/components/page-container.tsx",
     "./page-header": "./src/components/page-header.tsx",
     "./page-loader": "./src/components/page-loader.tsx",
+    "./pipeline-stage-tabs": "./src/components/pipeline-stage-tabs.tsx",
     "./popover": "./src/components/popover.tsx",
     "./progress": "./src/components/progress.tsx",
     "./query-client": "./src/lib/query-client.ts",

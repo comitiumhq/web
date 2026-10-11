@@ -1,6 +1,6 @@
 import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/candidates';
-import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
+import { KANBAN_COLUMN_BODY_CLASS, KANBAN_COLUMN_CLASS, KanbanColumnHeader } from '@comitium/ui/kanban';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { useInfiniteScrollSentinel } from '@comitium/ui/use-infinite-scroll-sentinel';
 import { useSortable } from '@dnd-kit/react/sortable';
@@ -63,25 +63,17 @@ export const KanbanColumn = memo(function KanbanColumn({
   return (
     <div
       ref={ref}
-      className={cn('flex w-72 shrink-0 flex-col rounded-xl p-1.5 transition-[background-color,box-shadow]', {
+      className={cn(KANBAN_COLUMN_CLASS, 'transition-[background-color,box-shadow]', {
         'bg-primary/[0.05] ring-1 ring-primary/20 ring-inset': isDropTarget,
         'h-full': scrollable,
       })}
     >
       <span ref={handleRef} aria-hidden="true" className="sr-only" />
 
-      <div className="mb-2.5 flex items-center gap-2 px-1.5 pt-0.5">
-        <h3 className="truncate text-label-14 font-medium text-foreground/75">{name}</h3>
-        <Badge
-          variant="secondary"
-          className="h-5 shrink-0 bg-foreground/5 px-1.5 text-xs text-muted-foreground tabular-nums"
-        >
-          {total}
-        </Badge>
-      </div>
+      <KanbanColumnHeader name={name} total={total} />
 
       <div
-        className={cn('flex min-h-0 flex-1 flex-col gap-2 rounded-xl bg-kanban-column p-2 pb-4', {
+        className={cn(KANBAN_COLUMN_BODY_CLASS, {
           'overflow-y-auto': scrollable,
         })}
       >

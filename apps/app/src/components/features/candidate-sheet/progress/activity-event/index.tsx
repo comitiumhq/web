@@ -1,4 +1,5 @@
 import type { DisplayIdentity } from '@comitium/schemas/common';
+import { ActivityEventRow } from '@comitium/ui/activity-feed';
 import { formatInTimezone, formatRelativeTime } from '@comitium/ui/date';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { memo } from 'react';
@@ -15,11 +16,6 @@ interface TimelineEventRowProps {
   timeZone: string;
 }
 
-interface EventBodyProps {
-  event: ActivityFeedRow;
-  selectedApplicationId: string | null;
-}
-
 export const TimelineEventRow = memo(function TimelineEventRow({
   event,
   selectedApplicationId,
@@ -30,37 +26,25 @@ export const TimelineEventRow = memo(function TimelineEventRow({
   }
 
   const occurredAt = formatInTimezone(event.createdAt, timeZone, 'MMM d, yyyy · h:mm a (zzz)');
+  const actor = isApplicantSubmission(event) ? null : getActorDisplayName(event.actor.name);
 
   return (
-    <div className="flex items-start gap-2 px-4 py-2">
-      <MemberAvatar identity={toDisplayIdentity(event)} size="sm" className="mt-0.5 shrink-0" />
-      <EventBody event={event} selectedApplicationId={selectedApplicationId} />
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="shrink-0 text-label-12 text-muted-foreground">{formatRelativeTime(event.createdAt)}</span>
-        </TooltipTrigger>
-        <TooltipContent side="top">{occurredAt}</TooltipContent>
-      </Tooltip>
-    </div>
+    <ActivityEventRow
+      avatar={<MemberAvatar identity={toDisplayIdentity(event)} size="sm" className="mt-0.5 shrink-0" />}
+      label={getEventLabel(event)}
+      actor={actor}
+      subline={getEventSubline(event, selectedApplicationId) || null}
+      time={
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="shrink-0 text-label-12 text-muted-foreground">{formatRelativeTime(event.createdAt)}</span>
+          </TooltipTrigger>
+          <TooltipContent side="top">{occurredAt}</TooltipContent>
+        </Tooltip>
+      }
+    />
   );
 });
-
-function EventBody({ event, selectedApplicationId }: EventBodyProps) {
-  const label = getEventLabel(event);
-  const subline = getEventSubline(event, selectedApplicationId);
-  const actor = getActorDisplayName(event.actor.name);
-  const showActor = !isApplicantSubmission(event);
-
-  return (
-    <div className="flex-1 min-w-0">
-      <span className="text-label-13">
-        <span className="font-medium">{label}</span>
-        {showActor && <span className="text-muted-foreground"> by {actor}</span>}
-      </span>
-      {subline && <p className="text-label-12 text-muted-foreground mt-0.5">{subline}</p>}
-    </div>
-  );
-}
 
 function toDisplayIdentity(event: ActivityFeedRow): DisplayIdentity {
   return {
