@@ -4,15 +4,16 @@ import { cn } from '@comitium/ui/cn';
 import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { KanbanCardBody, KanbanColumnHeader } from '@comitium/ui/kanban';
 import { StatusBadge } from '@comitium/ui/status-badge';
-import { CalendarPlusIcon, ChatCenteredTextIcon, ClipboardTextIcon } from '@phosphor-icons/react';
 import type { AnimationSequence } from 'motion/react';
 import type { CSSProperties } from 'react';
+import { LandingActivityIcon } from './landing-activity-icon';
 import { ProductDemoCursor } from './product-demo-cursor';
-import { useProductDemoPlayback } from './use-product-demo-playback';
+import { DEMO_RESET_TIMING, useProductDemoPlayback } from './use-product-demo-playback';
 
 const columnHeadingClassName = cn(
-  'ats-demo-column-heading relative h-6 mb-2 [&>_.ats-demo-before-move]:absolute',
-  '[&>_.ats-demo-after-move]:absolute [&>_.ats-demo-before-move]:inset-0 [&>_.ats-demo-after-move]:inset-0',
+  'ats-demo-column-heading relative h-6 mb-2 [&>_.ats-demo-column-count-before]:absolute',
+  '[&>_.ats-demo-after-move]:absolute [&>_.ats-demo-column-count-before]:inset-0 [&>_.ats-demo-after-move]:inset-0',
+  '[&>_.ats-demo-after-move_[data-slot=kanban-column-name]]:invisible',
   '[&_[data-slot=kanban-column-name]]:text-[11px] [&_[data-slot=kanban-column-name]]:leading-[16px]',
   '[&_[data-slot=badge]]:h-4 [&_[data-slot=badge]]:px-[5px] [&_[data-slot=badge]]:text-[9px]',
   '[&_[data-slot=kanban-column-header]]:gap-[5px] [&_[data-slot=kanban-column-header]]:m-0',
@@ -49,6 +50,12 @@ const actionClassName = 'h-6.5 px-[11px] text-[10px] leading-[calc(4/3)] transit
 function createSequence(): AnimationSequence {
   const feedbackOffset = 2.2;
   const stageMoveStart = feedbackOffset + 5.2;
+  // Give the dropped card and column updates 250ms to settle before revealing its sheet.
+  const sheetOpenAt = stageMoveStart + 2.9 + 0.25;
+  const resetAt = stageMoveStart + 9.55;
+  const resetSwapAt = resetAt + DEMO_RESET_TIMING.fadeOut;
+  const resetInAt = resetSwapAt + DEMO_RESET_TIMING.swap;
+  const resetCards = '.ats-demo-moving-card, .ats-demo-sofia, .ats-demo-lucia';
 
   return [
     ['.ats-demo-review-board-pointer', { opacity: 1, x: 0, y: 0 }, { at: 0.55, duration: 0.35 }],
@@ -100,13 +107,16 @@ function createSequence(): AnimationSequence {
     ['.ats-demo-moving-card', { y: 0, rotate: 0, scale: 1 }, { at: stageMoveStart + 2.55, duration: 0.25 }],
     ['.ats-demo-sofia', { y: -92 }, { at: stageMoveStart + 2.55, duration: 0.35 }],
     ['.ats-demo-drop-target', { opacity: 0 }, { at: stageMoveStart + 2.7, duration: 0.2 }],
-    ['.ats-demo-before-move', { opacity: 0 }, { at: stageMoveStart + 2.7, duration: 0.15 }],
+    [
+      '.ats-demo-before-move, .ats-demo-column-count-before [data-slot=badge]',
+      { opacity: 0 },
+      { at: stageMoveStart + 2.7, duration: 0.15 },
+    ],
     ['.ats-demo-after-move', { opacity: 1 }, { at: stageMoveStart + 2.7, duration: 0.2 }],
-    ['.ats-demo-board-pointer', { scale: 0.86 }, { at: stageMoveStart + 3.05, duration: 0.12 }],
-    ['.ats-demo-card-selection', { opacity: 1 }, { at: stageMoveStart + 3.05, duration: 0.15 }],
-    ['.ats-demo-board-pointer', { opacity: 0, scale: 1 }, { at: stageMoveStart + 3.25, duration: 0.2 }],
-    ['.ats-demo-board', { x: -20, scale: 0.95 }, { at: stageMoveStart + 3.35, duration: 0.45 }],
-    ['.ats-demo-sheet', { opacity: 1, x: 0 }, { at: stageMoveStart + 3.45, duration: 0.45 }],
+    ['.ats-demo-board-pointer', { opacity: 0 }, { at: stageMoveStart + 2.9, duration: 0.2 }],
+    ['.ats-demo-card-selection', { opacity: 1 }, { at: sheetOpenAt, duration: 0.15 }],
+    ['.ats-demo-board', { x: -20, scale: 0.95 }, { at: sheetOpenAt, duration: 0.45 }],
+    ['.ats-demo-sheet', { opacity: 1, x: 0 }, { at: sheetOpenAt, duration: 0.45 }],
     ['.ats-demo-sheet-pointer', { opacity: 1, x: 0, y: 0 }, { at: stageMoveStart + 4.2, duration: 0.4 }],
     ['.ats-demo-sheet-pointer', { scale: 0.86 }, { at: stageMoveStart + 4.85, duration: 0.12 }],
     ['.ats-demo-send-link', { scale: 0.97 }, { at: stageMoveStart + 4.85, duration: 0.12 }],
@@ -125,56 +135,54 @@ function createSequence(): AnimationSequence {
       { opacity: 0, scale: 1 },
       { at: stageMoveStart + 5.05, duration: 0.16, ease: 'easeInOut' },
     ],
+    [resetCards, { opacity: 0 }, { at: resetAt, duration: DEMO_RESET_TIMING.fadeOut }],
+    ['.ats-demo-after-move', { opacity: 0 }, { at: resetAt, duration: DEMO_RESET_TIMING.fadeOut }],
+    ['.ats-demo-sheet', { opacity: 0, x: 8 }, { at: resetAt, duration: DEMO_RESET_TIMING.fadeOut }],
     [
-      '.ats-demo-scene',
-      { '--ats-demo-reset-opacity': 1 },
-      { at: stageMoveStart + 9.55, duration: 0.3, ease: 'easeInOut' },
+      '.ats-demo-board',
+      { x: 0, scale: 1 },
+      { at: resetAt, duration: DEMO_RESET_TIMING.fadeOut + DEMO_RESET_TIMING.swap + DEMO_RESET_TIMING.fadeIn },
     ],
-    ['.ats-demo-sheet', { opacity: 0, x: 24 }, { at: stageMoveStart + 9.85, duration: 0.35 }],
-    ['.ats-demo-board', { x: 0, scale: 1 }, { at: stageMoveStart + 9.85, duration: 0.35 }],
-    // Keep the board surface visible and reset its contents under the white transition.
-    ['.ats-demo-board', { '--ats-demo-drag-progress': 0 }, { at: stageMoveStart + 10.1, duration: 0.01 }],
-    ['.ats-demo-lucia', { y: 0 }, { at: stageMoveStart + 10.1, duration: 0.01 }],
-    ['.ats-demo-sofia', { y: 0 }, { at: stageMoveStart + 10.1, duration: 0.01 }],
+    // Only moved cards disappear briefly; column surfaces and the rest of the board stay visible.
+    ['.ats-demo-board', { '--ats-demo-drag-progress': 0 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.ats-demo-lucia', { y: 0 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.ats-demo-sofia', { y: 0 }, { at: resetSwapAt, duration: 0.01 }],
     [
-      '.ats-demo-after-move, .ats-demo-card-selection, .ats-demo-after-send, .ats-demo-booking-provider',
+      '.ats-demo-card-selection, .ats-demo-after-send, .ats-demo-booking-provider',
       { opacity: 0 },
-      { at: stageMoveStart + 10.1, duration: 0.01 },
+      { at: resetSwapAt, duration: 0.01 },
     ],
-    [
-      '.ats-demo-before-move, .ats-demo-before-send, .ats-demo-activity-actions',
-      { opacity: 1 },
-      { at: stageMoveStart + 10.1, duration: 0.01 },
-    ],
-    ['.ats-demo-review-pending', { opacity: 1 }, { at: stageMoveStart + 10.1, duration: 0.01 }],
+    ['.ats-demo-before-send, .ats-demo-activity-actions', { opacity: 1 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.ats-demo-review-pending', { opacity: 1 }, { at: resetSwapAt, duration: 0.01 }],
     [
       '.ats-demo-review-complete, .ats-demo-recommendation-selected, .ats-demo-notes-focus',
       { opacity: 0 },
-      { at: stageMoveStart + 10.1, duration: 0.01 },
+      { at: resetSwapAt, duration: 0.01 },
     ],
     [
       '.ats-demo-notes-first-line, .ats-demo-notes-second-line',
       { clipPath: 'inset(0 100% 0 0)' },
-      { at: stageMoveStart + 10.1, duration: 0.01 },
+      { at: resetSwapAt, duration: 0.01 },
     ],
-    ['.ats-demo-feedback, .ats-demo-review-sheet', { x: 24 }, { at: stageMoveStart + 10.1, duration: 0.01 }],
-    ['.ats-demo-submit-feedback, .ats-demo-open-feedback', { scale: 1 }, { at: stageMoveStart + 10.1, duration: 0.01 }],
+    ['.ats-demo-feedback, .ats-demo-review-sheet, .ats-demo-sheet', { x: 24 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.ats-demo-submit-feedback, .ats-demo-open-feedback', { scale: 1 }, { at: resetSwapAt, duration: 0.01 }],
     [
       '.ats-demo-feedback-pointer, .ats-demo-review-board-pointer, .ats-demo-review-sheet-pointer',
       { opacity: 0, x: 12, y: 12, scale: 1 },
-      { at: stageMoveStart + 10.1, duration: 0.01 },
+      { at: resetSwapAt, duration: 0.01 },
     ],
-    ['.ats-demo-send-link', { scale: 1 }, { at: stageMoveStart + 10.1, duration: 0.01 }],
+    ['.ats-demo-send-link', { scale: 1 }, { at: resetSwapAt, duration: 0.01 }],
     [
       '.ats-demo-board-pointer, .ats-demo-sheet-pointer',
       { opacity: 0, x: 12, y: 12, scale: 1 },
-      { at: stageMoveStart + 10.1, duration: 0.01 },
+      { at: resetSwapAt, duration: 0.01 },
     ],
     [
-      '.ats-demo-scene',
-      { '--ats-demo-reset-opacity': 0 },
-      { at: stageMoveStart + 10.2, duration: 0.35, ease: 'easeInOut' },
+      '.ats-demo-before-move, .ats-demo-column-count-before [data-slot=badge]',
+      { opacity: 1 },
+      { at: resetInAt, duration: DEMO_RESET_TIMING.fadeIn },
     ],
+    [resetCards, { opacity: 1 }, { at: resetInAt, duration: DEMO_RESET_TIMING.fadeIn }],
   ];
 }
 
@@ -186,7 +194,7 @@ export function AtsProductVisual() {
       ref={scope}
       className="ats-demo @container/ats-demo grid size-full place-items-center pt-5 px-7 pb-3 max-[400px]:px-4.5 min-[1280px]:max-[1440px]:pt-2.5 min-[1280px]:max-[1440px]:pb-2"
       role="img"
-      aria-label="Noah opens Maya Chen’s candidate sheet and selects Submit feedback in Activities. He completes the review, then Grace moves Maya to Portfolio review and sends a booking link for the 45-minute interview."
+      aria-label="Noah opens Maya Chen’s candidate sheet and selects Submit in Activities. He completes the review, then Grace moves Maya to Portfolio review and sends a booking link for the 45-minute interview."
     >
       <div
         key={reduceMotion ? 'static' : 'animated'}
@@ -205,7 +213,7 @@ export function AtsProductVisual() {
           <div className="ats-demo-columns grid grid-cols-3 gap-2.5 @max-[520px]/ats-demo:grid-cols-2">
             <div className="ats-demo-column min-w-0">
               <div className={columnHeadingClassName}>
-                <div className="ats-demo-before-move" style={{ opacity: reduceMotion ? 0 : 1 }}>
+                <div className={cn('ats-demo-column-count-before', reduceMotion && '[&_[data-slot=badge]]:opacity-0')}>
                   <KanbanColumnHeader name="Recruiter screen" total={2} />
                 </div>
                 <div className="ats-demo-after-move" style={{ opacity: reduceMotion ? 1 : 0 }}>
@@ -229,7 +237,7 @@ export function AtsProductVisual() {
             </div>
             <div className="ats-demo-column min-w-0">
               <div className={columnHeadingClassName}>
-                <div className="ats-demo-before-move" style={{ opacity: reduceMotion ? 0 : 1 }}>
+                <div className={cn('ats-demo-column-count-before', reduceMotion && '[&_[data-slot=badge]]:opacity-0')}>
                   <KanbanColumnHeader name="Portfolio review" total={1} />
                 </div>
                 <div className="ats-demo-after-move" style={{ opacity: reduceMotion ? 1 : 0 }}>
@@ -316,7 +324,7 @@ export function AtsProductVisual() {
         >
           <header className="ats-demo-sheet-header relative pt-3 px-4 pb-2.5">
             <p className="ats-demo-candidate text-[16px] font-medium leading-[20px] tracking-[-0.025em]">Maya Chen</p>
-            <p className="ats-demo-headline mt-0.5 text-muted-foreground text-[11px] leading-[14px]">
+            <p className="ats-demo-headline mt-0.5 text-[color:var(--landing-text-context)] text-[11px] leading-[14px]">
               Product Designer at Pillbox
             </p>
             <div className="ats-demo-sheet-status absolute top-[13px] right-4 [&_[data-slot=badge]]:h-4.5 [&_[data-slot=badge]]:px-1.5 [&_[data-slot=badge]]:text-[9px]">
@@ -333,14 +341,18 @@ export function AtsProductVisual() {
               Activities
             </p>
             <div className="ats-demo-activity-group overflow-hidden border border-separator rounded-[14px]">
-              <div className="ats-demo-review-entry grid grid-cols-[14px_minmax(0,1fr)_auto] items-center gap-2 gap-y-0.5 p-3 @max-[360px]/ats-demo:grid-cols-[minmax(0,1fr)_auto] @max-[360px]/ats-demo:gap-[6px_8px]">
-                <ClipboardTextIcon className="ats-demo-activity-icon col-start-1 row-start-1 row-end-3 size-3.5 flex-none text-muted-foreground @max-[360px]/ats-demo:hidden" />
+              <div className="ats-demo-review-entry grid grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2 gap-y-0.5 p-3 @max-[360px]/ats-demo:grid-cols-[minmax(0,1fr)_auto] @max-[360px]/ats-demo:gap-[6px_8px]">
+                <LandingActivityIcon
+                  kind="review"
+                  compact
+                  className="ats-demo-activity-icon col-start-1 row-start-1 row-end-3 @max-[360px]/ats-demo:hidden"
+                />
                 <div className="ats-demo-activity-copy contents min-w-0">
-                  <p className="ats-demo-activity-title col-start-2 row-start-1 @max-[360px]/ats-demo:col-start-1 text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
+                  <p className="ats-demo-activity-title col-start-2 row-start-1 @max-[360px]/ats-demo:col-start-1 text-[color:var(--landing-text-content)] text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
                     Application Review
                   </p>
-                  <p className="ats-demo-review-meta col-[2/-1] row-start-2 @max-[360px]/ats-demo:col-span-full text-muted-foreground text-[10px] leading-[14px]">
-                    Recruiter screen · 1/2 reviewed
+                  <p className="ats-demo-review-meta col-[2/-1] row-start-2 @max-[360px]/ats-demo:col-span-full text-[color:var(--landing-text-meta)] text-[10px] leading-[14px]">
+                    Recruiter screen
                   </p>
                 </div>
                 <Button
@@ -351,13 +363,13 @@ export function AtsProductVisual() {
                     'ats-demo-open-feedback col-start-3 row-start-1 @max-[360px]/ats-demo:col-start-2 @max-[360px]/ats-demo:row-start-1',
                   )}
                 >
-                  <div>Submit feedback</div>
+                  <div>Submit</div>
                 </Button>
               </div>
             </div>
           </div>
           <ProductDemoCursor
-            className="ats-demo-pointer z-3 ats-demo-review-sheet-pointer top-[151px]"
+            className="ats-demo-pointer z-3 ats-demo-review-sheet-pointer top-[151px] [&_.product-demo-cursor-name]:left-auto [&_.product-demo-cursor-name]:right-0"
             name="Noah"
             style={{ opacity: 0, transform: 'translate(12px, 12px)' }}
           />
@@ -371,7 +383,7 @@ export function AtsProductVisual() {
             <p className="ats-demo-candidate text-[16px] font-medium leading-[20px] tracking-[-0.025em]">
               Application Review
             </p>
-            <p className="ats-demo-headline mt-0.5 text-muted-foreground text-[11px] leading-[14px]">
+            <p className="ats-demo-headline mt-0.5 text-[color:var(--landing-text-context)] text-[11px] leading-[14px]">
               Maya Chen · Recruiter screen
             </p>
           </header>
@@ -383,7 +395,7 @@ export function AtsProductVisual() {
                 size="sm"
               />
               <span>Noah Patel</span>
-              <span className="ats-demo-review-count grid ml-auto text-muted-foreground text-[10px] [&>_span]:col-start-1 [&>_span]:row-start-1">
+              <span className="ats-demo-review-count grid ml-auto text-[color:var(--landing-text-context)] text-[10px] [&>_span]:col-start-1 [&>_span]:row-start-1">
                 <span className="ats-demo-review-pending" style={{ opacity: 1 }}>
                   1/2 reviewed
                 </span>
@@ -410,7 +422,7 @@ export function AtsProductVisual() {
             <p className="ats-demo-feedback-label mb-[5px] text-[10px] leading-[14px] ats-demo-notes-label mt-2.5">
               Notes
             </p>
-            <div className="ats-demo-feedback-notes relative h-16 p-[7px] border border-control-border rounded-[7px] text-[10px] leading-[14px] [&>_span]:block [&>_span]:whitespace-nowrap">
+            <div className="ats-demo-feedback-notes relative h-16 p-[7px] border border-control-border rounded-[7px] text-[color:var(--landing-text-content)] text-[10px] leading-[14px] [&>_span]:block [&>_span]:whitespace-nowrap">
               <span
                 className="ats-demo-notes-focus absolute inset-[-1px] pointer-events-none rounded-[inherit]"
                 style={{ opacity: 0 }}
@@ -444,7 +456,7 @@ export function AtsProductVisual() {
         >
           <header className="ats-demo-sheet-header relative pt-3 px-4 pb-2.5">
             <p className="ats-demo-candidate text-[16px] font-medium leading-[20px] tracking-[-0.025em]">Maya Chen</p>
-            <p className="ats-demo-headline mt-0.5 text-muted-foreground text-[11px] leading-[14px]">
+            <p className="ats-demo-headline mt-0.5 text-[color:var(--landing-text-context)] text-[11px] leading-[14px]">
               Product Designer at Pillbox
             </p>
             <div
@@ -470,13 +482,17 @@ export function AtsProductVisual() {
               Activities
             </p>
             <div className="ats-demo-activity-group overflow-hidden border border-separator rounded-[14px]">
-              <div className="ats-demo-interview-activity grid grid-cols-[14px_minmax(0,1fr)_auto] items-center gap-2 p-3 @max-[360px]/ats-demo:grid-cols-[minmax(0,1fr)_auto] @max-[360px]/ats-demo:gap-[6px_8px]">
-                <CalendarPlusIcon className="ats-demo-activity-icon size-3.5 flex-none text-muted-foreground @max-[360px]/ats-demo:hidden" />
+              <div className="ats-demo-interview-activity grid grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2 p-3 @max-[360px]/ats-demo:grid-cols-[minmax(0,1fr)_auto] @max-[360px]/ats-demo:gap-[6px_8px]">
+                <LandingActivityIcon
+                  kind="schedule"
+                  compact
+                  className="ats-demo-activity-icon @max-[360px]/ats-demo:hidden"
+                />
                 <div className="ats-demo-activity-copy min-w-0 @max-[360px]/ats-demo:contents">
-                  <p className="ats-demo-activity-title @max-[360px]/ats-demo:col-start-1 @max-[360px]/ats-demo:row-start-1 text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
+                  <p className="ats-demo-activity-title @max-[360px]/ats-demo:col-start-1 @max-[360px]/ats-demo:row-start-1 text-[color:var(--landing-text-content)] text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
                     Portfolio review
                   </p>
-                  <div className="ats-demo-interview-meta flex flex-wrap items-center gap-[3px_10px] mt-0.5 text-muted-foreground text-[10px] leading-[14px] [&>_span]:inline-flex [&>_span]:items-center [&>_span]:gap-1 [&>_span]:whitespace-nowrap @max-[360px]/ats-demo:col-span-full @max-[360px]/ats-demo:row-start-2">
+                  <div className="ats-demo-interview-meta flex flex-wrap items-center gap-[3px_10px] mt-0.5 text-[color:var(--landing-text-meta)] text-[10px] leading-[14px] [&>_span]:inline-flex [&>_span]:items-center [&>_span]:gap-1 [&>_span]:whitespace-nowrap @max-[360px]/ats-demo:col-span-full @max-[360px]/ats-demo:row-start-2">
                     <span>45 min interview</span>
                   </div>
                 </div>
@@ -490,7 +506,7 @@ export function AtsProductVisual() {
                     </Button>
                   </div>
                   <span
-                    className="ats-demo-booking-provider inline-flex col-start-1 row-start-1 items-center gap-[5px] text-muted-foreground text-[10px] leading-[14px] whitespace-nowrap"
+                    className="ats-demo-booking-provider inline-flex col-start-1 row-start-1 items-center gap-[5px] text-[color:var(--landing-text-context)] text-[10px] leading-[14px] whitespace-nowrap"
                     style={{ opacity: reduceMotion ? 1 : 0 }}
                   >
                     <img src="/images/google-meet.webp" alt="" width="12" height="12" className="size-3 flex-none" />
@@ -499,12 +515,12 @@ export function AtsProductVisual() {
                 </div>
               </div>
               <div className="ats-demo-review-activity flex items-center gap-2 py-2.5 px-3 border-t-[1px] border-t-separator">
-                <ChatCenteredTextIcon className="ats-demo-activity-icon size-3.5 flex-none text-muted-foreground" />
+                <LandingActivityIcon kind="feedback" compact className="ats-demo-activity-icon" />
                 <div className="ats-demo-activity-copy min-w-0">
-                  <p className="ats-demo-activity-title text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
+                  <p className="ats-demo-activity-title text-[color:var(--landing-text-content)] text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
                     Interview feedback
                   </p>
-                  <p className="ats-demo-review-meta text-muted-foreground text-[10px] leading-[14px]">
+                  <p className="ats-demo-review-meta text-[color:var(--landing-text-meta)] text-[10px] leading-[14px]">
                     After the interview
                   </p>
                 </div>

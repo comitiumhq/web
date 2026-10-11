@@ -1,5 +1,8 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@comitium/ui/accordion';
+import { cn } from '@comitium/ui/cn';
 import { Link } from '@tanstack/react-router';
+import { ChevronDown } from 'lucide-react';
+import { LANDING_SECONDARY_ICON_CLASS_NAME } from './landing-layout';
 
 const FAQ_ITEMS = [
   {
@@ -53,7 +56,19 @@ export function LandingFaqSection() {
       <Accordion type="multiple" className="min-w-0 overflow-visible rounded-none border-0">
         {FAQ_ITEMS.map(({ id, question, answer }) => (
           <AccordionItem key={id} value={id} className="border-b border-separator data-open:bg-transparent">
-            <AccordionTrigger className="items-center gap-6 rounded-lg border-0 px-0 py-6 text-base leading-6 font-medium transition-colors hover:text-muted-foreground hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:text-lg sm:leading-7">
+            <AccordionTrigger
+              className="items-center gap-6 rounded-lg border-0 px-0 py-6 text-base leading-6 font-medium transition-colors hover:text-muted-foreground hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 [&_[data-slot=accordion-trigger-icon]]:text-[color:var(--landing-text-meta)] sm:text-lg sm:leading-7"
+              indicator={
+                <ChevronDown
+                  aria-hidden
+                  data-slot="accordion-trigger-icon"
+                  className={cn(
+                    'pointer-events-none transition-transform duration-200 group-aria-expanded/accordion-trigger:rotate-180 motion-reduce:transition-none',
+                    LANDING_SECONDARY_ICON_CLASS_NAME,
+                  )}
+                />
+              }
+            >
               {question}
             </AccordionTrigger>
             <AccordionContent className="h-auto px-0 pb-6 text-[0.9375rem] leading-7 text-muted-foreground sm:pr-10 sm:text-base">

@@ -1,5 +1,5 @@
 import { CaretRightIcon } from '@phosphor-icons/react';
-import { Fragment, memo } from 'react';
+import { Fragment, memo, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
 import { Tabs, TabsList, TabsTrigger } from './tabs';
@@ -15,18 +15,23 @@ interface PipelineStageTabsProps {
   value: string;
   onValueChange?: (value: string) => void;
   className?: string;
+  separator?: ReactNode;
 }
 
-export function PipelineStageTabs({ tabs, value, onValueChange, className }: PipelineStageTabsProps) {
+export function PipelineStageTabs({
+  tabs,
+  value,
+  onValueChange,
+  className,
+  separator = <CaretRightIcon aria-hidden weight="bold" className="mx-0.5 size-4 shrink-0 text-muted-foreground/50" />,
+}: PipelineStageTabsProps) {
   return (
     <Tabs value={value} onValueChange={onValueChange} className={cn('w-fit max-w-full', className)}>
       <div className="w-fit max-w-full max-sm:overflow-x-auto max-sm:scrollbar-hide">
         <TabsList className="min-w-max p-1 group-data-horizontal/tabs:h-auto">
           {tabs.map((tab, index) => (
             <Fragment key={tab.value}>
-              {index > 0 && (
-                <CaretRightIcon aria-hidden weight="bold" className="mx-0.5 size-4 shrink-0 text-muted-foreground/50" />
-              )}
+              {index > 0 && separator}
               <PipelineStageTabTrigger tab={tab} />
             </Fragment>
           ))}

@@ -1,12 +1,15 @@
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { cn } from '@comitium/ui/cn';
-import { CaretLeftIcon, LockSimpleIcon, UserIcon } from '@phosphor-icons/react';
+import { ChevronLeft, Lock, UserRound } from 'lucide-react';
 import type { AnimationSequence } from 'motion/react';
+import { IdentityProofScene } from './identity-proof-scene';
+import { LANDING_SECONDARY_ICON_CLASS_NAME } from './landing-layout';
 import { ProductDemoCursor } from './product-demo-cursor';
-import { useProductDemoPlayback } from './use-product-demo-playback';
+import { DEMO_RESET_TIMING, useProductDemoPlayback } from './use-product-demo-playback';
 
 const proofSignalLength = 0.36;
+const playbackSpeed = 0.75;
 
 const ciphertextClassName =
   'overflow-hidden font-mono text-[10px] font-medium leading-[15px] text-ellipsis whitespace-nowrap text-[#66717b] @max-[360px]/identity-demo:text-[9.5px]';
@@ -31,6 +34,11 @@ function createSequence(): AnimationSequence {
   const verificationDuration = 1.1;
   // Move the trailing rounded cap beyond the path endpoint before verifying.
   const transferDuration = travelDuration * (proofSignalLength + 1.03);
+  const resetAt = transferAt + transferDuration + verificationDuration + 0.28 + 1.8;
+  const resetFadeOut = DEMO_RESET_TIMING.fadeOut * playbackSpeed;
+  const resetSwapAt = resetAt + resetFadeOut;
+  const resetInAt = resetSwapAt + DEMO_RESET_TIMING.swap * playbackSpeed;
+  const resetLabels = '.identity-demo-action-labels, .identity-demo-identity-title';
 
   return [
     ['.identity-demo-scan', { opacity: 1 }, { at: 0.18, duration: 0.12 }],
@@ -96,50 +104,51 @@ function createSequence(): AnimationSequence {
       { '--identity-check-progress': 1 },
       { at: 'verification-complete', duration: 0.28 },
     ],
-    ['.identity-demo-scene', { '--identity-demo-reset-opacity': 1 }, { at: '+1.8', duration: 0.28 }],
-    'reset-covered',
-    ['.identity-demo-scan', { opacity: 0, '--identity-scan-progress': 0 }, { at: 'reset-covered', duration: 0.01 }],
+    // The document, avatar and card surfaces stay visible throughout the reset.
+    [resetLabels, { opacity: 0 }, { at: resetAt, duration: resetFadeOut }],
+    [
+      '.identity-demo-phone-indicator, .identity-demo-result-indicator',
+      { opacity: 0 },
+      { at: resetAt, duration: resetFadeOut },
+    ],
     [
       '.identity-demo-proof-action',
-      { scale: 1, '--identity-action-success': '0%' },
-      { at: 'reset-covered', duration: 0.01 },
+      { '--identity-action-success': '0%' },
+      {
+        at: resetAt,
+        duration: (DEMO_RESET_TIMING.fadeOut + DEMO_RESET_TIMING.swap + DEMO_RESET_TIMING.fadeIn) * playbackSpeed,
+      },
     ],
-    [
-      '.identity-demo-action-labels-track, .identity-demo-status-track',
-      { y: 0 },
-      { at: 'reset-covered', duration: 0.01 },
-    ],
+    ['.identity-demo-scan', { opacity: 0, '--identity-scan-progress': 0 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.identity-demo-proof-action', { scale: 1 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.identity-demo-action-labels-track, .identity-demo-status-track', { y: 0 }, { at: resetSwapAt, duration: 0.01 }],
     [
       '.identity-demo-status-indicator',
       { '--identity-ring-rotation': '0deg', '--identity-check-progress': 0 },
-      { at: 'reset-covered', duration: 0.01 },
+      { at: resetSwapAt, duration: 0.01 },
     ],
-    [
-      '.identity-demo-phone-indicator',
-      { opacity: 0, '--identity-ring-length': 0.74 },
-      { at: 'reset-covered', duration: 0.01 },
-    ],
+    ['.identity-demo-phone-indicator', { '--identity-ring-length': 0.74 }, { at: resetSwapAt, duration: 0.01 }],
     [
       '.identity-demo-result-indicator',
-      { opacity: 0, '--identity-ring-length': 1, '--identity-status-success': '0%' },
-      { at: 'reset-covered', duration: 0.01 },
+      { '--identity-ring-length': 1, '--identity-status-success': '0%' },
+      { at: resetSwapAt, duration: 0.01 },
     ],
     [
       '.identity-demo-cursor',
       { opacity: 0, scale: 1, '--identity-pointer-progress': 0 },
-      { at: 'reset-covered', duration: 0.01 },
+      { at: resetSwapAt, duration: 0.01 },
     ],
     [
       '.identity-demo-connection-signal',
       { opacity: 0, strokeDashoffset: proofSignalLength },
-      { at: 'reset-covered', duration: 0.01 },
+      { at: resetSwapAt, duration: 0.01 },
     ],
-    ['.identity-demo-scene', { '--identity-demo-reset-opacity': 0 }, { at: '+0.08', duration: 0.28 }],
+    [resetLabels, { opacity: 1 }, { at: resetInAt, duration: DEMO_RESET_TIMING.fadeIn * playbackSpeed }],
   ];
 }
 
 export function IdentityProductVisual() {
-  const { scope, isInView, reduceMotion } = useProductDemoPlayback(createSequence, { speed: 0.75 });
+  const { scope, isInView, reduceMotion } = useProductDemoPlayback(createSequence, { speed: playbackSpeed });
 
   return (
     <div
@@ -154,11 +163,12 @@ export function IdentityProductVisual() {
         className="identity-demo-scene relative w-full max-w-[430px] h-73 flex-none text-foreground"
         aria-hidden="true"
       >
+        <IdentityProofScene active={isInView} reduceMotion={reduceMotion} />
         <div className="identity-demo-phone absolute top-0 left-0 z-2 h-73 p-1 border border-[#d2dae6] rounded-[25px]">
           <div className="identity-demo-screen relative h-full pt-6 px-[11px] pb-4.5 overflow-hidden border border-surface-border rounded-[20px] bg-card @max-[360px]/identity-demo:px-2">
             <div className="identity-demo-speaker absolute top-2 left-[50%] w-8 h-1 rounded-[5px] bg-[#b7c2d2]" />
             <div className="identity-demo-phone-header flex items-center gap-[5px]">
-              <CaretLeftIcon className="size-3 flex-none text-muted-foreground" />
+              <ChevronLeft className={cn('size-3 flex-none', LANDING_SECONDARY_ICON_CLASS_NAME)} />
               <p className="identity-demo-phone-title text-[16px] font-medium leading-[22px] tracking-[-0.025em] whitespace-nowrap @max-[360px]/identity-demo:text-[14px]">
                 Identity check
               </p>
@@ -179,13 +189,12 @@ export function IdentityProductVisual() {
               </div>
               <div className="identity-demo-id-details flex items-center gap-2 mt-2 @max-[360px]/identity-demo:gap-[5px]">
                 <div className="identity-demo-id-avatar relative grid h-14 w-12 flex-none place-items-center rounded-[5px] bg-[#e5e9ec] text-[#89959f] @max-[360px]/identity-demo:h-10 @max-[360px]/identity-demo:w-8">
-                  <UserIcon weight="fill" className="size-8 @max-[360px]/identity-demo:size-6" />
+                  <UserRound fill="currentColor" strokeWidth={1} className="size-8 @max-[360px]/identity-demo:size-6" />
                   <span className="identity-demo-id-lock absolute right-[-4px] bottom-[-3px] grid size-4.5 place-items-center border-2 border-[#f5f6f7] rounded-full bg-[#dce2e6] text-[#56636e]">
-                    <LockSimpleIcon weight="bold" className="size-2.5" />
+                    <Lock className="size-2.5" />
                   </span>
                 </div>
                 <div className="identity-demo-id-data @container/identity-cipher min-w-0 flex-1">
-                  <span className="block text-[10px] leading-[14px] text-muted-foreground">Encrypted</span>
                   <p className={ciphertextClassName}>
                     Q7m4L9x2R
                     <span className="identity-demo-cipher-tail @max-[66px]/identity-cipher:hidden">
@@ -259,7 +268,7 @@ export function IdentityProductVisual() {
 
         <Card className="identity-demo-profile absolute top-[50%] right-0 z-2 h-33 items-center justify-center gap-0 p-3 border-0 rounded-[18px]">
           <div className="identity-demo-account-avatar relative grid size-13 flex-none place-items-center border border-surface-border rounded-full bg-muted text-[#89959f]">
-            <UserIcon weight="fill" className="identity-demo-account-avatar-icon size-7.5" />
+            <UserRound fill="currentColor" strokeWidth={1} className="identity-demo-account-avatar-icon size-7.5" />
             <VerificationIndicator
               className="identity-demo-result-indicator right-[-3px] bottom-[-3px] size-6 border-[3px] border-card rounded-full bg-card"
               verified={reduceMotion}

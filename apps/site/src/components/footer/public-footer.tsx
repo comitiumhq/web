@@ -1,6 +1,8 @@
+import { cn } from '@comitium/ui/cn';
 import { ComitiumLogo } from '@comitium/ui/comitium-logo';
 import { PageContainer } from '@comitium/ui/page-container';
 import { Link } from '@tanstack/react-router';
+import { LANDING_CONTAINER_CLASS_NAME } from '@/components/landing/landing-layout';
 
 const FOUNDER_X_URL = 'https://x.com/0xilroy';
 const FOUNDER_LINKEDIN_URL = 'https://www.linkedin.com/in/illia-yablonski/';
@@ -9,7 +11,7 @@ const GITHUB_URL = 'https://github.com/comitiumhq';
 export function PublicFooter() {
   return (
     <footer className="relative z-10 border-t border-separator bg-muted/20">
-      <PageContainer className="py-6 sm:py-8">
+      <PageContainer className={cn(LANDING_CONTAINER_CLASS_NAME, 'py-6 sm:py-8')}>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <Link to="/" className="inline-flex" aria-label="Comitium home">
             <ComitiumLogo />

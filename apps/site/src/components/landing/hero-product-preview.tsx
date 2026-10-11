@@ -1,4 +1,5 @@
 import { ActivityEventRow } from '@comitium/ui/activity-feed';
+import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { cn } from '@comitium/ui/cn';
 import { InitialsAvatar } from '@comitium/ui/initials-avatar';
@@ -13,18 +14,11 @@ import { PipelineStageTabs } from '@comitium/ui/pipeline-stage-tabs';
 import { StatusBadge, type StatusBadgeProps } from '@comitium/ui/status-badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@comitium/ui/tooltip';
-import {
-  CalendarBlankIcon,
-  CalendarCheckIcon,
-  CalendarPlusIcon,
-  ChatCenteredTextIcon,
-  ClipboardTextIcon,
-  ClockIcon,
-  EnvelopeSimpleIcon,
-  FileTextIcon,
-  type Icon as PhosphorIcon,
-} from '@phosphor-icons/react';
+import { BadgeCheck, Calendar, CalendarCheck, ChevronRight, Clock, FileCheck, Mail } from 'lucide-react';
 import { useState } from 'react';
+import { LandingActivityIcon } from './landing-activity-icon';
+import { LANDING_SECONDARY_ICON_CLASS_NAME, LANDING_TEXT_TONES_CLASS_NAME } from './landing-layout';
+import { LandingSurfaceLight } from './landing-surface-light';
 
 type FeedItem =
   | { kind: 'event'; actor: string | null; label: string; subline: string | null; time: string }
@@ -584,7 +578,7 @@ function PreviewKanbanCard({
         name={candidate.name}
         company={candidate.company}
         status={candidate.status}
-        footer={<span>In stage {candidate.inStage}</span>}
+        footer={<span className="text-[color:var(--landing-text-meta)]">In stage {candidate.inStage}</span>}
       />
     </button>
   );
@@ -597,9 +591,9 @@ function FeedEntry({ item, candidateName }: { item: FeedItem; candidateName: str
         <div className="flex items-center gap-2 px-4 py-2.5">
           <PreviewMemberAvatar name={item.author} />
           <span className="min-w-0 flex-1 truncate text-label-13 font-medium">{item.author}</span>
-          <span className="shrink-0 text-label-12 text-muted-foreground">{item.time}</span>
+          <span className="shrink-0 text-label-12 text-[color:var(--landing-text-meta)]">{item.time}</span>
         </div>
-        <p className="px-4 pb-4 text-copy-13 text-muted-foreground">{item.body}</p>
+        <p className="px-4 pb-4 text-copy-13 text-[color:var(--landing-text-content)]">{item.body}</p>
       </Card>
     );
   }
@@ -611,22 +605,22 @@ function FeedEntry({ item, candidateName }: { item: FeedItem; candidateName: str
           {item.from !== candidateName && <PreviewMemberAvatar name={item.from} />}
           <div className="min-w-0 flex-1">
             <p className="text-label-13 font-medium">{item.from}</p>
-            <p className="truncate text-label-12 text-muted-foreground">to: {item.to}</p>
+            <p className="truncate text-label-12 text-[color:var(--landing-text-meta)]">to: {item.to}</p>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            <EnvelopeSimpleIcon aria-hidden className="size-3.5 text-muted-foreground" />
-            <span className="text-label-12 text-muted-foreground">{item.time}</span>
+            <Mail aria-hidden className={cn('size-3.5', LANDING_SECONDARY_ICON_CLASS_NAME)} />
+            <span className="text-label-12 text-[color:var(--landing-text-meta)]">{item.time}</span>
           </div>
         </div>
         <div className="px-4 py-3">
           <p className="mb-1.5 text-label-13 font-medium">{item.subject}</p>
-          <p className="text-copy-13 text-muted-foreground">{item.body}</p>
+          <p className="text-copy-13 text-[color:var(--landing-text-content)]">{item.body}</p>
         </div>
       </Card>
     );
   }
 
-  const EventIcon = item.label === 'Application submitted' ? FileTextIcon : CalendarCheckIcon;
+  const EventIcon = item.label === 'Application submitted' ? FileCheck : CalendarCheck;
 
   return (
     <div className={cn(!item.actor && '[&>div]:items-center')}>
@@ -636,52 +630,60 @@ function FeedEntry({ item, candidateName }: { item: FeedItem; candidateName: str
             <PreviewMemberAvatar name={item.actor} className="mt-0.5" />
           ) : (
             <span className="flex size-6 shrink-0 items-center justify-center">
-              <EventIcon aria-hidden className="size-4 text-muted-foreground" />
+              <EventIcon aria-hidden className={cn('size-4', LANDING_SECONDARY_ICON_CLASS_NAME)} />
             </span>
           )
         }
         label={item.label}
         actor={item.actor}
         subline={item.subline}
-        time={<span className="shrink-0 text-label-12 text-muted-foreground">{item.time}</span>}
+        time={<span className="shrink-0 text-label-12 text-[color:var(--landing-text-meta)]">{item.time}</span>}
       />
     </div>
   );
 }
 
 function PreviewActivityRow({ activity }: { activity: PreviewActivity }) {
-  let Icon: PhosphorIcon;
   let title: string;
   let detail: string | null = null;
+  let progress: string | null = null;
 
   switch (activity.kind) {
     case 'schedule':
-      Icon = CalendarPlusIcon;
       title = activity.bookingLinkSent ? 'Awaiting booking' : 'Schedule interview';
       detail = `${activity.title} · ${activity.duration} min`;
       break;
     case 'email':
-      Icon = EnvelopeSimpleIcon;
       title = `Send: ${activity.template}`;
       break;
     case 'review':
-      Icon = ClipboardTextIcon;
       title = 'Application Review';
-      detail = `${activity.form} · ${activity.submitted}/${activity.required} reviewed`;
+      detail = activity.form;
+      progress = `${activity.submitted}/${activity.required} reviewed`;
       break;
     case 'feedback':
-      Icon = ChatCenteredTextIcon;
       title = 'Interview feedback';
-      detail = `${activity.title} · ${activity.submitted}/${activity.required} submitted`;
+      detail = activity.title;
+      progress = `${activity.submitted}/${activity.required} submitted`;
       break;
   }
 
   return (
     <div className="grid min-h-14 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 px-3 py-3">
-      <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+      <LandingActivityIcon kind={activity.kind} />
       <div className="min-w-0">
-        <p className="text-label-14 font-medium">{title}</p>
-        {detail && <p className="mt-0.5 text-copy-12 text-muted-foreground">{detail}</p>}
+        <p className="text-label-14 font-medium text-[color:var(--landing-text-content)]">{title}</p>
+        {detail && (
+          <p className="mt-0.5 text-copy-12 text-[color:var(--landing-text-meta)]">
+            {detail}
+            {progress && (
+              <>
+                {' · '}
+                <span className="text-[color:var(--landing-text-context)]">{progress}</span>
+              </>
+            )}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -703,11 +705,11 @@ function ScheduledInterview({
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-label-12 tabular-nums">
           <p className="flex items-center gap-1.5">
-            <CalendarBlankIcon aria-hidden className="size-3.5 text-muted-foreground" />
+            <Calendar aria-hidden className={cn('size-3.5', LANDING_SECONDARY_ICON_CLASS_NAME)} />
             {interview.month} {interview.day}
           </p>
           <p className="flex items-center gap-1.5">
-            <ClockIcon aria-hidden className="size-3.5 text-muted-foreground" />
+            <Clock aria-hidden className={cn('size-3.5', LANDING_SECONDARY_ICON_CLASS_NAME)} />
             {interview.time}
           </p>
         </div>
@@ -775,49 +777,45 @@ function CandidateActivities({ candidate }: { candidate: PreviewCandidate }) {
 function CandidatePanel({ candidate }: { candidate: PreviewCandidate }) {
   return (
     <div className="hero-candidate-panel hero-workspace relative min-w-0 overflow-hidden rounded-b-[1.25rem] bg-background min-[90rem]:mt-9 min-[90rem]:-ml-6 min-[90rem]:rounded-[1.25rem]">
-      <div className="px-5 pt-5 pb-2">
-        <div className="flex items-center gap-2">
-          <p className="min-w-0 truncate text-heading-20">{candidate.name}</p>
-          <TooltipProvider delayDuration={150}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Identity verified"
-                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-primary hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="min-w-0 truncate text-heading-20">{candidate.name}</p>
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Identity verified"
+                    className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-primary hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <BadgeCheck
+                      aria-hidden
+                      className="size-4.5 [&>path:first-child]:fill-current [&>path:last-child]:stroke-primary-foreground"
+                    />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  sideOffset={8}
+                  className="max-w-64 flex-col items-start gap-1 px-3 py-2 [&>span>svg]:h-1.5 [&>span>svg]:w-3 [&>span>svg]:translate-y-0 [&>span>svg]:rotate-0 [&>span>svg]:rounded-none [&>span>svg]:bg-transparent"
                 >
-                  <svg aria-hidden viewBox="0 0 24 24" className="size-4.5">
-                    <polygon
-                      fill="currentColor"
-                      points="12,0.5 14.59,2.34 17.75,2.04 19.07,4.93 21.96,6.25 21.66,9.41 23.5,12 21.66,14.59 21.96,17.75 19.07,19.07 17.75,21.96 14.59,21.66 12,23.5 9.41,21.66 6.25,21.96 4.93,19.07 2.04,17.75 2.34,14.59 0.5,12 2.34,9.41 2.04,6.25 4.93,4.93 6.25,2.04 9.41,2.34"
-                    />
-                    <path
-                      d="m7.5 12 3 3 6-6"
-                      fill="none"
-                      className="stroke-primary-foreground"
-                      strokeWidth="2.3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                align="center"
-                sideOffset={8}
-                className="max-w-64 flex-col items-start gap-1 px-3 py-2 [&>span>svg]:h-1.5 [&>span>svg]:w-3 [&>span>svg]:translate-y-0 [&>span>svg]:rotate-0 [&>span>svg]:rounded-none [&>span>svg]:bg-transparent"
-              >
-                <p className="font-medium">Identity verified</p>
-                <p className="leading-relaxed text-background/80">Verified using Zero Knowledge proofs</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+                  <p className="font-medium">Identity verified</p>
+                  <p className="leading-relaxed text-background/80">Verified using Zero Knowledge proofs</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <p className="mt-1 text-label-13 text-[color:var(--landing-text-context)]">{candidate.headline}</p>
+          <div className="mt-3">
+            <StatusBadge {...candidate.status} />
+          </div>
         </div>
-        <p className="mt-1 text-label-13 text-muted-foreground">{candidate.headline}</p>
-        <div className="mt-3">
-          <StatusBadge {...candidate.status} />
-        </div>
+        <Button type="button" variant="outline" className="px-4">
+          <Mail aria-hidden data-icon="inline-start" className={cn('size-4', LANDING_SECONDARY_ICON_CLASS_NAME)} />
+          Email
+        </Button>
       </div>
       <div className="hero-sheet-workspace grid min-w-0 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <Tabs value="activities" className="min-w-0 gap-0">
@@ -879,16 +877,12 @@ export function HeroProductPreview() {
   return (
     <section
       aria-label="Comitium product preview"
-      className="hero-product-stage pointer-events-auto relative isolate mx-auto mt-14 w-full overflow-hidden rounded-[clamp(1.75rem,3vw,2.75rem)] bg-[#eef3fb] px-[clamp(0.75rem,4vw,3rem)] pt-[clamp(2rem,5vw,4.5rem)] pb-[clamp(1.5rem,4vw,3.5rem)] text-left sm:mt-16"
+      className={cn(
+        'hero-product-stage pointer-events-auto relative isolate mx-auto mt-14 w-full overflow-hidden rounded-[clamp(1.75rem,3vw,2.75rem)] px-[clamp(0.75rem,4vw,3rem)] pt-[clamp(2rem,5vw,4.5rem)] pb-[clamp(1.5rem,4vw,3.5rem)] text-left sm:mt-16',
+        LANDING_TEXT_TONES_CLASS_NAME,
+      )}
     >
-      <div
-        className="hero-light pointer-events-none absolute inset-0 overflow-hidden [contain:paint]"
-        aria-hidden="true"
-      >
-        <div className="hero-light-blue absolute -inset-y-[18%] -inset-x-[12%]" />
-        <div className="hero-light-ice absolute -inset-y-[18%] -inset-x-[12%]" />
-        <div className="hero-light-surface absolute inset-0" />
-      </div>
+      <LandingSurfaceLight animated />
       <div className="hero-product-composition relative mx-auto min-w-0 max-w-5xl min-[90rem]:grid min-[90rem]:w-full min-[90rem]:max-w-[94.5rem] min-[90rem]:grid-cols-[minmax(0,0.52fr)_minmax(0,0.48fr)] min-[90rem]:items-start">
         <div className="hero-pipeline-panel hero-workspace min-w-0 overflow-hidden rounded-t-[1.25rem] bg-background min-[90rem]:rounded-[1.25rem]">
           <div className="min-w-0 p-3 min-[1440px]:p-5 min-[1440px]:pr-10">
@@ -896,6 +890,9 @@ export function HeroProductPreview() {
               <PipelineStageTabs
                 tabs={STAGE_TABS}
                 value="active"
+                separator={
+                  <ChevronRight aria-hidden className={cn('mx-0.5 size-4', LANDING_SECONDARY_ICON_CLASS_NAME)} />
+                }
                 className="hero-pipeline-tabs max-[390px]:[&_[data-slot=tabs-trigger]]:px-1 max-[390px]:[&_[data-slot=tabs-trigger]_span]:text-xs"
               />
             </div>

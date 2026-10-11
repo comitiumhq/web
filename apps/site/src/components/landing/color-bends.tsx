@@ -1,6 +1,7 @@
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { createFrameRateLimit } from './frame-rate-limit';
 
 type ColorBendsProps = {
   className?: string;
@@ -205,7 +206,7 @@ export default function ColorBends({
 
     const renderer = new THREE.WebGLRenderer({
       antialias: false,
-      powerPreference: 'high-performance',
+      powerPreference: 'low-power',
       alpha: true,
     });
     rendererRef.current = renderer;
@@ -238,7 +239,10 @@ export default function ColorBends({
       (window as Window).addEventListener('resize', handleResize);
     }
 
-    const loop = () => {
+    const shouldRender = createFrameRateLimit();
+    const loop = (time: number) => {
+      rafRef.current = requestAnimationFrame(loop);
+      if (!shouldRender(time)) return;
       timer.update();
 
       const dt = timer.getDelta();
@@ -259,13 +263,27 @@ export default function ColorBends({
       cur.lerp(tgt, amt);
       (material.uniforms.uPointer.value as THREE.Vector2).copy(cur);
       renderer.render(scene, camera);
-      rafRef.current = requestAnimationFrame(loop);
     };
 
-    rafRef.current = requestAnimationFrame(loop);
+    let inView = false;
+    const syncPlayback = () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      if (!inView || document.hidden) return;
+      timer.reset();
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    const viewObserver = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      syncPlayback();
+    });
+    viewObserver.observe(container);
+    document.addEventListener('visibilitychange', syncPlayback);
 
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      viewObserver.disconnect();
+      document.removeEventListener('visibilitychange', syncPlayback);
 
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
       else (window as Window).removeEventListener('resize', handleResize);

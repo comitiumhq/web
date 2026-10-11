@@ -2,7 +2,7 @@
 .scheduling-demo-frame {
   box-shadow:
     0 2px 6px -2px rgb(31 41 55 / 10%),
-    0 18px 36px -14px rgb(31 41 55 / 19%);
+    0 18px 36px -14px rgb(31 41 55 / 14%);
 }
 
 .scheduling-demo-day:not([data-available="true"]):not([data-selected="true"]) {

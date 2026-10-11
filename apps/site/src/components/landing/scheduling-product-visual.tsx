@@ -1,10 +1,12 @@
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
+import { cn } from '@comitium/ui/cn';
 import { StatusBadge } from '@comitium/ui/status-badge';
-import { ClockIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
+import { Clock, Globe } from 'lucide-react';
 import type { AnimationSequence } from 'motion/react';
+import { LANDING_SECONDARY_ICON_CLASS_NAME } from './landing-layout';
 import { ProductDemoCursor } from './product-demo-cursor';
-import { useProductDemoPlayback } from './use-product-demo-playback';
+import { DEMO_RESET_TIMING, useProductDemoPlayback } from './use-product-demo-playback';
 
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const DAYS = Array.from({ length: 35 }, (_, index) => {
@@ -14,6 +16,9 @@ const DAYS = Array.from({ length: 35 }, (_, index) => {
 const TIMES = ['10:30', '11:30', '14:00'];
 
 function createSequence(): AnimationSequence {
+  const resetAt = 7.3;
+  const resetSwapAt = resetAt + DEMO_RESET_TIMING.fadeOut;
+  const resetInAt = resetSwapAt + DEMO_RESET_TIMING.swap;
   return [
     ['.scheduling-demo-pointer', { opacity: 1, x: 0, y: 0 }, { at: 0.35, duration: 0.35 }],
     ['.scheduling-demo-pointer', { scale: 0.86 }, { at: 0.8, duration: 0.12 }],
@@ -29,13 +34,14 @@ function createSequence(): AnimationSequence {
     ['.scheduling-demo-confirmation', { opacity: 1, x: 0 }, { at: 2.75, duration: 0.35 }],
     ['.scheduling-demo-event', { opacity: 1, y: 0, scale: 1 }, { at: 3.05, duration: 0.45 }],
     ['.scheduling-demo-scheduled', { opacity: 1 }, { at: 3.05, duration: 0.45 }],
-    ['.scheduling-demo-confirmation', { opacity: 0, x: -8 }, { at: 7.3, duration: 0.3 }],
-    ['.scheduling-demo-event', { opacity: 0, y: 8, scale: 0.97 }, { at: 7.6, duration: 0.01 }],
-    ['.scheduling-demo-scheduled', { opacity: 0 }, { at: 7.6, duration: 0.01 }],
-    ['.scheduling-demo-slot-selected', { opacity: 0 }, { at: 7.6, duration: 0.01 }],
-    ['.scheduling-demo-confirm-button', { y: 4, scale: 1 }, { at: 7.6, duration: 0.01 }],
-    ['.scheduling-demo-pointer', { opacity: 0, x: 12, y: 18, scale: 1 }, { at: 7.6, duration: 0.01 }],
-    ['.scheduling-demo-availability', { opacity: 1, y: 0 }, { at: 7.65, duration: 0.35 }],
+    ['.scheduling-demo-confirmation', { opacity: 0 }, { at: resetAt, duration: DEMO_RESET_TIMING.fadeOut }],
+    ['.scheduling-demo-event', { opacity: 0, y: 8, scale: 0.97 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.scheduling-demo-scheduled', { opacity: 0 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.scheduling-demo-slot-selected', { opacity: 0 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.scheduling-demo-confirm-button', { y: 4, scale: 1 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.scheduling-demo-pointer', { opacity: 0, x: 12, y: 18, scale: 1 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.scheduling-demo-availability', { y: 0 }, { at: resetSwapAt, duration: 0.01 }],
+    ['.scheduling-demo-availability', { opacity: 1 }, { at: resetInAt, duration: DEMO_RESET_TIMING.fadeIn }],
   ];
 }
 
@@ -62,9 +68,9 @@ export function SchedulingProductVisual() {
             <p className="scheduling-demo-title text-[16px] font-medium leading-[22px] tracking-[-0.025em] @max-[350px]/scheduling-demo:text-[15px]">
               Portfolio review
             </p>
-            <div className="scheduling-demo-meta flex gap-3.5 mt-[5px] text-muted-foreground text-[11px] [&>_span]:inline-flex [&>_span]:items-center [&>_span]:gap-1.5">
+            <div className="scheduling-demo-meta flex gap-3.5 mt-[5px] text-[color:var(--landing-text-context)] text-[11px] [&>_span]:inline-flex [&>_span]:items-center [&>_span]:gap-1.5">
               <span>
-                <ClockIcon className="size-3.5 flex-none text-muted-foreground" />
+                <Clock className={cn('size-3.5 flex-none', LANDING_SECONDARY_ICON_CLASS_NAME)} />
                 45 min
               </span>
               <span>
@@ -83,7 +89,7 @@ export function SchedulingProductVisual() {
           <div className="scheduling-demo-picker grid grid-cols-[minmax(0,_1.5fr)_minmax(0,_1fr)] gap-[22px] mt-4 @max-[350px]/scheduling-demo:gap-3">
             <div className="scheduling-demo-calendar">
               <p className="scheduling-demo-month mb-2 text-[12px] font-medium leading-[16px]">October 2026</p>
-              <div className="scheduling-demo-weekdays grid grid-cols-7 gap-[3px] text-center text-[11px] tabular-nums mb-1 text-muted-foreground">
+              <div className="scheduling-demo-weekdays grid grid-cols-7 gap-[3px] text-center text-[11px] tabular-nums mb-1 text-[color:var(--landing-text-meta)]">
                 {WEEKDAYS.map((day, index) => (
                   <span key={`${day}-${index}`}>{day}</span>
                 ))}
@@ -126,11 +132,7 @@ export function SchedulingProductVisual() {
             </div>
           </div>
 
-          <footer className="scheduling-demo-picker-footer absolute right-5 bottom-4 left-5 flex min-h-7.5 items-center justify-between gap-2 @max-[350px]/scheduling-demo:right-4 @max-[350px]/scheduling-demo:left-4 @max-[350px]/scheduling-demo:[&_.scheduling-demo-timezone]:text-[10px]">
-            <span className="scheduling-demo-timezone inline-flex items-center gap-1.5 text-muted-foreground text-[11px]">
-              <GlobeSimpleIcon className="size-3.5 flex-none text-muted-foreground" />
-              Europe/London
-            </span>
+          <footer className="scheduling-demo-picker-footer absolute right-5 bottom-4 left-5 flex min-h-7.5 items-center justify-end gap-2 @max-[350px]/scheduling-demo:right-4 @max-[350px]/scheduling-demo:left-4">
             <Button
               asChild
               size="sm"
@@ -159,7 +161,7 @@ export function SchedulingProductVisual() {
               <StatusBadge variant="success" label="Scheduled" />
             </div>
           </header>
-          <div className="scheduling-demo-week-strip mt-3 ml-10 grid grid-cols-5 text-center text-[10px] leading-[14px] text-muted-foreground">
+          <div className="scheduling-demo-week-strip mt-3 ml-10 grid grid-cols-5 text-center text-[10px] leading-[14px] text-[color:var(--landing-text-meta)]">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day, index) => (
               <div
                 key={day}
@@ -177,7 +179,7 @@ export function SchedulingProductVisual() {
             {['10:00', '11:00', '12:00'].map((time, index) => (
               <div
                 key={time}
-                className="scheduling-demo-hour absolute left-0 grid w-full grid-cols-[30px_minmax(0,_1fr)] items-center gap-2.5 text-muted-foreground text-[10px] leading-[14px] tabular-nums"
+                className="scheduling-demo-hour absolute left-0 grid w-full grid-cols-[30px_minmax(0,_1fr)] items-center gap-2.5 text-[color:var(--landing-text-meta)] text-[10px] leading-[14px] tabular-nums"
                 style={{ top: index * 100 }}
               >
                 <span>{time}</span>
@@ -194,7 +196,7 @@ export function SchedulingProductVisual() {
               <p className="scheduling-demo-event-title text-[14px] font-medium leading-[18px] tracking-[-0.02em]">
                 Portfolio review
               </p>
-              <p className="scheduling-demo-event-time mt-[1px] text-muted-foreground text-[11px] leading-[14px] tabular-nums">
+              <p className="scheduling-demo-event-time mt-[1px] text-[color:var(--landing-text-content)] text-[11px] leading-[14px] tabular-nums">
                 10:30 – 11:15
               </p>
               <div className="scheduling-demo-people flex items-center justify-between gap-2 mt-1.5 text-[10px] leading-[18px] @max-[350px]/scheduling-demo:gap-[5px] @max-[350px]/scheduling-demo:text-[9px]">
@@ -202,7 +204,7 @@ export function SchedulingProductVisual() {
                   <img src="/images/hero-members/noah-patel.webp" alt="" width="18" height="18" loading="lazy" />
                   <span>Noah Patel</span>
                 </div>
-                <span className="scheduling-demo-meeting inline-flex items-center gap-1.5 text-muted-foreground text-[10px] whitespace-nowrap [&_.scheduling-demo-meet-logo]:size-3 @max-[350px]/scheduling-demo:gap-1 @max-[350px]/scheduling-demo:text-[9px]">
+                <span className="scheduling-demo-meeting inline-flex items-center gap-1.5 text-[color:var(--landing-text-context)] text-[10px] whitespace-nowrap [&_.scheduling-demo-meet-logo]:size-3 @max-[350px]/scheduling-demo:gap-1 @max-[350px]/scheduling-demo:text-[9px]">
                   <img
                     src="/images/google-meet.webp"
                     alt=""
@@ -215,12 +217,10 @@ export function SchedulingProductVisual() {
               </div>
             </div>
           </div>
-          <footer className="scheduling-demo-picker-footer absolute right-5 bottom-4 left-5 flex min-h-7.5 items-center justify-between gap-2 @max-[350px]/scheduling-demo:right-4 @max-[350px]/scheduling-demo:left-4 @max-[350px]/scheduling-demo:[&_.scheduling-demo-timezone]:text-[10px]">
-            <span className="scheduling-demo-timezone inline-flex items-center gap-1.5 text-muted-foreground text-[11px]">
-              <GlobeSimpleIcon className="size-3.5 flex-none text-muted-foreground" />
-              Europe/London
-            </span>
-          </footer>
+        </div>
+        <div className="scheduling-demo-timezone absolute bottom-4 left-5 inline-flex h-7.5 items-center gap-1.5 text-[color:var(--landing-text-meta)] text-[11px] pointer-events-none @max-[350px]/scheduling-demo:left-4 @max-[350px]/scheduling-demo:text-[10px]">
+          <Globe className={cn('size-3.5 flex-none', LANDING_SECONDARY_ICON_CLASS_NAME)} />
+          Europe/London
         </div>
       </Card>
     </div>

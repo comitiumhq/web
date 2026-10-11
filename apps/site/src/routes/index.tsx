@@ -1,8 +1,8 @@
 import { Button } from '@comitium/ui/button';
 import { cn } from '@comitium/ui/cn';
 import { PageContainer } from '@comitium/ui/page-container';
-import { ArrowRightIcon } from '@phosphor-icons/react';
 import { createFileRoute } from '@tanstack/react-router';
+import { ArrowRight } from 'lucide-react';
 import { HeroProductPreview } from '@/components/landing/hero-product-preview';
 import { LandingBackground } from '@/components/landing/landing-background';
 import { LandingFeaturesSection } from '@/components/landing/landing-features-section';
@@ -45,7 +45,7 @@ function LandingPage() {
             <Button asChild size="lg" className="mt-7 h-11 px-5">
               <a href={EARLY_ACCESS_URL}>
                 Request early access
-                <ArrowRightIcon data-icon="inline-end" />
+                <ArrowRight aria-hidden data-icon="inline-end" />
               </a>
             </Button>
           </div>

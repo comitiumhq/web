@@ -1,24 +1,8 @@
 /* Animation effects and coordinate calculations; layout lives in the component. */
-.ats-demo-scene {
-  --ats-demo-reset-opacity: 0;
-}
-
 .ats-demo-board {
   --ats-demo-column-step: calc(33.333% - 7.333px);
   --ats-demo-card-width: calc((100% - 52px) / 3 - 12px);
-  box-shadow: 0 12px 28px -14px rgb(31 41 55 / 17%);
-}
-
-.ats-demo-board::after,
-.ats-demo-sheet::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  border-radius: inherit;
-  background: var(--card);
-  opacity: var(--ats-demo-reset-opacity);
-  pointer-events: none;
+  box-shadow: 0 12px 28px -14px rgb(31 41 55 / 12%);
 }
 
 .ats-demo-mini-card {
@@ -45,7 +29,7 @@
 .ats-demo-feedback {
   box-shadow:
     0 2px 6px -2px rgb(31 41 55 / 10%),
-    0 18px 36px -14px rgb(31 41 55 / 19%);
+    0 18px 36px -14px rgb(31 41 55 / 14%);
 }
 
 .ats-demo-recommendation-selected {
@@ -67,9 +51,12 @@
   left: calc(40px + var(--ats-demo-drag-progress) * var(--ats-demo-column-step));
 }
 
-.ats-demo-sheet-pointer,
-.ats-demo-review-sheet-pointer {
+.ats-demo-sheet-pointer {
   left: calc(100% - 94px);
+}
+
+.ats-demo-review-sheet-pointer {
+  left: calc(100% - 50px);
 }
 
 .ats-demo-review-board-pointer,

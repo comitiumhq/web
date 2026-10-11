@@ -2,6 +2,8 @@ import { type AnimationSequence, useAnimate, useInView } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import { usePrefersReducedMotion } from './use-prefers-reduced-motion';
 
+export const DEMO_RESET_TIMING = { fadeOut: 0.3, swap: 0.05, fadeIn: 0.35 } as const;
+
 export function useProductDemoPlayback(
   createSequence: () => AnimationSequence,
   { speed = 1, repeatDelay = 0 }: { speed?: number; repeatDelay?: number } = {},
@@ -30,8 +32,13 @@ export function useProductDemoPlayback(
   }, [animate, createSequence, reduceMotion, repeatDelay, speed]);
 
   useEffect(() => {
-    if (isInView && !reduceMotion) playbackRef.current?.play();
-    else playbackRef.current?.pause();
+    const syncPlayback = () => {
+      if (isInView && !reduceMotion && !document.hidden) playbackRef.current?.play();
+      else playbackRef.current?.pause();
+    };
+    syncPlayback();
+    document.addEventListener('visibilitychange', syncPlayback);
+    return () => document.removeEventListener('visibilitychange', syncPlayback);
   }, [animate, createSequence, isInView, reduceMotion, repeatDelay, speed]);
 
   return { scope, isInView, reduceMotion };
