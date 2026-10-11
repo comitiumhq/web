@@ -38,9 +38,6 @@ const ArchivedApplicationRow = memo(function ArchivedApplicationRow({
         <button type="button" className="font-medium hover:underline" onClick={handleClick}>
           {candidateName}
         </button>
-        {app.duplicateAttemptCount > 0 && (
-          <p className="text-xs text-muted-foreground">{app.duplicateAttemptCount + 1} application attempts</p>
-        )}
       </TableCell>
       <TableCell className="text-muted-foreground">{APPLICATION_TERMINAL_OUTCOME_LABEL[app.terminalOutcome]}</TableCell>
       <TableCell className="text-muted-foreground">{app.archiveReasonLabel ?? '—'}</TableCell>

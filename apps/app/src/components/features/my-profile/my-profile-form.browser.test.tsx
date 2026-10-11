@@ -85,6 +85,7 @@ describe('MyProfileForm avatar upload', () => {
     if (!input) {
       throw new Error('Expected the profile photo input to render');
     }
+
     await expect.element(screen.getByRole('img', { name: 'Profile photo' })).toHaveAttribute('src', INITIAL_AVATAR);
     await userEvent.upload(input, file);
 
@@ -93,7 +94,9 @@ describe('MyProfileForm avatar upload', () => {
     (screen.getByRole('button', { name: 'Save photo' }).element() as HTMLButtonElement).click();
 
     expect(mocks.avatarMutate).toHaveBeenCalledOnce();
+
     const upload = mocks.avatarMutate.mock.calls[0]?.[0];
+
     expect(upload.file).toMatchObject({ name: file.name, size: file.size, type: file.type });
     expect(upload.crop).toEqual({
       x: expect.any(Number),

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { useAccount } from '../use-wallet';
 
@@ -23,7 +23,6 @@ const mocks = vi.hoisted(() => {
       {
         address,
         walletClientType: 'privy',
-        switchChain: vi.fn(),
       },
     ],
   };
@@ -31,9 +30,7 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('@privy-io/react-auth', () => ({
   usePrivy: () => ({ authenticated: true, ready: true, user: mocks.user }),
-  useSendTransaction: () => ({ sendTransaction: vi.fn() }),
   useSignMessage: () => ({ signMessage: vi.fn() }),
-  useSignTypedData: () => ({ signTypedData: vi.fn() }),
   useWallets: () => ({ ready: true, wallets: mocks.wallets }),
 }));
 
@@ -46,10 +43,6 @@ function AccountProbe() {
     </output>
   );
 }
-
-beforeEach(() => {
-  mocks.wallets[0]?.switchChain.mockReset();
-});
 
 describe('useAccount', () => {
   it('connects the canonical wallet when Privy omits the optional wallet index', async () => {

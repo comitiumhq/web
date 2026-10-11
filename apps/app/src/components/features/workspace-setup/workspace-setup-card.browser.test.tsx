@@ -75,12 +75,15 @@ describe('workspace setup card', () => {
     await expect
       .element(screen.getByRole('link', { name: 'Incomplete: Add recruiting privacy policy' }))
       .toBeInTheDocument();
+
     const disabledJob = screen.getByRole('button', { name: /Unavailable: Create your first job/ });
+
     await expect.element(disabledJob).toBeDisabled();
 
     const labels = Array.from(document.querySelectorAll('a, button')).map((element) =>
       element.getAttribute('aria-label'),
     );
+
     expect(labels.indexOf('Complete: Add a department')).toBeLessThan(
       labels.indexOf('Incomplete: Add recruiting privacy policy'),
     );

@@ -26,6 +26,7 @@ export function PublicScheduleConfirmation({
     start: scheduledAt.toISOString(),
     end: addMinutes(scheduledAt, state.interview.durationMinutes).toISOString(),
   };
+
   return (
     <PublicScheduleFrame size="compact">
       <Card className="w-full gap-0 py-0">

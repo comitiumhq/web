@@ -52,7 +52,9 @@ describe('useDecryptApplication', () => {
   it('ignores decrypted answers from a previous submission after the identity changes', async () => {
     const first = deferred<Record<string, unknown>>();
     const second = deferred<Record<string, unknown>>();
+
     mocks.decryptAnswerBuckets.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+
     const hook = await renderHook(
       (props?: { submissionId: string | null }) =>
         useDecryptApplication('org-1', props?.submissionId ?? null, 'form-1', answers, wrappedVaultKey),
@@ -75,6 +77,7 @@ describe('useDecryptApplication', () => {
 
   it('keeps a failed decrypt retryable and clears the error after success', async () => {
     mocks.decryptAnswerBuckets.mockRejectedValueOnce(new Error('bad key')).mockResolvedValueOnce({ answer: 'ok' });
+
     const hook = await renderHook(() =>
       useDecryptApplication('org-1', 'submission-1', 'form-1', answers, wrappedVaultKey),
     );

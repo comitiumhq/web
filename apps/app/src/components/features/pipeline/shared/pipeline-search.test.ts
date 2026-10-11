@@ -57,10 +57,8 @@ describe('pipeline search', () => {
 function createJob(overrides: Partial<PipelineJob> = {}): PipelineJob {
   return {
     id: 'job-1',
-    onchainCommitmentId: 1,
     status: 'open',
     lifecycle: {
-      commitmentFinalizationPending: false,
       activeApplications: 1,
       allowedActions: [],
     },
@@ -78,11 +76,8 @@ function createCandidate(overrides: Partial<PipelineCandidate> = {}): PipelineCa
     candidateId: 'candidate-1',
     candidateProfile: null,
     jobId: 'job-1',
-    onchainCommitmentId: 1,
     jobTitle: 'Protocol Engineer',
     appliedAt: '2026-08-20T12:00:00.000Z',
-    responseDeadline: null,
-    isResponded: false,
     terminalOutcome: null,
     terminalOutcomeAt: null,
     currentStageId: 'stage-1',
@@ -107,7 +102,6 @@ function createCandidate(overrides: Partial<PipelineCandidate> = {}): PipelineCa
       currentUserHasSubmittedReview: false,
       needsDecision: false,
     },
-    duplicateAttemptCount: 0,
     ...overrides,
   };
 }

@@ -50,6 +50,7 @@ export function JobsTable({ orgId, rows, loading, emptyState }: JobsTableProps) 
           params: { orgId, jobId: item.id },
           search: { tab: 'active' },
         });
+
         return;
       }
 

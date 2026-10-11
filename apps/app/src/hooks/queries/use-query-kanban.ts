@@ -45,6 +45,7 @@ export function useQueryKanban(jobId: string | null, filters: KanbanFilters = DE
       }
 
       const cursor = stage.nextCursor;
+
       loadingStageIdsRef.current.add(stageId);
       setLoadingStageIds((ids) => [...ids, stageId]);
 
@@ -54,6 +55,7 @@ export function useQueryKanban(jobId: string | null, filters: KanbanFilters = DE
           queryFn: () => getKanban(jobId, { ...baseFilters, stage: stageId, cursor }),
           staleTime: STALE_TIME_SHORT,
         });
+
         queryClient.setQueryData<KanbanResponse>(queryKey, (latest) =>
           latest ? mergeKanbanStagePage(latest, page, stageId) : latest,
         );

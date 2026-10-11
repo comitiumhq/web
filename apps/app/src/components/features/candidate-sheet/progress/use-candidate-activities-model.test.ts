@@ -155,21 +155,21 @@ describe('getPendingInterviewFeedback', () => {
 });
 
 describe('shouldShowCurrentWork', () => {
-  it('hides stale tasks for terminal or settling considerations', () => {
+  it('hides stale tasks for terminal considerations and pending identity processing', () => {
     const active: CandidateSheetActionState = { status: 'no_action', blockedReason: null, nextAction: null };
     const terminal: CandidateSheetActionState = {
       status: 'complete',
       blockedReason: 'terminal_consideration',
       nextAction: null,
     };
-    const settlingCommitment: CandidateSheetActionState = {
+    const identityProcessing: CandidateSheetActionState = {
       status: 'read_only',
-      blockedReason: 'commitment_settling',
+      blockedReason: 'identity_processing',
       nextAction: null,
     };
 
     expect(shouldShowCurrentWork(active)).toBe(true);
     expect(shouldShowCurrentWork(terminal)).toBe(false);
-    expect(shouldShowCurrentWork(settlingCommitment)).toBe(false);
+    expect(shouldShowCurrentWork(identityProcessing)).toBe(false);
   });
 });

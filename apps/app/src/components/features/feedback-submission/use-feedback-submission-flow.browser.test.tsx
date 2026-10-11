@@ -180,7 +180,9 @@ describe('useFeedbackSubmissionFlow', () => {
     const first = deferred<{ data: { formSnapshot: FormDefinitionSnapshot } }>();
     const second = deferred<{ data: { formSnapshot: FormDefinitionSnapshot } }>();
     const secondFormId = '99999999-9999-4999-8999-999999999999';
+
     mocks.resolveForm.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+
     const hook = await renderFlow(activitySource());
 
     await vi.waitFor(() => expect(mocks.resolveForm).toHaveBeenCalledTimes(1));

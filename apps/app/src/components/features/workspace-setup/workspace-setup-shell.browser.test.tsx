@@ -80,7 +80,9 @@ describe('workspace setup shell', () => {
     await expect.element(screen.getByText('Organization work')).toBeInTheDocument();
     await expect.element(screen.getByRole('complementary', { name: 'Getting started' })).toBeInTheDocument();
     await expect.element(screen.getByText('Getting started card · profile complete · workspace')).toBeInTheDocument();
+
     const setupAside = document.querySelector('aside[aria-label="Getting started"]');
+
     expect(setupAside?.classList.contains('fixed')).toBe(true);
     expect(setupAside?.previousElementSibling?.classList.contains('pb-20')).toBe(false);
     expect(mocks.enabled).toHaveBeenCalledWith(true);

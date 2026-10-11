@@ -207,10 +207,12 @@ describe('ZK Identity account integration', () => {
 
   it('shows a terminal message when the identity is linked to another account', async () => {
     const api = createApi();
+
     vi.mocked(api.completeZkIdentityAttempt).mockResolvedValue({
       status: 'failed',
       failureCode: 'identity_already_linked',
     });
+
     const screen = await renderSection(api);
 
     await startVerification(screen);

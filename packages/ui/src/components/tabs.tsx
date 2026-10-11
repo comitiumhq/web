@@ -69,6 +69,7 @@ function TabsList({
 
       if (!activeTrigger) {
         indicator.style.opacity = '0';
+
         return;
       }
 
@@ -92,11 +93,13 @@ function TabsList({
     };
 
     const resizeObserver = new ResizeObserver(updateIndicator);
+
     const observeTriggers = () => {
       for (const trigger of list.querySelectorAll<HTMLElement>('[data-slot="tabs-trigger"]')) {
         resizeObserver.observe(trigger);
       }
     };
+
     const mutationObserver = new MutationObserver(() => {
       observeTriggers();
       updateIndicator();
@@ -171,6 +174,7 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
 function setRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
   if (typeof ref === 'function') {
     ref(value);
+
     return;
   }
 

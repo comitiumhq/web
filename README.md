@@ -21,7 +21,7 @@
   ·
   <a href="packages/crypto/README.md">Encryption</a>
   ·
-  <a href="https://github.com/comitiumhq/contracts">Contracts</a>
+
 </p>
 
 <picture>
@@ -76,7 +76,7 @@ This repository contains Comitium's open-source web client.
 | `apps/site` | Public website and job discovery |
 | `apps/my` | Candidate workspace, application flow, and self-scheduling |
 | `apps/app` | ATS and organization workspace |
-| `packages` | Shared UI, auth, jobs, chain, schemas, and cryptography |
+| `packages` | Shared UI, auth, jobs, schemas, and cryptography |
 
 ## Development
 

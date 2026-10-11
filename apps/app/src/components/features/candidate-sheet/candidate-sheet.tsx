@@ -4,7 +4,6 @@ import { useCallback } from 'react';
 import { FeedbackSubmissionSheet } from '@/components/features/feedback-submission';
 import { DirectBookingLinkDialog } from '@/components/features/interviews/direct-booking-link-dialog';
 import { ScheduleInterviewDialog } from '@/components/features/interviews/schedule-dialog';
-import { useQueryDuplicateApplicationAttempts } from '@/hooks/queries/use-query-duplicate-application-attempts';
 import { useQueryOtherApplications } from '@/hooks/queries/use-query-other-applications';
 import type { InterviewStage } from '@/lib/schemas/pipeline';
 
@@ -26,7 +25,6 @@ import { useCandidateSheetWorkflows } from './workflows/use-candidate-sheet-work
 interface CandidateSheetProps {
   applicationId: string | null;
   jobId: string;
-  onchainCommitmentId: number | null;
   orgId: string;
   stages?: InterviewStage[];
   jobTitle: string | null;
@@ -40,7 +38,6 @@ interface CandidateSheetProps {
 export function CandidateSheet({
   applicationId,
   jobId,
-  onchainCommitmentId,
   orgId,
   stages,
   jobTitle,
@@ -105,7 +102,6 @@ export function CandidateSheet({
     open,
   });
   const effectiveJobTitle = application?.considerationContext.job.title ?? jobTitle;
-  const effectiveOnchainCommitmentId = application && effectiveJobId !== jobId ? null : onchainCommitmentId;
 
   const {
     archiveSheetOpen,
@@ -163,80 +159,15 @@ export function CandidateSheet({
     isFetchNextPageError: isFetchNextOtherApplicationsPageError,
   } = useQueryOtherApplications(application?.id ?? applicationId);
 
-  const {
-    attempts: duplicateAttempts,
-    total: duplicateAttemptsTotal,
-    isLoading: isLoadingDuplicateAttempts,
-    isError: isDuplicateAttemptsError,
-    isFetching: isFetchingDuplicateAttempts,
-    refetch: refetchDuplicateAttempts,
-    fetchNextPage: fetchNextDuplicateAttempts,
-    hasNextPage: hasNextDuplicateAttemptsPage,
-    isFetchingNextPage: isFetchingNextDuplicateAttemptsPage,
-    isFetchNextPageError: isFetchNextDuplicateAttemptsPageError,
-  } = useQueryDuplicateApplicationAttempts(
-    application?.id ?? applicationId,
-    Boolean(application?.duplicateAttemptCount),
-  );
-
   const { considerations, handleApplicationClick } = useConsiderationSelection({
     application,
     otherApplications,
     jobId: effectiveJobId,
-    onchainCommitmentId: effectiveOnchainCommitmentId,
     jobTitle: effectiveJobTitle,
     currentStageName: restoreStageName,
     onApplicationSwitch,
     onNavigate,
   });
-
-  const handleDuplicateAttemptClick = useCallback(
-    (duplicateApplicationId: string) => {
-      const attempt = duplicateAttempts.find((item) => item.id === duplicateApplicationId);
-
-      if (!attempt) {
-        return;
-      }
-
-      if (onApplicationSwitch) {
-        const stageName = resolvedStages?.find((stage) => stage.id === attempt.currentStageId)?.name ?? null;
-
-        onApplicationSwitch({
-          id: attempt.id,
-          jobId: effectiveJobId,
-          onchainCommitmentId: effectiveOnchainCommitmentId,
-          jobTitle: effectiveJobTitle,
-          appliedAt: attempt.appliedAt,
-          currentStageId: attempt.currentStageId,
-          terminalOutcome: attempt.terminalOutcome,
-          terminalOutcomeAt: attempt.terminalOutcomeAt,
-          currentStageName: stageName,
-          isResponded: attempt.isResponded,
-          archivedAt: null,
-          duplicateAttemptCount: 0,
-        });
-
-        return;
-      }
-
-      onNavigate?.(duplicateApplicationId);
-    },
-    [
-      duplicateAttempts,
-      effectiveJobId,
-      effectiveOnchainCommitmentId,
-      effectiveJobTitle,
-      onApplicationSwitch,
-      onNavigate,
-      resolvedStages,
-    ],
-  );
-
-  const handleOpenPrimaryApplication = useCallback(() => {
-    if (application?.duplicateOfApplicationId) {
-      handleApplicationClick(application.duplicateOfApplicationId);
-    }
-  }, [application?.duplicateOfApplicationId, handleApplicationClick]);
 
   const handleRetryEmails = useCallback(() => refetchEmails(), [refetchEmails]);
 
@@ -248,7 +179,6 @@ export function CandidateSheet({
 
   const handleLoadMoreEmails = useCallback(() => fetchNextEmailsPage(), [fetchNextEmailsPage]);
   const handleRetryOtherApplications = useCallback(() => refetchOtherApplications(), [refetchOtherApplications]);
-  const handleRetryDuplicateAttempts = useCallback(() => refetchDuplicateAttempts(), [refetchDuplicateAttempts]);
 
   if (!application) {
     if (isLoadingApplication && open) {
@@ -305,7 +235,6 @@ export function CandidateSheet({
   };
 
   const totalConsiderations = getMergedConsiderationTotal(otherApplications, otherApplicationsTotal, application.id);
-  const totalDuplicateAttempts = duplicateAttemptsTotal || application.duplicateAttemptCount;
 
   const considerationRail = (
     <div className="min-h-0 min-w-0">
@@ -323,17 +252,6 @@ export function CandidateSheet({
         onLoadMore={fetchNextOtherApplications}
         onRetry={handleRetryOtherApplications}
         onApplicationClick={handleApplicationClick}
-        duplicateAttempts={duplicateAttempts}
-        totalDuplicateAttempts={totalDuplicateAttempts}
-        isInitialDuplicateAttemptsLoading={isLoadingDuplicateAttempts}
-        isInitialDuplicateAttemptsError={isDuplicateAttemptsError && duplicateAttempts.length === 0}
-        isRetryingDuplicateAttempts={isFetchingDuplicateAttempts}
-        hasNextDuplicateAttemptsPage={Boolean(hasNextDuplicateAttemptsPage)}
-        isFetchingNextDuplicateAttemptsPage={isFetchingNextDuplicateAttemptsPage}
-        isFetchNextDuplicateAttemptsPageError={isFetchNextDuplicateAttemptsPageError}
-        onLoadMoreDuplicateAttempts={fetchNextDuplicateAttempts}
-        onRetryDuplicateAttempts={handleRetryDuplicateAttempts}
-        onDuplicateAttemptClick={handleDuplicateAttemptClick}
       />
     </div>
   );
@@ -342,26 +260,15 @@ export function CandidateSheet({
     <ConsiderationSelector
       currentApplicationId={application.id}
       considerations={considerations}
-      duplicateAttempts={duplicateAttempts}
-      totalDuplicateAttempts={totalDuplicateAttempts}
       isInitialLoading={isLoadingOtherApplications}
       isInitialError={isOtherApplicationsError && otherApplications.length === 0}
       isRetrying={isFetchingOtherApplications}
       hasNextConsiderationsPage={hasNextOtherApplicationsPage}
       isFetchingNextConsiderationsPage={isFetchingNextOtherApplicationsPage}
       isFetchNextConsiderationsPageError={isFetchNextOtherApplicationsPageError}
-      hasNextDuplicateAttemptsPage={Boolean(hasNextDuplicateAttemptsPage)}
-      isFetchingNextDuplicateAttemptsPage={isFetchingNextDuplicateAttemptsPage}
-      isFetchNextDuplicateAttemptsPageError={isFetchNextDuplicateAttemptsPageError}
-      isInitialDuplicateAttemptsLoading={isLoadingDuplicateAttempts}
-      isInitialDuplicateAttemptsError={isDuplicateAttemptsError && duplicateAttempts.length === 0}
-      isRetryingDuplicateAttempts={isFetchingDuplicateAttempts}
       onConsiderationChange={handleApplicationClick}
-      onDuplicateAttemptChange={handleDuplicateAttemptClick}
       onLoadMoreConsiderations={fetchNextOtherApplications}
       onRetryConsiderations={handleRetryOtherApplications}
-      onLoadMoreDuplicateAttempts={fetchNextDuplicateAttempts}
-      onRetryDuplicateAttempts={handleRetryDuplicateAttempts}
     />
   );
 
@@ -456,8 +363,6 @@ export function CandidateSheet({
           candidateId={application.candidateId}
           displayName={applicationDisplayName}
           subtitle={candidateSubtitle}
-          isResponded={application.isResponded}
-          responseDeadline={application.responseDeadline ?? null}
           appliedAt={application.appliedAt ?? null}
           currentStageId={application.currentStageId}
           currentStageEnteredAt={application.currentStageEnteredAt}
@@ -474,8 +379,6 @@ export function CandidateSheet({
           capabilities={capabilities}
           tagIds={application.tagIds}
           reviewStatus={application.reviewStatus}
-          duplicateOfApplicationId={application.duplicateOfApplicationId}
-          onOpenPrimaryApplication={handleOpenPrimaryApplication}
         />
 
         <CandidateSheetWorkspace
@@ -498,7 +401,6 @@ export function CandidateSheet({
         candidateEmail={decryptedEmail}
         candidateFirstName={candidateFirstName}
         jobTitle={effectiveJobTitle}
-        isResponded={application.isResponded}
         canSendEmail={capabilities.consideration.canSendEmail}
       />
 

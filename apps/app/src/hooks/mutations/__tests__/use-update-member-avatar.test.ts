@@ -61,7 +61,9 @@ describe('member avatar cache refresh', () => {
     options.onSuccess({ avatarUrl: AVATAR_URL });
 
     expect(mocks.setQueryData).toHaveBeenCalledWith(['org-permissions', ORG_ID], expect.any(Function));
+
     const updateMe = mocks.setQueryData.mock.calls[0]?.[1] as (current: OrgMeResponse) => OrgMeResponse;
+
     expect(updateMe({ avatarUrl: null } as OrgMeResponse).avatarUrl).toBe(AVATAR_URL);
     expect(mocks.invalidateQueries.mock.calls.map(([request]) => request.queryKey)).toEqual([
       ['org', ORG_ID, 'team'],

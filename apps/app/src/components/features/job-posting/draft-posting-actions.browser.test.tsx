@@ -29,7 +29,6 @@ vi.mock('@/hooks/queries/use-query-job-summary', () => ({
   useQueryJobSummary: () => ({
     data: {
       lifecycle: {
-        commitmentFinalizationPending: false,
         activeApplications: 0,
         allowedActions: ['open_job', 'publish_posting'],
       },
@@ -71,6 +70,7 @@ describe('DraftPostingActions', () => {
 
   it('does not publish when required fields are missing', async () => {
     mocks.context.validatePublish.mockReturnValue(false);
+
     const screen = await render(<DraftPostingActions jobId="job-1" />);
 
     await screen.getByRole('button', { name: 'Publish' }).click();

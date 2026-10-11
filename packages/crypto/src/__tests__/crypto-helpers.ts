@@ -24,6 +24,7 @@ export const TEST_SIGNATURE = `0x${'11'.repeat(32)}${'22'.repeat(32)}1b` as Hex;
 
 export function randomDek(): Uint8Array {
   const dek = new Uint8Array(32);
+
   crypto.getRandomValues(dek);
 
   return dek;

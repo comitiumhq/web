@@ -112,6 +112,7 @@ export function useDraftForm(orgId: string, jobId: string) {
 
     if (skills.length > MAX_POSTING_SKILLS) {
       toast.error(POSTING_SKILL_LIMIT_MESSAGE);
+
       return null;
     }
 

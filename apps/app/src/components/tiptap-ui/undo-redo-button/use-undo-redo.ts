@@ -55,6 +55,7 @@ export const historyIcons = {
  */
 export function canExecuteUndoRedoAction(editor: Editor | null, action: UndoRedoAction): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (isNodeTypeSelected(editor, ['image'])) return false;
 
   return action === 'undo' ? editor.can().undo() : editor.can().redo();
@@ -65,9 +66,11 @@ export function canExecuteUndoRedoAction(editor: Editor | null, action: UndoRedo
  */
 export function executeUndoRedoAction(editor: Editor | null, action: UndoRedoAction): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!canExecuteUndoRedoAction(editor, action)) return false;
 
   const chain = editor.chain().focus();
+
   return action === 'undo' ? chain.undo().run() : chain.redo().run();
 }
 
@@ -159,9 +162,11 @@ export function useUndoRedo(config: UseUndoRedoConfig) {
     if (!editor) return false;
 
     const success = executeUndoRedoAction(editor, action);
+
     if (success) {
       onExecuted?.();
     }
+
     return success;
   }, [editor, action, onExecuted]);
 

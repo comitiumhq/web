@@ -32,6 +32,7 @@ export function CriteriaTab({ criteria, onChangeCriteria, readOnly = false }: Cr
     }
 
     const newId = generateId();
+
     publish([...criteria, { id: newId, title: '', prompt: '' }]);
     setExpandedId(newId);
   }, [criteria, publish]);

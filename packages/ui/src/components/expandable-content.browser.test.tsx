@@ -14,6 +14,7 @@ describe('ExpandableContent', () => {
     );
 
     const showMore = screen.getByRole('button', { name: 'Show more' });
+
     await expect.element(showMore).toHaveAttribute('aria-expanded', 'false');
 
     await showMore.click();

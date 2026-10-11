@@ -73,7 +73,9 @@ describe('useDecryptEmails', () => {
   it('ignores a previous application decrypt that finishes after navigation', async () => {
     const first = deferred<DecryptedEmailContent>();
     const second = deferred<DecryptedEmailContent>();
+
     mocks.decryptAsOrg.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+
     const hook = await renderHook(
       (props?: { applicationId: string; emails: EmailResponse[] }) => {
         if (!props) {
@@ -109,6 +111,7 @@ describe('useDecryptEmails', () => {
 
   it('does not loop after a failure and retries only when requested', async () => {
     mocks.decryptAsOrg.mockRejectedValueOnce(new Error('bad key')).mockResolvedValueOnce(decryptedEmail('Recovered'));
+
     const hook = await renderHook(() =>
       useDecryptEmails('org-1', 'application-1', [encryptedEmail('email-1', 'ciphertext')], true, wrappedVaultKey),
     );
@@ -128,6 +131,7 @@ describe('useDecryptEmails', () => {
 
   it('uses the organization vault path with application-bound email context', async () => {
     mocks.decryptAsOrg.mockResolvedValue(decryptedEmail('Organization'));
+
     const email = encryptedEmail('email-1', 'ciphertext');
     const hook = await renderHook(() => useDecryptEmails('org-1', 'application-1', [email], true, wrappedVaultKey));
 
@@ -144,6 +148,7 @@ describe('useDecryptEmails', () => {
 
   it('uses the applicant path without requiring an organization vault key', async () => {
     mocks.decryptAsApplicant.mockResolvedValue(decryptedEmail('Applicant'));
+
     const email = encryptedEmail('email-1', 'ciphertext');
     const hook = await renderHook(() => useDecryptEmails('org-1', 'application-1', [email], false));
 

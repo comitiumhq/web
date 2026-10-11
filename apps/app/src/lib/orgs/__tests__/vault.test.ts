@@ -1,7 +1,7 @@
 import { publicEncryptionKeySchema } from '@comitium/crypto/schemas';
 import { generateVaultKeyPair, wrapVaultKey } from '@comitium/crypto/vault-key';
 import { shouldRetryQuery } from '@comitium/schemas/api-query-policy';
-import { ContractError } from '@comitium/schemas/product-errors';
+import { VaultError } from '@comitium/schemas/product-errors';
 import { bytesToHex } from '@noble/hashes/utils.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/lib/api/client';
@@ -46,6 +46,7 @@ describe('orgs/vault', () => {
           headers: { 'Content-Type': 'application/json' },
         }),
       );
+
       vi.stubGlobal('fetch', fetchMock);
 
       const result = await saveVaultKeys('org-id', TEST_KEYS.alice.publicKey, {} as never);
@@ -61,6 +62,7 @@ describe('orgs/vault', () => {
           headers: { 'Content-Type': 'application/json' },
         }),
       );
+
       vi.stubGlobal('fetch', fetchMock);
 
       const result = await saveVaultKeys('org-id', TEST_KEYS.alice.publicKey, {} as never);
@@ -70,7 +72,7 @@ describe('orgs/vault', () => {
     });
 
     it('does not retry a wrapped permanent API error', () => {
-      const error = new ContractError('save_vault', new ApiError(409, 'Vault already exists'));
+      const error = new VaultError('save_vault', new ApiError(409, 'Vault already exists'));
 
       expect(shouldRetryQuery(0, error)).toBe(false);
     });

@@ -10,8 +10,6 @@ function application(id: string): KanbanApplication {
     candidateId: null,
     candidateProfile: null,
     appliedAt: '2026-07-11T12:00:00.000Z',
-    responseDeadline: null,
-    isResponded: true,
     terminalOutcome: null,
     terminalOutcomeAt: null,
     currentStageId: 'stage-1',
@@ -29,7 +27,6 @@ function application(id: string): KanbanApplication {
       currentUserHasSubmittedReview: false,
       needsDecision: false,
     },
-    duplicateAttemptCount: 0,
   };
 }
 

@@ -109,6 +109,7 @@ describe('file-encryption (PDF blob pack/unpack)', () => {
     it('originalSize in metadata matches decrypted result length', async () => {
       const vault = generateVaultKeyPair();
       const data = new Uint8Array(777);
+
       crypto.getRandomValues(data);
 
       const blob = await encryptFileWithVaultKey(vault.publicKey, 1, data, resumeContext);

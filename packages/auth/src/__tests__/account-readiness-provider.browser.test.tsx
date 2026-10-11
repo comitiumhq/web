@@ -116,7 +116,9 @@ describe('AccountReadinessProvider', () => {
 
   it('reports wallet provisioning failure and refreshes Privy state once', async () => {
     const failure = new Error('Wallet provisioning failed');
+
     mocks.createWallet.mockRejectedValue(failure);
+
     const onError = vi.fn();
     const getSession = vi.fn().mockResolvedValue(user);
 

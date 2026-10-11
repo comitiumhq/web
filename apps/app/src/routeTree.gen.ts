@@ -33,7 +33,6 @@ import { Route as OrgOrgIdOrganizationJobTemplatesRouteImport } from './routes/o
 import { Route as OrgOrgIdOrganizationInterviewsRouteImport } from './routes/org/$orgId/organization/interviews'
 import { Route as OrgOrgIdOrganizationInterviewReasonsRouteImport } from './routes/org/$orgId/organization/interview-reasons'
 import { Route as OrgOrgIdOrganizationInterviewPlansRouteImport } from './routes/org/$orgId/organization/interview-plans'
-import { Route as OrgOrgIdOrganizationFundsRouteImport } from './routes/org/$orgId/organization/funds'
 import { Route as OrgOrgIdOrganizationEmailTemplatesRouteImport } from './routes/org/$orgId/organization/email-templates'
 import { Route as OrgOrgIdOrganizationDepartmentsRouteImport } from './routes/org/$orgId/organization/departments'
 import { Route as OrgOrgIdOrganizationDataPrivacyRouteImport } from './routes/org/$orgId/organization/data-privacy'
@@ -182,12 +181,6 @@ const OrgOrgIdOrganizationInterviewPlansRoute =
     path: '/interview-plans',
     getParentRoute: () => OrgOrgIdOrganizationRoute,
   } as any)
-const OrgOrgIdOrganizationFundsRoute =
-  OrgOrgIdOrganizationFundsRouteImport.update({
-    id: '/funds',
-    path: '/funds',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
 const OrgOrgIdOrganizationEmailTemplatesRoute =
   OrgOrgIdOrganizationEmailTemplatesRouteImport.update({
     id: '/email-templates',
@@ -318,7 +311,6 @@ export interface FileRoutesByFullPath {
   '/org/$orgId/organization/data-privacy': typeof OrgOrgIdOrganizationDataPrivacyRoute
   '/org/$orgId/organization/departments': typeof OrgOrgIdOrganizationDepartmentsRoute
   '/org/$orgId/organization/email-templates': typeof OrgOrgIdOrganizationEmailTemplatesRoute
-  '/org/$orgId/organization/funds': typeof OrgOrgIdOrganizationFundsRoute
   '/org/$orgId/organization/interview-plans': typeof OrgOrgIdOrganizationInterviewPlansRouteWithChildren
   '/org/$orgId/organization/interview-reasons': typeof OrgOrgIdOrganizationInterviewReasonsRoute
   '/org/$orgId/organization/interviews': typeof OrgOrgIdOrganizationInterviewsRouteWithChildren
@@ -359,7 +351,6 @@ export interface FileRoutesByTo {
   '/org/$orgId/organization/data-privacy': typeof OrgOrgIdOrganizationDataPrivacyRoute
   '/org/$orgId/organization/departments': typeof OrgOrgIdOrganizationDepartmentsRoute
   '/org/$orgId/organization/email-templates': typeof OrgOrgIdOrganizationEmailTemplatesRoute
-  '/org/$orgId/organization/funds': typeof OrgOrgIdOrganizationFundsRoute
   '/org/$orgId/organization/interview-reasons': typeof OrgOrgIdOrganizationInterviewReasonsRoute
   '/org/$orgId/organization/locations': typeof OrgOrgIdOrganizationLocationsRoute
   '/org/$orgId/organization/members': typeof OrgOrgIdOrganizationMembersRoute
@@ -402,7 +393,6 @@ export interface FileRoutesById {
   '/org/$orgId/organization/data-privacy': typeof OrgOrgIdOrganizationDataPrivacyRoute
   '/org/$orgId/organization/departments': typeof OrgOrgIdOrganizationDepartmentsRoute
   '/org/$orgId/organization/email-templates': typeof OrgOrgIdOrganizationEmailTemplatesRoute
-  '/org/$orgId/organization/funds': typeof OrgOrgIdOrganizationFundsRoute
   '/org/$orgId/organization/interview-plans': typeof OrgOrgIdOrganizationInterviewPlansRouteWithChildren
   '/org/$orgId/organization/interview-reasons': typeof OrgOrgIdOrganizationInterviewReasonsRoute
   '/org/$orgId/organization/interviews': typeof OrgOrgIdOrganizationInterviewsRouteWithChildren
@@ -449,7 +439,6 @@ export interface FileRouteTypes {
     | '/org/$orgId/organization/data-privacy'
     | '/org/$orgId/organization/departments'
     | '/org/$orgId/organization/email-templates'
-    | '/org/$orgId/organization/funds'
     | '/org/$orgId/organization/interview-plans'
     | '/org/$orgId/organization/interview-reasons'
     | '/org/$orgId/organization/interviews'
@@ -490,7 +479,6 @@ export interface FileRouteTypes {
     | '/org/$orgId/organization/data-privacy'
     | '/org/$orgId/organization/departments'
     | '/org/$orgId/organization/email-templates'
-    | '/org/$orgId/organization/funds'
     | '/org/$orgId/organization/interview-reasons'
     | '/org/$orgId/organization/locations'
     | '/org/$orgId/organization/members'
@@ -532,7 +520,6 @@ export interface FileRouteTypes {
     | '/org/$orgId/organization/data-privacy'
     | '/org/$orgId/organization/departments'
     | '/org/$orgId/organization/email-templates'
-    | '/org/$orgId/organization/funds'
     | '/org/$orgId/organization/interview-plans'
     | '/org/$orgId/organization/interview-reasons'
     | '/org/$orgId/organization/interviews'
@@ -736,13 +723,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrgOrgIdOrganizationInterviewPlansRouteImport
       parentRoute: typeof OrgOrgIdOrganizationRoute
     }
-    '/org/$orgId/organization/funds': {
-      id: '/org/$orgId/organization/funds'
-      path: '/funds'
-      fullPath: '/org/$orgId/organization/funds'
-      preLoaderRoute: typeof OrgOrgIdOrganizationFundsRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
     '/org/$orgId/organization/email-templates': {
       id: '/org/$orgId/organization/email-templates'
       path: '/email-templates'
@@ -938,7 +918,6 @@ interface OrgOrgIdOrganizationRouteChildren {
   OrgOrgIdOrganizationDataPrivacyRoute: typeof OrgOrgIdOrganizationDataPrivacyRoute
   OrgOrgIdOrganizationDepartmentsRoute: typeof OrgOrgIdOrganizationDepartmentsRoute
   OrgOrgIdOrganizationEmailTemplatesRoute: typeof OrgOrgIdOrganizationEmailTemplatesRoute
-  OrgOrgIdOrganizationFundsRoute: typeof OrgOrgIdOrganizationFundsRoute
   OrgOrgIdOrganizationInterviewPlansRoute: typeof OrgOrgIdOrganizationInterviewPlansRouteWithChildren
   OrgOrgIdOrganizationInterviewReasonsRoute: typeof OrgOrgIdOrganizationInterviewReasonsRoute
   OrgOrgIdOrganizationInterviewsRoute: typeof OrgOrgIdOrganizationInterviewsRouteWithChildren
@@ -961,7 +940,6 @@ const OrgOrgIdOrganizationRouteChildren: OrgOrgIdOrganizationRouteChildren = {
   OrgOrgIdOrganizationDepartmentsRoute: OrgOrgIdOrganizationDepartmentsRoute,
   OrgOrgIdOrganizationEmailTemplatesRoute:
     OrgOrgIdOrganizationEmailTemplatesRoute,
-  OrgOrgIdOrganizationFundsRoute: OrgOrgIdOrganizationFundsRoute,
   OrgOrgIdOrganizationInterviewPlansRoute:
     OrgOrgIdOrganizationInterviewPlansRouteWithChildren,
   OrgOrgIdOrganizationInterviewReasonsRoute:

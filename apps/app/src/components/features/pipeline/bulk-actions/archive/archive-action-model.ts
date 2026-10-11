@@ -26,6 +26,7 @@ export function buildArchiveReasonOptions(reasons: readonly ArchiveReasonRow[]):
 
 export function getArchiveReasonPlaceholder(query: { isLoading: boolean; isError: boolean }) {
   if (query.isLoading) return 'Loading reasons...';
+
   if (query.isError) return 'Reasons unavailable';
 
   return 'Select a reason';
@@ -45,6 +46,7 @@ export function isArchiveSubmitDisabled(input: {
     !input.archiveReasonId || input.reasonsLoading || input.reasonsError || input.executableCount === 0;
 
   if (isArchiveContextInvalid) return true;
+
   if (input.preparableEmailCount === 0) return false;
 
   return input.vaultLoading || input.vaultError || !input.hasVaultKey;

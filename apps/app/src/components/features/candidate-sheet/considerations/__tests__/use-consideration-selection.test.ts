@@ -12,7 +12,6 @@ function makeApplication(overrides: Partial<ApplicationApiResponse> = {}): Appli
     criterionSummary: null,
     criterionAssessments: [],
     appliedAt: '2026-01-02T00:00:00.000Z',
-    responseDeadline: null,
     currentStageId: 'stage-current',
     currentStageEnteredAt: '2026-01-02T00:00:00.000Z',
     interviewStatus: null,
@@ -31,15 +30,11 @@ function makeApplication(overrides: Partial<ApplicationApiResponse> = {}): Appli
     archiveReasonId: null,
     archiveReasonLabel: null,
     archiveReasonType: null,
-    isResponded: false,
-    respondedAt: null,
     hasResume: false,
     resumeFileId: null,
     createdAt: '2026-01-02T00:00:00.000Z',
     updatedAt: '2026-01-02T00:00:00.000Z',
     tagIds: [],
-    duplicateAttemptCount: 0,
-    duplicateOfApplicationId: null,
     considerationContext: {
       job: { id: 'job-current-from-api', title: 'Current role', status: 'open' },
       stage: {
@@ -96,30 +91,24 @@ const otherApplications = [
   {
     id: 'app-old',
     jobId: 'job-old',
-    onchainCommitmentId: 10,
     jobTitle: 'Old role',
     appliedAt: '2026-01-01T00:00:00.000Z',
     currentStageId: 'stage-old',
     terminalOutcome: null,
     terminalOutcomeAt: null,
     currentStageName: 'Review',
-    isResponded: true,
     archivedAt: null,
-    duplicateAttemptCount: 0,
   },
   {
     id: 'app-new',
     jobId: 'job-new',
-    onchainCommitmentId: 11,
     jobTitle: 'New role',
     appliedAt: '2026-01-03T00:00:00.000Z',
     currentStageId: 'stage-new',
     terminalOutcome: null,
     terminalOutcomeAt: null,
     currentStageName: 'Offer',
-    isResponded: false,
     archivedAt: null,
-    duplicateAttemptCount: 0,
   },
 ];
 
@@ -129,7 +118,6 @@ describe('buildConsiderations', () => {
       application: makeApplication(),
       otherApplications,
       jobId: 'job-current',
-      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       currentStageName: 'Interview',
     });
@@ -139,7 +127,6 @@ describe('buildConsiderations', () => {
     expect(applications[1]).toMatchObject({
       id: 'app-current',
       jobId: 'job-current',
-      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       currentStageName: 'Interview',
     });
@@ -153,20 +140,16 @@ describe('buildConsiderations', () => {
         {
           id: 'app-current',
           jobId: 'job-stale',
-          onchainCommitmentId: 99,
           jobTitle: 'Stale cached role',
           appliedAt: '2025-12-31T00:00:00.000Z',
           currentStageId: 'stage-stale',
           terminalOutcome: null,
           terminalOutcomeAt: null,
           currentStageName: 'Stale stage',
-          isResponded: true,
           archivedAt: null,
-          duplicateAttemptCount: 0,
         },
       ],
       jobId: 'job-current',
-      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       currentStageName: 'Interview',
     });
@@ -175,12 +158,10 @@ describe('buildConsiderations', () => {
     expect(applications.filter((app) => app.id === 'app-current')).toHaveLength(1);
     expect(applications[1]).toMatchObject({
       jobId: 'job-current',
-      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       appliedAt: '2026-01-02T00:00:00.000Z',
       currentStageId: 'stage-current',
       currentStageName: 'Interview',
-      isResponded: false,
     });
   });
 
@@ -189,7 +170,6 @@ describe('buildConsiderations', () => {
       application: makeApplication({ appliedAt: '2026-01-03T00:00:00.000Z' }),
       otherApplications,
       jobId: 'job-current',
-      onchainCommitmentId: 12,
       jobTitle: 'Current role',
       currentStageName: 'Interview',
     });
@@ -203,7 +183,6 @@ describe('buildConsiderations', () => {
         application: null,
         otherApplications: [],
         jobId: 'job-current',
-        onchainCommitmentId: null,
         jobTitle: null,
         currentStageName: null,
       }),

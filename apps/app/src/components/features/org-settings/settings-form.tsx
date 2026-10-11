@@ -3,7 +3,6 @@ import { Card, CardContent, CardFooter } from '@comitium/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { ImageUploader } from '@comitium/ui/image-uploader';
 import { Input } from '@comitium/ui/input';
-import { resolveIpfsUrl } from '@comitium/ui/ipfs';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
 import { Textarea } from '@comitium/ui/textarea';
@@ -63,9 +62,7 @@ export function SettingsForm({ org }: SettingsFormProps) {
       website: orgDetails.website || '',
     });
 
-    if (orgDetails.logo) {
-      setExistingLogo(orgDetails.logo);
-    }
+    setExistingLogo(orgDetails.logo);
   }, [orgDetails, form]);
 
   const handleImageChange = useCallback((file: File | null) => {
@@ -136,7 +133,8 @@ export function SettingsForm({ org }: SettingsFormProps) {
               label="Company logo"
               size="size-40"
               disabled={isReadOnly}
-              initialImage={existingLogo ? (resolveIpfsUrl(existingLogo) ?? null) : null}
+              initialImage={existingLogo}
+              acceptedTypes={['image/png', 'image/jpeg', 'image/webp']}
               maxSize={MAX_FILE_UPLOAD_SIZE}
               onImageChange={handleImageChange}
             />

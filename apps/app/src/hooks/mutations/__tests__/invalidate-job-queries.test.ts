@@ -4,6 +4,7 @@ import { qk } from '@/hooks/query-keys';
 import { invalidateJobQueries } from '../invalidate-job-queries';
 
 const target = { orgId: 'org-1', jobId: 'job-1' };
+
 const cachedQuery = (queryKey: QueryKey) => ({ queryKey, queryFn: vi.fn(() => null) });
 
 describe('invalidateJobQueries', () => {
@@ -27,6 +28,7 @@ describe('invalidateJobQueries', () => {
     for (const query of affectedQueries) {
       expect(query.queryFn).toHaveBeenCalledTimes(2);
     }
+
     expect(unrelatedQuery.queryFn).toHaveBeenCalledOnce();
   });
 });

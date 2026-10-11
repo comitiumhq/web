@@ -23,8 +23,6 @@ const walletsState = Object.freeze({ ready: false, wallets: [] });
 const emailLoginState = Object.freeze({ status: 'initial' });
 const passkeyState = Object.freeze({ status: 'initial' });
 const PrivyProvider = ({ children }) => children;
-const useAuthorizationSignature = () => ({ generateAuthorizationSignature: unavailable });
-const useConnectWallet = () => ({ connectWallet: unavailable });
 const useCreateWallet = () => ({ createWallet: unavailable });
 const useIdentityToken = () => ({ identityToken: null });
 const useLinkAccount = () => ({ linkGoogle: unavailable });
@@ -46,15 +44,11 @@ const useUpdateEmail = () => ({ sendCode: unavailable, state: emailLoginState, v
 const usePrivy = () => privyState;
 const useUser = () => ({ refreshUser: unavailable, user: null });
 const useWallets = () => walletsState;
-const useSendTransaction = () => ({ sendTransaction: unavailable });
 const useSignMessage = () => ({ signMessage: unavailable });
-const useSignTypedData = () => ({ signTypedData: unavailable });
 export {
   getAccessToken,
   getIdentityToken,
   PrivyProvider,
-  useAuthorizationSignature,
-  useConnectWallet,
   useCreateWallet,
   useIdentityToken,
   useLinkAccount,
@@ -64,9 +58,7 @@ export {
   useLoginWithOAuth,
   useLoginWithPasskey,
   usePrivy,
-  useSendTransaction,
   useSignMessage,
-  useSignTypedData,
   useUser,
   useUnlinkOAuth,
   useUpdateEmail,

@@ -59,6 +59,7 @@ export function orderApplicationRequiredQuestionsFirst<Question extends Applicat
     }
 
     const [question] = remainingQuestions.splice(questionIndex, 1);
+
     requiredQuestions.push(question);
   }
 

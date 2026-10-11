@@ -43,7 +43,6 @@ export const qk = {
     root: () => ['application'] as const,
     detail: (applicationId?: string | null) => ['application', applicationId] as const,
     otherApplications: (applicationId: string | null) => ['application', applicationId, 'other-applications'] as const,
-    duplicateAttempts: (applicationId: string | null) => ['application', applicationId, 'duplicate-attempts'] as const,
     emails: (applicationId: string | null) => ['emails', applicationId] as const,
     interviews: (applicationId: string | null) => ['interviews', 'application', applicationId] as const,
     interviewProgress: (applicationId: string | null) => ['application', applicationId, 'interview-progress'] as const,
@@ -124,10 +123,6 @@ export const qk = {
     job: (jobId: string) => ['application-form-options', 'job', jobId] as const,
     jobTemplate: (orgId: string) => ['application-form-options', 'job-template', orgId] as const,
   },
-  responseCommitmentConfig: {
-    current: () => ['response-commitment-config'] as const,
-    stakeToken: () => ['stake-token'] as const,
-  },
   templates: {
     jobsRoot: (orgId?: string) => ['job-templates', orgId] as const,
     jobs: (orgId: string | undefined, params: unknown) => ['job-templates', orgId, params] as const,
@@ -177,15 +172,6 @@ export const qk = {
     templateOptions: (orgId?: string, templateId?: string) =>
       ['stage-activities', 'job-template', orgId, templateId, 'options'] as const,
     stage: (jobId?: string, stageId?: string | null) => ['stage-activities', 'stage', jobId, stageId] as const,
-  },
-  balance: {
-    walletRoot: () => ['wallet-balance'] as const,
-    wallet: (stakeToken?: string, address?: string) => ['wallet-balance', stakeToken, address] as const,
-    orgRoot: () => ['org-balance'] as const,
-    org: (orgId: number | null) => ['org-balance', orgId] as const,
-    orgHistoryRoot: () => ['org-balance-history'] as const,
-    orgHistory: (orgId: string) => ['org-balance-history', orgId] as const,
-    orgTreasury: (orgId: string) => ['org-treasury', orgId] as const,
   },
   calendar: {
     token: (orgId?: string) => ['cal', 'token', orgId] as const,

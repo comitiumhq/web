@@ -39,6 +39,7 @@ function getSetupCardState(
   setupQuery: ReturnType<typeof useQueryWorkspaceSetup>,
 ): { profileComplete: boolean; setup?: WorkspaceSetup } | null {
   if (memberQuery.isLoading || memberQuery.isError || !memberQuery.data) return null;
+
   if (isAdmin && setupQuery.isLoading) return null;
 
   const profileComplete = Boolean(memberQuery.data.name?.trim());

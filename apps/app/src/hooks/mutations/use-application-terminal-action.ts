@@ -1,4 +1,3 @@
-import { refreshAfterOnchainOperationSettles } from '@comitium/chain/onchain-operation-observer';
 import type { PublicEncryptionKey } from '@comitium/crypto';
 import { getProductErrorMessage } from '@comitium/ui/product-error-messages';
 import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -110,30 +109,8 @@ export function useApplicationTerminalAction({ onCompleted }: { onCompleted: () 
         id: 'application-terminal-action',
       });
     },
-    onSuccess: async (result, params) => {
-      const stage =
-        result.status === 'accepted'
-          ? await refreshAfterOnchainOperationSettles(result.operationId, () => undefined)
-          : 'completed';
-
-      if (stage === 'failed') {
-        toast.error(getApplicationTerminalErrorMessage(new Error('Archive failed'), params.action), {
-          id: 'application-terminal-action',
-        });
-
-        return;
-      }
-
+    onSuccess: async (_result, params) => {
       await invalidateApplicationOutcomeQueries(queryClient, params);
-
-      if (stage === 'background') {
-        toast.info('Archive submitted and is still being finalized.', {
-          id: 'application-terminal-action',
-        });
-        onCompleted();
-
-        return;
-      }
 
       toast.success(getApplicationTerminalSuccessMessage(params.action), {
         id: 'application-terminal-action',

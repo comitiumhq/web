@@ -1,6 +1,6 @@
 import type { EnvelopeKey } from '@comitium/crypto';
 import { encryptedEnvelopeSchema, type TipTapDoc, tipTapDocSchema } from '@comitium/schemas/common';
-import { paginationSchema, uuidSchema, walletAddressSchema } from '@comitium/schemas/public';
+import { paginationSchema, uuidSchema } from '@comitium/schemas/public';
 import { z } from 'zod';
 import { archiveReasonTypeSchema } from '@/lib/schemas/archive-reasons';
 import { stageTypeSchema } from './stages';
@@ -125,7 +125,6 @@ const activityEventTypeSchema = z.enum([
   'email_sent_from_activity',
   'email_bounced',
   'application_created',
-  'application_responded',
   'application_outcome_recorded',
   'application_outcome_reopened',
   'candidate_created',
@@ -215,7 +214,6 @@ export const activityFeedRowSchema = z.object({
   jobTitle: z.string().nullable(),
   actor: z.object({
     userId: uuidSchema.nullable(),
-    externalWallet: walletAddressSchema.nullable(),
     name: z.string().nullable(),
     avatarUrl: z.string().nullable(),
   }),

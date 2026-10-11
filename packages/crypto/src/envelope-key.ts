@@ -55,6 +55,7 @@ export async function unwrapDek(wrappedKey: WrappedKey, privateKey: Uint8Array, 
 
   if (dek.length !== 32) {
     dek.fill(0);
+
     throw new Error('DEK must be 32 bytes');
   }
 

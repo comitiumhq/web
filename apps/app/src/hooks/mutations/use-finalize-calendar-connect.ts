@@ -6,6 +6,7 @@ import { connectCalendar } from '@/lib/api/interviews';
 
 export function useFinalizeCalendarConnect(orgId: string) {
   const queryClient = useQueryClient();
+
   const invalidateStatus = () => queryClient.invalidateQueries({ queryKey: qk.calendar.status(orgId) });
 
   return useMutation({

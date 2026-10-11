@@ -42,6 +42,7 @@ function postResetMessage(message: CryptoResetMessage): void {
   }
 
   const channel = new BroadcastChannel(CRYPTO_RESET_CHANNEL);
+
   channel.postMessage(message);
   channel.close();
 }

@@ -76,6 +76,7 @@ export function useDecryptedCustomFieldValues(
       }
 
       const activeCandidateId = candidateId;
+
       decryptingRef.current.add(row.id);
       CryptoProxy.decryptApplication(
         row.value,

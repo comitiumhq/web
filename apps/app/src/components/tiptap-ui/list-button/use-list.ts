@@ -68,6 +68,7 @@ export const LIST_SHORTCUT_KEYS: Record<ListType, string> = {
  */
 export function canToggleList(editor: Editor | null, type: ListType, turnInto = true): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!isNodeInSchema(type, editor) || isNodeTypeSelected(editor, ['image'])) return false;
 
   if (!turnInto) {
@@ -134,6 +135,7 @@ export function isListActive(editor: Editor | null, type: ListType): boolean {
  */
 export function toggleList(editor: Editor | null, type: ListType): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!canToggleList(editor, type)) return false;
 
   try {
@@ -163,6 +165,7 @@ export function toggleList(editor: Editor | null, type: ListType): boolean {
         editor,
         node: state.selection.$anchor.node(1),
       })?.pos;
+
       if (!isValidPosition(pos)) return false;
 
       tr = tr.setSelection(NodeSelection.create(state.doc, pos));
@@ -201,6 +204,7 @@ export function toggleList(editor: Editor | null, type: ListType): boolean {
       };
 
       const toggle = toggleMap[type];
+
       if (!toggle) return false;
 
       toggle().run();
@@ -306,9 +310,11 @@ export function useList(config: UseListConfig) {
     if (!editor) return false;
 
     const success = toggleList(editor, type);
+
     if (success) {
       onToggled?.();
     }
+
     return success;
   }, [editor, type, onToggled]);
 

@@ -1,8 +1,4 @@
-import {
-  duplicateApplicationAttemptsResponseSchema,
-  otherApplicationsResponseSchema,
-  recipientKeySchema,
-} from '@comitium/schemas/applications';
+import { otherApplicationsResponseSchema, recipientKeySchema } from '@comitium/schemas/applications';
 import { emailListResponseSchema } from '@/lib/schemas/emails';
 
 import { api } from './client';
@@ -20,19 +16,6 @@ export function getOtherApplications(applicationId: string, limit = DEFAULT_CURS
   return api.get(
     `/applications/${applicationId}/other-applications?${params.toString()}`,
     otherApplicationsResponseSchema,
-  );
-}
-
-export function getDuplicateApplicationAttempts(
-  applicationId: string,
-  limit = DEFAULT_CURSOR_PAGE_SIZE,
-  cursor?: string,
-) {
-  const params = buildCursorSearchParams(limit, cursor);
-
-  return api.get(
-    `/applications/${applicationId}/duplicate-attempts?${params.toString()}`,
-    duplicateApplicationAttemptsResponseSchema,
   );
 }
 

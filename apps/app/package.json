@@ -15,7 +15,6 @@
   "dependencies": {
     "@comitium/auth": "workspace:*",
     "@comitium/crypto": "workspace:*",
-    "@comitium/chain": "workspace:*",
     "@comitium/schemas": "workspace:*",
     "@comitium/ui": "workspace:*",
     "@date-fns/tz": "1.4.1",

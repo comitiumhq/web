@@ -1,16 +1,11 @@
 import { useIsAuthenticated } from '@comitium/auth/use-is-authenticated';
 import { useSession } from '@comitium/auth/use-session';
-import { useActiveWallet } from '@comitium/auth/use-wallet';
-import { normalizeAddress } from '@comitium/chain/address';
-import { refreshAfterOnchainOperationSettles } from '@comitium/chain/onchain-operation-observer';
-import { useOnchainSettlementObserver } from '@comitium/chain/use-onchain-settlement-observer';
 import { assertEncryptionKeyBundle } from '@comitium/crypto/key-bundle';
 import { API_ERROR_CODES, hasApiErrorCode } from '@comitium/schemas/api-errors';
 import { getErrorMessage } from '@comitium/schemas/error';
 import type { CandidateProfileInputValue } from '@comitium/schemas/forms/application-required-fields';
 import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { isJobError } from '@comitium/schemas/product-errors';
-import { isProductSubmissionUncertain } from '@comitium/schemas/transaction-errors';
 import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -34,7 +29,6 @@ const APPLY_TOAST_ID = 'apply-job';
 
 const STEP_MESSAGES: Record<WorkflowStep, string> = {
   encrypting: 'Securing application data...',
-  signing: 'Preparing application...',
   submitting: 'Submitting application...',
 };
 
@@ -51,32 +45,16 @@ function getApplyErrorMessage(error: unknown): string {
     return 'Failed to secure application data. Please try again.';
   }
 
-  if (error._tag === 'SignatureError' && error.apiCode === API_ERROR_CODES.aiCriteriaEvaluationPolicyChanged) {
+  if (error._tag === 'ApplicationRequestError' && error.apiCode === API_ERROR_CODES.aiCriteriaEvaluationPolicyChanged) {
     return 'The hiring organization changed its AI-assisted evaluation setting. Review the updated choice before submitting again.';
   }
 
-  if (error._tag === 'SignatureError' && error.apiCode === API_ERROR_CODES.postingSkillsChanged) {
+  if (error._tag === 'ApplicationRequestError' && error.apiCode === API_ERROR_CODES.postingSkillsChanged) {
     return 'The skills for this role changed. Review the updated requirements before submitting again.';
   }
 
-  if (error._tag === 'SignatureError') {
+  if (error._tag === 'ApplicationRequestError') {
     return 'Application submission could not be prepared. Please try again.';
-  }
-
-  if (error._tag === 'TransactionError') {
-    if (isProductSubmissionUncertain(error)) {
-      return 'We could not confirm whether your application was submitted. Check My applications before trying again.';
-    }
-
-    if (error.message.includes('rejected')) {
-      return 'Application submission was cancelled.';
-    }
-
-    return 'Application could not be submitted. Please try again.';
-  }
-
-  if (error._tag === 'ContractError' && error.operation === 'application_confirmation_pending') {
-    return 'Your application is still being submitted. Check My applications again in a moment.';
   }
 
   return 'Application could not be submitted. Please try again.';
@@ -86,9 +64,7 @@ export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequi
   const queryClient = useQueryClient();
   const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
-  const wallet = useActiveWallet();
   const { user } = useSession();
-  const settlementObserver = useOnchainSettlementObserver();
 
   const mutation = useMutation({
     mutationFn: async (input: SubmitApplicationParams) => {
@@ -98,13 +74,8 @@ export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequi
 
       assertEncryptionKeyBundle(user);
 
-      const walletReady = Boolean(
-        wallet && user?.walletAddress && normalizeAddress(wallet.address) === normalizeAddress(user.walletAddress),
-      );
-
       const result = await applyJobWorkflow({
         ...input,
-        walletReady,
         onStep: (step) => {
           toast.loading(STEP_MESSAGES[step], { id: APPLY_TOAST_ID });
         },
@@ -121,36 +92,8 @@ export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequi
       toast.loading('Preparing application...', { id: APPLY_TOAST_ID });
     },
 
-    onSuccess: (result) => {
-      const refresh = () => invalidateApplicationQueries(queryClient);
-
-      if (result.kind === 'completed') {
-        refresh();
-        toast.success('Application submitted successfully!', { id: APPLY_TOAST_ID });
-        params.onCompleted();
-
-        return;
-      }
-
-      if (result.kind === 'confirming') {
-        toast.info('Application submission is being completed.', { id: APPLY_TOAST_ID });
-
-        settlementObserver.observe({
-          operationId: result.operationId,
-          refresh,
-          onCompleted: () => {
-            toast.success('Application submitted successfully!', { id: APPLY_TOAST_ID });
-            params.onCompleted();
-          },
-          onFailed: () => {
-            toast.error('Application could not be submitted. Please try again.', { id: APPLY_TOAST_ID });
-          },
-        });
-
-        return;
-      }
-
-      refreshAfterOnchainOperationSettles(result.operationId, refresh);
+    onSuccess: () => {
+      invalidateApplicationQueries(queryClient);
       toast.success('Application submitted successfully!', { id: APPLY_TOAST_ID });
       params.onCompleted();
     },
@@ -162,7 +105,7 @@ export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequi
 
       if (
         isJobError(error) &&
-        error._tag === 'SignatureError' &&
+        error._tag === 'ApplicationRequestError' &&
         (error.apiCode === API_ERROR_CODES.aiCriteriaEvaluationPolicyChanged ||
           error.apiCode === API_ERROR_CODES.postingSkillsChanged)
       ) {
@@ -177,7 +120,6 @@ export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequi
   return {
     submit: mutation.mutate,
     isPending: mutation.isPending,
-    isConfirming: settlementObserver.isConfirming,
   };
 }
 

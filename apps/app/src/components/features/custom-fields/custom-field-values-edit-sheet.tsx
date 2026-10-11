@@ -97,6 +97,7 @@ export function CustomFieldValuesEditSheet({
 
       if (items.length === 0) {
         onOpenChange(false);
+
         return;
       }
 

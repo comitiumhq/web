@@ -1,5 +1,5 @@
 import type { ApplicationResult } from '@comitium/schemas/product-errors';
-import { SignatureError } from '@comitium/schemas/product-errors';
+import { ApplicationRequestError } from '@comitium/schemas/product-errors';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -12,7 +12,6 @@ const mocks = vi.hoisted(() => ({
   observeSettlement: vi.fn(),
   onCompleted: vi.fn(),
   onZkIdentityRequired: vi.fn(),
-  refreshAfterOnchainOperationSettles: vi.fn(),
   routerInvalidate: vi.fn(),
   toastError: vi.fn(),
   toastInfo: vi.fn(),
@@ -57,13 +56,6 @@ vi.mock('@comitium/auth/use-wallet', () => ({
   useActiveWallet: () => mocks.wallet,
 }));
 
-vi.mock('@comitium/chain/use-onchain-settlement-observer', () => ({
-  useOnchainSettlementObserver: () => ({
-    isConfirming: false,
-    observe: mocks.observeSettlement,
-  }),
-}));
-
 vi.mock('@comitium/crypto/key-bundle', () => ({
   assertEncryptionKeyBundle: mocks.assertEncryptionKeyBundle,
 }));
@@ -73,13 +65,8 @@ vi.mock('@/lib/jobs/workflows/apply-job', async (importOriginal) => ({
   applyJobWorkflow: mocks.applyJobWorkflow,
 }));
 
-vi.mock('@comitium/chain/onchain-operation-observer', () => ({
-  refreshAfterOnchainOperationSettles: mocks.refreshAfterOnchainOperationSettles,
-}));
-
 import { useApplyJob } from '../use-apply-job';
 
-const OPERATION_ID = '11111111-1111-4111-8111-111111111111';
 const variables = {
   jobData: {
     id: '22222222-2222-4222-8222-222222222222',
@@ -130,6 +117,7 @@ describe('useApplyJob', () => {
     mocks.assertEncryptionKeyBundle.mockImplementation(() => {
       throw new Error('Encryption key bundle is incomplete');
     });
+
     const options = getMutationOptions();
 
     await expect(options.mutationFn(variables)).rejects.toThrow('Encryption key bundle is incomplete');
@@ -146,35 +134,10 @@ describe('useApplyJob', () => {
     expect(mocks.onCompleted).toHaveBeenCalledOnce();
   });
 
-  it('observes a response commitment submission before completing the UI flow', () => {
-    const options = getMutationOptions();
-
-    options.onSuccess({ kind: 'confirming', operationId: OPERATION_ID });
-
-    expect(mocks.observeSettlement).toHaveBeenCalledWith(
-      expect.objectContaining({
-        operationId: OPERATION_ID,
-        onCompleted: expect.any(Function),
-        onFailed: expect.any(Function),
-      }),
-    );
-    expect(mocks.onCompleted).not.toHaveBeenCalled();
-  });
-
-  it('refreshes after a confirmed wallet submission', () => {
-    const options = getMutationOptions();
-
-    options.onSuccess({ kind: 'confirmed', operationId: OPERATION_ID });
-
-    expect(mocks.refreshAfterOnchainOperationSettles).toHaveBeenCalledWith(OPERATION_ID, expect.any(Function));
-    expect(mocks.toastSuccess).toHaveBeenCalledWith('Application submitted successfully!', { id: 'apply-job' });
-    expect(mocks.onCompleted).toHaveBeenCalledOnce();
-  });
-
   it('reloads the current job policy after a finalization policy conflict', async () => {
     const options = getMutationOptions();
 
-    await options.onError(new SignatureError(409, 'Policy changed', 'AI_CRITERIA_EVALUATION_POLICY_CHANGED'));
+    await options.onError(new ApplicationRequestError(409, 'Policy changed', 'AI_CRITERIA_EVALUATION_POLICY_CHANGED'));
 
     expect(mocks.routerInvalidate).toHaveBeenCalledOnce();
     expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['careers'], refetchType: 'none' });
@@ -187,7 +150,7 @@ describe('useApplyJob', () => {
   it('reloads changed Posting skills and tells the applicant to review them', async () => {
     const options = getMutationOptions();
 
-    await options.onError(new SignatureError(409, 'Posting skills changed', 'POSTING_SKILLS_CHANGED'));
+    await options.onError(new ApplicationRequestError(409, 'Posting skills changed', 'POSTING_SKILLS_CHANGED'));
 
     expect(mocks.routerInvalidate).toHaveBeenCalledOnce();
     expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['careers'], refetchType: 'none' });
@@ -200,7 +163,7 @@ describe('useApplyJob', () => {
   it('describes preparation failures without wallet terminology', async () => {
     const options = getMutationOptions();
 
-    await options.onError(new SignatureError(500, 'Wallet signature failed'));
+    await options.onError(new ApplicationRequestError(500, 'Application request failed'));
 
     expect(mocks.toastError).toHaveBeenCalledWith('Application submission could not be prepared. Please try again.', {
       id: 'apply-job',

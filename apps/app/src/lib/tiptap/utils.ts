@@ -58,6 +58,7 @@ export function isMac(): boolean {
 export const formatShortcutKey = (key: string, isMac: boolean, capitalize = true) => {
   if (isMac) {
     const lowerKey = key.toLowerCase();
+
     return MAC_SYMBOLS[lowerKey] || (capitalize ? key.toUpperCase() : key);
   }
 
@@ -94,6 +95,7 @@ export const parseShortcutKeys = (props: {
  */
 export const isMarkInSchema = (markName: string, editor: Editor | null): boolean => {
   if (!editor?.schema) return false;
+
   return isDefined(editor.schema.spec.marks.get(markName));
 };
 
@@ -105,6 +107,7 @@ export const isMarkInSchema = (markName: string, editor: Editor | null): boolean
  */
 export const isNodeInSchema = (nodeName: string, editor: Editor | null): boolean => {
   if (!editor?.schema) return false;
+
   return isDefined(editor.schema.spec.nodes.get(nodeName));
 };
 
@@ -118,14 +121,18 @@ export function focusNextNode(editor: Editor) {
   const { doc, selection } = state;
 
   const nextSel = Selection.findFrom(selection.$to, 1, true);
+
   if (nextSel) {
     view.dispatch(state.tr.setSelection(nextSel).scrollIntoView());
+
     return true;
   }
 
   const paragraphType = state.schema.nodes.paragraph;
+
   if (!paragraphType) {
     logger.warn('No paragraph node type found in schema.');
+
     return false;
   }
 
@@ -137,6 +144,7 @@ export function focusNextNode(editor: Editor) {
   const $inside = tr.doc.resolve(end + 1);
   tr = tr.setSelection(TextSelection.near($inside)).scrollIntoView();
   view.dispatch(tr);
+
   return true;
 }
 
@@ -180,13 +188,17 @@ export function isExtensionAvailable(editor: Editor | null, extensionNames: stri
 export function findNodeAtPosition(editor: Editor, position: number) {
   try {
     const node = editor.state.doc.nodeAt(position);
+
     if (!node) {
       logger.warn(`No node found at position ${position}`);
+
       return null;
     }
+
     return node;
   } catch (error) {
     logger.error(`Error getting node at position ${position}:`, error);
+
     return null;
   }
 }
@@ -225,8 +237,10 @@ export function findNodePosition(props: {
       if (currentNode === node) {
         foundPos = pos;
         foundNode = currentNode;
+
         return false;
       }
+
       return true;
     });
 
@@ -238,6 +252,7 @@ export function findNodePosition(props: {
   // If we have a valid position, use findNodeAtPosition
   if (validNodePos !== null) {
     const nodeAtPos = findNodeAtPosition(editor, validNodePos);
+
     if (nodeAtPos) {
       return { pos: validNodePos, node: nodeAtPos };
     }
@@ -261,19 +276,23 @@ export function isNodeTypeSelected(
   if (!editor || !editor.state.selection) return false;
 
   const { selection } = editor.state;
+
   if (selection.empty) return false;
 
   // Direct node selection check
   if (selection instanceof NodeSelection) {
     const selectedNode = selection.node;
+
     return selectedNode ? nodeTypeNames.includes(selectedNode.type.name) : false;
   }
 
   // Depth-based ancestor node check
   if (checkAncestorNodes) {
     const { $from } = selection;
+
     for (let depth = $from.depth; depth > 0; depth--) {
       const ancestorNode = $from.node(depth);
+
       if (nodeTypeNames.includes(ancestorNode.type.name)) {
         return true;
       }
@@ -299,18 +318,23 @@ export function selectionWithinConvertibleTypes(editor: Editor, types: string[] 
 
   if (selection instanceof NodeSelection) {
     const nodeType = selection.node?.type?.name;
+
     return !!nodeType && allowed.has(nodeType);
   }
 
   if (selection instanceof TextSelection || selection instanceof AllSelection) {
     let valid = true;
+
     state.doc.nodesBetween(selection.from, selection.to, (node) => {
       if (node.isTextblock && !allowed.has(node.type.name)) {
         valid = false;
+
         return false; // stop early
       }
+
       return valid;
     });
+
     return valid;
   }
 
@@ -344,6 +368,7 @@ export const handleImageUpload = async (
     if (abortSignal?.aborted) {
       throw new Error('Upload cancelled');
     }
+
     await new Promise((resolve) => setTimeout(resolve, 500));
     onProgress?.({ progress });
   }
@@ -409,6 +434,7 @@ export function sanitizeUrl(inputUrl: string, baseUrl: string, protocols?: Proto
   } catch {
     // If URL creation fails, it's considered invalid
   }
+
   return '#';
 }
 
@@ -435,6 +461,7 @@ export function updateNodesAttr<A extends string = string, V = unknown>(
   for (const { pos } of targets) {
     // Always re-read from the transaction's current doc
     const currentNode = tr.doc.nodeAt(pos);
+
     if (!currentNode) continue;
 
     const prevValue = (currentNode.attrs as Record<string, unknown>)[attrName] as V | undefined;
@@ -443,6 +470,7 @@ export function updateNodesAttr<A extends string = string, V = unknown>(
     if (prevValue === resolvedNext) continue;
 
     const nextAttrs: Record<string, unknown> = { ...currentNode.attrs };
+
     if (!isDefined(resolvedNext)) {
       // Remove the key entirely instead of setting null
       delete nextAttrs[attrName];
@@ -514,14 +542,17 @@ export function getSelectedNodesOfType(selection: Selection, allowedNodeTypes: s
         results.push({ node, pos });
       }
     });
+
     return results;
   }
 
   if (selection instanceof NodeSelection) {
     const { node, from: pos } = selection;
+
     if (node && allowed.has(node.type.name)) {
       results.push({ node, pos });
     }
+
     return results;
   }
 
@@ -530,8 +561,10 @@ export function getSelectedNodesOfType(selection: Selection, allowedNodeTypes: s
 
   if (cell) {
     const cellNode = selection.$anchor.doc.nodeAt(cell.pos);
+
     if (cellNode && allowed.has(cellNode.type.name)) {
       results.push({ node: cellNode, pos: cell.pos });
+
       return results;
     }
   }

@@ -12,6 +12,7 @@ describe('KeyStore', () => {
   describe('personal key', () => {
     it('stores and retrieves personal key (same reference)', () => {
       const key = new Uint8Array([1, 2, 3, 4, 5]);
+
       store.storePersonalKey(key);
 
       expect(store.getPersonalKey()).toBe(key);
@@ -39,6 +40,7 @@ describe('KeyStore', () => {
   describe('vault keys', () => {
     it('stores and retrieves vault key by orgId', () => {
       const key = new Uint8Array([10, 20, 30]);
+
       store.storeVaultKey('1', key);
 
       expect(store.getVaultKey('1')).toBe(key);
@@ -58,6 +60,7 @@ describe('KeyStore', () => {
       const unwrapFn = vi.fn().mockResolvedValue(vaultKey);
 
       await store.getOrUnwrapVaultKey('1', wrappedKey, unwrapFn);
+
       const result2 = await store.getOrUnwrapVaultKey('1', wrappedKey, unwrapFn);
 
       expect(result2).toBe(vaultKey);
@@ -132,6 +135,7 @@ describe('KeyStore', () => {
 
     it('pre-cached vault key is returned without calling unwrapFn', async () => {
       store.storeVaultKey('1', vaultKey);
+
       const unwrapFn = vi.fn();
 
       const result = await store.getOrUnwrapVaultKey('1', wrappedKey, unwrapFn);
@@ -144,6 +148,7 @@ describe('KeyStore', () => {
   describe('clear', () => {
     it('zeros personal key bytes in-place', () => {
       const key = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+
       store.storePersonalKey(key);
       store.clear();
 
@@ -200,6 +205,7 @@ describe('KeyStore', () => {
       store.clear();
 
       const staleKey = new Uint8Array([1, 2, 3]);
+
       resolveUnwrap(staleKey);
 
       await expect(promise).rejects.toThrow('Crypto session cleared while unwrapping vault key');

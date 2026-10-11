@@ -147,11 +147,13 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
     (detail?: AdminFormDetail) => {
       if (detail) {
         const nextSections = detail.sections.map((section) => toEditorSection(section, formClass));
+
         setTitle(detail.form.title);
         setSections(nextSections);
         setSnapshot(serialize(detail.form.title, nextSections));
       } else {
         const nextSections = seedSectionsForFormClass(formClass);
+
         setTitle('');
         setSections(nextSections);
         setSnapshot(serialize('', nextSections));
@@ -185,6 +187,7 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
 
     setSections((prev) => {
       const { source, target } = event.operation;
+
       return applyDndReorder(prev, (s) => s.clientId, source, target) ?? prev;
     });
   }, []);
@@ -245,6 +248,7 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
 
     if (trimmedTitle.length === 0) {
       toast.error('Title is required');
+
       return;
     }
 
@@ -286,8 +290,10 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
   const handleClose = useCallback(() => {
     if (isDirty) {
       setDiscardDialogOpen(true);
+
       return;
     }
+
     onClose();
   }, [isDirty, onClose]);
 

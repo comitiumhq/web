@@ -59,7 +59,7 @@ function emailActivity(id: string, emailId: string, applicationId = 'application
     applicationId,
     jobId: 'job-1',
     jobTitle: 'Engineer',
-    actor: { userId: null, externalWallet: null, name: 'Recruiter', avatarUrl: null },
+    actor: { userId: null, name: 'Recruiter', avatarUrl: null },
     actorRole: 'org_member',
     metadata: {},
     payload: { kind: 'email', emailId, content: envelope(`${id}-ciphertext`) },
@@ -75,7 +75,9 @@ describe('useDecryptedActivityEmails', () => {
   it('does not expose email content decrypted for the previous candidate', async () => {
     const previous = deferred<DecryptedEmailContent>();
     const current = deferred<DecryptedEmailContent>();
+
     mocks.decryptEmailContentForOrganization.mockReturnValueOnce(previous.promise).mockReturnValueOnce(current.promise);
+
     const hook = await renderHook(
       (props?: { candidateId: string; events: ActivityFeedRow[] }) =>
         useDecryptedActivityEmails(props?.candidateId ?? null, 'org-1', props?.events ?? [], wrappedVaultKey),
@@ -107,7 +109,9 @@ describe('useDecryptedActivityEmails', () => {
   it('decrypts a repeated email id once and binds it to its application context', async () => {
     const first = emailActivity('event-1', 'email-1');
     const duplicate = emailActivity('event-2', 'email-1');
+
     mocks.decryptEmailContentForOrganization.mockResolvedValue(decryptedContent('Decrypted'));
+
     const hook = await renderHook(() =>
       useDecryptedActivityEmails('candidate-1', 'org-1', [first, duplicate], wrappedVaultKey),
     );
@@ -124,6 +128,7 @@ describe('useDecryptedActivityEmails', () => {
 
   it('records a failed email without retrying it on rerender', async () => {
     mocks.decryptEmailContentForOrganization.mockRejectedValue(new Error('bad key'));
+
     const hook = await renderHook(() =>
       useDecryptedActivityEmails('candidate-1', 'org-1', [emailActivity('event-1', 'email-1')], wrappedVaultKey),
     );

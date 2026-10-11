@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
-import { ArchiveIcon, ArrowUpRightIcon, CaretDownIcon, DotsThreeIcon, EnvelopeSimpleIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, CaretDownIcon, EnvelopeSimpleIcon } from '@phosphor-icons/react';
 import { memo, useCallback, useMemo } from 'react';
 import type { InterviewStage } from '@/lib/schemas/pipeline';
 
@@ -17,12 +17,10 @@ interface CandidateSheetHeaderActionsProps {
   stages: InterviewStage[] | null;
   isChangingStage: boolean;
   isTerminalActionPending: boolean;
-  duplicateOfApplicationId: string | null;
   onStageChange: (stageId: string) => void;
   onEmail: () => void;
   onArchive: () => void;
   onReopenToStage: (stageId: string) => void;
-  onOpenPrimaryApplication: () => void;
 }
 
 export function CandidateSheetHeaderActions({
@@ -31,12 +29,10 @@ export function CandidateSheetHeaderActions({
   stages,
   isChangingStage,
   isTerminalActionPending,
-  duplicateOfApplicationId,
   onStageChange,
   onEmail,
   onArchive,
   onReopenToStage,
-  onOpenPrimaryApplication,
 }: CandidateSheetHeaderActionsProps) {
   const nextStages = useMemo(
     () => stages?.filter((stage) => stage.id !== currentStageId) ?? [],
@@ -44,7 +40,6 @@ export function CandidateSheetHeaderActions({
   );
   const reopenStages = useMemo(() => stages?.filter((stage) => stage.stageType !== 'hired') ?? [], [stages]);
   const consideration = capabilities.consideration;
-  const hasPrimaryApplication = duplicateOfApplicationId !== null;
   const terminalActionPending = isTerminalActionPending || isChangingStage;
   const showChangeStage = consideration.canMoveStage && currentStageId !== null && nextStages.length > 0;
 
@@ -80,22 +75,6 @@ export function CandidateSheetHeaderActions({
           <ArchiveIcon data-icon="inline-start" />
           Archive
         </Button>
-      )}
-
-      {hasPrimaryApplication && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon-sm" aria-label="More actions">
-              <DotsThreeIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onSelect={onOpenPrimaryApplication}>
-              <ArrowUpRightIcon />
-              View primary application
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       )}
     </div>
   );

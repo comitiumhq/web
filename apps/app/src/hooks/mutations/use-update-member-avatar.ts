@@ -13,6 +13,7 @@ export function useUpdateMemberAvatar(orgId: string) {
       queryClient.setQueryData<OrgMeResponse>(qk.org.permissions(orgId), (current) =>
         current ? { ...current, avatarUrl } : current,
       );
+
       const avatarConsumerKeys = [
         qk.org.team(orgId),
         qk.application.root(),
@@ -26,6 +27,7 @@ export function useUpdateMemberAvatar(orgId: string) {
       for (const queryKey of avatarConsumerKeys) {
         queryClient.invalidateQueries({ queryKey });
       }
+
       toast.success(avatarUrl ? 'Profile photo updated' : 'Profile photo removed');
     },
     onError: (error: Error) => {

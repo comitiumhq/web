@@ -49,9 +49,11 @@ function operation(id: string, overrides: Partial<BulkOperation> = {}): BulkOper
 
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+
   return wrapper;
 }
 
@@ -62,8 +64,10 @@ afterEach(() => {
 describe('useBulkOperation', () => {
   it('creates one server draft for the exact open selection', async () => {
     const draft = operation('operation-a');
+
     mocks.createBulkOperationDraft.mockResolvedValue(draft);
     mocks.getBulkOperation.mockResolvedValue(draft);
+
     const hook = await renderHook(
       () =>
         useBulkOperation({
@@ -142,6 +146,7 @@ describe('useBulkOperation', () => {
     );
 
     await vi.waitFor(() => expect(hook.result.current.operation?.id).toBe(firstDraft.id));
+
     const firstIdempotencyKey = mocks.createBulkOperationDraft.mock.calls[0][1].idempotencyKey;
 
     await hook.rerender({ orgId: ORG_ID, targetIds: [APPLICATION_B, APPLICATION_A] });
@@ -164,10 +169,12 @@ describe('useBulkOperation', () => {
       startedAt: '2026-08-31T00:01:00.000Z',
       counts: { ...draft.counts, ready: 0, processing: 1 },
     });
+
     mocks.createBulkOperationDraft.mockResolvedValue(draft);
     mocks.getBulkOperation.mockResolvedValue(draft);
     mocks.attachBulkOperationPayloads.mockResolvedValue(draft);
     mocks.commitBulkOperation.mockResolvedValue(running);
+
     const hook = await renderHook(
       () =>
         useBulkOperation({
@@ -197,8 +204,10 @@ describe('useBulkOperation', () => {
 
   it('does not commit through a stale callback after the draft is discarded', async () => {
     const draft = operation('operation-discarded');
+
     mocks.createBulkOperationDraft.mockResolvedValue(draft);
     mocks.getBulkOperation.mockResolvedValue(draft);
+
     const hook = await renderHook(
       () =>
         useBulkOperation({
@@ -227,9 +236,11 @@ describe('useBulkOperation', () => {
     const attachment = new Promise<BulkOperation>((resolve) => {
       finishAttachment = resolve;
     });
+
     mocks.createBulkOperationDraft.mockResolvedValue(draft);
     mocks.getBulkOperation.mockResolvedValue(draft);
     mocks.attachBulkOperationPayloads.mockReturnValue(attachment);
+
     const hook = await renderHook(
       () =>
         useBulkOperation({
@@ -342,8 +353,10 @@ describe('useBulkOperation', () => {
     );
     mocks.commitBulkOperation.mockImplementation(async () => {
       serverOperation = running;
+
       return running;
     });
+
     const hook = await renderHook(
       (props?: { targetIds: string[]; open: boolean }) =>
         useBulkOperation({
@@ -388,12 +401,15 @@ describe('useBulkOperation', () => {
       counts: { ...draft.counts, ready: 0, processing: 1 },
     });
     let serverOperation = draft;
+
     mocks.createBulkOperationDraft.mockResolvedValue(draft);
     mocks.getBulkOperation.mockImplementation(async () => serverOperation);
     mocks.commitBulkOperation.mockImplementation(async () => {
       serverOperation = running;
+
       throw new TypeError('Response was lost');
     });
+
     const props = {
       orgId: ORG_ID,
       operationType: 'application.email' as const,

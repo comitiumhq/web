@@ -71,6 +71,7 @@ export const HEADING_SHORTCUT_KEYS: Record<Level, string> = {
  */
 export function canToggle(editor: Editor | null, level?: Level, turnInto = true): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!isNodeInSchema('heading', editor) || isNodeTypeSelected(editor, ['image'])) return false;
 
   if (!turnInto) {
@@ -149,6 +150,7 @@ export function toggleHeading(editor: Editor | null, level: Level | Level[]): bo
         editor,
         node: state.selection.$anchor.node(1),
       })?.pos;
+
       if (!isValidPosition(pos)) return false;
 
       tr = tr.setSelection(NodeSelection.create(state.doc, pos));
@@ -212,6 +214,7 @@ export function shouldShowButton(props: {
     if (Array.isArray(level)) {
       return level.some((l) => canToggle(editor, l));
     }
+
     return canToggle(editor, level);
   }
 
@@ -292,9 +295,11 @@ export function useHeading(config: UseHeadingConfig) {
     if (!editor) return false;
 
     const success = toggleHeading(editor, level);
+
     if (success) {
       onToggled?.();
     }
+
     return success;
   }, [editor, level, onToggled]);
 

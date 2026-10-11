@@ -1,6 +1,5 @@
 export const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 export const DECIMAL_INTEGER_REGEX = /^\d+$/;
-export const USDC_AMOUNT_REGEX = /^\d+(?:\.\d{1,6})?$/;
 export const BYTES32_HEX_REGEX = /^0x[a-fA-F0-9]{64}$/;
 export const EVM_HEX_DATA_REGEX = /^0x[a-fA-F0-9]*$/;
 export const ECDSA_SIGNATURE_HEX_REGEX = /^0x[a-fA-F0-9]{130}$/;

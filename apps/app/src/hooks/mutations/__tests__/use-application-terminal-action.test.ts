@@ -10,7 +10,6 @@ const mocks = vi.hoisted(() => ({
   mutate: vi.fn(),
   onCompleted: vi.fn(),
   prepareEncryptedEmailDelivery: vi.fn(),
-  refreshAfterOnchainOperationSettles: vi.fn(),
   reopenApplication: vi.fn(),
   toastError: vi.fn(),
   toastInfo: vi.fn(),
@@ -41,10 +40,6 @@ vi.mock('sonner', () => ({
   },
 }));
 
-vi.mock('@comitium/chain/onchain-operation-observer', () => ({
-  refreshAfterOnchainOperationSettles: mocks.refreshAfterOnchainOperationSettles,
-}));
-
 vi.mock('@/lib/api/application-outcomes', () => ({
   archiveApplication: mocks.archiveApplication,
   reopenApplication: mocks.reopenApplication,
@@ -60,7 +55,6 @@ vi.mock('@/lib/applications/communication/email-delivery', () => ({
 
 import { useApplicationTerminalAction } from '../use-application-terminal-action';
 
-const OPERATION_ID = '11111111-1111-4111-8111-111111111111';
 const params = {
   action: 'archive' as const,
   applicationId: '22222222-2222-4222-8222-222222222222',
@@ -72,10 +66,7 @@ const params = {
 
 interface MutationOptions {
   mutationFn: (variables: TerminalActionParams) => Promise<unknown>;
-  onSuccess: (
-    result: { status: 'accepted'; operationId: string } | { status: 'completed' },
-    variables: typeof params,
-  ) => Promise<void>;
+  onSuccess: (result: { status: 'completed' }, variables: typeof params) => Promise<void>;
 }
 
 type TerminalActionParams =
@@ -121,7 +112,6 @@ describe('application terminal action completion', () => {
       content: { ciphertext: 'ciphertext' },
       deliveryGrant: { ciphertext: 'grant' },
     });
-    mocks.refreshAfterOnchainOperationSettles.mockResolvedValue('completed');
     mocks.reopenApplication.mockResolvedValue({ status: 'completed' });
   });
 
@@ -176,6 +166,7 @@ describe('application terminal action completion', () => {
 
   it('does not archive when notice encryption fails', async () => {
     mocks.prepareEncryptedEmailDelivery.mockRejectedValue(new Error('encryption failed'));
+
     const options = getMutationOptions();
 
     await expect(
@@ -212,30 +203,6 @@ describe('application terminal action completion', () => {
     });
     expect(mocks.archiveApplication).not.toHaveBeenCalled();
     expect(mocks.getRecipientKey).not.toHaveBeenCalled();
-  });
-
-  it('does not report archive success before the accepted operation settles', async () => {
-    const options = getMutationOptions();
-    let settle: (stage: 'completed') => void = () => undefined;
-    const settlement = new Promise<'completed'>((resolve) => {
-      settle = resolve;
-    });
-    mocks.refreshAfterOnchainOperationSettles.mockReturnValue(settlement);
-
-    const completion = options.onSuccess({ status: 'accepted', operationId: OPERATION_ID }, params);
-
-    expect(mocks.refreshAfterOnchainOperationSettles).toHaveBeenCalledWith(OPERATION_ID, expect.any(Function));
-    expect(mocks.toastSuccess).not.toHaveBeenCalled();
-    expect(mocks.onCompleted).not.toHaveBeenCalled();
-
-    settle('completed');
-    await completion;
-
-    expect(mocks.invalidateQueries).toHaveBeenCalled();
-    expect(mocks.toastSuccess).toHaveBeenCalledWith('Application archived', {
-      id: 'application-terminal-action',
-    });
-    expect(mocks.onCompleted).toHaveBeenCalledOnce();
   });
 
   it('refreshes completed archive state before closing the dialog', async () => {

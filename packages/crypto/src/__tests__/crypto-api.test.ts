@@ -184,8 +184,10 @@ describe('CryptoWorkerApi', () => {
     it('clears and unlocks again for a different session identity', async () => {
       await unlockApi(api);
       mockUnwrapPersonalKeyWithWrappingKey.mockClear();
+
       const nextPersonalKey = new Uint8Array(32).fill(7);
       const nextEncryptedPersonalKey = mockWrappedPersonalKey({ pk: { ek: 'different-ek', iv: 'nn' } });
+
       mockUnwrapPersonalKeyWithWrappingKey.mockResolvedValue({
         personalKey: nextPersonalKey,
         personalKeyWrappingKey: Uint8Array.from(PERSONAL_KEY_WRAPPING_KEY),
@@ -213,6 +215,7 @@ describe('CryptoWorkerApi', () => {
 
     it('unlocks with a remembered-device record', async () => {
       const record = { id: 'record' };
+
       rememberedDeviceStoreMock.load.mockResolvedValue(record);
       rememberedDeviceStoreMock.decrypt.mockResolvedValue(Uint8Array.from(PERSONAL_KEY_WRAPPING_KEY));
       mockDecryptPersonalKeyWithWrappingKey.mockResolvedValue(PERSONAL_KEY);
@@ -229,6 +232,7 @@ describe('CryptoWorkerApi', () => {
 
     it('deletes a local record and falls back when remembered decrypt fails', async () => {
       const record = { id: 'record' };
+
       rememberedDeviceStoreMock.load.mockResolvedValue(record);
       rememberedDeviceStoreMock.decrypt.mockRejectedValue(new Error('bad local key'));
 
@@ -261,6 +265,7 @@ describe('CryptoWorkerApi', () => {
 
       const envelope = mockEncryptedEnvelope();
       const decrypted = { name: 'Jane' };
+
       mockDecryptApp.mockResolvedValue(decrypted);
 
       const result = await api.decryptApplication(envelope, '1', WRAPPED_VAULT_KEY, TEST_CONTEXT);
@@ -289,6 +294,7 @@ describe('CryptoWorkerApi', () => {
     it('delegates and transfers result', async () => {
       const input = new Uint8Array([1, 2, 3]);
       const encrypted = new Uint8Array([4, 5, 6, 7]);
+
       mockEncryptFile.mockResolvedValue(encrypted);
 
       const result = await api.encryptFile(TEST_PUBLIC_KEY, 1, input, TEST_CONTEXT);
@@ -309,6 +315,7 @@ describe('CryptoWorkerApi', () => {
         blob: new Uint8Array([4, 5, 6, 7]),
         overlayKeys: [{ recipient: 'processor:grant-1', ...mockWrappedKey() }],
       };
+
       mockEncryptFileWithOverlays.mockResolvedValue(encrypted);
 
       const result = await api.encryptFileWithOverlays(TEST_PUBLIC_KEY, 1, input, TEST_CONTEXT, overlayRecipients);
@@ -332,6 +339,7 @@ describe('CryptoWorkerApi', () => {
 
       const blob = new Uint8Array([10, 20, 30]);
       const decrypted = new Uint8Array([1, 2, 3]);
+
       mockDecryptFile.mockResolvedValue(decrypted);
 
       const result = await api.decryptFile(blob, '1', WRAPPED_VAULT_KEY, TEST_CONTEXT);
@@ -351,6 +359,7 @@ describe('CryptoWorkerApi', () => {
 
       const encrypted = mockEncryptedEnvelope();
       const decrypted = { text: 'hello' };
+
       mockDecryptEmailContentVault.mockResolvedValue(decrypted);
 
       const result = await api.decryptEmailContentForOrganization(encrypted, '1', WRAPPED_VAULT_KEY, TEST_CONTEXT);
@@ -366,6 +375,7 @@ describe('CryptoWorkerApi', () => {
 
       const encrypted = mockEncryptedEnvelope();
       const decrypted = { text: 'hi' };
+
       mockDecryptEmailContentPersonal.mockResolvedValue(decrypted);
 
       const result = await api.decryptEmailContentForApplicant(encrypted, TEST_CONTEXT);
@@ -381,6 +391,7 @@ describe('CryptoWorkerApi', () => {
     it('generates keypair, wraps private key, returns public + encrypted', async () => {
       const privateKey = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
       const encryptedPersonalKey = mockWrappedPersonalKey();
+
       mockGeneratePersonalKeyPair.mockReturnValue({ privateKey, publicKey: TEST_PUBLIC_KEY });
       mockWrapPersonalKey.mockResolvedValue(encryptedPersonalKey);
 
@@ -394,6 +405,7 @@ describe('CryptoWorkerApi', () => {
 
     it('zeros private key after wrapping', async () => {
       const privateKey = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+
       mockGeneratePersonalKeyPair.mockReturnValue({ privateKey, publicKey: TEST_PUBLIC_KEY });
       mockWrapPersonalKey.mockResolvedValue(mockWrappedPersonalKey());
 
@@ -404,6 +416,7 @@ describe('CryptoWorkerApi', () => {
 
     it('zeros private key even when wrapPersonalKey throws', async () => {
       const privateKey = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+
       mockGeneratePersonalKeyPair.mockReturnValue({ privateKey, publicKey: TEST_PUBLIC_KEY });
       mockWrapPersonalKey.mockRejectedValue(new Error('wrap failed'));
 
@@ -418,7 +431,9 @@ describe('CryptoWorkerApi', () => {
       const privateKey = new Uint8Array([1, 2, 3, 4]);
 
       mockGenerateVaultKeyPair.mockReturnValue({ privateKey, publicKey: OTHER_PUBLIC_KEY });
+
       const wrappedVaultKey = mockWrappedKey();
+
       mockWrapVaultKey.mockResolvedValue(wrappedVaultKey);
 
       const result = await api.generateAndWrapVaultKey(TEST_PUBLIC_KEY);
@@ -438,6 +453,7 @@ describe('CryptoWorkerApi', () => {
       await unlockApi(api);
 
       const memberWrapped = mockWrappedKey();
+
       mockGrantAccess.mockResolvedValue(memberWrapped);
 
       const result = await api.grantVaultAccess(WRAPPED_VAULT_KEY, OTHER_PUBLIC_KEY);
@@ -465,8 +481,10 @@ describe('CryptoWorkerApi', () => {
     it('normalizes custom field values before hashing', async () => {
       await unlockApi(api);
       setupVaultKeyUnwrap();
+
       const orgId = '11111111-1111-1111-1111-111111111111';
       const fieldId = '22222222-2222-4222-8222-222222222222';
+
       const hash = (value: string) =>
         api.hashCustomFieldValue(orgId, WRAPPED_VAULT_KEY, fieldId, 'multiple_choice', value);
 

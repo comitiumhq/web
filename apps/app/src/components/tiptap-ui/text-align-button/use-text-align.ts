@@ -63,6 +63,7 @@ export const textAlignLabels: Record<TextAlign, string> = {
  */
 export function canSetTextAlign(editor: Editor | null, align: TextAlign): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!isExtensionAvailable(editor, 'textAlign') || isNodeTypeSelected(editor, ['image', 'horizontalRule']))
     return false;
 
@@ -80,6 +81,7 @@ export function hasSetTextAlign(commands: ChainedCommands): commands is ChainedC
  */
 export function isTextAlignActive(editor: Editor | null, align: TextAlign): boolean {
   if (!editor || !editor.isEditable) return false;
+
   return editor.isActive({ textAlign: align });
 }
 
@@ -88,9 +90,11 @@ export function isTextAlignActive(editor: Editor | null, align: TextAlign): bool
  */
 export function setTextAlign(editor: Editor | null, align: TextAlign): boolean {
   if (!editor || !editor.isEditable) return false;
+
   if (!canSetTextAlign(editor, align)) return false;
 
   const chain = editor.chain().focus();
+
   if (hasSetTextAlign(chain)) {
     return chain.setTextAlign(align).run();
   }
@@ -190,9 +194,11 @@ export function useTextAlign(config: UseTextAlignConfig) {
     if (!editor) return false;
 
     const success = setTextAlign(editor, align);
+
     if (success) {
       onAligned?.();
     }
+
     return success;
   }, [editor, align, onAligned]);
 

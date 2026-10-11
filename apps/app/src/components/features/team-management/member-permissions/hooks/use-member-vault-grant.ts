@@ -21,6 +21,7 @@ export function useEnsureMemberVaultGrant() {
       }
 
       await ensureUnlocked();
+
       const ownWrappedKey = await getWrappedVaultKey(orgId);
       const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownWrappedKey, memberPublicKey);
 

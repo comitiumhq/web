@@ -5,7 +5,6 @@ interface BuildConsiderationsParams {
   application: ApplicationApiResponse | null;
   otherApplications: OtherApplicationSummary[];
   jobId: string;
-  onchainCommitmentId: number | null;
   jobTitle: string | null;
   currentStageName: string | null;
 }
@@ -29,7 +28,6 @@ export function buildConsiderations({
   application,
   otherApplications,
   jobId,
-  onchainCommitmentId,
   jobTitle,
   currentStageName,
 }: BuildConsiderationsParams): OtherApplicationSummary[] {
@@ -40,19 +38,17 @@ export function buildConsiderations({
   const current = {
     id: application.id,
     jobId,
-    onchainCommitmentId,
     jobTitle,
     appliedAt: application.appliedAt,
     currentStageId: application.currentStageId,
     terminalOutcome: application.terminalOutcome,
     terminalOutcomeAt: application.terminalOutcomeAt,
     currentStageName,
-    isResponded: application.isResponded,
     archivedAt: application.archivedAt,
-    duplicateAttemptCount: application.duplicateAttemptCount,
   };
 
   const considerationsById = new Map(otherApplications.map((item) => [item.id, item]));
+
   considerationsById.set(current.id, current);
 
   return [...considerationsById.values()].sort(compareConsiderations);
@@ -72,7 +68,6 @@ export function useConsiderationSelection({
   application,
   otherApplications,
   jobId,
-  onchainCommitmentId,
   jobTitle,
   currentStageName,
   onApplicationSwitch,
@@ -84,11 +79,10 @@ export function useConsiderationSelection({
         application,
         otherApplications,
         jobId,
-        onchainCommitmentId,
         jobTitle,
         currentStageName,
       }),
-    [application, currentStageName, jobId, onchainCommitmentId, jobTitle, otherApplications],
+    [application, currentStageName, jobId, jobTitle, otherApplications],
   );
 
   const handleApplicationClick = useCallback(

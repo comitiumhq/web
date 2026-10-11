@@ -1,6 +1,5 @@
-import type { DuplicateApplicationAttempt, OtherApplicationSummary } from '@comitium/schemas/applications';
+import type { OtherApplicationSummary } from '@comitium/schemas/applications';
 import { APPLICATION_TERMINAL_OUTCOME_LABEL } from '@comitium/ui/application-outcome-labels';
-import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
 import { Skeleton } from '@comitium/ui/skeleton';
@@ -23,17 +22,6 @@ interface ConsiderationRailProps {
   onLoadMore: () => void;
   onRetry: () => void;
   onApplicationClick: (applicationId: string) => void;
-  duplicateAttempts: DuplicateApplicationAttempt[];
-  totalDuplicateAttempts: number;
-  isInitialDuplicateAttemptsLoading: boolean;
-  isInitialDuplicateAttemptsError: boolean;
-  isRetryingDuplicateAttempts: boolean;
-  hasNextDuplicateAttemptsPage: boolean;
-  isFetchingNextDuplicateAttemptsPage: boolean;
-  isFetchNextDuplicateAttemptsPageError: boolean;
-  onLoadMoreDuplicateAttempts: () => void;
-  onRetryDuplicateAttempts: () => void;
-  onDuplicateAttemptClick: (applicationId: string) => void;
 }
 
 export function ConsiderationRail({
@@ -50,17 +38,6 @@ export function ConsiderationRail({
   onLoadMore,
   onRetry,
   onApplicationClick,
-  duplicateAttempts,
-  totalDuplicateAttempts,
-  isInitialDuplicateAttemptsLoading,
-  isInitialDuplicateAttemptsError,
-  isRetryingDuplicateAttempts,
-  hasNextDuplicateAttemptsPage,
-  isFetchingNextDuplicateAttemptsPage,
-  isFetchNextDuplicateAttemptsPageError,
-  onLoadMoreDuplicateAttempts,
-  onRetryDuplicateAttempts,
-  onDuplicateAttemptClick,
 }: ConsiderationRailProps) {
   return (
     <div className="flex h-full flex-col overflow-hidden border-r border-separator bg-background">
@@ -95,33 +72,6 @@ export function ConsiderationRail({
             errorLabel="Could not load more applications."
             onLoadMore={onLoadMore}
           />
-
-          {totalDuplicateAttempts > 0 && (
-            <>
-              <p className="px-1 pb-1 pt-3 text-xs font-medium text-muted-foreground">
-                Additional attempts ({totalDuplicateAttempts})
-              </p>
-              {duplicateAttempts.map((attempt) => (
-                <DuplicateAttemptButton key={attempt.id} attempt={attempt} onClick={onDuplicateAttemptClick} />
-              ))}
-              <InitialConsiderationsStatus
-                isLoading={isInitialDuplicateAttemptsLoading}
-                isError={isInitialDuplicateAttemptsError}
-                isRetrying={isRetryingDuplicateAttempts}
-                loadingKind="attempt"
-                errorLabel="Attempts could not be loaded."
-                onRetry={onRetryDuplicateAttempts}
-              />
-              <InfiniteCollectionStatus
-                hasNextPage={hasNextDuplicateAttemptsPage}
-                isFetchingNextPage={isFetchingNextDuplicateAttemptsPage}
-                isFetchNextPageError={isFetchNextDuplicateAttemptsPageError}
-                loadingLabel="Loading attempts..."
-                errorLabel="Could not load more attempts."
-                onLoadMore={onLoadMoreDuplicateAttempts}
-              />
-            </>
-          )}
         </div>
       </div>
     </div>
@@ -269,38 +219,4 @@ function getConsiderationStatusLabel(app: OtherApplicationSummary): string {
   }
 
   return app.currentStageName || 'Active';
-}
-
-interface DuplicateAttemptButtonProps {
-  attempt: DuplicateApplicationAttempt;
-  onClick: (applicationId: string) => void;
-}
-
-const DuplicateAttemptButton = memo(function DuplicateAttemptButton({ attempt, onClick }: DuplicateAttemptButtonProps) {
-  const handleClick = useCallback(() => {
-    onClick(attempt.id);
-  }, [attempt.id, onClick]);
-  const status = getDuplicateAttemptStatus(attempt);
-
-  return (
-    <Button variant="ghost" onClick={handleClick} className="h-auto w-full justify-start px-2 py-2 text-left">
-      <div className="min-w-0">
-        <p className="text-sm font-medium">Application attempt</p>
-        <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-          <Badge variant="outline" className="h-4 px-1 py-0 text-[10px]">
-            {status}
-          </Badge>
-          <span className="text-[10px] text-muted-foreground">{formatRelativeTime(attempt.appliedAt)}</span>
-        </div>
-      </div>
-    </Button>
-  );
-});
-
-function getDuplicateAttemptStatus(attempt: DuplicateApplicationAttempt): string {
-  if (attempt.terminalOutcome) {
-    return APPLICATION_TERMINAL_OUTCOME_LABEL[attempt.terminalOutcome];
-  }
-
-  return attempt.isResponded ? 'Responded' : 'Awaiting response';
 }

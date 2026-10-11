@@ -100,10 +100,13 @@ describe('DataTableVirtual', () => {
     const screen = await render(<SortableTable />);
 
     const sortButton = screen.getByRole('button', { name: 'Name' });
+
     await sortButton.click();
 
     expect(sortButton.element().closest('th')?.getAttribute('aria-sort')).toBe('ascending');
+
     const rows = screen.getByRole('row');
+
     await expect.element(rows.nth(1)).toHaveTextContent('Alice');
     await expect.element(rows.nth(2)).toHaveTextContent('Bob');
   });
@@ -140,6 +143,7 @@ describe('DataTableVirtual', () => {
 
   it('deduplicates repeated load-more observations for one in-flight request', async () => {
     const onLoadMore = vi.fn();
+
     await render(
       <DataTableVirtual
         ariaLabel="People"

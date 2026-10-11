@@ -51,11 +51,3 @@ export function uploadApplicationFile(applicationId: string, fileId: string, upl
 export function finalizeApplication(applicationId: string, body: FinalizeApplicationInput) {
   return api.post(`/applications/${applicationId}/finalize`, body, applicationSubmitDispositionSchema);
 }
-
-export function retryApplicationOnchainOperation(applicationId: string, operationId: string) {
-  return api.post(
-    `/applications/${applicationId}/onchain-operation/retry`,
-    { operationId },
-    applicationSubmitDispositionSchema,
-  );
-}

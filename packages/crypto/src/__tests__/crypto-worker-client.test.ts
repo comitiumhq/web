@@ -25,6 +25,7 @@ class MockWorker {
 
   addEventListener(type: string, listener: () => void): void {
     const listeners = this.listeners.get(type) ?? new Set();
+
     listeners.add(listener);
     this.listeners.set(type, listeners);
   }
@@ -76,6 +77,7 @@ describe('CryptoWorkerClient', () => {
     client = new CryptoWorkerClient(onFailure);
 
     const pending = client.run((api) => api.clear());
+
     await vi.waitFor(() => expect(remote.clear).toHaveBeenCalledOnce());
 
     client.dispose();
@@ -90,6 +92,7 @@ describe('CryptoWorkerClient', () => {
     client = new CryptoWorkerClient(onFailure);
 
     const pending = client.run((api) => api.clear());
+
     workerInstances[0]?.emit('error');
 
     await expect(pending).rejects.toThrow('Crypto worker failed');
@@ -119,6 +122,7 @@ describe('CryptoWorkerClient', () => {
     client = new CryptoWorkerClient(onFailure);
 
     const pending = client.run((api) => api.clear());
+
     await vi.waitFor(() => expect(remote.clear).toHaveBeenCalledOnce());
 
     workerInstances[0]?.emit('error');
@@ -132,6 +136,7 @@ describe('CryptoWorkerClient', () => {
     client = new CryptoWorkerClient(onFailure);
 
     const pending = client.run((api) => api.clear());
+
     await vi.waitFor(() => expect(remote.clear).toHaveBeenCalledOnce());
 
     workerInstances[0]?.emit('messageerror');

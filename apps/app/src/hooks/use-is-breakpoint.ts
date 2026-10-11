@@ -17,6 +17,7 @@ export function useIsBreakpoint(mode: BreakpointMode = 'max', breakpoint = 768) 
     const query = mode === 'min' ? `(min-width: ${breakpoint}px)` : `(max-width: ${breakpoint - 1}px)`;
 
     const mql = window.matchMedia(query);
+
     const onChange = (e: MediaQueryListEvent) => setMatches(e.matches);
 
     // Set initial value
@@ -24,6 +25,7 @@ export function useIsBreakpoint(mode: BreakpointMode = 'max', breakpoint = 768) 
 
     // Add listener
     mql.addEventListener('change', onChange);
+
     return () => mql.removeEventListener('change', onChange);
   }, [mode, breakpoint]);
 

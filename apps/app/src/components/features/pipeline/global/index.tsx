@@ -128,7 +128,6 @@ export function GlobalPipelineDashboard({ org, activeTab, onTabChange }: GlobalP
     (candidate: PipelineCandidate): CandidateSheetSelection => ({
       id: candidate.id,
       jobId: candidate.jobId,
-      onchainCommitmentId: candidate.onchainCommitmentId,
       jobTitle: candidate.jobTitle,
       stages: [],
     }),
@@ -150,7 +149,6 @@ export function GlobalPipelineDashboard({ org, activeTab, onTabChange }: GlobalP
     setSelectedApp({
       id: candidateId,
       jobId: job.id,
-      onchainCommitmentId: job.onchainCommitmentId,
       jobTitle: job.title,
       stages: job.stages,
     });
@@ -171,7 +169,6 @@ export function GlobalPipelineDashboard({ org, activeTab, onTabChange }: GlobalP
     setSelectedApp({
       id: app.id,
       jobId: app.jobId,
-      onchainCommitmentId: app.onchainCommitmentId,
       jobTitle: app.jobTitle,
       stages: [],
     });

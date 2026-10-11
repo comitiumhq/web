@@ -75,7 +75,7 @@ function noteActivity(noteId: string, content: EncryptedEnvelope): ActivityFeedR
     applicationId: null,
     jobId: null,
     jobTitle: null,
-    actor: { userId: null, externalWallet: null, name: 'Recruiter', avatarUrl: null },
+    actor: { userId: null, name: 'Recruiter', avatarUrl: null },
     actorRole: 'org_member',
     metadata: {},
     payload: { kind: 'note', noteId, content, isPrivate: false },
@@ -98,6 +98,7 @@ describe('useDecryptedNotes', () => {
     const current = deferred<unknown>();
     mocks.notes = [{ id: 'note-1', content: envelope('previous') }];
     mocks.decryptApplication.mockReturnValueOnce(previous.promise).mockReturnValueOnce(current.promise);
+
     const hook = await renderHook(
       (props?: { candidateId: string }) => useDecryptedNotes('application-1', 'org-1', props?.candidateId ?? null),
       { initialProps: { candidateId: 'candidate-1' } },
@@ -123,6 +124,7 @@ describe('useDecryptedNotes', () => {
     mocks.notes = [{ id: 'note-1', content }];
     mocks.activityData = { data: [noteActivity('note-1', content)] };
     mocks.decryptApplication.mockResolvedValue(noteDoc('Shared'));
+
     const hook = await renderHook(() => useDecryptedNotes('application-1', 'org-1', 'candidate-1'));
 
     await vi.waitFor(() => expect(hook.result.current.decryptedNotes['note-1']).toEqual(noteDoc('Shared')));
@@ -138,6 +140,7 @@ describe('useDecryptedNotes', () => {
   it('records a failed note without retrying it on rerender', async () => {
     mocks.notes = [{ id: 'note-1', content: envelope('invalid') }];
     mocks.decryptApplication.mockRejectedValue(new Error('bad key'));
+
     const hook = await renderHook(() => useDecryptedNotes('application-1', 'org-1', 'candidate-1'));
 
     await vi.waitFor(() => expect(hook.result.current.failedNoteIds.has('note-1')).toBe(true));

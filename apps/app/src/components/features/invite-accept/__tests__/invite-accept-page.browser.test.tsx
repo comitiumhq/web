@@ -137,6 +137,7 @@ describe('InviteAcceptPage global account actions', () => {
     const screen = await renderPage();
 
     await screen.getByRole('button', { name: 'Join workspace' }).click();
+
     const acceptOptions = mocks.acceptInvite.mock.calls[0]?.[1];
 
     acceptOptions.onError(new Error('Invite belongs to another account'));

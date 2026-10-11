@@ -164,7 +164,9 @@ export default function ColorBends({
 
   useEffect(() => {
     const container = containerRef.current;
+
     if (!container) return;
+
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
@@ -198,6 +200,7 @@ export default function ColorBends({
     materialRef.current = material;
 
     const mesh = new THREE.Mesh(geometry, material);
+
     scene.add(mesh);
 
     const renderer = new THREE.WebGLRenderer({
@@ -219,6 +222,7 @@ export default function ColorBends({
     const handleResize = () => {
       const w = container.clientWidth || 1;
       const h = container.clientHeight || 1;
+
       renderer.setSize(w, h, false);
       (material.uniforms.uCanvas.value as THREE.Vector2).set(w, h);
     };
@@ -227,6 +231,7 @@ export default function ColorBends({
 
     if ('ResizeObserver' in window) {
       const ro = new ResizeObserver(handleResize);
+
       ro.observe(container);
       resizeObserverRef.current = ro;
     } else {
@@ -235,6 +240,7 @@ export default function ColorBends({
 
     const loop = () => {
       timer.update();
+
       const dt = timer.getDelta();
       const elapsed = timer.getElapsed();
       material.uniforms.uTime.value = elapsed;
@@ -243,26 +249,32 @@ export default function ColorBends({
       const rad = (deg * Math.PI) / 180;
       const c = Math.cos(rad);
       const s = Math.sin(rad);
+
       (material.uniforms.uRot.value as THREE.Vector2).set(c, s);
 
       const cur = pointerCurrentRef.current;
       const tgt = pointerTargetRef.current;
       const amt = Math.min(1, dt * pointerSmoothRef.current);
+
       cur.lerp(tgt, amt);
       (material.uniforms.uPointer.value as THREE.Vector2).copy(cur);
       renderer.render(scene, camera);
       rafRef.current = requestAnimationFrame(loop);
     };
+
     rafRef.current = requestAnimationFrame(loop);
 
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
       else (window as Window).removeEventListener('resize', handleResize);
+
       geometry.dispose();
       material.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
+
       if (renderer.domElement && renderer.domElement.parentElement === container) {
         container.removeChild(renderer.domElement);
       }
@@ -272,6 +284,7 @@ export default function ColorBends({
   useEffect(() => {
     const material = materialRef.current;
     const renderer = rendererRef.current;
+
     if (!material) return;
 
     rotationRef.current = rotation;
@@ -301,20 +314,25 @@ export default function ColorBends({
 
       context.fillStyle = resolvedColor;
       context.fillRect(0, 0, 1, 1);
+
       const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
 
       return new THREE.Vector3(red / 255, green / 255, blue / 255);
     };
 
     const arr = (colors || []).filter(Boolean).slice(0, MAX_COLORS).map(toColorVector);
+
     for (let i = 0; i < MAX_COLORS; i++) {
       const vec = (material.uniforms.uColors.value as THREE.Vector3[])[i];
+
       if (i < arr.length) vec.copy(arr[i]);
       else vec.set(0, 0, 0);
     }
+
     material.uniforms.uColorCount.value = arr.length;
 
     material.uniforms.uTransparent.value = transparent ? 1 : 0;
+
     if (renderer) renderer.setClearColor(0x000000, transparent ? 0 : 1);
   }, [
     rotation,
@@ -336,16 +354,19 @@ export default function ColorBends({
   useEffect(() => {
     const material = materialRef.current;
     const container = containerRef.current;
+
     if (!material || !container) return;
 
     const handlePointerMove = (e: PointerEvent) => {
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / (rect.width || 1)) * 2 - 1;
       const y = -(((e.clientY - rect.top) / (rect.height || 1)) * 2 - 1);
+
       pointerTargetRef.current.set(x, y);
     };
 
     container.addEventListener('pointermove', handlePointerMove);
+
     return () => {
       container.removeEventListener('pointermove', handlePointerMove);
     };

@@ -27,17 +27,13 @@
     "./error": "./src/error.ts",
     "./guards": "./src/guards.ts",
     "./interview-status": "./src/interview-status.ts",
-    "./ipfs": "./src/ipfs.ts",
     "./job-enums": "./src/job-enums.ts",
     "./jobs": "./src/jobs.ts",
-    "./onchain": "./src/onchain.ts",
-    "./onchain-operations": "./src/onchain-operations.ts",
     "./patterns": "./src/patterns.ts",
     "./product-errors": "./src/product-errors.ts",
     "./public": "./src/public.ts",
     "./public-jobs": "./src/public-jobs.ts",
     "./skills": "./src/skills.ts",
-    "./transaction-errors": "./src/transaction-errors.ts",
     "./vault": "./src/vault.ts"
   },
   "scripts": {

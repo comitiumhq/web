@@ -226,12 +226,14 @@ function GroupsList({
       }),
     [allSubmissions, decryptedMap],
   );
+
   useProjectFormSubmissions({
     orgId,
     candidateId,
     submissions: projectableSubmissions,
     enabled: canProjectFormFields,
   });
+
   const memberMap = useQueryOrgTeamMap(orgId);
 
   return (

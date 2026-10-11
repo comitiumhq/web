@@ -55,6 +55,7 @@ export function AuthLoginSurface({
   useEffect(() => {
     if (!session.isSessionLoading && session.isSignedIn) {
       navigate(destination);
+
       return;
     }
 
@@ -67,6 +68,7 @@ export function AuthLoginSurface({
     async (email: string): Promise<AuthActionResult> => {
       try {
         await sendCode({ email, disableSignup: mode === 'sign-in' });
+
         return { ok: true };
       } catch {
         return authError(
@@ -83,6 +85,7 @@ export function AuthLoginSurface({
     async (code: string): Promise<AuthActionResult> => {
       try {
         await loginWithCode({ code });
+
         return { ok: true };
       } catch {
         return authError(
@@ -98,6 +101,7 @@ export function AuthLoginSurface({
   const handleGoogleLogin = useCallback(async (): Promise<AuthActionResult> => {
     try {
       await initOAuth({ provider: 'google', disableSignup: mode === 'sign-in' });
+
       return { ok: true };
     } catch {
       return authError(oauthErrorMessage);
