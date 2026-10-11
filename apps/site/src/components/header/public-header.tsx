@@ -1,7 +1,9 @@
 import { cn } from '@comitium/ui/cn';
 import { ComitiumLogo } from '@comitium/ui/comitium-logo';
+import { PageContainer } from '@comitium/ui/page-container';
 import { Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { LANDING_CONTAINER_CLASS_NAME } from '@/components/landing/landing-layout';
 
 const headerClassName = 'fixed inset-x-0 top-0 z-40';
 
@@ -30,11 +32,11 @@ export function PublicHeader() {
         aria-hidden="true"
       />
 
-      <div className="relative flex h-14 items-center px-5 sm:px-8 lg:px-16">
+      <PageContainer className={cn(LANDING_CONTAINER_CLASS_NAME, 'relative flex h-14 items-center')}>
         <Link to="/" className="w-fit shrink-0" aria-label="Comitium home">
           <ComitiumLogo />
         </Link>
-      </div>
+      </PageContainer>
     </header>
   );
 }

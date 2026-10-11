@@ -47,6 +47,7 @@ export function LandingLottieVisual({ src, poster }: LandingLottieVisualProps) {
     const syncPlayback = () => {
       setPlayerReady(player.isLoaded);
       if (isInView && !reduceMotion) {
+        player.resize();
         player.play();
       } else {
         player.pause();
@@ -71,6 +72,7 @@ export function LandingLottieVisual({ src, poster }: LandingLottieVisualProps) {
           <DotLottiePlayer
             src={src}
             loop
+            renderConfig={{ autoResize: true }}
             dotLottieRefCallback={handlePlayerRef}
             className={`h-full w-full ${playerReady ? '' : 'opacity-0'}`}
           />

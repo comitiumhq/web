@@ -1,0 +1,96 @@
+/* Animation effects and coordinate calculations; layout lives in the component. */
+.ats-demo-scene {
+  --ats-demo-reset-opacity: 0;
+}
+
+.ats-demo-board {
+  --ats-demo-column-step: calc(33.333% - 7.333px);
+  --ats-demo-card-width: calc((100% - 52px) / 3 - 12px);
+  box-shadow: 0 12px 28px -14px rgb(31 41 55 / 17%);
+}
+
+.ats-demo-board::after,
+.ats-demo-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  background: var(--card);
+  opacity: var(--ats-demo-reset-opacity);
+  pointer-events: none;
+}
+
+.ats-demo-mini-card {
+  box-shadow: 0 1px 3px rgb(31 41 55 / 7%);
+}
+
+.ats-demo-moving-card {
+  left: calc(22px + var(--ats-demo-drag-progress) * var(--ats-demo-column-step));
+  width: var(--ats-demo-card-width);
+}
+
+.ats-demo-card-selection {
+  border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 9%, transparent);
+}
+
+.ats-demo-drop-target {
+  border: 1px dashed color-mix(in oklab, var(--primary) 40%, transparent);
+  background: color-mix(in oklab, var(--primary) 5%, var(--card));
+}
+
+.ats-demo-sheet,
+.ats-demo-review-sheet,
+.ats-demo-feedback {
+  box-shadow:
+    0 2px 6px -2px rgb(31 41 55 / 10%),
+    0 18px 36px -14px rgb(31 41 55 / 19%);
+}
+
+.ats-demo-recommendation-selected {
+  border: 1px solid color-mix(in oklab, var(--primary) 50%, transparent);
+  background: color-mix(in oklab, var(--primary) 7%, var(--card));
+}
+
+.ats-demo-notes-focus {
+  border: 1px solid color-mix(in oklab, var(--ring) 55%, var(--control-border));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ring) 12%, transparent);
+}
+
+.ats-demo-tabs > span[data-active="true"] {
+  box-shadow: 0 1px 3px rgb(31 41 55 / 10%);
+}
+
+.ats-demo-board-pointer,
+.ats-demo-review-board-pointer {
+  left: calc(40px + var(--ats-demo-drag-progress) * var(--ats-demo-column-step));
+}
+
+.ats-demo-sheet-pointer,
+.ats-demo-review-sheet-pointer {
+  left: calc(100% - 94px);
+}
+
+.ats-demo-review-board-pointer,
+.ats-demo-review-sheet-pointer,
+.ats-demo-feedback-pointer {
+  --product-cursor-color: #e87518;
+}
+
+.ats-demo-feedback-pointer {
+  left: calc(21px + (100% - 47px) * 0.375);
+}
+
+@container (width < 520px) {
+  .ats-demo-board {
+    --ats-demo-column-step: calc(50% - 11px);
+    --ats-demo-card-width: calc((100% - 42px) / 2 - 12px);
+  }
+}
+
+@media (1280px <= width < 1440px) {
+  .ats-demo-scene {
+    transform: scale(0.9);
+  }
+}
