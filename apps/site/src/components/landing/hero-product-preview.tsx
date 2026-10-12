@@ -1,4 +1,5 @@
 import { ActivityEventRow } from '@comitium/ui/activity-feed';
+import { ActivityIcon } from '@comitium/ui/activity-icon';
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { cn } from '@comitium/ui/cn';
@@ -16,7 +17,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@comitium/ui/tooltip';
 import { BadgeCheck, Calendar, CalendarCheck, ChevronRight, Clock, FileCheck, Mail } from 'lucide-react';
 import { useState } from 'react';
-import { LandingActivityIcon } from './landing-activity-icon';
 import { LANDING_SECONDARY_ICON_CLASS_NAME, LANDING_TEXT_TONES_CLASS_NAME } from './landing-layout';
 import { LandingSurfaceLight } from './landing-surface-light';
 
@@ -670,7 +670,7 @@ function PreviewActivityRow({ activity }: { activity: PreviewActivity }) {
 
   return (
     <div className="grid min-h-14 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 px-3 py-3">
-      <LandingActivityIcon kind={activity.kind} />
+      <ActivityIcon kind={activity.kind} />
       <div className="min-w-0">
         <p className="text-label-14 font-medium text-[color:var(--landing-text-content)]">{title}</p>
         {detail && (

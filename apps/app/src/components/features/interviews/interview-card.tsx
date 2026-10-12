@@ -1,3 +1,4 @@
+import { ActivityIcon } from '@comitium/ui/activity-icon';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
@@ -227,15 +228,15 @@ export const InterviewCard = memo(function InterviewCard({
   return (
     <>
       <div className="grid min-h-16 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-2 px-3 py-2.5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-        <StatusIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground sm:mt-0" />
+        <ActivityIcon kind="schedule" icon={StatusIcon} className="mt-0.5 sm:mt-0" />
 
         <div className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <span className="truncate text-label-14 font-medium">{interview.title}</span>
+            <span className="truncate text-label-14 font-medium text-content-foreground">{interview.title}</span>
             <Badge variant={display.variant}>{display.label}</Badge>
           </div>
 
-          <p className="mt-0.5 flex flex-wrap items-center gap-1 text-copy-12 text-muted-foreground">
+          <p className="mt-0.5 flex flex-wrap items-center gap-1 text-copy-12 text-meta-foreground">
             {timeData.formattedDate && (
               <>
                 <span>{timeData.formattedDate}</span>
@@ -246,7 +247,7 @@ export const InterviewCard = memo(function InterviewCard({
           </p>
 
           {isSchedulingLink && (
-            <p className="mt-0.5 text-copy-12 text-muted-foreground">Created {formatRelativeTime(scheduleCreatedAt)}</p>
+            <p className="mt-0.5 text-copy-12 text-meta-foreground">Created {formatRelativeTime(scheduleCreatedAt)}</p>
           )}
 
           {rsvpAggregate.total > 0 &&
@@ -273,13 +274,13 @@ export const InterviewCard = memo(function InterviewCard({
           )}
 
           {interview.status === InterviewStatus.COMPLETED && interview.completedAt && (
-            <p className="mt-0.5 text-copy-12 text-muted-foreground">
+            <p className="mt-0.5 text-copy-12 text-meta-foreground">
               Completed {formatRelativeTime(interview.completedAt)}
             </p>
           )}
         </div>
 
-        <div className="col-span-2 flex min-w-0 flex-wrap items-center justify-end gap-2 pl-7 sm:col-span-1 sm:flex-nowrap sm:pl-0">
+        <div className="col-span-2 flex min-w-0 flex-wrap items-center justify-end gap-2 pl-10 sm:col-span-1 sm:flex-nowrap sm:pl-0">
           {interview.interviewers.length > 0 && (
             <div className="flex -space-x-1.5">
               {interview.interviewers.map((interviewer) => {

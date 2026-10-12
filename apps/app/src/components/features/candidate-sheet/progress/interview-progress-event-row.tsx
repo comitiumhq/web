@@ -27,8 +27,8 @@ export const InterviewProgressEventRow = memo(function InterviewProgressEventRow
   return (
     <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <p className="truncate text-label-13 font-medium">{event.title}</p>
-        <p className="mt-0.5 text-copy-12 text-muted-foreground">
+        <p className="truncate text-label-13 font-medium text-content-foreground">{event.title}</p>
+        <p className="mt-0.5 text-copy-12 text-meta-foreground">
           {formatInTimezone(event.scheduledAt, timeZone, 'EEE, MMM d · h:mm a (zzz)')} · {event.durationMinutes} min
         </p>
       </div>

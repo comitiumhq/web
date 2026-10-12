@@ -37,7 +37,7 @@ export const TimelineEventRow = memo(function TimelineEventRow({
       time={
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="shrink-0 text-label-12 text-muted-foreground">{formatRelativeTime(event.createdAt)}</span>
+            <span className="shrink-0 text-label-12 text-meta-foreground">{formatRelativeTime(event.createdAt)}</span>
           </TooltipTrigger>
           <TooltipContent side="top">{occurredAt}</TooltipContent>
         </Tooltip>

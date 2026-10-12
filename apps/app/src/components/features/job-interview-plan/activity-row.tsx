@@ -1,3 +1,4 @@
+import { ActivityIcon } from '@comitium/ui/activity-icon';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
@@ -5,20 +6,11 @@ import type { MemberDisplayIdentity } from '@comitium/ui/display-name';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@comitium/ui/tooltip';
 import { useSortable } from '@dnd-kit/react/sortable';
-import {
-  CalendarDaysIcon,
-  ClockIcon,
-  EllipsisVerticalIcon,
-  GripVerticalIcon,
-  LockIcon,
-  MailIcon,
-  PencilIcon,
-  TrashIcon,
-} from 'lucide-react';
+import { ClockIcon, EllipsisVerticalIcon, GripVerticalIcon, LockIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import { useDeleteOwnerActivity } from '@/hooks/mutations/use-stage-activity-mutations';
-import { ApplicationReviewIcon, FeedbackFormIcon } from '@/lib/constants/domain-icons';
+import { FeedbackFormIcon } from '@/lib/constants/domain-icons';
 import type { StageActivity, StageActivityOwner } from '@/lib/schemas/stage-activities';
 import { cn } from '@/lib/utils';
 
@@ -155,11 +147,11 @@ function ScheduleInterviewBody({ activity, memberMap }: ScheduleInterviewBodyPro
 
   return (
     <>
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-        <CalendarDaysIcon className="size-4" />
-      </span>
+      <ActivityIcon kind="schedule" className="size-8" />
       <div className="min-w-32 flex-1">
-        <span className="text-label-14 truncate block font-medium">{activity.interviewTitle}</span>
+        <span className="text-label-14 truncate block font-medium text-content-foreground">
+          {activity.interviewTitle}
+        </span>
       </div>
 
       <Badge variant="secondary">
@@ -179,11 +171,11 @@ interface SendEmailBodyProps {
 function SendEmailBody({ activity }: SendEmailBodyProps) {
   return (
     <>
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-        <MailIcon className="size-4" />
-      </span>
+      <ActivityIcon kind="email" className="size-8" />
       <div className="min-w-32 flex-1">
-        <span className="text-label-14 truncate block font-medium">Send: {activity.emailTemplateName}</span>
+        <span className="text-label-14 truncate block font-medium text-content-foreground">
+          Send: {activity.emailTemplateName}
+        </span>
       </div>
     </>
   );
@@ -201,11 +193,9 @@ function ApplicationReviewBody({ activity, memberMap, isRequired }: ApplicationR
 
   return (
     <>
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-        <ApplicationReviewIcon className="size-4" />
-      </span>
+      <ActivityIcon kind="review" className="size-8" />
       <div className="flex min-w-32 flex-1 items-center gap-1">
-        <span className="block truncate text-label-14 font-medium">Application Review</span>
+        <span className="block truncate text-label-14 font-medium text-content-foreground">Application Review</span>
         {isRequired ? <RequiredReviewIndicator /> : null}
       </div>
 

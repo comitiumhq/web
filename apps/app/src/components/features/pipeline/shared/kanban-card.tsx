@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/react/sortable';
 import { type MouseEvent, memo, type PointerEvent, useCallback, useRef } from 'react';
 import { getActivityBadge } from '@/components/features/application-status';
 import type { KanbanApplication } from '@/lib/schemas/pipeline';
-import { cn, getCandidateDisplayName } from '@/lib/utils';
+import { cn, formatElapsedDaysSince, getCandidateDisplayName } from '@/lib/utils';
 
 import { getCardUrgencyState, toCardStatusInput } from './pipeline-status';
 import { UrgencyStripe } from './urgency-stripe';
@@ -48,6 +48,7 @@ export const KanbanCard = memo(function KanbanCard({
 
   const activityBadge = getActivityBadge(statusInput);
   const { level: urgency, reason: urgencyTitle } = getCardUrgencyState(statusInput);
+  const stageElapsed = formatElapsedDaysSince(statusInput.stageSince);
 
   const setCardRef = useCallback(
     (node: HTMLButtonElement | null) => {
@@ -125,7 +126,12 @@ export const KanbanCard = memo(function KanbanCard({
         },
       )}
     >
-      <KanbanCardBody name={displayName} company={company} status={activityBadge} footer={null} />
+      <KanbanCardBody
+        name={displayName}
+        company={company}
+        status={activityBadge}
+        footer={stageElapsed ? `In stage ${stageElapsed}` : null}
+      />
       <UrgencyStripe level={urgency} reason={urgencyTitle} side="left" />
     </button>
   );

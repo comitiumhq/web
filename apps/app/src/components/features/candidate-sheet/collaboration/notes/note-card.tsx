@@ -71,7 +71,7 @@ export const NoteCard = memo(function NoteCard({
           </Badge>
         )}
 
-        <span className="text-label-12 text-muted-foreground shrink-0">{formatRelativeTime(createdAt)}</span>
+        <span className="text-label-12 text-meta-foreground shrink-0">{formatRelativeTime(createdAt)}</span>
 
         {isOwnNote && onDelete && (
           <Button
@@ -122,7 +122,7 @@ interface NoteBodyProps {
 function NoteBody({ orgId, decryptedContent, isDecrypting, decryptionError, previewLines }: NoteBodyProps) {
   if (decryptedContent) {
     return (
-      <div className="text-copy-13 text-muted-foreground">
+      <div className="text-copy-13 text-content-foreground">
         <ExpandableContent collapsedLines={previewLines}>
           <RichTextEditor content={decryptedContent} readOnly />
         </ExpandableContent>

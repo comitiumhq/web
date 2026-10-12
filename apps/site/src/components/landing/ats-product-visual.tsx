@@ -1,3 +1,4 @@
+import { ActivityIcon } from '@comitium/ui/activity-icon';
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { cn } from '@comitium/ui/cn';
@@ -6,7 +7,6 @@ import { KanbanCardBody, KanbanColumnHeader } from '@comitium/ui/kanban';
 import { StatusBadge } from '@comitium/ui/status-badge';
 import type { AnimationSequence } from 'motion/react';
 import type { CSSProperties } from 'react';
-import { LandingActivityIcon } from './landing-activity-icon';
 import { ProductDemoCursor } from './product-demo-cursor';
 import { DEMO_RESET_TIMING, useProductDemoPlayback } from './use-product-demo-playback';
 
@@ -342,7 +342,7 @@ export function AtsProductVisual() {
             </p>
             <div className="ats-demo-activity-group overflow-hidden border border-separator rounded-[14px]">
               <div className="ats-demo-review-entry grid grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2 gap-y-0.5 p-3 @max-[360px]/ats-demo:grid-cols-[minmax(0,1fr)_auto] @max-[360px]/ats-demo:gap-[6px_8px]">
-                <LandingActivityIcon
+                <ActivityIcon
                   kind="review"
                   compact
                   className="ats-demo-activity-icon col-start-1 row-start-1 row-end-3 @max-[360px]/ats-demo:hidden"
@@ -364,6 +364,15 @@ export function AtsProductVisual() {
                   )}
                 >
                   <div>Submit</div>
+                </Button>
+              </div>
+              <div className="ats-demo-email-activity grid grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2 border-t border-separator p-3 @max-[360px]/ats-demo:grid-cols-[minmax(0,1fr)_auto]">
+                <ActivityIcon kind="email" compact className="ats-demo-activity-icon @max-[360px]/ats-demo:hidden" />
+                <p className="ats-demo-activity-title min-w-0 text-[color:var(--landing-text-content)] text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
+                  Send: Next steps
+                </p>
+                <Button asChild variant="outline" size="xs" className={actionClassName}>
+                  <div>Send</div>
                 </Button>
               </div>
             </div>
@@ -483,11 +492,7 @@ export function AtsProductVisual() {
             </p>
             <div className="ats-demo-activity-group overflow-hidden border border-separator rounded-[14px]">
               <div className="ats-demo-interview-activity grid grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2 p-3 @max-[360px]/ats-demo:grid-cols-[minmax(0,1fr)_auto] @max-[360px]/ats-demo:gap-[6px_8px]">
-                <LandingActivityIcon
-                  kind="schedule"
-                  compact
-                  className="ats-demo-activity-icon @max-[360px]/ats-demo:hidden"
-                />
+                <ActivityIcon kind="schedule" compact className="ats-demo-activity-icon @max-[360px]/ats-demo:hidden" />
                 <div className="ats-demo-activity-copy min-w-0 @max-[360px]/ats-demo:contents">
                   <p className="ats-demo-activity-title @max-[360px]/ats-demo:col-start-1 @max-[360px]/ats-demo:row-start-1 text-[color:var(--landing-text-content)] text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
                     Portfolio review
@@ -515,7 +520,7 @@ export function AtsProductVisual() {
                 </div>
               </div>
               <div className="ats-demo-review-activity flex items-center gap-2 py-2.5 px-3 border-t-[1px] border-t-separator">
-                <LandingActivityIcon kind="feedback" compact className="ats-demo-activity-icon" />
+                <ActivityIcon kind="feedback" compact className="ats-demo-activity-icon" />
                 <div className="ats-demo-activity-copy min-w-0">
                   <p className="ats-demo-activity-title text-[color:var(--landing-text-content)] text-[12px] font-medium leading-[18px] tracking-[-0.015em]">
                     Interview feedback

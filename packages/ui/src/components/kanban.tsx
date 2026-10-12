@@ -51,7 +51,7 @@ export function KanbanCardBody({ name, company, status, footer }: KanbanCardBody
         </div>
       )}
 
-      {footer && <p className="mt-auto pt-2 text-label-12 tabular-nums text-muted-foreground">{footer}</p>}
+      {footer && <p className="mt-auto pt-2 text-label-12 tabular-nums text-meta-foreground">{footer}</p>}
     </>
   );
 }

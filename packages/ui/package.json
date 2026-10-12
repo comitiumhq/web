@@ -11,6 +11,7 @@
     "./accordion": "./src/components/accordion.tsx",
     "./action-confirmation": "./src/components/action-confirmation.tsx",
     "./activity-feed": "./src/components/activity-feed.tsx",
+    "./activity-icon": "./src/components/activity-icon.tsx",
     "./alert": "./src/components/alert.tsx",
     "./autocomplete": "./src/components/autocomplete.tsx",
     "./application-outcome-labels": "./src/lib/application-outcome-labels.ts",
