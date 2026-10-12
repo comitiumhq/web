@@ -47,7 +47,7 @@ function LandingPage() {
             </h1>
 
             <p className="mt-6 max-w-[34rem] text-base leading-7 text-muted-foreground text-balance sm:text-lg">
-              An ATS built for people on both sides.
+              The ATS where every application comes from a real person who means it.
             </p>
 
             <Button size="lg" className="mt-7 h-11 px-5" onClick={openEarlyAccess}>

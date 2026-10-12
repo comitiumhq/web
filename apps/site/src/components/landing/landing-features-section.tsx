@@ -84,7 +84,7 @@ export function LandingFeaturesSection({ onRequestEarlyAccess }: { onRequestEarl
             </Moment>
 
             <Moment
-              title="Scheduling Automation"
+              title="Scheduling automation"
               surfaceTone="workflow"
               description="Turn your team’s availability into confirmed interviews. Candidates choose a time; invitations go out automatically."
               className="landing-feature-card-main xl:col-span-5 xl:h-[clamp(28rem,34vw,30rem)]"
@@ -105,7 +105,7 @@ export function LandingFeaturesSection({ onRequestEarlyAccess }: { onRequestEarl
             <Moment
               title="A person behind the application"
               surfaceTone="identity"
-              description="Zero Knowledge Identity helps verify real people while keeping sensitive details protected."
+              description="Zero Knowledge Identity verifies real people while keeping sensitive details protected."
               className="landing-feature-card-support md:max-[60rem]:h-[32rem] xl:col-span-4"
               visualClassName="landing-feature-visual-identity-product max-md:h-[clamp(20rem,76vw,26rem)]"
             >

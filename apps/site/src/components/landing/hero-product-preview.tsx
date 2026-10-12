@@ -140,10 +140,7 @@ const CANDIDATES: PreviewCandidate[] = [
     status: { variant: 'success', label: 'Scheduled · Oct 9' },
     inStage: '2d',
     interview: { status: 'scheduled', interviewer: 'Grace Liu', month: 'Oct', day: '9', time: '14:00 – 14:30' },
-    activities: [
-      { kind: 'review', form: 'Design experience', submitted: 0, required: 2 },
-      { kind: 'email', template: 'Screen prep' },
-    ],
+    activities: [{ kind: 'email', template: 'Screen prep' }],
     feed: [
       {
         kind: 'event',
@@ -187,7 +184,7 @@ const CANDIDATES: PreviewCandidate[] = [
     status: { variant: 'warning', label: 'Needs scheduling' },
     inStage: '1d',
     interview: { status: 'needs_scheduling', interviewer: 'Grace Liu' },
-    activities: [{ kind: 'review', form: 'Design experience', submitted: 1, required: 2 }],
+    activities: [{ kind: 'email', template: 'Screen prep' }],
     feed: [
       {
         kind: 'email',
@@ -204,13 +201,6 @@ const CANDIDATES: PreviewCandidate[] = [
         subject: 'A first conversation',
         body: 'Hi Sofia, I’d love to hear about the patient intake flow you designed at Harbor Health. Send over a couple of times that work next week and we’ll find a slot.',
         time: '2h ago',
-      },
-      {
-        kind: 'event',
-        actor: 'Noah Patel',
-        label: 'Feedback submitted',
-        subline: null,
-        time: '4h ago',
       },
       {
         kind: 'note',
@@ -231,10 +221,7 @@ const CANDIDATES: PreviewCandidate[] = [
     status: { variant: 'success', label: 'Scheduled · Oct 12' },
     inStage: '3d',
     interview: { status: 'scheduled', interviewer: 'Grace Liu', month: 'Oct', day: '12', time: '11:00 – 11:30' },
-    activities: [
-      { kind: 'review', form: 'Design experience', submitted: 1, required: 2 },
-      { kind: 'email', template: 'Screen prep' },
-    ],
+    activities: [],
     feed: [
       {
         kind: 'email',
@@ -260,6 +247,14 @@ const CANDIDATES: PreviewCandidate[] = [
         time: '4h ago',
       },
       {
+        kind: 'email',
+        from: 'Grace Liu',
+        to: 'kenji@example.com',
+        subject: 'Before our conversation',
+        body: 'Hi Kenji, we’ll spend 30 minutes talking about your recent design work and what you’re looking for next. No presentation needed. We’ll leave time for your questions about the role and team.',
+        time: '5h ago',
+      },
+      {
         kind: 'event',
         actor: null,
         label: 'Interview scheduled',
@@ -271,13 +266,6 @@ const CANDIDATES: PreviewCandidate[] = [
         author: 'Grace Liu',
         body: 'Kenji designed Tidepool’s mobile booking flow. Ask how he kept rescheduling simple on a small screen.',
         time: '7h ago',
-      },
-      {
-        kind: 'event',
-        actor: 'Noah Patel',
-        label: 'Feedback submitted',
-        subline: null,
-        time: '8h ago',
       },
       {
         kind: 'email',
@@ -303,14 +291,14 @@ const CANDIDATES: PreviewCandidate[] = [
     interview: { status: 'completed', interviewer: 'Noah Patel', month: 'Oct', day: '7', time: '15:00 – 15:45' },
     feedback: { submitted: 0, required: 1 },
     activities: [
-      { kind: 'review', form: 'Portfolio', submitted: 1, required: 2 },
+      { kind: 'review', form: 'Portfolio', submitted: 2, required: 2 },
       { kind: 'email', template: 'Next steps' },
     ],
     feed: [
       {
         kind: 'note',
         author: 'Ava Brooks',
-        body: 'Added Lucía’s research summary to the review materials. Read the customer interviews before our debrief.',
+        body: 'Lucía’s research summary is in the review materials. Noah still needs to submit feedback from yesterday’s conversation. Let’s thank her for the summary and confirm when she’ll hear from us after the debrief.',
         time: '1h ago',
       },
       {
@@ -330,12 +318,21 @@ const CANDIDATES: PreviewCandidate[] = [
       },
       { kind: 'event', actor: 'Noah Patel', label: 'Interview completed', subline: null, time: '1d ago' },
       {
+        kind: 'email',
+        from: 'Grace Liu',
+        to: 'lucia@example.com',
+        subject: 'Your portfolio conversation',
+        body: 'Hi Lucía, you’re confirmed for Oct 7 at 15:00 with Noah. Please bring one project that shows how research shaped your design decisions. We’ll leave time for your questions too.',
+        time: '2d ago',
+      },
+      {
         kind: 'event',
         actor: 'Grace Liu',
         label: 'Interview scheduled',
         subline: null,
         time: '2d ago',
       },
+      { kind: 'event', actor: 'Noah Patel', label: 'Feedback submitted', subline: null, time: '2d ago' },
       { kind: 'event', actor: 'Grace Liu', label: 'Moved to Portfolio review', subline: null, time: '3d ago' },
       {
         kind: 'event',
@@ -356,7 +353,7 @@ const CANDIDATES: PreviewCandidate[] = [
     inStage: '1d',
     interview: { status: 'link_sent', interviewer: 'Ava Brooks' },
     activities: [
-      { kind: 'review', form: 'Hiring debrief', submitted: 0, required: 2 },
+      { kind: 'review', form: 'Hiring assessment', submitted: 2, required: 2 },
       { kind: 'email', template: 'Interview prep' },
     ],
     feed: [
@@ -376,6 +373,15 @@ const CANDIDATES: PreviewCandidate[] = [
         body: 'Hi Arjun, the next step is a 45-minute conversation with Ava, our design manager. Please use your booking link to choose a time next week. We’ll send an agenda once you’ve booked.',
         time: '2h ago',
       },
+      { kind: 'event', actor: 'Grace Liu', label: 'Scheduling link sent', subline: null, time: '2h ago' },
+      {
+        kind: 'note',
+        author: 'Noah Patel',
+        body: 'Grace and I have finished the background review. Arjun showed how his delivery dashboard changed after testing with dispatchers. Ava can explore how he chose what to simplify.',
+        time: '3h ago',
+      },
+      { kind: 'event', actor: 'Grace Liu', label: 'Feedback submitted', subline: null, time: '4h ago' },
+      { kind: 'event', actor: 'Noah Patel', label: 'Feedback submitted', subline: null, time: '6h ago' },
       { kind: 'event', actor: 'Grace Liu', label: 'Moved to Hiring manager', subline: null, time: '1d ago' },
       {
         kind: 'event',
@@ -394,7 +400,7 @@ const CANDIDATES: PreviewCandidate[] = [
       {
         kind: 'note',
         author: 'Noah Patel',
-        body: 'Arjun showed how his delivery dashboard changed after testing with dispatchers. Explore how he chose what to simplify.',
+        body: 'Arjun’s portfolio conversation covered the delivery dashboard and his research with dispatchers. The next round can focus on prioritization and working with the wider team.',
         time: '2d ago',
       },
       { kind: 'event', actor: null, label: 'Application submitted', subline: null, time: '8d ago' },
@@ -411,10 +417,16 @@ const CANDIDATES: PreviewCandidate[] = [
     interview: { status: 'completed', interviewer: 'Ava Brooks', month: 'Oct', day: '6', time: '13:00 – 13:45' },
     feedback: { submitted: 1, required: 1 },
     activities: [
-      { kind: 'review', form: 'Hiring debrief', submitted: 1, required: 2 },
+      { kind: 'review', form: 'Hiring assessment', submitted: 1, required: 2 },
       { kind: 'email', template: 'Next steps' },
     ],
     feed: [
+      {
+        kind: 'note',
+        author: 'Grace Liu',
+        body: 'Ava’s interview feedback and Noah’s assessment are in. I still need to finish my review before the hiring debrief. Amara also asked to meet Customer Success if we move forward.',
+        time: '3h ago',
+      },
       {
         kind: 'event',
         actor: 'Noah Patel',
@@ -438,12 +450,6 @@ const CANDIDATES: PreviewCandidate[] = [
         time: '1d ago',
       },
       {
-        kind: 'note',
-        author: 'Grace Liu',
-        body: 'Amara asked to meet Customer Success too. She wants to understand how customer visits become design decisions.',
-        time: '2d ago',
-      },
-      {
         kind: 'event',
         actor: 'Ava Brooks',
         label: 'Interview completed',
@@ -465,7 +471,7 @@ const CANDIDATES: PreviewCandidate[] = [
     interview: { status: 'completed', interviewer: 'Ava Brooks', month: 'Oct', day: '7', time: '11:00 – 11:45' },
     feedback: { submitted: 1, required: 1 },
     activities: [
-      { kind: 'review', form: 'Hiring debrief', submitted: 2, required: 2 },
+      { kind: 'review', form: 'Hiring assessment', submitted: 2, required: 2 },
       { kind: 'email', template: 'Next steps' },
       { kind: 'email', template: 'Reference check consent' },
     ],
@@ -759,16 +765,18 @@ function CandidateActivities({ candidate }: { candidate: PreviewCandidate }) {
   return (
     <section aria-label="Activities" className="space-y-3">
       <h3 className="text-heading-14">Activities</h3>
-      <Card size="sm" className="gap-0 py-0">
-        <div className="divide-y divide-separator">
-          {activities.map((activity) => (
-            <PreviewActivityRow
-              key={activity.kind === 'email' ? `email:${activity.template}` : activity.kind}
-              activity={activity}
-            />
-          ))}
-        </div>
-      </Card>
+      {activities.length > 0 && (
+        <Card size="sm" className="gap-0 py-0">
+          <div className="divide-y divide-separator">
+            {activities.map((activity) => (
+              <PreviewActivityRow
+                key={activity.kind === 'email' ? `email:${activity.template}` : activity.kind}
+                activity={activity}
+              />
+            ))}
+          </div>
+        </Card>
+      )}
       {interview.status === 'scheduled' && <ScheduledInterview stage={candidate.stage} interview={interview} />}
     </section>
   );
