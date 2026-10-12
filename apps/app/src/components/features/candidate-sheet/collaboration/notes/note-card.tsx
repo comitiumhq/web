@@ -5,7 +5,7 @@ import { Card } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { LockIcon, XIcon } from '@phosphor-icons/react';
+import { LockIcon, XIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';

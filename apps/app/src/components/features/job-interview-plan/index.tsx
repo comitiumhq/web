@@ -1,5 +1,5 @@
 import { EmptyState } from '@comitium/ui/empty-state';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useQueryInterviewPlan } from '@/hooks/queries/use-query-interview-plan';
 import { useQueryInterviewPlans } from '@/hooks/queries/use-query-interview-plans';
@@ -100,7 +100,7 @@ export function JobInterviewPlan({ org, jobId, draftPlan }: JobInterviewPlanProp
   if (error || !jobSummary) {
     return (
       <EmptyState
-        icon={WarningCircleIcon}
+        icon={CircleAlertIcon}
         title="Failed to load interview plan"
         description="Refresh the page and try again."
       />

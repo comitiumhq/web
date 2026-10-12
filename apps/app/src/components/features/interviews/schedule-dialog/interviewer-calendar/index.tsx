@@ -1,8 +1,8 @@
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { type CellInfo, IlamyCalendar, type IlamyCalendarProps, type Resource } from '@ilamy/calendar';
-import { CalendarDotsIcon, SpinnerGapIcon, UserPlusIcon } from '@phosphor-icons/react';
 import { parseISO } from 'date-fns';
+import { CalendarDaysIcon, LoaderCircleIcon, UserPlusIcon } from 'lucide-react';
 import {
   type CSSProperties,
   memo,
@@ -82,7 +82,7 @@ function AvailabilityUnavailable({ className, description, header }: Availabilit
     <div className={cn('interviewer-calendar flex flex-col overflow-hidden', className)}>
       {header}
       <div className="flex flex-1 items-center justify-center overflow-hidden rounded-xl border bg-card">
-        <EmptyState icon={CalendarDotsIcon} title="Availability unavailable" description={description} />
+        <EmptyState icon={CalendarDaysIcon} title="Availability unavailable" description={description} />
       </div>
     </div>
   );
@@ -373,7 +373,7 @@ function InterviewerCalendarImpl({
             />
           ) : (
             <EmptyState
-              icon={CalendarDotsIcon}
+              icon={CalendarDaysIcon}
               title="Select an interview type"
               description="Choose an interview type above to start scheduling."
             />
@@ -467,7 +467,7 @@ function InterviewerCalendarImpl({
             availabilityIsPending ? 'Loading interviewer availability' : 'Refreshing interviewer availability'
           }
         >
-          <SpinnerGapIcon className="size-5 animate-spin text-muted-foreground" />
+          <LoaderCircleIcon className="size-5 animate-spin text-muted-foreground" />
         </output>
       )}
     </div>

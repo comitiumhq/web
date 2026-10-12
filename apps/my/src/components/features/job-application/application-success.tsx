@@ -1,6 +1,6 @@
 import { Button } from '@comitium/ui/button';
-import { CheckIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { CheckIcon } from 'lucide-react';
 
 interface ApplicationSuccessProps {
   jobTitle: string;

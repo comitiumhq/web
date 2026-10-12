@@ -29,7 +29,7 @@ export function LandingActivityIcon({
         className,
       )}
     >
-      <Icon className={compact ? 'size-3.5' : 'size-4'} />
+      <Icon strokeWidth={2} className={compact ? 'size-3.5' : 'size-4'} />
     </span>
   );
 }

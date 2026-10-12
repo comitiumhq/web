@@ -1,7 +1,7 @@
 import { isDefined } from '@comitium/schemas/guards';
 import { Calendar } from '@comitium/ui/calendar';
-import { CalendarXIcon, type Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { isSameMonth, startOfMonth, startOfToday } from 'date-fns';
+import { CalendarXIcon, type LucideIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ScheduleCalendarSkeleton } from './schedule-skeletons';
@@ -126,7 +126,7 @@ function ScheduleDatePickerMessage({
   title,
   description,
 }: {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
 }) {

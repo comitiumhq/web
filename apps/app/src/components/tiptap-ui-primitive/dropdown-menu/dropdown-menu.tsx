@@ -1,7 +1,9 @@
 'use client';
 
+import { CheckIcon } from 'lucide-react';
+
 import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
-import { CheckIcon } from '@/components/tiptap-icons/check-icon';
+
 import { cn } from '@/lib/tiptap/utils';
 
 import '@/components/tiptap-ui-primitive/dropdown-menu/dropdown-menu.css';

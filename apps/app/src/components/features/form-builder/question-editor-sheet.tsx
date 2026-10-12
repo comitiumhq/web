@@ -15,7 +15,7 @@ import { Spinner } from '@comitium/ui/spinner';
 import { Textarea } from '@comitium/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { InfoIcon } from '@phosphor-icons/react';
+import { InfoIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import {

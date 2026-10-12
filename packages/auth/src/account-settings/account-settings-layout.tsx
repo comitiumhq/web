@@ -1,6 +1,6 @@
 import { PageContainer } from '@comitium/ui/page-container';
 import { SettingsNavLink } from '@comitium/ui/settings-nav-link';
-import { KeyIcon, SealCheckIcon } from '@phosphor-icons/react';
+import { BadgeCheckIcon, KeyIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export function AccountSettingsLayout({ children }: { children: ReactNode }) {
@@ -27,7 +27,7 @@ function AccountNavigation({ className }: { className: string }) {
   return (
     <nav aria-label="Account" className={`flex gap-1 ${className}`}>
       <SettingsNavLink icon={KeyIcon} label="Authentication" to="/account" />
-      <SettingsNavLink icon={SealCheckIcon} label="ZK Identity" to="/account/zk-identity" />
+      <SettingsNavLink icon={BadgeCheckIcon} label="ZK Identity" to="/account/zk-identity" />
     </nav>
   );
 }

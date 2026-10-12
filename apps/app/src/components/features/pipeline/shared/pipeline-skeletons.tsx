@@ -2,7 +2,7 @@ import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { Card } from '@comitium/ui/card';
 import { PageContainer } from '@comitium/ui/page-container';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { CaretRightIcon } from '@phosphor-icons/react';
+import { ChevronRightIcon } from 'lucide-react';
 import { type CSSProperties, Fragment, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { PipelineTab } from '../types';
@@ -77,7 +77,11 @@ export function PipelineStageControlsSkeleton({
           {TAB_SKELETONS.map(({ key, widthClassName }, index) => (
             <Fragment key={key}>
               {index > 0 && (
-                <CaretRightIcon aria-hidden weight="bold" className="mx-0.5 size-4 shrink-0 text-muted-foreground/25" />
+                <ChevronRightIcon
+                  aria-hidden
+                  strokeWidth={2}
+                  className="mx-0.5 size-4 shrink-0 text-muted-foreground/25"
+                />
               )}
               <div
                 className={cn(

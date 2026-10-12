@@ -7,7 +7,7 @@ import {
   DropdownMenuSubTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { UserAccountSummary } from '@comitium/ui/user-account-summary';
-import { CheckIcon } from '@phosphor-icons/react';
+import { CheckIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import type { MyOrg } from '@/lib/schemas/org';
 import { getOrgDisplayName } from '@/lib/utils/org';

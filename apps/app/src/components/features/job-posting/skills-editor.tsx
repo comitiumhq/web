@@ -5,7 +5,7 @@ import { SkillSearchInput } from '@comitium/ui/skill-search-input';
 import { ToggleGroup, ToggleGroupItem } from '@comitium/ui/toggle-group';
 import { type DragDropEventHandlers, DragDropProvider } from '@dnd-kit/react';
 import { useSortable } from '@dnd-kit/react/sortable';
-import { DotsSixVerticalIcon, XIcon } from '@phosphor-icons/react';
+import { GripVerticalIcon, XIcon } from 'lucide-react';
 import { searchSkills } from '@/lib/api/skills';
 import { cn } from '@/lib/utils';
 import { applyDndReorder } from '@/lib/utils/dnd';
@@ -140,7 +140,7 @@ function SkillRow({ skill, index, count, disabled, onRequiredChange, onRemove }:
         aria-label={`Reorder ${skill.label}`}
         inert={!canReorder}
       >
-        <DotsSixVerticalIcon />
+        <GripVerticalIcon />
       </Button>
 
       <div className="flex min-w-40 flex-1 flex-wrap items-center gap-2">

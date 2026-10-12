@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { validateImageUpload } from '@comitium/ui/image-upload';
 import { InitialsAvatar } from '@comitium/ui/initials-avatar';
 import { Slider } from '@comitium/ui/slider';
-import { CameraIcon, MinusIcon, PlusIcon } from '@phosphor-icons/react';
+import { CameraIcon, MinusIcon, PlusIcon } from 'lucide-react';
 import type { ChangeEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
@@ -109,7 +109,7 @@ export function ProfilePhotoField({ disabled, imageSrc, maxSize, name, email, on
             className="size-28 text-2xl"
           />
           <span className="absolute inset-0 flex items-center justify-center rounded-full bg-foreground/8 text-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
-            <CameraIcon className="size-5" weight="fill" />
+            <CameraIcon className="size-5" />
             <span className="sr-only">{pickerLabel}</span>
           </span>
         </button>

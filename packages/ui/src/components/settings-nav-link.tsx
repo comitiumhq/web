@@ -1,11 +1,11 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import type { LucideIcon } from 'lucide-react';
 
 import { cn } from '../lib/cn';
 
 interface SettingsNavLinkProps {
   className?: string;
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   label: string;
   to: string;
 }

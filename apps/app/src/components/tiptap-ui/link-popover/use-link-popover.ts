@@ -2,9 +2,9 @@
 
 import { httpsUrlSchema } from '@comitium/schemas/common';
 import type { Editor } from '@tiptap/react';
+import { LinkIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-// --- Icons ---
-import { LinkIcon } from '@/components/tiptap-icons/link-icon';
+
 // --- Hooks ---
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
 

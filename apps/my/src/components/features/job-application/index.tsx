@@ -5,8 +5,8 @@ import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Spinner } from '@comitium/ui/spinner';
-import { SignInIcon } from '@phosphor-icons/react';
 import { Link, useRouterState } from '@tanstack/react-router';
+import { LogInIcon } from 'lucide-react';
 import { AuthenticatedApplicationForm } from './authenticated-application-form';
 
 interface ApplicationFormProps {
@@ -35,7 +35,7 @@ export function ApplicationForm(props: ApplicationFormProps) {
   if (!isSignedIn || !user) {
     return (
       <EmptyState
-        icon={SignInIcon}
+        icon={LogInIcon}
         title="Sign in to apply"
         description="Sign in before entering your application details."
         className="min-h-80"

@@ -8,8 +8,8 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from '@comitium/ui/popover';
-import { LockIcon } from '@phosphor-icons/react';
 import { useParams, useRouterState } from '@tanstack/react-router';
+import { LockIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { getPublicSiteOrigin } from '@/config/site';
 import { useQueryMyOrgs } from '@/hooks/queries/use-query-my-orgs';

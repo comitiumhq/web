@@ -1,8 +1,8 @@
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
-import { ArrowUpRightIcon, CaretDownIcon, UsersIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { ArrowUpRightIcon, ChevronDownIcon, UsersIcon } from 'lucide-react';
 import type { MouseEvent, ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { KanbanBoard } from '@/components/features/pipeline/shared/kanban-board';
@@ -114,7 +114,7 @@ export function JobAccordion({ job, orgId, stageType, defaultExpanded, onApplica
           aria-hidden="true"
           className="pointer-events-none relative z-10 flex size-8 items-center justify-center rounded-full bg-secondary text-muted-foreground"
         >
-          <CaretDownIcon
+          <ChevronDownIcon
             className={cn(
               'size-4 transition-transform duration-200 ease-out motion-reduce:transition-none',
               !expanded && '-rotate-90',

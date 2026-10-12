@@ -17,9 +17,9 @@ import { Skeleton } from '@comitium/ui/skeleton';
 import { ThemeMenuSub } from '@comitium/ui/theme-menu';
 import { UserAccountSummary } from '@comitium/ui/user-account-summary';
 import { UserAvatar } from '@comitium/ui/user-avatar';
-import { SignOutIcon, UserCircleIcon } from '@phosphor-icons/react';
 import { usePrivy } from '@privy-io/react-auth';
 import { Link } from '@tanstack/react-router';
+import { CircleUserRoundIcon, LogOutIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { AuthSessionRecovery } from '@/components/auth/auth-session-recovery';
 import { useLogout } from '@/hooks/use-logout';
@@ -90,7 +90,7 @@ function SignedInPublicUserMenu({ user }: { user: User }) {
 
         <DropdownMenuItem asChild className={menuItemClassName}>
           <Link to="/account">
-            <UserCircleIcon className="size-4 text-muted-foreground" />
+            <CircleUserRoundIcon className="size-4 text-muted-foreground" />
             Account
           </Link>
         </DropdownMenuItem>
@@ -105,7 +105,7 @@ function SignedInPublicUserMenu({ user }: { user: User }) {
           disabled={isWalletRestoring}
           onClick={handleDisconnect}
         >
-          <SignOutIcon className="size-4" />
+          <LogOutIcon className="size-4" />
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>

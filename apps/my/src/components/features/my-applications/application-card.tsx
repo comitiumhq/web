@@ -6,8 +6,8 @@ import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { formatDate } from '@comitium/ui/date';
 import { formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@comitium/ui/tooltip';
-import { MapPinIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { MapPinIcon } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { getApplicationStatus, getApplicationStatusDescription } from './utils';
 

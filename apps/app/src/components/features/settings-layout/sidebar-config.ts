@@ -1,14 +1,14 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import {
-  BuildingsIcon,
+  Building2Icon,
   CalendarIcon,
-  EnvelopeIcon,
   FileLockIcon,
-  LayoutIcon,
+  LayoutTemplateIcon,
+  type LucideIcon,
+  MailIcon,
   MapPinIcon,
   TagIcon,
   UsersIcon,
-} from '@phosphor-icons/react';
+} from 'lucide-react';
 
 import {
   ApplicationFormIcon,
@@ -26,7 +26,7 @@ export interface SidebarItem {
   type: 'item';
   label: string;
   path: string;
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   match: (pathname: string) => boolean;
   permission: Permission | null;
   orgAdminOnly?: boolean;
@@ -52,7 +52,7 @@ export function buildSidebarEntries(basePath: string): SidebarEntry[] {
           type: 'item',
           label: 'Company Profile',
           path: `${basePath}/company`,
-          icon: BuildingsIcon,
+          icon: Building2Icon,
           match: (p) => p === `${basePath}/company` || p === basePath || p === `${basePath}/`,
           permission: Permission.ORG_SETTINGS_WRITE,
         },
@@ -84,7 +84,7 @@ export function buildSidebarEntries(basePath: string): SidebarEntry[] {
           type: 'item',
           label: 'Email Templates',
           path: `${basePath}/email-templates`,
-          icon: EnvelopeIcon,
+          icon: MailIcon,
           match: (p) => p.startsWith(`${basePath}/email-templates`),
           permission: Permission.EMAIL_TEMPLATE_WRITE,
         },
@@ -123,7 +123,7 @@ export function buildSidebarEntries(basePath: string): SidebarEntry[] {
           type: 'item',
           label: 'Job Templates',
           path: `${basePath}/job-templates`,
-          icon: LayoutIcon,
+          icon: LayoutTemplateIcon,
           match: (p) => p.startsWith(`${basePath}/job-templates`),
           permission: Permission.JOB_TEMPLATE_WRITE,
         },

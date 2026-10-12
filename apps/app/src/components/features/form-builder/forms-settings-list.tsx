@@ -11,8 +11,7 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { TablePagination } from '@comitium/ui/table-pagination';
 import { TableSkeleton, type TableSkeletonColumn } from '@comitium/ui/table-skeleton';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ArchiveIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, CircleAlertIcon, type LucideIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EntitySettingsPage } from '@/components/features/settings-library/entity-settings-page';
 import { useQueryFormsList } from '@/hooks/queries/use-query-forms-list';
@@ -56,7 +55,7 @@ const FEEDBACK_SKELETON_COLUMNS: TableSkeletonColumn[] = [
 ];
 
 const FORM_CLASS_COPY: Partial<
-  Record<FormClass, { pageTitle: string; emptyActiveDescription: string; icon: PhosphorIcon }>
+  Record<FormClass, { pageTitle: string; emptyActiveDescription: string; icon: LucideIcon }>
 > = {
   application: {
     pageTitle: 'Application Forms',
@@ -136,7 +135,7 @@ export function FormsSettingsList({ orgId, formClass, selectedFormId, onSelected
     return (
       <div className="h-full flex items-center justify-center px-4 sm:px-6 pb-8">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Something went wrong"
           description="We couldn't load forms. Please try again."
         />
@@ -190,7 +189,7 @@ interface FormsContentProps {
   isLoading: boolean;
   tab: TabValue;
   activeDescription: string;
-  activeIcon: PhosphorIcon;
+  activeIcon: LucideIcon;
   forms: FormDefinitionListItem[];
   formClass: FormClass;
   totalRows: number;
@@ -249,7 +248,7 @@ function FormsContent({
 interface FormEmptyStateProps {
   tab: TabValue;
   activeDescription: string;
-  activeIcon: PhosphorIcon;
+  activeIcon: LucideIcon;
 }
 
 function FormEmptyState({ tab, activeDescription, activeIcon }: FormEmptyStateProps) {

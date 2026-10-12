@@ -80,7 +80,7 @@ describe('ProfilePhotoField', () => {
 
     await userEvent.upload(input, new File(['gif'], 'avatar.gif', { type: 'image/gif' }));
 
-    await expect.element(screen.getByRole('alert')).toHaveTextContent('Use PNG, JPEG, WEBP.');
+    await expect.element(screen.getByRole('alert')).toHaveTextContent('Use PNG, JPG, WebP.');
     expect(screen.getByRole('heading', { name: 'Crop profile photo' }).query()).toBeNull();
     expect(onChange).not.toHaveBeenCalled();
   });

@@ -6,8 +6,8 @@ import { FeatureSheetBody, FeatureSheetContent, FeatureSheetHeader } from '@comi
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
-import { ArrowSquareOutIcon, CalendarBlankIcon, ClockIcon, MapPinIcon } from '@phosphor-icons/react';
 import { useQueryClient } from '@tanstack/react-query';
+import { CalendarIcon, ClockIcon, ExternalLinkIcon, MapPinIcon } from 'lucide-react';
 import { type ComponentType, type ReactNode, useCallback, useMemo, useState } from 'react';
 import { ApplicationSubmissionView } from '@/components/features/application-submission/application-submission-view';
 import {
@@ -340,7 +340,7 @@ function InterviewDetails({ briefing }: { briefing: InterviewBriefing }) {
       <CardContent className="pt-3">
         <dl className="grid gap-x-6 gap-y-4 text-copy-14 sm:grid-cols-2">
           {interview.scheduledAt && (
-            <BriefingDetail icon={CalendarBlankIcon} label="Date and time">
+            <BriefingDetail icon={CalendarIcon} label="Date and time">
               {formatDate(interview.scheduledAt, 'EEE, MMM d · h:mm a')}
             </BriefingDetail>
           )}
@@ -356,7 +356,7 @@ function InterviewDetails({ briefing }: { briefing: InterviewBriefing }) {
           )}
 
           {interview.meetingUrl && interview.status !== InterviewStatus.COMPLETED && (
-            <BriefingDetail icon={ArrowSquareOutIcon} label="Meeting">
+            <BriefingDetail icon={ExternalLinkIcon} label="Meeting">
               <Button variant="link" className="h-auto p-0" asChild>
                 <a href={interview.meetingUrl} target="_blank" rel="noopener noreferrer">
                   Join meeting

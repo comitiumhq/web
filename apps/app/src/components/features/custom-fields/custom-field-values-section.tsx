@@ -2,7 +2,7 @@ import { Button } from '@comitium/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@comitium/ui/tooltip';
-import { LockIcon, PencilIcon } from '@phosphor-icons/react';
+import { LockIcon, PencilIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { useQueryCustomFieldsList } from '@/hooks/queries/use-query-custom-fields-list';

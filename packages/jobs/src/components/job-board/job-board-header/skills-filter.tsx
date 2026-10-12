@@ -1,8 +1,8 @@
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { SkillSearchInput } from '@comitium/ui/skill-search-input';
-import { XIcon } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
+import { XIcon } from 'lucide-react';
 import type { PublicJobsApi } from '../../../api';
 
 interface SkillsFilterProps {

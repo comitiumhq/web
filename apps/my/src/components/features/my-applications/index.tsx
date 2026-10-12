@@ -4,13 +4,7 @@ import { Card, CardContent } from '@comitium/ui/card';
 import { PageContainer } from '@comitium/ui/page-container';
 import { PageHeader } from '@comitium/ui/page-header';
 import { Skeleton } from '@comitium/ui/skeleton';
-import {
-  ArchiveIcon,
-  CheckCircleIcon,
-  type Icon as PhosphorIcon,
-  TrayIcon,
-  WarningCircleIcon,
-} from '@phosphor-icons/react';
+import { ArchiveIcon, CircleAlertIcon, CircleCheckIcon, InboxIcon, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useQueryMyApplications } from '@/hooks/queries/use-query-my-applications';
@@ -33,7 +27,7 @@ function DashboardHeader() {
 }
 
 interface ApplicationsStatusCardProps {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
   children?: ReactNode;
@@ -57,19 +51,19 @@ function ApplicationsStatusCard({ icon: Icon, title, description, children }: Ap
 function ContentEmptyState({ filter, onShowAll }: { filter: FilterValue; onShowAll: () => void }) {
   const key: EmptyStateKey = filter ?? 'all';
 
-  const content: Record<EmptyStateKey, { icon: PhosphorIcon; title: string; description: string }> = {
+  const content: Record<EmptyStateKey, { icon: LucideIcon; title: string; description: string }> = {
     all: {
-      icon: TrayIcon,
+      icon: InboxIcon,
       title: 'No applications yet',
       description: 'Apply to open roles and track every response from this page.',
     },
     active: {
-      icon: TrayIcon,
+      icon: InboxIcon,
       title: 'No active applications',
       description: 'Submitted and in-process applications will show here.',
     },
     action: {
-      icon: CheckCircleIcon,
+      icon: CircleCheckIcon,
       title: 'No action needed',
       description: 'Applications that need something from you will appear here.',
     },
@@ -96,7 +90,7 @@ function ContentEmptyState({ filter, onShowAll }: { filter: FilterValue; onShowA
 function ErrorState({ isRetrying, onRetry }: { isRetrying: boolean; onRetry: () => void }) {
   return (
     <ApplicationsStatusCard
-      icon={WarningCircleIcon}
+      icon={CircleAlertIcon}
       title="Applications failed to load"
       description="Refresh the page or try again in a moment."
     >

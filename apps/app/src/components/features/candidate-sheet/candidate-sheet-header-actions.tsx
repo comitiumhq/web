@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
-import { ArchiveIcon, CaretDownIcon, EnvelopeSimpleIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ChevronDownIcon, MailIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import type { InterviewStage } from '@/lib/schemas/pipeline';
 
@@ -65,7 +65,7 @@ export function CandidateSheetHeaderActions({
 
       {consideration.canSendEmail && (
         <Button variant="outline" size="sm" onClick={onEmail} disabled={isTerminalActionPending}>
-          <EnvelopeSimpleIcon data-icon="inline-start" />
+          <MailIcon data-icon="inline-start" />
           Email
         </Button>
       )}
@@ -93,7 +93,7 @@ function ChangeStageMenu({ stages, canSelectHired, disabled, onStageChange }: Ch
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" disabled={disabled}>
           Change stage
-          <CaretDownIcon data-icon="inline-end" />
+          <ChevronDownIcon data-icon="inline-end" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">

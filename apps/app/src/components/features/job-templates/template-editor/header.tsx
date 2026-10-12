@@ -3,7 +3,7 @@ import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
 import { SheetDescription, SheetTitle } from '@comitium/ui/sheet';
-import { ArchiveIcon, ArrowCounterClockwiseIcon, DotsThreeIcon, EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
   useActivateJobTemplate,
@@ -112,7 +112,7 @@ export const TemplateHeader = memo(function TemplateHeader({
             )}
             {isActive && (
               <Button variant="outline" size="sm" disabled={anyPending} onClick={handleDeactivate}>
-                <EyeSlashIcon data-icon="inline-start" />
+                <EyeOffIcon data-icon="inline-start" />
                 Deactivate
               </Button>
             )}
@@ -120,7 +120,7 @@ export const TemplateHeader = memo(function TemplateHeader({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending}>
-                  <DotsThreeIcon />
+                  <EllipsisIcon />
                   <span className="sr-only">More actions</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -136,7 +136,7 @@ export const TemplateHeader = memo(function TemplateHeader({
                 )}
                 {isArchived && (
                   <DropdownMenuItem className="h-8 text-label-13" onClick={handleRestore}>
-                    <ArrowCounterClockwiseIcon />
+                    <ArchiveRestoreIcon />
                     Restore
                   </DropdownMenuItem>
                 )}

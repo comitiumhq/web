@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { CalendarBlankIcon, CalendarPlusIcon, CaretDownIcon, LinkSimpleIcon } from '@phosphor-icons/react';
+import { CalendarIcon, CalendarPlusIcon, ChevronDownIcon, LinkIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { useQueryCalendarStatus } from '@/hooks/queries/use-query-interviews';
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';
@@ -34,19 +34,19 @@ export function NewInterviewButton({ orgId, onManualSchedule, onDirectBooking }:
           <Button type="button" variant="outline" size="sm">
             <CalendarPlusIcon data-icon="inline-start" />
             New Interview
-            <CaretDownIcon data-icon="inline-end" />
+            <ChevronDownIcon data-icon="inline-end" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-72">
           <DropdownMenuItem className="items-start" onSelect={handleManualSchedule}>
-            <CalendarBlankIcon className="mt-0.5" />
+            <CalendarIcon className="mt-0.5" />
             <span className="flex min-w-0 flex-col">
               <span className="font-medium">Schedule manually</span>
               <span className="text-xs text-muted-foreground">Pick a time and send invites.</span>
             </span>
           </DropdownMenuItem>
           <DropdownMenuItem className="items-start" onSelect={handleDirectBooking}>
-            <LinkSimpleIcon className="mt-0.5" />
+            <LinkIcon className="mt-0.5" />
             <span className="flex min-w-0 flex-col">
               <span className="font-medium">Send scheduling link</span>
               <span className="text-xs text-muted-foreground">Let the candidate pick a time.</span>

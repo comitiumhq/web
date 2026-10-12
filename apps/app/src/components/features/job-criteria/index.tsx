@@ -1,7 +1,7 @@
 import type { EvaluationCriterion } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { type DragDropEventHandlers, DragDropProvider } from '@dnd-kit/react';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { EVALUATION_CRITERIA_HELPER_TEXT, MAX_EVALUATION_CRITERIA } from '@/lib/jobs/evaluation-criteria';
 import { generateId } from '@/lib/utils';

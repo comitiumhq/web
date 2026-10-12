@@ -3,9 +3,9 @@ import { useAccountReadiness } from '@comitium/auth/use-account-readiness';
 import { getErrorMessage } from '@comitium/schemas/error';
 import { Button } from '@comitium/ui/button';
 import { Spinner } from '@comitium/ui/spinner';
-import { ClockIcon, LinkIcon, WarningCircleIcon, XCircleIcon } from '@phosphor-icons/react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from '@tanstack/react-router';
+import { CircleAlertIcon, CircleXIcon, ClockIcon, LinkIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { getPublicSiteOrigin } from '@/config/site';
 import { useAcceptInvite } from '@/hooks/mutations/use-accept-invite';
@@ -108,7 +108,7 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
   if (pageState === 'not_found' || !invite) {
     return (
       <InviteStatusCard
-        icon={WarningCircleIcon}
+        icon={CircleAlertIcon}
         title="Invite not found"
         description="This invitation link is invalid or no longer available. Ask the sender to resend it."
       >
@@ -122,7 +122,7 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
   if (pageState === 'revoked') {
     return (
       <InviteStatusCard
-        icon={XCircleIcon}
+        icon={CircleXIcon}
         title="Invitation revoked"
         description="This invitation was revoked by the workspace admin. Ask for a new invite if you still need access."
       >

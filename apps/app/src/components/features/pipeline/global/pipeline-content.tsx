@@ -3,15 +3,15 @@ import { Button } from '@comitium/ui/button';
 import { EmptyStatePanel } from '@comitium/ui/empty-state-panel';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
 import { PageContainer } from '@comitium/ui/page-container';
+import type { OnChangeFn, RowSelectionState } from '@tanstack/react-table';
 import {
   ArchiveIcon,
-  BriefcaseIcon,
+  BadgeCheckIcon,
+  BriefcaseBusinessIcon,
   FlagIcon,
-  MagnifyingGlassMinusIcon,
-  type Icon as PhosphorIcon,
-  SealCheckIcon,
-} from '@phosphor-icons/react';
-import type { OnChangeFn, RowSelectionState } from '@tanstack/react-table';
+  type LucideIcon,
+  SearchXIcon,
+} from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { ArchivedCandidateTable, CandidateTable } from '@/components/features/pipeline/shared/candidate-table';
 import { GlobalPipelineContentSkeleton } from '@/components/features/pipeline/shared/pipeline-skeletons';
@@ -20,14 +20,14 @@ import type { PipelineCandidate, PipelineCandidateSorting, PipelineJob, StageTyp
 import type { PipelineTab } from '../types';
 import { JobAccordion } from './job-accordion';
 
-const EMPTY_BY_TAB: Record<PipelineTab, { icon: PhosphorIcon; title: string; description: string }> = {
+const EMPTY_BY_TAB: Record<PipelineTab, { icon: LucideIcon; title: string; description: string }> = {
   review: {
     icon: ApplicationReviewIcon,
     title: 'Nothing to review',
     description: 'Applications waiting for your review will appear here.',
   },
   active: {
-    icon: BriefcaseIcon,
+    icon: BriefcaseBusinessIcon,
     title: 'No active candidates',
     description: 'Candidates moving through interviews will appear here.',
   },
@@ -37,7 +37,7 @@ const EMPTY_BY_TAB: Record<PipelineTab, { icon: PhosphorIcon; title: string; des
     description: 'Candidates who reach the offer stage will show up here.',
   },
   hired: {
-    icon: SealCheckIcon,
+    icon: BadgeCheckIcon,
     title: 'No hires yet',
     description: 'Candidates you hire will be collected here.',
   },
@@ -237,7 +237,7 @@ function PipelineSearchEmptyState({ subject, onClear }: { subject: 'candidates' 
   return (
     <EmptyStatePanel
       fill
-      icon={MagnifyingGlassMinusIcon}
+      icon={SearchXIcon}
       title={`No ${subject} match`}
       description="Try a different search or clear the search."
     >

@@ -3,7 +3,7 @@ import type { CareerJob } from '@comitium/jobs/schemas';
 import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { FileXIcon, type Icon as PhosphorIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, FileXIcon, type LucideIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { ApplicationForm } from '@/components/features/job-application';
 import { useQueryApplyForm } from '@/hooks/queries/use-query-apply-form';
@@ -17,7 +17,7 @@ type UnavailableApplicationState = Exclude<PublicApplicationAvailability, 'accep
 
 const UNAVAILABLE_APPLICATION_COPY: Record<
   UnavailableApplicationState,
-  { icon: PhosphorIcon; title: string; description: string }
+  { icon: LucideIcon; title: string; description: string }
 > = {
   closed: {
     icon: FileXIcon,
@@ -113,7 +113,7 @@ export function CareerJobApplyPanel({ job, companyName }: CareerJobApplyPanelPro
   if (!privacyConfigured || formError || !applyForm) {
     return (
       <EmptyState
-        icon={WarningCircleIcon}
+        icon={CircleAlertIcon}
         title="Application form unavailable"
         description="Applications are temporarily unavailable. Please contact the hiring organization."
         className="min-h-80"

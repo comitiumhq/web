@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
-import { WarningIcon } from '@phosphor-icons/react';
+import { TriangleAlertIcon } from 'lucide-react';
 import {
   EmailDeliverySummary,
   getEmailSenderLabel,
@@ -30,7 +30,7 @@ export function BulkEmailSheet(props: PipelineBulkActionSheetProps) {
     >
       {action.vaultError ? (
         <Alert variant="warning">
-          <WarningIcon />
+          <TriangleAlertIcon />
           <AlertTitle>Encryption keys unavailable</AlertTitle>
           <AlertDescription>Unlock organization data before sending email.</AlertDescription>
         </Alert>
@@ -38,7 +38,7 @@ export function BulkEmailSheet(props: PipelineBulkActionSheetProps) {
 
       {action.unavailableTargets.length > 0 ? (
         <Alert variant="warning">
-          <WarningIcon />
+          <TriangleAlertIcon />
           <AlertTitle>
             {action.unavailableTargets.length}{' '}
             {action.unavailableTargets.length === 1 ? 'recipient will be skipped' : 'recipients will be skipped'}
@@ -49,7 +49,7 @@ export function BulkEmailSheet(props: PipelineBulkActionSheetProps) {
 
       {action.preparationError ? (
         <Alert variant="warning">
-          <WarningIcon />
+          <TriangleAlertIcon />
           <AlertTitle>Email needs attention</AlertTitle>
           <AlertDescription>{action.preparationError}</AlertDescription>
         </Alert>

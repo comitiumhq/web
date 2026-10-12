@@ -2,8 +2,8 @@ import { Button } from '@comitium/ui/button';
 import { Calendar } from '@comitium/ui/calendar';
 import { cn } from '@comitium/ui/cn';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { CalendarIcon } from '@phosphor-icons/react';
 import { format, parseISO } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import type { ControllerRenderProps } from 'react-hook-form';
 

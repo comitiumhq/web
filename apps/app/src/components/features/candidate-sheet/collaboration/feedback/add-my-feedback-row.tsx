@@ -1,5 +1,5 @@
 import { Button } from '@comitium/ui/button';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
 interface AddMyFeedbackRowProps {

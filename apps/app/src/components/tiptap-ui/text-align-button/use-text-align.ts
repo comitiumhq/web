@@ -1,12 +1,9 @@
 'use client';
 
 import type { ChainedCommands, Editor } from '@tiptap/react';
+import { TextAlignCenterIcon, TextAlignEndIcon, TextAlignJustifyIcon, TextAlignStartIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-// --- Icons ---
-import { AlignCenterIcon } from '@/components/tiptap-icons/align-center-icon';
-import { AlignJustifyIcon } from '@/components/tiptap-icons/align-justify-icon';
-import { AlignLeftIcon } from '@/components/tiptap-icons/align-left-icon';
-import { AlignRightIcon } from '@/components/tiptap-icons/align-right-icon';
+
 // --- Hooks ---
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
 // --- Lib ---
@@ -45,10 +42,10 @@ export const TEXT_ALIGN_SHORTCUT_KEYS: Record<TextAlign, string> = {
 };
 
 export const textAlignIcons = {
-  left: AlignLeftIcon,
-  center: AlignCenterIcon,
-  right: AlignRightIcon,
-  justify: AlignJustifyIcon,
+  left: TextAlignStartIcon,
+  center: TextAlignCenterIcon,
+  right: TextAlignEndIcon,
+  justify: TextAlignJustifyIcon,
 };
 
 export const textAlignLabels: Record<TextAlign, string> = {

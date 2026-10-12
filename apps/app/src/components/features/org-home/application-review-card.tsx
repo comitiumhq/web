@@ -4,8 +4,8 @@ import { Button } from '@comitium/ui/button';
 import { CardAction, CardContent, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { StatusBadge, type StatusBadgeProps } from '@comitium/ui/status-badge';
-import { CaretRightIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { ChevronRightIcon, CircleCheckIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { getActivityBadge } from '@/components/features/application-status';
 import { CriteriaBadge, getCriteriaLabel } from '@/components/features/pipeline/shared/criteria-badge';
@@ -64,7 +64,7 @@ export function ApplicationReviewCard({
         <CardAction>
           <Button variant="ghost" size="icon-sm" aria-label="Open application review" asChild>
             <Link to="/org/$orgId/pipeline" params={{ orgId }} search={{ tab: 'review' }}>
-              <CaretRightIcon className="size-3.5" />
+              <ChevronRightIcon className="size-3.5" />
             </Link>
           </Button>
         </CardAction>
@@ -81,7 +81,7 @@ export function ApplicationReviewCard({
 
         {!isLoading && candidates.length === 0 && (
           <HomeEmptyState
-            icon={CheckCircleIcon}
+            icon={CircleCheckIcon}
             title="Your review queue is clear"
             description="Assigned and available reviews will appear here."
           />

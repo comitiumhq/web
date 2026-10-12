@@ -4,7 +4,7 @@ import { PageLoader } from '@comitium/ui/page-loader';
 import { RouteNotFound } from '@comitium/ui/route-not-found';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { type ReactNode, useCallback } from 'react';
 import { useQueryOrgCreation } from '@/hooks/queries/use-query-org-creation';
 
@@ -69,7 +69,7 @@ function CreateOrgError({ isRetrying, onRetry }: { isRetrying: boolean; onRetry:
   return (
     <div className="space-y-6 text-center">
       <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive-text">
-        <WarningCircleIcon className="size-5" />
+        <CircleAlertIcon className="size-5" />
       </div>
       <PageHeader
         title="Couldn’t load organization setup"

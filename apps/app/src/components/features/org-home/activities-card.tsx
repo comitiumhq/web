@@ -1,9 +1,8 @@
 import { Badge } from '@comitium/ui/badge';
 import { CardContent, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { CalendarDotsIcon, CheckCircleIcon, FlagIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { CalendarDaysIcon, CircleCheckIcon, FlagIcon, type LucideIcon } from 'lucide-react';
 import { ApplicationReviewIcon } from '@/lib/constants/domain-icons';
 import { cn } from '@/lib/utils';
 import { HomeCard, HomeCardHeader } from './home-card';
@@ -22,7 +21,7 @@ interface ActivitiesCardProps {
 
 interface PipelineActivityRowProps {
   countLabel: string;
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   label: string;
   orgId: string;
   tab: 'review' | 'offer';
@@ -79,7 +78,7 @@ export function ActivitiesCard({
 
         {!isLoading && counts.total === 0 && (
           <HomeEmptyState
-            icon={CheckCircleIcon}
+            icon={CircleCheckIcon}
             title="You're all caught up"
             description="Tasks and offers requiring action will appear here."
           />
@@ -112,7 +111,7 @@ function InterviewActivityRow({ countLabel, orgId }: InterviewActivityRowProps) 
       search={{ tab: 'active' }}
       className={cn(homeListRowClassName, 'grid-cols-[auto_minmax(0,1fr)_auto]')}
     >
-      <CalendarDotsIcon className="size-5 text-muted-foreground" />
+      <CalendarDaysIcon className="size-5 text-muted-foreground" />
       <span className="min-w-0 truncate text-label-14 text-foreground">Interviews to schedule</span>
       <ActivityCountBadge label={countLabel} />
     </Link>

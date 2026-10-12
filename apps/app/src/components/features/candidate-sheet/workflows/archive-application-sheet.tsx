@@ -13,7 +13,7 @@ import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
 import { Switch } from '@comitium/ui/switch';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArchiveIcon, WarningIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, TriangleAlertIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -331,7 +331,7 @@ export function ArchiveApplicationSheet({
                 <>
                   {!candidateEmail && (
                     <Alert variant="warning">
-                      <WarningIcon />
+                      <TriangleAlertIcon />
                       <AlertTitle>Candidate email unavailable</AlertTitle>
                       <AlertDescription>
                         Unlock candidate data or add an email address before archiving.

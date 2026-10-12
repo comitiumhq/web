@@ -3,7 +3,7 @@ import { Card } from '@comitium/ui/card';
 import { cn } from '@comitium/ui/cn';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { BriefcaseIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { BriefcaseBusinessIcon, CircleAlertIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { CareerJobListItem } from '../../schemas/careers';
 import { CareerJobRow } from './career-job-row';
@@ -94,7 +94,7 @@ function CareerJobsStatusPanel({ type, hasActiveFilters = false, onClearFilters 
     return (
       <Card className="gap-0 py-0">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Roles failed to load"
           description="Refresh the page or try again in a moment."
           className="min-h-72"
@@ -110,7 +110,7 @@ function CareerJobsStatusPanel({ type, hasActiveFilters = false, onClearFilters 
 
   return (
     <Card className="gap-0 py-0">
-      <EmptyState icon={BriefcaseIcon} title={title} description={description} className="min-h-72">
+      <EmptyState icon={BriefcaseBusinessIcon} title={title} description={description} className="min-h-72">
         {hasActiveFilters && (
           <Button variant="outline" className="mt-4" onClick={onClearFilters}>
             Clear filters

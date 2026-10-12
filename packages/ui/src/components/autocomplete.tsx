@@ -1,5 +1,5 @@
 import { Combobox as ComboboxPrimitive } from '@base-ui/react/combobox';
-import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
+import { SearchIcon, XIcon } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../lib/cn';
 import {
@@ -147,7 +147,7 @@ export const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
                 {...inputProps}
               />
               <InputGroupAddon>
-                <MagnifyingGlassIcon className="size-4 shrink-0 opacity-50" />
+                <SearchIcon className="size-4 shrink-0 opacity-50" />
               </InputGroupAddon>
             </InputGroup>
           </div>

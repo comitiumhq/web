@@ -3,7 +3,7 @@ import { Button } from '@comitium/ui/button';
 import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import type { OrgTeamMember } from '@/lib/schemas/org';
 

@@ -1,4 +1,4 @@
-import type { Icon } from '@phosphor-icons/react';
+import type { LucideIcon } from 'lucide-react';
 import {
   EvaluationCriteriaIcon,
   InterviewPlanIcon,
@@ -9,7 +9,7 @@ import {
 interface DraftSectionDefinition {
   id: string;
   label: string;
-  icon: Icon;
+  icon: LucideIcon;
   route: string;
 }
 

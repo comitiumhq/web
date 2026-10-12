@@ -10,7 +10,7 @@ import {
 import { Label } from '@comitium/ui/label';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { CalendarDotsIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { CalendarDaysIcon, LoaderCircleIcon } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { ReasonPicker } from '@/components/features/cancel-reschedule-reasons/reason-picker';
 import { useReasonPickerState } from '@/components/features/cancel-reschedule-reasons/use-reason-picker-state';
@@ -176,7 +176,7 @@ export function RescheduleInterviewDialog({
           <FeatureSheetBody className="flex flex-col gap-4">
             <div className="flex flex-col gap-1 rounded-md border bg-muted p-3">
               <div className="flex items-center gap-2 text-label-14">
-                <CalendarDotsIcon className="size-4 text-muted-foreground" />
+                <CalendarDaysIcon className="size-4 text-muted-foreground" />
                 <span className="font-medium">{interview.title}</span>
                 <span className="text-muted-foreground">· {interview.durationMinutes} min</span>
               </div>
@@ -216,7 +216,7 @@ export function RescheduleInterviewDialog({
               Cancel
             </Button>
             <Button type="button" onClick={handleSubmit} disabled={isPending || !selectedTime}>
-              {isPending && <SpinnerGapIcon data-icon="inline-start" className="animate-spin" />}
+              {isPending && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
               Reschedule
             </Button>
           </FeatureSheetFooter>

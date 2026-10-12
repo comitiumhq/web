@@ -2,7 +2,7 @@ import type { CandidateSheetActionState, CandidateSheetCurrentActivity } from '@
 import { Button } from '@comitium/ui/button';
 import { formatDate } from '@comitium/ui/date';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { CalendarPlusIcon, ChatCenteredTextIcon, EnvelopeSimpleIcon, type Icon } from '@phosphor-icons/react';
+import { CalendarPlusIcon, type LucideIcon, MailIcon, MessageSquareTextIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { useQueryCalendarStatus } from '@/hooks/queries/use-query-interviews';
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';
@@ -20,7 +20,7 @@ import { getCalendarActionDisabledReason } from './calendar-action-availability'
 import type { PendingInterviewFeedbackActivity } from './use-candidate-activities-model';
 
 interface ActivityCardProps {
-  icon: Icon;
+  icon: LucideIcon;
   primary: string;
   secondary?: string;
   actionLabel: string | null;
@@ -172,7 +172,7 @@ const SendEmailActivityRow = memo(function SendEmailActivityRow({
 
   return (
     <ActivityCard
-      icon={EnvelopeSimpleIcon}
+      icon={MailIcon}
       primary={`Send: ${activity.emailTemplateName}`}
       actionLabel={canAct ? 'Send' : null}
       onClick={canAct ? handleClick : null}
@@ -239,7 +239,7 @@ export const InterviewFeedbackActivityRow = memo(function InterviewFeedbackActiv
 
   return (
     <ActivityCard
-      icon={ChatCenteredTextIcon}
+      icon={MessageSquareTextIcon}
       primary={event.title}
       secondary={secondary}
       actionLabel={canAct ? 'Submit feedback' : null}

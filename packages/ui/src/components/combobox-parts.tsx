@@ -1,5 +1,5 @@
 import { Combobox as ComboboxPrimitive } from '@base-ui/react/combobox';
-import { CaretDownIcon, CheckIcon } from '@phosphor-icons/react';
+import { CheckIcon, ChevronDownIcon } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../lib/cn';
 
@@ -160,7 +160,7 @@ export function SelectionFieldTrigger({ label }: { label: string }) {
       aria-label={label}
       className="group mr-1 inline-flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring"
     >
-      <CaretDownIcon className="size-4 transition-transform group-data-popup-open:rotate-180" />
+      <ChevronDownIcon className="size-4 transition-transform group-data-popup-open:rotate-180" />
     </ComboboxPrimitive.Trigger>
   );
 }

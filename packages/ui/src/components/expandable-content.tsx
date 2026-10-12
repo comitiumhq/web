@@ -1,4 +1,4 @@
-import { CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react';
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 import { useCallback, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
@@ -123,7 +123,7 @@ function ExpandableFrame({
     setIsExpanded((expanded) => !expanded);
   }, []);
 
-  const DisclosureIcon = isExpanded ? CaretUpIcon : CaretDownIcon;
+  const DisclosureIcon = isExpanded ? ChevronUpIcon : ChevronDownIcon;
 
   return (
     <div className={cn('min-w-0', className)}>

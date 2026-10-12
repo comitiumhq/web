@@ -6,8 +6,8 @@ import { PageContainer } from '@comitium/ui/page-container';
 import { formatCompensationSalary, hasCompensation } from '@comitium/ui/salary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { ArrowLeftIcon, BriefcaseIcon, BuildingsIcon, CurrencyDollarIcon, MapPinIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { ArrowLeftIcon, BriefcaseBusinessIcon, Building2Icon, DollarSignIcon, MapPinIcon } from 'lucide-react';
 import type { ElementType, ReactNode } from 'react';
 import { getPublicApplicationAvailability, type PublicApplicationAvailability } from '../../application/availability';
 import type { CareerJob } from '../../schemas/careers';
@@ -94,11 +94,11 @@ export function CareerJobDetailPage({
   const applyPath = applyUrl ?? `/careers/${job.org.careersSlug}/jobs/${job.postingSlug}/apply`;
 
   const detailItems: DetailItem[] = [
-    { icon: CurrencyDollarIcon, label: 'Compensation', value: salary },
-    { icon: BuildingsIcon, label: 'Work model', value: locationTypeText },
+    { icon: DollarSignIcon, label: 'Compensation', value: salary },
+    { icon: Building2Icon, label: 'Work model', value: locationTypeText },
     { icon: MapPinIcon, label: 'Location', value: locationText },
     {
-      icon: BriefcaseIcon,
+      icon: BriefcaseBusinessIcon,
       label: 'Employment',
       value: job.employmentType ? formatEmploymentType(job.employmentType) : null,
     },

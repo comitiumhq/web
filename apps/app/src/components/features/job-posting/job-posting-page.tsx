@@ -8,7 +8,7 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { PageContainer } from '@comitium/ui/page-container';
 import { richTextToPlainText } from '@comitium/ui/rich-text';
 import { Spinner } from '@comitium/ui/spinner';
-import { ArrowSquareOutIcon, PencilIcon } from '@phosphor-icons/react';
+import { ExternalLinkIcon, PencilIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { DraftSectionSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
@@ -210,7 +210,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
             {isPostingPublished && candidatePostingUrl && (
               <Button asChild variant="outline" size="sm">
                 <a href={candidatePostingUrl} target="_blank" rel="noopener noreferrer">
-                  <ArrowSquareOutIcon data-icon="inline-start" />
+                  <ExternalLinkIcon data-icon="inline-start" />
                   View posting
                 </a>
               </Button>

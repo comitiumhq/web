@@ -7,7 +7,7 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { WarningCircleIcon, XIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, XIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import { HiringTeamIcon } from '@/lib/constants/domain-icons';
@@ -52,7 +52,7 @@ export function HiringTeamList({
 
   if (isError) {
     return (
-      <EmptyState icon={WarningCircleIcon} title="Couldn't load team members" description="Try refreshing the page." />
+      <EmptyState icon={CircleAlertIcon} title="Couldn't load team members" description="Try refreshing the page." />
     );
   }
 

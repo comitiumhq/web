@@ -1,7 +1,7 @@
 import { PageContainer } from '@comitium/ui/page-container';
 import { SettingsNavLink } from '@comitium/ui/settings-nav-link';
-import { CalendarIcon, type Icon as PhosphorIcon, UserIcon } from '@phosphor-icons/react';
 import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { CalendarIcon, type LucideIcon, UserRoundIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { OrgGuard } from '@/components/auth/org-guard';
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/org/$orgId/settings')({
 interface PersonalSettingsNavItem {
   label: string;
   path: string;
-  icon: PhosphorIcon;
+  icon: LucideIcon;
 }
 
 function PersonalSettingsLayout() {
@@ -27,7 +27,7 @@ function PersonalSettingsLayoutContent({ orgId }: { orgId: string }) {
   const basePath = `/org/${orgId}/settings`;
 
   const items: PersonalSettingsNavItem[] = [
-    { label: 'Profile', path: basePath, icon: UserIcon },
+    { label: 'Profile', path: basePath, icon: UserRoundIcon },
     {
       label: 'Calendar',
       path: `${basePath}/calendar`,

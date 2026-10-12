@@ -1,4 +1,4 @@
-import { CheckIcon, MonitorIcon, MoonIcon, SunIcon } from '@phosphor-icons/react';
+import { CheckIcon, MonitorIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import type { ComponentType } from 'react';
 

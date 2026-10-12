@@ -3,7 +3,7 @@ import { Combobox, type ComboboxOption } from '@comitium/ui/combobox';
 import { Label } from '@comitium/ui/label';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { InfoIcon } from '@phosphor-icons/react';
+import { InfoIcon } from 'lucide-react';
 import type { RefObject } from 'react';
 import { EditorToolbar } from '@/components/tiptap-ui/editor-toolbars';
 import { RichTextEditor, type RichTextEditorHandle } from '@/components/tiptap-ui/rich-text-editor';

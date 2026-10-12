@@ -1,11 +1,11 @@
-import { type Icon as PhosphorIcon, XIcon } from '@phosphor-icons/react';
+import { type LucideIcon, XIcon } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { Button } from './button';
 
 export interface TableSelectionDockAction {
   id: string;
   label: string;
-  icon?: PhosphorIcon;
+  icon?: LucideIcon;
   disabled?: boolean;
   destructive?: boolean;
   onSelect: () => void;

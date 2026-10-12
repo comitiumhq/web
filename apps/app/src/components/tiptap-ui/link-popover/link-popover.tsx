@@ -1,12 +1,9 @@
 'use client';
 
 import type { Editor } from '@tiptap/react';
+import { CornerDownLeftIcon, ExternalLinkIcon, LinkIcon, UnlinkIcon } from 'lucide-react';
 import { forwardRef, useCallback, useEffect, useState } from 'react';
-// --- Icons ---
-import { CornerDownLeftIcon } from '@/components/tiptap-icons/corner-down-left-icon';
-import { ExternalLinkIcon } from '@/components/tiptap-icons/external-link-icon';
-import { LinkIcon } from '@/components/tiptap-icons/link-icon';
-import { TrashIcon } from '@/components/tiptap-icons/trash-icon';
+
 // --- Tiptap UI ---
 import type { UseLinkPopoverConfig } from '@/components/tiptap-ui/link-popover';
 import { useLinkPopover } from '@/components/tiptap-ui/link-popover';
@@ -160,7 +157,7 @@ const LinkMain: React.FC<LinkMainProps> = ({ url, isUrlValid, setUrl, setLink, r
                 disabled={!url && !isActive}
                 variant="ghost"
               >
-                <TrashIcon className="tiptap-button-icon" />
+                <UnlinkIcon className="tiptap-button-icon" />
               </Button>
             </ButtonGroup>
           </ButtonGroup>

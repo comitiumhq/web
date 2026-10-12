@@ -1,6 +1,6 @@
 import { Button } from '@comitium/ui/button';
 import { PipelineStageTabs } from '@comitium/ui/pipeline-stage-tabs';
-import { ArchiveIcon } from '@phosphor-icons/react';
+import { ArchiveIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import type { StageTypeCounts } from '@/lib/schemas/pipeline';
 import { cn } from '@/lib/utils';

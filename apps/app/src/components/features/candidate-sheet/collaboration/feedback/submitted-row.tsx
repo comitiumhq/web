@@ -3,7 +3,7 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { formatRelativeTime } from '@comitium/ui/date';
 import { getMemberDisplayName, type MemberDisplayIdentity } from '@comitium/ui/display-name';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
-import { CaretDownIcon, CaretUpIcon, DotsThreeVerticalIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react';
+import { ChevronDownIcon, ChevronUpIcon, EllipsisVerticalIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import { useDeleteFeedbackSubmission } from '@/hooks/mutations/use-feedback-submission';
@@ -62,7 +62,7 @@ export const SubmittedRow = memo(function SubmittedRow({
   const canEdit = isOwn && onEdit !== null;
   const canDelete = isOwn && !!applicationId;
   const hasMenu = canEdit || canDelete;
-  const ChevronGlyph = open ? CaretUpIcon : CaretDownIcon;
+  const ChevronGlyph = open ? ChevronUpIcon : ChevronDownIcon;
 
   return (
     <>
@@ -84,7 +84,7 @@ export const SubmittedRow = memo(function SubmittedRow({
                 disabled={isDeleting}
                 aria-label="Feedback actions"
               >
-                <DotsThreeVerticalIcon weight="bold" />
+                <EllipsisVerticalIcon strokeWidth={2} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

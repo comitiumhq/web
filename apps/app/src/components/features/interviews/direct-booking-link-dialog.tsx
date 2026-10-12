@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
-import { EnvelopeIcon, SpinnerGapIcon, WarningIcon } from '@phosphor-icons/react';
+import { LoaderCircleIcon, MailIcon, TriangleAlertIcon } from 'lucide-react';
 import { EditorToolbar } from '@/components/tiptap-ui/editor-toolbars';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
 import { DirectBookingInterviewerPicker } from './direct-booking-interviewer-picker';
@@ -61,7 +61,7 @@ export function DirectBookingLinkDialog({
             <FeatureSheetBody className="space-y-4">
               {!candidateEmail && (
                 <Alert variant="warning">
-                  <WarningIcon />
+                  <TriangleAlertIcon />
                   <AlertTitle>Candidate email unavailable</AlertTitle>
                   <AlertDescription>Unlock candidate data before sending a scheduling link.</AlertDescription>
                 </Alert>
@@ -152,9 +152,9 @@ export function DirectBookingLinkDialog({
               </Button>
               <Button type="submit" disabled={dialog.isPending || !dialog.canSubmit}>
                 {dialog.isPending ? (
-                  <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
+                  <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <EnvelopeIcon className="mr-2 h-4 w-4" />
+                  <MailIcon className="mr-2 h-4 w-4" />
                 )}
                 Send scheduling link
               </Button>

@@ -2,7 +2,7 @@ import type { OtherApplicationSummary } from '@comitium/schemas/applications';
 import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { PageContainer } from '@comitium/ui/page-container';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CandidateSheetMount, type CandidateSheetSelection } from '@/components/features/candidate-sheet';
 import { CreateJobDialog } from '@/components/features/jobs-list/create-job-dialog';
@@ -261,7 +261,7 @@ export function GlobalPipelineDashboard({ org, activeTab, onTabChange }: GlobalP
     return (
       <div className="flex h-full items-center justify-center bg-background p-6">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Pipeline could not be loaded"
           description="Retry the request before continuing."
         >

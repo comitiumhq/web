@@ -1,4 +1,3 @@
-import { ArrowDownIcon, ArrowsDownUpIcon, ArrowUpIcon } from '@phosphor-icons/react';
 import {
   type Cell,
   type Column,
@@ -16,6 +15,7 @@ import {
   type VisibilityState,
 } from '@tanstack/react-table';
 import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual';
+import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react';
 import {
   type ComponentProps,
   type CSSProperties,
@@ -438,7 +438,7 @@ function SortIcon({ direction }: { direction: SortDirection }) {
     return <ArrowDownIcon className="size-3.5" />;
   }
 
-  return <ArrowsDownUpIcon className="size-3.5 opacity-45" />;
+  return <ArrowUpDownIcon className="size-3.5 opacity-45" />;
 }
 
 function getAriaSort(direction: SortDirection) {

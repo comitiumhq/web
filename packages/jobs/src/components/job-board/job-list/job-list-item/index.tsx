@@ -5,7 +5,7 @@ import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { formatRelativeTime } from '@comitium/ui/date';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { formatCompensationCompact } from '@comitium/ui/salary';
-import { BriefcaseIcon, MapPinIcon } from '@phosphor-icons/react';
+import { BriefcaseBusinessIcon, MapPinIcon } from 'lucide-react';
 import { RequiredSkillPreview } from '../../../required-skill-preview';
 
 interface JobListItemProps {
@@ -71,7 +71,7 @@ export function JobListItem({ job, isSelected, isLast, onClick }: JobListItemPro
             )}
             {job.employmentType && (
               <Badge variant="outline" className={LIST_BADGE_CLASS}>
-                <BriefcaseIcon data-icon="inline-start" />
+                <BriefcaseBusinessIcon data-icon="inline-start" />
                 {formatEmploymentType(job.employmentType)}
               </Badge>
             )}

@@ -2,9 +2,9 @@
 
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import type { Editor } from '@tiptap/react';
+import { TextQuoteIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-// --- Icons ---
-import { BlockquoteIcon } from '@/components/tiptap-icons/blockquote-icon';
+
 // --- Hooks ---
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
 
@@ -246,6 +246,6 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
     canToggle,
     label: 'Blockquote',
     shortcutKeys: BLOCKQUOTE_SHORTCUT_KEY,
-    Icon: BlockquoteIcon,
+    Icon: TextQuoteIcon,
   };
 }

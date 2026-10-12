@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { cn } from '@comitium/ui/cn';
 import { formatInTimezone } from '@comitium/ui/date';
-import { CalendarXIcon } from '@phosphor-icons/react';
+import { CalendarXIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import type { PublicScheduleSlot } from '@/lib/schemas/public-schedule';
 

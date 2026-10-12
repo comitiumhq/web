@@ -4,7 +4,7 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { PageHeader } from '@comitium/ui/page-header';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@comitium/ui/tabs';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { type ReactNode, useCallback } from 'react';
 
 import type { EntityTabValue } from './types';
@@ -94,7 +94,7 @@ function EntityCount({ value }: { value: number | null }) {
 function EntitySettingsError({ description }: { description: string }) {
   return (
     <div className="h-full flex items-center justify-center pb-8">
-      <EmptyState icon={WarningCircleIcon} title="Something went wrong" description={description} />
+      <EmptyState icon={CircleAlertIcon} title="Something went wrong" description={description} />
     </div>
   );
 }

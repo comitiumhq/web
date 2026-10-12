@@ -5,8 +5,8 @@ import { DESKTOP_BREAKPOINT } from '@comitium/ui/config';
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@comitium/ui/drawer';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { useMediaQuery } from '@comitium/ui/use-media-query';
-import { BriefcaseIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useNavigate } from '@tanstack/react-router';
+import { BriefcaseBusinessIcon, CircleAlertIcon } from 'lucide-react';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PublicJobsApi } from '../../api';
 import { JOBS_PAGE_LIMIT } from '../../constants';
@@ -105,7 +105,7 @@ function JobBoardStatusPanel({ type, hasActiveFilters = false, onClearFilters }:
     return (
       <Card className="gap-0 py-0">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Jobs failed to load"
           description="Refresh the page or try again in a moment."
           className="min-h-88"
@@ -122,7 +122,7 @@ function JobBoardStatusPanel({ type, hasActiveFilters = false, onClearFilters }:
   return (
     <div className="flex min-h-[calc(100dvh-9rem)] flex-col items-center justify-center px-6 pb-12 text-center">
       <span className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-        <BriefcaseIcon className="size-7 text-muted-foreground" aria-hidden="true" />
+        <BriefcaseBusinessIcon className="size-7 text-muted-foreground" aria-hidden="true" />
       </span>
       <h2 className="text-heading-20">{title}</h2>
       <p className="mt-2 max-w-sm text-copy-14 text-muted-foreground">{description}</p>
@@ -139,7 +139,7 @@ function JobBoardStatusPanel({ type, hasActiveFilters = false, onClearFilters }:
 function SelectedJobUnavailable({ onClearSelection }: { onClearSelection: () => void }) {
   return (
     <EmptyState
-      icon={WarningCircleIcon}
+      icon={CircleAlertIcon}
       title="Job unavailable"
       description="This posting may have closed or the link may no longer match a published role."
       className="min-h-96"
@@ -290,7 +290,7 @@ export function JobBoard({ api, selectedPosting = null, filters = {}, resolveApp
   if (isError) {
     detailContent = (
       <EmptyState
-        icon={WarningCircleIcon}
+        icon={CircleAlertIcon}
         title="Jobs failed to load"
         description="Refresh the page or try again in a moment."
         className="min-h-96"

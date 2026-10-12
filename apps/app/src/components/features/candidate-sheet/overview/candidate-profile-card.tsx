@@ -5,14 +5,14 @@ import { Button } from '@comitium/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
 import {
-  ArrowSquareOutIcon,
-  BriefcaseIcon,
-  BuildingOfficeIcon,
+  BriefcaseBusinessIcon,
+  Building2Icon,
+  ExternalLinkIcon,
   GlobeIcon,
   MapPinIcon,
   PencilIcon,
   PhoneIcon,
-} from '@phosphor-icons/react';
+} from 'lucide-react';
 import { type ReactNode, useCallback, useState } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';
@@ -206,21 +206,21 @@ function CandidateProfileFields({ profile }: { profile: CandidateProfile }) {
   return (
     <div className="flex flex-col gap-2.5">
       {currentTitle && currentCompany && (
-        <ProfileField icon={<BriefcaseIcon />}>
+        <ProfileField icon={<BriefcaseBusinessIcon />}>
           {currentTitle} at {currentCompany}
         </ProfileField>
       )}
-      {currentTitle && !currentCompany && <ProfileField icon={<BriefcaseIcon />}>{currentTitle}</ProfileField>}
-      {!currentTitle && currentCompany && <ProfileField icon={<BuildingOfficeIcon />}>{currentCompany}</ProfileField>}
+      {currentTitle && !currentCompany && <ProfileField icon={<BriefcaseBusinessIcon />}>{currentTitle}</ProfileField>}
+      {!currentTitle && currentCompany && <ProfileField icon={<Building2Icon />}>{currentCompany}</ProfileField>}
       {phone && <ProfileField icon={<PhoneIcon />}>{phone}</ProfileField>}
       {locationLabel && <ProfileField icon={<MapPinIcon />}>{locationLabel}</ProfileField>}
       {isUrl(linkedIn) && (
-        <ProfileLink icon={<ArrowSquareOutIcon />} href={linkedIn}>
+        <ProfileLink icon={<ExternalLinkIcon />} href={linkedIn}>
           LinkedIn
         </ProfileLink>
       )}
       {isUrl(github) && (
-        <ProfileLink icon={<ArrowSquareOutIcon />} href={github}>
+        <ProfileLink icon={<ExternalLinkIcon />} href={github}>
           GitHub
         </ProfileLink>
       )}

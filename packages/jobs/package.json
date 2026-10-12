@@ -19,7 +19,7 @@
   "dependencies": {
     "@comitium/schemas": "workspace:*",
     "@comitium/ui": "workspace:*",
-    "@phosphor-icons/react": "2.1.10",
+    "lucide-react": "1.55.0",
     "@tanstack/react-query": "5.90.21",
     "@tanstack/react-router": "1.147.3",
     "@tanstack/react-virtual": "3.14.2",

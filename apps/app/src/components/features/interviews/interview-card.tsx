@@ -12,21 +12,21 @@ import {
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import {
-  ArrowSquareOutIcon,
-  CalendarDotsIcon,
-  CalendarIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  DotsThreeIcon,
-  LinkIcon,
-  MapPinIcon,
-  QuestionIcon,
-  SpinnerGapIcon,
-  UserMinusIcon,
-  XCircleIcon,
-} from '@phosphor-icons/react';
 import { addMinutes, isBefore } from 'date-fns';
+import {
+  CalendarDaysIcon,
+  CalendarIcon,
+  CircleCheckIcon,
+  CircleHelpIcon,
+  CircleXIcon,
+  ClockIcon,
+  EllipsisIcon,
+  ExternalLinkIcon,
+  LinkIcon,
+  LoaderCircleIcon,
+  MapPinIcon,
+  UserMinusIcon,
+} from 'lucide-react';
 import { memo, type ReactNode, useCallback, useMemo, useState } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import { useCompleteInterview } from '@/hooks/mutations/use-interview-mutations';
@@ -59,8 +59,8 @@ const STATUS_ICONS: Partial<Record<InterviewStatusValue, typeof CalendarIcon>> =
   [InterviewStatus.NEEDS_SCHEDULING]: ClockIcon,
   [InterviewStatus.LINK_SENT]: LinkIcon,
   [InterviewStatus.SCHEDULED]: CalendarIcon,
-  [InterviewStatus.COMPLETED]: CheckCircleIcon,
-  [InterviewStatus.CANCELLED]: XCircleIcon,
+  [InterviewStatus.COMPLETED]: CircleCheckIcon,
+  [InterviewStatus.CANCELLED]: CircleXIcon,
   [InterviewStatus.NO_SHOW]: UserMinusIcon,
 };
 
@@ -71,10 +71,10 @@ const RSVP_LABEL: Record<NonNullable<RsvpStatus>, string> = {
   awaiting: 'Awaiting response',
 };
 
-const RSVP_DOT_CONFIG: Record<NonNullable<RsvpStatus>, { Icon: typeof CheckCircleIcon; color: string }> = {
-  accepted: { Icon: CheckCircleIcon, color: 'text-success' },
-  declined: { Icon: XCircleIcon, color: 'text-destructive' },
-  tentative: { Icon: QuestionIcon, color: 'text-warning' },
+const RSVP_DOT_CONFIG: Record<NonNullable<RsvpStatus>, { Icon: typeof CircleCheckIcon; color: string }> = {
+  accepted: { Icon: CircleCheckIcon, color: 'text-success' },
+  declined: { Icon: CircleXIcon, color: 'text-destructive' },
+  tentative: { Icon: CircleHelpIcon, color: 'text-warning' },
   awaiting: { Icon: ClockIcon, color: 'text-muted-foreground' },
 };
 
@@ -314,7 +314,7 @@ export const InterviewCard = memo(function InterviewCard({
           {canJoin && interview.meetingUrl && (
             <Button asChild variant="outline" size="sm">
               <a href={interview.meetingUrl} target="_blank" rel="noopener noreferrer">
-                <ArrowSquareOutIcon data-icon="inline-start" />
+                <ExternalLinkIcon data-icon="inline-start" />
                 Join
               </a>
             </Button>
@@ -324,7 +324,7 @@ export const InterviewCard = memo(function InterviewCard({
             <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon-xs" disabled={isCompleting}>
-                  {isCompleting ? <SpinnerGapIcon className="animate-spin" /> : <DotsThreeIcon />}
+                  {isCompleting ? <LoaderCircleIcon className="animate-spin" /> : <EllipsisIcon />}
                   <span className="sr-only">Interview actions</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -333,7 +333,7 @@ export const InterviewCard = memo(function InterviewCard({
                   <DropdownMenuGroup>
                     {canComplete && timeData.canCompleteNow && (
                       <DropdownMenuItem onClick={handleCompleteRequest}>
-                        <CheckCircleIcon />
+                        <CircleCheckIcon />
                         Mark completed
                       </DropdownMenuItem>
                     )}
@@ -352,7 +352,7 @@ export const InterviewCard = memo(function InterviewCard({
                 {canReschedule && (
                   <DropdownMenuGroup>
                     <DropdownMenuItem onClick={handleReschedule}>
-                      <CalendarDotsIcon />
+                      <CalendarDaysIcon />
                       Reschedule
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -361,7 +361,7 @@ export const InterviewCard = memo(function InterviewCard({
                 {canCancel && (
                   <DropdownMenuGroup>
                     <DropdownMenuItem onClick={handleCancel} variant="destructive">
-                      <XCircleIcon />
+                      <CircleXIcon />
                       {cancelActionLabel}
                     </DropdownMenuItem>
                   </DropdownMenuGroup>

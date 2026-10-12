@@ -14,8 +14,7 @@ import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { Spinner } from '@comitium/ui/spinner';
 import { TablePagination } from '@comitium/ui/table-pagination';
 import { TableSkeleton, type TableSkeletonColumn } from '@comitium/ui/table-skeleton';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ArchiveIcon, InfoIcon, LockIcon, TagIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, CircleAlertIcon, InfoIcon, LockIcon, type LucideIcon, TagIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EntitySettingsPage } from '@/components/features/settings-library/entity-settings-page';
 import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
@@ -241,7 +240,7 @@ function ErrorState() {
   return (
     <div className="h-full flex items-center justify-center pb-8">
       <EmptyState
-        icon={WarningCircleIcon}
+        icon={CircleAlertIcon}
         title="Something went wrong"
         description="We couldn't load your tags. Please try again."
       />
@@ -249,7 +248,7 @@ function ErrorState() {
   );
 }
 
-const EMPTY_STATE_CONFIG: Record<TabValue, { icon: PhosphorIcon; title: string; description: string }> = {
+const EMPTY_STATE_CONFIG: Record<TabValue, { icon: LucideIcon; title: string; description: string }> = {
   active: {
     icon: TagIcon,
     title: 'No tags yet',

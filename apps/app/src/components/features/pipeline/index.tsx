@@ -3,8 +3,8 @@ import type { OtherApplicationSummary } from '@comitium/schemas/applications';
 import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { PageContainer } from '@comitium/ui/page-container';
-import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useNavigate } from '@tanstack/react-router';
+import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CandidateSheet } from '@/components/features/candidate-sheet';
 import type { CandidateTableVariant } from '@/components/features/pipeline/shared/candidate-table';
@@ -194,7 +194,7 @@ export function PipelineView({
     return (
       <PageContainer className="flex h-full items-center justify-center py-6">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Candidates could not be loaded"
           description="Retry the pipeline request before continuing."
         >

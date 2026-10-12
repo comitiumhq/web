@@ -1,5 +1,4 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ArchiveIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, type LucideIcon } from 'lucide-react';
 
 import type { EntityTabValue } from '@/components/features/settings-library/types';
 import { CloseJobReasonsIcon } from '@/lib/constants/domain-icons';
@@ -10,7 +9,7 @@ export type TabValue = EntityTabValue;
 export const EMPTY_REASONS: CloseReasonRow[] = [];
 
 interface EmptyStateConfig {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
 }

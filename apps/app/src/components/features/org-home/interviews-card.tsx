@@ -2,7 +2,7 @@ import { Badge } from '@comitium/ui/badge';
 import { CardContent, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { CalendarIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { CalendarIcon, ChevronRightIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import type { MyInterview } from '@/lib/schemas/interviews';
 import { cn } from '@/lib/utils';
@@ -108,7 +108,7 @@ const InterviewRow = memo(function InterviewRow({
 
         {isFeedbackDue && <Badge variant="warning">Feedback due</Badge>}
 
-        <CaretRightIcon className="size-3.5" />
+        <ChevronRightIcon className="size-3.5" />
       </span>
     </button>
   );

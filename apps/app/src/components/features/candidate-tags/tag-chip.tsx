@@ -1,5 +1,5 @@
 import { Badge } from '@comitium/ui/badge';
-import { XIcon } from '@phosphor-icons/react';
+import { XIcon } from 'lucide-react';
 import { type MouseEvent, memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 

@@ -2,7 +2,7 @@ import type { JobSummary } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
-import { ArchiveIcon, ArrowCounterClockwiseIcon, CopyIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, CopyIcon, EllipsisVerticalIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useCreateDraft } from '@/hooks/mutations/use-create-draft';
 import { useArchiveJob, useRestoreJob } from '@/hooks/mutations/use-job-archive-mutations';
@@ -52,7 +52,7 @@ export function JobMoreMenu({ job, orgId }: JobMoreMenuProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="size-8 shrink-0">
-            <DotsThreeVerticalIcon />
+            <EllipsisVerticalIcon />
             <span className="sr-only">Job actions</span>
           </Button>
         </DropdownMenuTrigger>
@@ -71,7 +71,7 @@ export function JobMoreMenu({ job, orgId }: JobMoreMenuProps) {
           )}
           {canRestore && (
             <DropdownMenuItem disabled={restoreJob.isPending} onSelect={handleRestore}>
-              <ArrowCounterClockwiseIcon />
+              <ArchiveRestoreIcon />
               {restoreJob.isPending ? 'Restoring...' : 'Restore'}
             </DropdownMenuItem>
           )}

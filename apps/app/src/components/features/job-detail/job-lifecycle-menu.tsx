@@ -1,7 +1,7 @@
 import type { JobSummary } from '@comitium/schemas/jobs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { CaretDownIcon } from '@phosphor-icons/react';
+import { ChevronDownIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useOpenJob } from '@/hooks/mutations/use-open-job';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
@@ -60,7 +60,7 @@ export function JobLifecycleMenu({ job, orgId, actionsDisabled = false }: JobLif
             aria-label={`${job.status} job status`}
           >
             <JobStatusBadge status={job.status} />
-            <CaretDownIcon className="size-3 text-muted-foreground" aria-hidden="true" />
+            <ChevronDownIcon className="size-3 text-muted-foreground" aria-hidden="true" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">

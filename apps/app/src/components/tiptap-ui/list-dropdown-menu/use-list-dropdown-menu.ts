@@ -1,11 +1,9 @@
 'use client';
 
 import type { Editor } from '@tiptap/react';
+import { ListIcon, ListOrderedIcon, ListTodoIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-// --- Icons ---
-import { ListIcon } from '@/components/tiptap-icons/list-icon';
-import { ListOrderedIcon } from '@/components/tiptap-icons/list-ordered-icon';
-import { ListTodoIcon } from '@/components/tiptap-icons/list-todo-icon';
+
 // --- Tiptap UI ---
 import { canToggleList, isListActive, type ListType, listIcons } from '@/components/tiptap-ui/list-button';
 // --- Hooks ---

@@ -791,6 +791,7 @@ function CandidatePanel({ candidate }: { candidate: PreviewCandidate }) {
                   >
                     <BadgeCheck
                       aria-hidden
+                      strokeWidth={2}
                       className="size-4.5 [&>path:first-child]:fill-current [&>path:last-child]:stroke-primary-foreground"
                     />
                   </button>

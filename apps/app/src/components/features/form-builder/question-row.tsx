@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { useSortable } from '@dnd-kit/react/sortable';
-import { DotsSixVerticalIcon, DotsThreeIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react';
+import { EllipsisIcon, GripVerticalIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -77,7 +77,7 @@ export const QuestionRow = memo(function QuestionRow({
               className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors shrink-0"
               onClick={stopPropagation}
             >
-              <DotsSixVerticalIcon className="size-4" />
+              <GripVerticalIcon className="size-4" />
             </span>
           )}
 
@@ -102,7 +102,7 @@ export const QuestionRow = memo(function QuestionRow({
                 disabled={isDeleting}
                 onClick={stopPropagation}
               >
-                <DotsThreeIcon />
+                <EllipsisIcon />
                 <span className="sr-only">Question actions</span>
               </Button>
             </DropdownMenuTrigger>

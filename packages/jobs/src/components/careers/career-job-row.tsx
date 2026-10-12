@@ -3,8 +3,8 @@ import { cn } from '@comitium/ui/cn';
 import { formatRelativeTime } from '@comitium/ui/date';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { formatCompensationCompact } from '@comitium/ui/salary';
-import { BriefcaseIcon, CaretRightIcon, MapPinIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { BriefcaseBusinessIcon, ChevronRightIcon, MapPinIcon } from 'lucide-react';
 import { memo } from 'react';
 import type { CareerJobListItem } from '../../schemas/careers';
 import { RequiredSkillPreview } from '../required-skill-preview';
@@ -52,7 +52,7 @@ export const CareerJobRow = memo(function CareerJobRow({ job, isLast }: CareerJo
             )}
             {job.employmentType && (
               <Badge variant="outline" className={ROW_BADGE_CLASS}>
-                <BriefcaseIcon data-icon="inline-start" />
+                <BriefcaseBusinessIcon data-icon="inline-start" />
                 {formatEmploymentType(job.employmentType)}
               </Badge>
             )}
@@ -68,7 +68,7 @@ export const CareerJobRow = memo(function CareerJobRow({ job, isLast }: CareerJo
           <RequiredSkillPreview skills={job.skills} />
         </div>
 
-        <CaretRightIcon className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5" />
+        <ChevronRightIcon className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5" />
       </div>
     </Link>
   );

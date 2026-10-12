@@ -1,10 +1,9 @@
 'use client';
 
 import type { Editor } from '@tiptap/react';
+import { Redo2Icon, Undo2Icon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-// --- Icons ---
-import { Redo2Icon } from '@/components/tiptap-icons/redo2-icon';
-import { Undo2Icon } from '@/components/tiptap-icons/undo2-icon';
+
 // --- Hooks ---
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
 // --- Lib ---

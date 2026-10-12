@@ -1,4 +1,4 @@
-import { WarningDiamondIcon, WarningIcon } from '@phosphor-icons/react';
+import { OctagonAlertIcon, TriangleAlertIcon } from 'lucide-react';
 import type { FallbackProps } from 'react-error-boundary';
 import { cn } from '../lib/cn';
 import { Button } from './button';
@@ -15,7 +15,7 @@ export function RouteError({ error, reset }: RouteErrorProps) {
   return (
     <div className="flex items-center justify-center px-4">
       <EmptyState
-        icon={WarningDiamondIcon}
+        icon={OctagonAlertIcon}
         title="Something went wrong"
         description="An unexpected error occurred. Please try again."
       >
@@ -32,7 +32,7 @@ export function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-8">
       <div className="max-w-md text-center">
-        <WarningIcon className="mx-auto mb-4 size-12 text-destructive" />
+        <TriangleAlertIcon className="mx-auto mb-4 size-12 text-destructive" />
         <h1 className="mb-2 text-heading-20">Something went wrong</h1>
         <p className="mb-6 text-copy-14 text-muted-foreground">
           An unexpected error occurred. Please try reloading the page.
@@ -68,7 +68,7 @@ export function FeatureErrorFallback({
 }: FeatureErrorFallbackProps) {
   return (
     <div className={cn('flex flex-col items-center justify-center p-8 text-center', className)}>
-      <WarningIcon className="mb-3 size-8 text-destructive" />
+      <TriangleAlertIcon className="mb-3 size-8 text-destructive" />
       <p className="mb-1 text-label-14">{title}</p>
       <p className="mb-4 text-copy-12 text-muted-foreground">Something went wrong. Please try again.</p>
 

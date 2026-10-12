@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { Input } from '@comitium/ui/input';
 import { useSortable } from '@dnd-kit/react/sortable';
-import { DotsSixVerticalIcon, LockIcon, TrashIcon } from '@phosphor-icons/react';
+import { GripVerticalIcon, LockIcon, TrashIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -47,7 +47,7 @@ export const StageItem = memo(function StageItem({ stage, index, isPinned, onUpd
           className="flex size-8 shrink-0 cursor-grab items-center justify-center text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
           aria-hidden
         >
-          <DotsSixVerticalIcon className="size-4" />
+          <GripVerticalIcon className="size-4" />
         </div>
       )}
 

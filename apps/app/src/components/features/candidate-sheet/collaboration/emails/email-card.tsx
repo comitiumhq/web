@@ -2,7 +2,7 @@ import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/ca
 import { Card } from '@comitium/ui/card';
 import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { EnvelopeSimpleIcon } from '@phosphor-icons/react';
+import { MailIcon } from 'lucide-react';
 import { memo } from 'react';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
 import type { DecryptedEmail } from '@/lib/schemas/emails';
@@ -29,7 +29,7 @@ export const EmailCard = memo(function EmailCard({ email, candidateProfile }: Em
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <EnvelopeSimpleIcon className="size-3.5 text-muted-foreground" />
+          <MailIcon className="size-3.5 text-muted-foreground" />
           <span className="text-label-12 text-muted-foreground">{formatDate(email.createdAt)}</span>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Progress } from '@comitium/ui/progress';
-import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, CircleCheckIcon } from 'lucide-react';
 import { type BulkOperation, type BulkOperationItem, isBulkOperationInProgress } from '@/lib/schemas/bulk-operations';
 import { getTargetLabel, type PipelineBulkTarget } from '../model';
 
@@ -23,7 +23,7 @@ export function BulkOperationExecutionStatus({
 
   return (
     <Alert variant={presentation.variant}>
-      {presentation.hasIssues ? <WarningCircleIcon /> : <CheckCircleIcon />}
+      {presentation.hasIssues ? <CircleAlertIcon /> : <CircleCheckIcon />}
       <AlertTitle>{presentation.title}</AlertTitle>
       <AlertDescription>
         <p>

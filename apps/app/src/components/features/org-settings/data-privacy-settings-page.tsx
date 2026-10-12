@@ -11,7 +11,7 @@ import { Switch } from '@comitium/ui/switch';
 import { Textarea } from '@comitium/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { InfoIcon } from '@phosphor-icons/react';
+import { InfoIcon } from 'lucide-react';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 

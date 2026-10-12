@@ -1,6 +1,6 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
-import { CaretRightIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { ChevronRightIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -90,7 +90,7 @@ function DesktopGroup({ group, pathname, open, onOpenChange }: DesktopGroupProps
   return (
     <Collapsible open={open} onOpenChange={handleOpenChange}>
       <CollapsibleTrigger className="group flex h-9 w-full items-center gap-2 rounded-xl px-3 text-left text-label-14 font-medium text-card-foreground/70 transition-colors hover:bg-accent hover:text-card-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-        <CaretRightIcon className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
+        <ChevronRightIcon className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
         <span className="min-w-0 flex-1 truncate">{group.label}</span>
       </CollapsibleTrigger>
       <CollapsibleContent>

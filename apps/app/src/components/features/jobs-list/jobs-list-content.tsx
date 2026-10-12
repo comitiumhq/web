@@ -2,7 +2,7 @@ import type { JobDraftListItem, OrgJobListItem } from '@comitium/schemas/jobs';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Input } from '@comitium/ui/input';
 import { PageContainer } from '@comitium/ui/page-container';
-import { BriefcaseIcon, MagnifyingGlassIcon, MagnifyingGlassMinusIcon } from '@phosphor-icons/react';
+import { BriefcaseBusinessIcon, SearchIcon, SearchXIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateJobButton } from '@/components/features/job-creation/create-job-button';
 import { useQueryJobCreationContext } from '@/hooks/queries/use-query-job-creation-context';
@@ -217,12 +217,12 @@ export function JobsListContent({
   ) : null;
 
   const emptyState = isGlobalEmpty ? (
-    <EmptyState icon={BriefcaseIcon} title="No jobs posted yet" description="Create a job to get started.">
+    <EmptyState icon={BriefcaseBusinessIcon} title="No jobs posted yet" description="Create a job to get started.">
       {createJobButton && <div className="mt-5">{createJobButton}</div>}
     </EmptyState>
   ) : (
     <EmptyState
-      icon={MagnifyingGlassMinusIcon}
+      icon={SearchXIcon}
       title="No jobs match your search"
       description="Try adjusting your filters or search term to find what you're looking for."
     />
@@ -239,7 +239,7 @@ export function JobsListContent({
 
             <div className="flex w-full items-center gap-2 lg:ml-auto lg:w-auto">
               <div className="relative flex-1 lg:w-60 lg:flex-none">
-                <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <SearchIcon className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search jobs..."
                   value={search}

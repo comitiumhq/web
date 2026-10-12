@@ -1,4 +1,4 @@
-import { CaretRightIcon } from '@phosphor-icons/react';
+import { ChevronRightIcon } from 'lucide-react';
 import { Fragment, memo, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
@@ -23,7 +23,9 @@ export function PipelineStageTabs({
   value,
   onValueChange,
   className,
-  separator = <CaretRightIcon aria-hidden weight="bold" className="mx-0.5 size-4 shrink-0 text-muted-foreground/50" />,
+  separator = (
+    <ChevronRightIcon aria-hidden strokeWidth={2} className="mx-0.5 size-4 shrink-0 text-muted-foreground/50" />
+  ),
 }: PipelineStageTabsProps) {
   return (
     <Tabs value={value} onValueChange={onValueChange} className={cn('w-fit max-w-full', className)}>

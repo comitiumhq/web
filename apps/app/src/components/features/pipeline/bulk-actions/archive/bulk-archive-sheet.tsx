@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Label } from '@comitium/ui/label';
-import { WarningIcon } from '@phosphor-icons/react';
+import { TriangleAlertIcon } from 'lucide-react';
 import { ArchiveReasonSelect } from '@/components/features/archive-reasons/archive-reason-select';
 import { BulkEmailContentFields, BulkEmailTemplateField } from '../email/bulk-email-composer';
 import { BulkOperationSheet } from '../operation/bulk-operation-sheet';
@@ -31,7 +31,7 @@ export function BulkArchiveSheet(props: PipelineBulkActionSheetProps) {
 
       {action.vaultError && action.emailRequired ? (
         <Alert variant="warning">
-          <WarningIcon />
+          <TriangleAlertIcon />
           <AlertTitle>Encryption keys unavailable</AlertTitle>
           <AlertDescription>Unlock organization data before preparing required email.</AlertDescription>
         </Alert>
@@ -39,7 +39,7 @@ export function BulkArchiveSheet(props: PipelineBulkActionSheetProps) {
 
       {action.preparationError ? (
         <Alert variant="warning">
-          <WarningIcon />
+          <TriangleAlertIcon />
           <AlertTitle>Email needs attention</AlertTitle>
           <AlertDescription>{action.preparationError}</AlertDescription>
         </Alert>
@@ -74,7 +74,7 @@ function UnavailableRecipientWarning({ count }: { count: number }) {
 
   return (
     <Alert variant="warning">
-      <WarningIcon />
+      <TriangleAlertIcon />
       <AlertTitle>
         {count} {count === 1 ? 'application will be skipped' : 'applications will be skipped'}
       </AlertTitle>

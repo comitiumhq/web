@@ -7,7 +7,7 @@ import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { InlineEmptyState } from '@comitium/ui/inline-empty-state';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, CircleCheckIcon } from 'lucide-react';
 import type { PendingInterviewEvent } from '@/lib/interviews/feedback';
 import type { InterviewSchedule } from '@/lib/schemas/interviews';
 import type {
@@ -98,7 +98,7 @@ export function CurrentActivitiesSection({
       {sourceIssues.map((issue) => (
         <InlineEmptyState
           key={issue.key}
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title={ACTIVITY_SOURCE_TITLES[issue.key]}
           description={issue.message}
           action={
@@ -175,7 +175,7 @@ export function CurrentActivitiesSection({
 
       {!isLoading && sourceIssues.length === 0 && !hasActivities && (
         <InlineEmptyState
-          icon={CheckCircleIcon}
+          icon={CircleCheckIcon}
           title="No current activities"
           description={emptyMessage}
           className="min-h-20"

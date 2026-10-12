@@ -2,7 +2,7 @@ import { Button } from '@comitium/ui/button';
 import { BROWSER_TZ } from '@comitium/ui/date';
 import { InlineEmptyState } from '@comitium/ui/inline-empty-state';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { ClockCounterClockwiseIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, HistoryIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { useQueryOrgTeamMap } from '@/hooks/queries/use-query-org-team';
 import { useQueryOrgMe } from '@/hooks/use-permissions';
@@ -53,7 +53,7 @@ export function InterviewProgressSection({
 
       {isError && (
         <InlineEmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title={hasData ? 'Interview progress may be out of date' : 'Interview progress unavailable'}
           description={hasData ? 'The latest stage history could not be loaded.' : 'Stage history could not be loaded.'}
           action={
@@ -68,7 +68,7 @@ export function InterviewProgressSection({
 
       {hasData && !isError && !hasVisits && (
         <InlineEmptyState
-          icon={ClockCounterClockwiseIcon}
+          icon={HistoryIcon}
           title="No interview progress yet"
           description="Stage changes and completed interviews will appear here."
           className="min-h-20"

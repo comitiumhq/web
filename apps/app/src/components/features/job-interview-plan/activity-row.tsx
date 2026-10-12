@@ -6,15 +6,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@comitium/ui/tooltip';
 import { useSortable } from '@dnd-kit/react/sortable';
 import {
-  CalendarDotsIcon,
+  CalendarDaysIcon,
   ClockIcon,
-  DotsSixVerticalIcon,
-  DotsThreeVerticalIcon,
-  EnvelopeSimpleIcon,
+  EllipsisVerticalIcon,
+  GripVerticalIcon,
   LockIcon,
+  MailIcon,
   PencilIcon,
   TrashIcon,
-} from '@phosphor-icons/react';
+} from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import { useDeleteOwnerActivity } from '@/hooks/mutations/use-stage-activity-mutations';
@@ -87,7 +87,7 @@ export const ActivityRow = memo(function ActivityRow({
           className="shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
           aria-label={`Reorder ${accessibleName}`}
         >
-          <DotsSixVerticalIcon />
+          <GripVerticalIcon />
         </Button>
       )}
 
@@ -111,7 +111,7 @@ export const ActivityRow = memo(function ActivityRow({
               className="shrink-0 text-muted-foreground transition-[color,background-color,opacity] focus-visible:opacity-100 md:opacity-0 md:group-hover/activity:opacity-100 md:group-focus-within/activity:opacity-100"
               aria-label={`Actions for ${accessibleName}`}
             >
-              <DotsThreeVerticalIcon />
+              <EllipsisVerticalIcon />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-36">
@@ -156,7 +156,7 @@ function ScheduleInterviewBody({ activity, memberMap }: ScheduleInterviewBodyPro
   return (
     <>
       <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-        <CalendarDotsIcon className="size-4" />
+        <CalendarDaysIcon className="size-4" />
       </span>
       <div className="min-w-32 flex-1">
         <span className="text-label-14 truncate block font-medium">{activity.interviewTitle}</span>
@@ -180,7 +180,7 @@ function SendEmailBody({ activity }: SendEmailBodyProps) {
   return (
     <>
       <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-        <EnvelopeSimpleIcon className="size-4" />
+        <MailIcon className="size-4" />
       </span>
       <div className="min-w-32 flex-1">
         <span className="text-label-14 truncate block font-medium">Send: {activity.emailTemplateName}</span>

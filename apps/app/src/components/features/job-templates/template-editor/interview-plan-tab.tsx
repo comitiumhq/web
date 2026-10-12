@@ -2,7 +2,7 @@ import { Badge } from '@comitium/ui/badge';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { memo, type ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { useQueryInterviewPlan } from '@/hooks/queries/use-query-interview-plan';
 import { useQueryInterviewPlans } from '@/hooks/queries/use-query-interview-plans';
@@ -57,11 +57,7 @@ export const InterviewPlanTab = memo(function InterviewPlanTab({
     content = <TemplateListSkeleton />;
   } else if (isError) {
     content = (
-      <EmptyState
-        icon={WarningCircleIcon}
-        title="Couldn't load interview plans"
-        description="Try refreshing the page."
-      />
+      <EmptyState icon={CircleAlertIcon} title="Couldn't load interview plans" description="Try refreshing the page." />
     );
   } else if (templates.length === 0) {
     content = (

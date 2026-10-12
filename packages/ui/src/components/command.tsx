@@ -1,7 +1,7 @@
 'use client';
 
-import { CheckIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { Command as CommandPrimitive } from 'cmdk';
+import { CheckIcon, SearchIcon } from 'lucide-react';
 import type * as React from 'react';
 import { cn } from '../lib/cn';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog';
@@ -59,7 +59,7 @@ function CommandInput({ className, ...props }: React.ComponentProps<typeof Comma
           {...props}
         />
         <InputGroupAddon>
-          <MagnifyingGlassIcon className="size-4 shrink-0 opacity-50" />
+          <SearchIcon className="size-4 shrink-0 opacity-50" />
         </InputGroupAddon>
       </InputGroup>
     </div>

@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import type { DragDropEventHandlers } from '@dnd-kit/react';
 import { DragDropProvider } from '@dnd-kit/react';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useReorderOwnerActivities } from '@/hooks/mutations/use-stage-activity-mutations';
 import type { StageType } from '@/lib/schemas/pipeline';

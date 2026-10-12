@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { ArrowUpRightIcon } from '@phosphor-icons/react';
+import { ArrowUpRightIcon } from 'lucide-react';
 import type { MouseEvent, ReactNode } from 'react';
 
 export const JOB_USAGE_STATUS_LABELS = {

@@ -2,7 +2,7 @@ import { Button } from '@comitium/ui/button';
 import { FILTER_DEBOUNCE_DELAY, LOCATION_SUGGESTIONS_LIMIT } from '@comitium/ui/config';
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@comitium/ui/input-group';
 import { Popover, PopoverAnchor, PopoverContent } from '@comitium/ui/popover';
-import { MapPinIcon, XIcon } from '@phosphor-icons/react';
+import { MapPinIcon, XIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import type { PublicJobsApi } from '../../../api';
 import { useDebouncedInput } from '../../../hooks/use-debounced-input';

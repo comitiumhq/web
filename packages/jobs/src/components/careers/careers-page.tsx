@@ -4,7 +4,7 @@ import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { SKELETON_CARD_COUNT } from '@comitium/ui/config';
 import { PageContainer } from '@comitium/ui/page-container';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { GlobeSimpleIcon } from '@phosphor-icons/react';
+import { GlobeIcon } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import type { PublicJobsApi } from '../../api';
 import { CAREERS_JOBS_LIMIT } from '../../constants';
@@ -73,7 +73,7 @@ export function CareersPage({
               {org.website && (
                 <Button variant="outline" size="icon" aria-label="Open organization site" asChild>
                   <a href={org.website} target="_blank" rel="noreferrer">
-                    <GlobeSimpleIcon />
+                    <GlobeIcon />
                   </a>
                 </Button>
               )}

@@ -2,7 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
 import { Spinner } from '@comitium/ui/spinner';
-import { CaretDownIcon, WarningCircleIcon, WarningIcon } from '@phosphor-icons/react';
+import { ChevronDownIcon, CircleAlertIcon, TriangleAlertIcon } from 'lucide-react';
 import type { BulkOperation } from '@/lib/schemas/bulk-operations';
 import { getExcludedTargets, getTargetLabel, type PipelineBulkTarget } from '../model';
 
@@ -31,7 +31,7 @@ export function BulkOperationReadiness({
   if (error || !operation) {
     return (
       <Alert variant="warning">
-        <WarningIcon />
+        <TriangleAlertIcon />
         <AlertTitle>Selection could not be reviewed</AlertTitle>
         <AlertDescription>
           <span>{error ?? 'Try again before continuing.'}</span>{' '}
@@ -55,7 +55,7 @@ function ExcludedTargetsWarning({ targets }: { targets: readonly PipelineBulkTar
 
   return (
     <Alert variant="warning">
-      <WarningCircleIcon />
+      <CircleAlertIcon />
       <AlertTitle>
         {targets.length} {targets.length === 1 ? 'application will be skipped' : 'applications will be skipped'}
       </AlertTitle>
@@ -64,7 +64,7 @@ function ExcludedTargetsWarning({ targets }: { targets: readonly PipelineBulkTar
           <CollapsibleTrigger asChild>
             <Button type="button" variant="link" className="h-auto gap-1 p-0 text-current">
               Review details
-              <CaretDownIcon />
+              <ChevronDownIcon />
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent>

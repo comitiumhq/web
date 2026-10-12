@@ -3,7 +3,7 @@ import { Badge } from '@comitium/ui/badge';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { formatCompensationSalary, hasCompensation } from '@comitium/ui/salary';
 import { ScrollArea } from '@comitium/ui/scroll-area';
-import { BriefcaseIcon, MapPinIcon } from '@phosphor-icons/react';
+import { BriefcaseBusinessIcon, MapPinIcon } from 'lucide-react';
 import { getPublicApplicationAvailability } from '../../../application/availability';
 import { SkillRequirements } from '../../skill-requirements';
 import { JobActions } from './actions';
@@ -81,7 +81,7 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
           )}
           {job.employmentType && (
             <Badge variant="outline" className={JOB_FACT_BADGE_CLASS}>
-              <BriefcaseIcon data-icon="inline-start" />
+              <BriefcaseBusinessIcon data-icon="inline-start" />
               {formatEmploymentType(job.employmentType)}
             </Badge>
           )}
