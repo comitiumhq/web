@@ -6,7 +6,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
-import { CopyIcon, DotsThreeVerticalIcon, EyeSlashIcon } from '@phosphor-icons/react';
+import { CopyIcon, EllipsisVerticalIcon, EyeOffIcon } from 'lucide-react';
 
 interface PostingActionsMenuProps {
   canCopyLink: boolean;
@@ -24,7 +24,7 @@ export function PostingActionsMenu({ canCopyLink, canUnpublish, onCopyLink, onUn
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="size-8 shrink-0">
-          <DotsThreeVerticalIcon />
+          <EllipsisVerticalIcon />
           <span className="sr-only">Posting actions</span>
         </Button>
       </DropdownMenuTrigger>
@@ -38,7 +38,7 @@ export function PostingActionsMenu({ canCopyLink, canUnpublish, onCopyLink, onUn
         {canUnpublish && canCopyLink && <DropdownMenuSeparator />}
         {canUnpublish && (
           <DropdownMenuItem variant="destructive" onSelect={onUnpublish}>
-            <EyeSlashIcon />
+            <EyeOffIcon />
             Unpublish
           </DropdownMenuItem>
         )}

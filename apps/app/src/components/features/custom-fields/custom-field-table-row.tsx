@@ -10,14 +10,7 @@ import {
 } from '@comitium/ui/dropdown-menu';
 import { TableCell, TableRow } from '@comitium/ui/table';
 import { useSortable } from '@dnd-kit/react/sortable';
-import {
-  ArchiveIcon,
-  ArrowCounterClockwiseIcon,
-  DotsSixVerticalIcon,
-  DotsThreeIcon,
-  LockIcon,
-  PencilIcon,
-} from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, GripVerticalIcon, LockIcon, PencilIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { useArchiveCustomField, useRestoreCustomField } from '@/hooks/mutations/use-custom-field';
 import type { CustomFieldRow } from '@/lib/schemas/custom-fields';
@@ -90,7 +83,7 @@ export const CustomFieldTableRow = memo(function CustomFieldTableRow({
               className="inline-flex h-8 w-6 items-center justify-center text-muted-foreground cursor-grab active:cursor-grabbing"
               onClick={stopRowClick}
             >
-              <DotsSixVerticalIcon className="size-4" />
+              <GripVerticalIcon className="size-4" />
             </span>
           )}
         </TableCell>
@@ -108,14 +101,14 @@ export const CustomFieldTableRow = memo(function CustomFieldTableRow({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
-                <DotsThreeIcon />
+                <EllipsisIcon />
                 <span className="sr-only">Actions for {field.title}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>
               {isArchived ? (
                 <DropdownMenuItem onClick={handleRestore} disabled={isRestoring}>
-                  <ArrowCounterClockwiseIcon />
+                  <ArchiveRestoreIcon />
                   {isRestoring ? 'Restoring…' : 'Restore'}
                 </DropdownMenuItem>
               ) : (

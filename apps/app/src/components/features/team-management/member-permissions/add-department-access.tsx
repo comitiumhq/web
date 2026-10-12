@@ -1,7 +1,7 @@
 import type { JobAccessRole } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import type { OrgDepartment } from '@/lib/schemas/org-structure';
 

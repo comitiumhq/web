@@ -6,7 +6,7 @@ import { PageHeader } from '@comitium/ui/page-header';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { TableSkeleton, type TableSkeletonColumn } from '@comitium/ui/table-skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@comitium/ui/tabs';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useQueryJobTemplates } from '@/hooks/queries/use-query-job-templates';
 import type { JobTemplateListItem, JobTemplateStatus } from '@/lib/schemas/job-templates';
@@ -82,7 +82,7 @@ export function JobTemplateSettings({ orgId, activeTemplateId, onOpenTemplate, o
     return (
       <div className="h-full flex items-center justify-center px-4 sm:px-6 pb-8">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Something went wrong"
           description="We couldn't load job templates. Please try again."
         />

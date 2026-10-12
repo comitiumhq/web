@@ -6,7 +6,7 @@ import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { FeatureSheetBody, FeatureSheetContent, FeatureSheetHeader } from '@comitium/ui/feature-sheet';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
-import { DotsThreeIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, EllipsisIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
@@ -60,7 +60,7 @@ function MemberPermissionsContent({ org, userId }: MemberPermissionsContentProps
         </FeatureSheetHeader>
         <FeatureSheetBody>
           <EmptyStateCard
-            icon={WarningCircleIcon}
+            icon={CircleAlertIcon}
             title="Member not found"
             description="This user is not a member of the organization."
           />
@@ -82,7 +82,7 @@ function MemberPermissionsContent({ org, userId }: MemberPermissionsContentProps
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon-sm" disabled={model.pending.lifecycle}>
-                  <DotsThreeIcon weight="bold" />
+                  <EllipsisIcon strokeWidth={2} />
                   <span className="sr-only">Member actions</span>
                 </Button>
               </DropdownMenuTrigger>

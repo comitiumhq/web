@@ -1,6 +1,6 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { TableSelectionDock, type TableSelectionDockAction } from '@comitium/ui/table-selection-dock';
-import { ArchiveIcon, EnvelopeSimpleIcon, TagIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, MailIcon, TagIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';
 import type { PipelineCandidate } from '@/lib/schemas/pipeline';
@@ -51,7 +51,7 @@ export function BulkOperations({
 
     if (activeTab === 'review' || activeTab === 'offer') {
       items.push(
-        { id: 'email', label: 'Email', icon: EnvelopeSimpleIcon, onSelect: () => openAction('email') },
+        { id: 'email', label: 'Email', icon: MailIcon, onSelect: () => openAction('email') },
         {
           id: 'archive',
           label: 'Archive',

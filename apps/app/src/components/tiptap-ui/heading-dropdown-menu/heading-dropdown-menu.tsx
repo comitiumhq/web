@@ -1,9 +1,8 @@
 'use client';
+import { ChevronDownIcon } from 'lucide-react';
 
 import { forwardRef, useCallback, useState } from 'react';
 
-// --- Icons ---
-import { ChevronDownIcon } from '@/components/tiptap-icons/chevron-down-icon';
 // --- Tiptap UI ---
 import { HeadingButton } from '@/components/tiptap-ui/heading-button';
 import type { UseHeadingDropdownMenuConfig } from '@/components/tiptap-ui/heading-dropdown-menu';

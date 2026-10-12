@@ -7,7 +7,7 @@ import { SectionHeader } from '@comitium/ui/section-header';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
-import { FileXIcon } from '@phosphor-icons/react';
+import { FileXIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { CriteriaTab } from '@/components/features/job-criteria';

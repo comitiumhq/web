@@ -4,6 +4,7 @@ import { STALE_TIME_DEFAULT } from '@comitium/schemas/api-query-policy';
 import { logger } from '@comitium/ui/logger';
 import { TooltipProvider } from '@comitium/ui/tooltip';
 import { type QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { LucideProvider } from 'lucide-react';
 import { ThemeProvider } from 'next-themes';
 import type { JSX } from 'react';
 import { qk } from '@/hooks/query-keys';
@@ -26,7 +27,9 @@ export const Providers = ({ queryClient, children }: { queryClient: QueryClient;
           onWalletProvisioningError={logWalletProvisioningError}
           registerApiAuthTokenProvider={registerApiAuthTokenProvider}
         >
-          <TooltipProvider>{children}</TooltipProvider>
+          <LucideProvider strokeWidth={1.5}>
+            <TooltipProvider>{children}</TooltipProvider>
+          </LucideProvider>
         </PrivyAppProvider>
       </QueryClientProvider>
     </ThemeProvider>

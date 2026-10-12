@@ -4,8 +4,8 @@ import { Button } from '@comitium/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { Spinner } from '@comitium/ui/spinner';
-import { XIcon } from '@phosphor-icons/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { XIcon } from 'lucide-react';
 import { lazy, type ReactNode, Suspense, useState } from 'react';
 import { toast } from 'sonner';
 

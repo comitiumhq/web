@@ -2,7 +2,7 @@ import { normalizeScoreAnswer } from '@comitium/schemas/forms/answer-values';
 import { isDefined } from '@comitium/schemas/guards';
 import { cn } from '@comitium/ui/cn';
 import { Textarea } from '@comitium/ui/textarea';
-import { StarIcon } from '@phosphor-icons/react';
+import { StarIcon } from 'lucide-react';
 import { type ChangeEvent, memo, useCallback } from 'react';
 import type { ControllerRenderProps } from 'react-hook-form';
 

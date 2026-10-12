@@ -1,6 +1,6 @@
 import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { TimezonePicker } from '@comitium/ui/timezone-picker';
-import { CalendarIcon, ClockIcon, GlobeSimpleIcon, type Icon as PhosphorIcon, UsersIcon } from '@phosphor-icons/react';
+import { CalendarIcon, ClockIcon, GlobeIcon, type LucideIcon, UsersIcon } from 'lucide-react';
 import type { AvailablePublicScheduleState, PublicScheduleSlot } from '@/lib/schemas/public-schedule';
 
 import { formatScheduleSlotRange } from './utils';
@@ -43,7 +43,7 @@ export function ScheduleSummary({
         <SummaryMetric icon={ClockIcon} label={`${state.interview.durationMinutes} minutes`} />
         <SummaryMetric icon={UsersIcon} label={`${state.interview.interviewerCount} ${interviewerLabel}`} />
         <div className="flex items-center gap-3 text-label-14">
-          <GlobeSimpleIcon className="size-4 shrink-0 text-muted-foreground" />
+          <GlobeIcon className="size-4 shrink-0 text-muted-foreground" />
           {onTimeZoneChange === null ? (
             <span>{timeZone}</span>
           ) : (
@@ -62,7 +62,7 @@ export function ScheduleSummary({
   );
 }
 
-function SummaryMetric({ icon: Icon, label }: { icon: PhosphorIcon; label: string }) {
+function SummaryMetric({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
     <div className="flex items-center gap-3 text-label-14">
       <Icon className="size-4 shrink-0 text-muted-foreground" />

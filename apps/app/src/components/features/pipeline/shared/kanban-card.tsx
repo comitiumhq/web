@@ -1,9 +1,9 @@
-import { StatusBadge } from '@comitium/ui/status-badge';
+import { KANBAN_CARD_SURFACE_CLASS, KanbanCardBody } from '@comitium/ui/kanban';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { type MouseEvent, memo, type PointerEvent, useCallback, useRef } from 'react';
 import { getActivityBadge } from '@/components/features/application-status';
 import type { KanbanApplication } from '@/lib/schemas/pipeline';
-import { cn, getCandidateDisplayName } from '@/lib/utils';
+import { cn, formatElapsedDaysSince, getCandidateDisplayName } from '@/lib/utils';
 
 import { getCardUrgencyState, toCardStatusInput } from './pipeline-status';
 import { UrgencyStripe } from './urgency-stripe';
@@ -48,6 +48,7 @@ export const KanbanCard = memo(function KanbanCard({
 
   const activityBadge = getActivityBadge(statusInput);
   const { level: urgency, reason: urgencyTitle } = getCardUrgencyState(statusInput);
+  const stageElapsed = formatElapsedDaysSince(statusInput.stageSince);
 
   const setCardRef = useCallback(
     (node: HTMLButtonElement | null) => {
@@ -115,7 +116,8 @@ export const KanbanCard = memo(function KanbanCard({
       onPointerCancel={handlePointerEnd}
       onClick={handleClick}
       className={cn(
-        'relative flex h-30 w-full shrink-0 cursor-grab flex-col overflow-hidden rounded-xl border border-transparent bg-card bg-clip-padding p-3 text-left outline-none transition-[background-color,border-color,box-shadow,opacity] duration-150 ease-out active:cursor-grabbing motion-reduce:transition-none',
+        KANBAN_CARD_SURFACE_CLASS,
+        'cursor-grab outline-none transition-[background-color,border-color,box-shadow,opacity] duration-150 ease-out active:cursor-grabbing motion-reduce:transition-none',
         'focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 focus-visible:ring-offset-kanban-canvas',
         'data-[dnd-placeholder=clone]:opacity-40 data-[dnd-placeholder=clone]:shadow-none data-[dnd-placeholder=clone]:ring-0',
         {
@@ -124,17 +126,12 @@ export const KanbanCard = memo(function KanbanCard({
         },
       )}
     >
-      <div className="min-w-0">
-        <p className="truncate text-heading-14 text-foreground">{displayName}</p>
-        {company && <p className="mt-0.5 truncate text-label-12 text-muted-foreground">{company}</p>}
-      </div>
-
-      {activityBadge && (
-        <div className="mt-2.5 flex">
-          <StatusBadge {...activityBadge} />
-        </div>
-      )}
-
+      <KanbanCardBody
+        name={displayName}
+        company={company}
+        status={activityBadge}
+        footer={stageElapsed ? `In stage ${stageElapsed}` : null}
+      />
       <UrgencyStripe level={urgency} reason={urgencyTitle} side="left" />
     </button>
   );

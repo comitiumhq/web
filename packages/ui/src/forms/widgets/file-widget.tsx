@@ -9,7 +9,7 @@ import {
   AttachmentTitle,
   AttachmentTrigger,
 } from '@comitium/ui/attachment';
-import { PaperclipIcon, XIcon } from '@phosphor-icons/react';
+import { PaperclipIcon, XIcon } from 'lucide-react';
 import { useCallback, useRef } from 'react';
 import type { ControllerRenderProps } from 'react-hook-form';
 

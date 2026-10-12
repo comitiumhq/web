@@ -10,8 +10,8 @@ import {
 } from '@comitium/ui/dropdown-menu';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { ArchiveIcon, ArrowCounterClockwiseIcon, ArrowRightIcon, CopyIcon, DotsThreeIcon } from '@phosphor-icons/react';
 import type { ColumnDef } from '@tanstack/react-table';
+import { ArchiveIcon, ArchiveRestoreIcon, ArrowRightIcon, CopyIcon, EllipsisIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { JobStatusBadge } from '@/components/features/job-detail/job-status-badge';
 import { useCreateDraft } from '@/hooks/mutations/use-create-draft';
@@ -102,7 +102,7 @@ export const ActionsCell = memo(function ActionsCell({
           aria-label="Job actions"
           onClick={handleStopPropagation}
         >
-          <DotsThreeIcon />
+          <EllipsisIcon />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -123,7 +123,7 @@ export const ActionsCell = memo(function ActionsCell({
         )}
         {canRestore && (
           <DropdownMenuItem onClick={handleRestore}>
-            <ArrowCounterClockwiseIcon />
+            <ArchiveRestoreIcon />
             Restore
           </DropdownMenuItem>
         )}

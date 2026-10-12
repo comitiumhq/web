@@ -6,7 +6,7 @@ import { Button } from '@comitium/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@comitium/ui/form';
 import { Switch } from '@comitium/ui/switch';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LockIcon } from '@phosphor-icons/react';
+import { LockIcon } from 'lucide-react';
 import { useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';

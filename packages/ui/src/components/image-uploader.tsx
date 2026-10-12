@@ -1,8 +1,8 @@
-import { UploadIcon, XIcon } from '@phosphor-icons/react';
+import { UploadIcon, XIcon } from 'lucide-react';
 import type { ChangeEvent, DragEvent } from 'react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
-import { getImageUploadMaxSizeLabel, getSupportedImageFormats, validateImageUpload } from '../lib/image-upload';
+import { getSupportedImageFormats, validateImageUpload } from '../lib/image-upload';
 import { Button } from './button';
 
 interface ImageUploaderProps {
@@ -123,7 +123,6 @@ export const ImageUploader = ({
   }, [disabled]);
 
   const supportedFormats = getSupportedImageFormats(acceptedTypes);
-  const maxSizeLabel = getImageUploadMaxSizeLabel(maxSize);
   const pickerLabel = `${preview ? 'Change' : 'Upload'} ${label.toLowerCase()}`;
 
   return (
@@ -196,9 +195,7 @@ export const ImageUploader = ({
         />
       </div>
 
-      <p className="text-label-12 text-muted-foreground">
-        {supportedFormats} · up to {maxSizeLabel}
-      </p>
+      <p className="text-label-12 text-muted-foreground">{supportedFormats}</p>
       {error && (
         <p className="text-label-12 text-destructive" role="alert">
           {error}

@@ -2,7 +2,7 @@ import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/ca
 import { Card } from '@comitium/ui/card';
 import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { EnvelopeSimpleIcon } from '@phosphor-icons/react';
+import { MailIcon } from 'lucide-react';
 import { memo } from 'react';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
 import type { DecryptedEmail } from '@/lib/schemas/emails';
@@ -25,18 +25,18 @@ export const EmailCard = memo(function EmailCard({ email, candidateProfile }: Em
 
         <div className="flex-1 min-w-0">
           <span className="text-label-13 font-medium">{sender.name}</span>
-          <p className="text-label-12 text-muted-foreground truncate">to: {email.content.to}</p>
+          <p className="text-label-12 text-meta-foreground truncate">to: {email.content.to}</p>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <EnvelopeSimpleIcon className="size-3.5 text-muted-foreground" />
-          <span className="text-label-12 text-muted-foreground">{formatDate(email.createdAt)}</span>
+          <MailIcon className="size-3.5 text-meta-foreground" />
+          <span className="text-label-12 text-meta-foreground">{formatDate(email.createdAt)}</span>
         </div>
       </div>
 
       <div className="px-4 py-3">
         <p className="text-label-14 font-medium mb-2">{email.content.subject}</p>
-        <div className="text-copy-14">
+        <div className="text-copy-14 text-content-foreground">
           <ExpandableContent collapsedLines={6}>
             <RichTextEditor content={email.content.body} readOnly />
           </ExpandableContent>

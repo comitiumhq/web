@@ -3,8 +3,8 @@ import { APPLICATION_TERMINAL_OUTCOME_LABEL } from '@comitium/ui/application-out
 import { Button } from '@comitium/ui/button';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { ArrowUpRightIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { ArrowUpRightIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { cn, formatRelativeTime } from '@/lib/utils';
 

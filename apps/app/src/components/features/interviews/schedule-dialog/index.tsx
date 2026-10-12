@@ -7,8 +7,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Separator } from '@comitium/ui/separator';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarBlankIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { addMinutes, parseISO } from 'date-fns';
+import { CalendarIcon, LoaderCircleIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type Control, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -313,7 +313,7 @@ export function ScheduleInterviewDialog({
                 {slotSummary && (
                   <div className="mr-auto flex w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground sm:w-auto">
                     <span className="inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap text-foreground/80">
-                      <CalendarBlankIcon className="size-3.5 opacity-70" />
+                      <CalendarIcon className="size-3.5 opacity-70" />
                       <span className="truncate">
                         {slotSummary.date} <span aria-hidden="true">·</span> {slotSummary.time}
                       </span>
@@ -329,7 +329,7 @@ export function ScheduleInterviewDialog({
                   type="submit"
                   disabled={isPending || interviewers.length === 0 || !selectedInterviewId || !scheduledAt}
                 >
-                  {isPending && <SpinnerGapIcon data-icon="inline-start" className="animate-spin" />}
+                  {isPending && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
                   Schedule
                 </Button>
               </FeatureSheetFooter>

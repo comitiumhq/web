@@ -1,7 +1,7 @@
 import { formatInTimezone } from '@comitium/ui/date';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { ArrowSquareOutIcon, CheckCircleIcon, QuestionIcon, XCircleIcon } from '@phosphor-icons/react';
+import { CircleCheckIcon, CircleHelpIcon, CircleXIcon, ExternalLinkIcon } from 'lucide-react';
 import { memo } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import type { OrgTeamMember } from '@/hooks/queries/use-query-org-team';
@@ -27,8 +27,8 @@ export const InterviewProgressEventRow = memo(function InterviewProgressEventRow
   return (
     <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <p className="truncate text-label-13 font-medium">{event.title}</p>
-        <p className="mt-0.5 text-copy-12 text-muted-foreground">
+        <p className="truncate text-label-13 font-medium text-content-foreground">{event.title}</p>
+        <p className="mt-0.5 text-copy-12 text-meta-foreground">
           {formatInTimezone(event.scheduledAt, timeZone, 'EEE, MMM d · h:mm a (zzz)')} · {event.durationMinutes} min
         </p>
       </div>
@@ -50,7 +50,7 @@ export const InterviewProgressEventRow = memo(function InterviewProgressEventRow
             className="inline-flex items-center gap-1 text-label-12 text-link hover:underline"
           >
             Join
-            <ArrowSquareOutIcon className="size-3.5" />
+            <ExternalLinkIcon className="size-3.5" />
           </a>
         )}
       </div>
@@ -109,9 +109,9 @@ function RsvpStatusIcon({ status }: { status: InterviewProgressInterviewer['rsvp
 }
 
 const RSVP_STATUS_ICON = {
-  accepted: { Icon: CheckCircleIcon, className: 'text-success' },
-  declined: { Icon: XCircleIcon, className: 'text-destructive' },
-  tentative: { Icon: QuestionIcon, className: 'text-warning' },
+  accepted: { Icon: CircleCheckIcon, className: 'text-success' },
+  declined: { Icon: CircleXIcon, className: 'text-destructive' },
+  tentative: { Icon: CircleHelpIcon, className: 'text-warning' },
 } as const;
 
 export function getInterviewerFeedbackLabel(interviewer: InterviewProgressInterviewer): string {

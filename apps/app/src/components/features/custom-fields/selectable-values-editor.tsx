@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
-import { ArchiveIcon, ArrowCounterClockwiseIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, PlusIcon, XIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { type Control, type UseFormSetValue, useFieldArray, useWatch } from 'react-hook-form';
 import { cn } from '@/lib/utils';
@@ -97,7 +97,7 @@ const OptionRow = memo(function OptionRow({ control, index, disabled, onRemove, 
                 disabled={disabled}
                 onClick={isArchived ? handleRestore : handleArchive}
               >
-                {isArchived ? <ArrowCounterClockwiseIcon /> : <ArchiveIcon />}
+                {isArchived ? <ArchiveRestoreIcon /> : <ArchiveIcon />}
                 <span className="sr-only">{isArchived ? 'Restore option' : 'Archive option'}</span>
               </Button>
             ) : (

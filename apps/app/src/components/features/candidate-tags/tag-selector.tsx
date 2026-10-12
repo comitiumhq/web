@@ -2,7 +2,7 @@ import { Button } from '@comitium/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@comitium/ui/command';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import {
   useAssignTagToCandidate,

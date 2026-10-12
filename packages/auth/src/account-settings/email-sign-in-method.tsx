@@ -5,8 +5,8 @@ import { Label } from '@comitium/ui/label';
 import { Spinner } from '@comitium/ui/spinner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@comitium/ui/tooltip';
 import { VERIFICATION_CODE_LENGTH, VerificationCodeInput } from '@comitium/ui/verification-code-input';
-import { EnvelopeSimpleIcon, InfoIcon } from '@phosphor-icons/react';
 import { useLinkEmail, useUpdateEmail } from '@privy-io/react-auth';
+import { InfoIcon, MailIcon } from 'lucide-react';
 import { type ChangeEvent, type FormEvent, useCallback, useState } from 'react';
 
 import type { LinkedSignInMethods } from '../linked-sign-in-methods';
@@ -33,7 +33,7 @@ export function EmailSignInMethod({ email, refreshUser }: EmailSignInMethodProps
   return (
     <>
       <SignInMethodRow
-        icon={<EnvelopeSimpleIcon />}
+        icon={<MailIcon />}
         label={<EmailLabel />}
         value={email?.address ?? 'Not added'}
         action={

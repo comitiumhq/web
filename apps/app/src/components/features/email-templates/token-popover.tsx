@@ -1,5 +1,5 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { BracketsCurlyIcon } from '@phosphor-icons/react';
+import { BracesIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Button } from '@/components/tiptap-ui-primitive/button';
 import { useQuerySubstitutionTokens } from '@/hooks/queries/use-query-substitution-tokens';
@@ -62,7 +62,7 @@ export function TokenPopover({ orgId }: TokenPopoverProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button type="button" variant="ghost" tooltip="Insert token" aria-label="Insert token">
-          <BracketsCurlyIcon className="tiptap-button-icon" />
+          <BracesIcon className="tiptap-button-icon" />
           <span className="tiptap-button-text">Insert token</span>
         </Button>
       </PopoverTrigger>

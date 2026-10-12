@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@comitium/ui/input';
 import { type DragDropEventHandlers, DragDropProvider } from '@dnd-kit/react';
 import { useSortable } from '@dnd-kit/react/sortable';
-import { DotsSixVerticalIcon, DotsThreeIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
+import { EllipsisIcon, GripVerticalIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { type ReactNode, useCallback, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { applyDndReorder } from '@/lib/utils/dnd';
@@ -165,7 +165,7 @@ export function SectionCard({
           <div className="flex items-center gap-1 flex-1 min-w-0">
             {canDrag && (
               <span className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                <DotsSixVerticalIcon className="size-4" />
+                <GripVerticalIcon className="size-4" />
               </span>
             )}
             <div className="min-w-0 flex-1">
@@ -191,7 +191,7 @@ export function SectionCard({
                   className="size-8 shrink-0 p-0"
                   disabled={controller.isSectionDeleting}
                 >
-                  <DotsThreeIcon />
+                  <EllipsisIcon />
                   <span className="sr-only">Section actions</span>
                 </Button>
               </DropdownMenuTrigger>

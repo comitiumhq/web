@@ -1,6 +1,6 @@
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { InfoIcon } from '@phosphor-icons/react';
+import { InfoIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { SubmitHandler, UseFormReturn } from 'react-hook-form';
 import { FeedbackFormSelect } from '@/components/features/form-builder/feedback-form-select';

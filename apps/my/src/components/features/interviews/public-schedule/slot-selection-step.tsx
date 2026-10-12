@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from '@comitium/ui/alert';
 import { Card } from '@comitium/ui/card';
-import { CalendarXIcon, type Icon as PhosphorIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CalendarXIcon, CircleAlertIcon, type LucideIcon } from 'lucide-react';
 import type { AvailablePublicScheduleState, PublicScheduleSlot } from '@/lib/schemas/public-schedule';
 
 import { MemoizedScheduleDatePicker } from './date-picker';
@@ -131,7 +131,7 @@ function AvailabilityStatePanel({
   title,
   description,
 }: {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
 }) {
@@ -149,7 +149,7 @@ function AvailabilityStatePanel({
 function getAvailabilityPanel(slotsError: boolean, hasNoSlots: boolean) {
   if (slotsError) {
     return {
-      icon: WarningCircleIcon,
+      icon: CircleAlertIcon,
       title: 'Availability could not be loaded',
       description: 'Please try again in a moment.',
     };

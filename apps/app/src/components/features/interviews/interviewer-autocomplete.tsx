@@ -1,6 +1,6 @@
 import { Autocomplete, type AutocompleteOption } from '@comitium/ui/autocomplete';
 import { getMemberDisplayName } from '@comitium/ui/display-name';
-import { CalendarXIcon } from '@phosphor-icons/react';
+import { CalendarXIcon } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import type { OrgTeamMember } from '@/lib/schemas/org';

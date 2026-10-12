@@ -1,8 +1,7 @@
 import { DATA_TABLE_WRAPPER_CLASS, DataTable, type DataTableColumn } from '@comitium/ui/data-table';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { TablePagination } from '@comitium/ui/table-pagination';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ArchiveIcon, LayoutIcon, PowerIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, LayoutTemplateIcon, type LucideIcon, PowerIcon } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import type { JobTemplateListItem, JobTemplateStatus } from '@/lib/schemas/job-templates';
 
@@ -27,14 +26,14 @@ interface TemplateTableProps {
   scrollAreaClassName?: string;
 }
 
-const EMPTY_STATE_CONFIG: Record<JobTemplateStatus, { icon: PhosphorIcon; title: string; description: string }> = {
+const EMPTY_STATE_CONFIG: Record<JobTemplateStatus, { icon: LucideIcon; title: string; description: string }> = {
   active: {
     icon: PowerIcon,
     title: 'No active templates',
     description: 'Activate an inactive template, or create a new one to get started.',
   },
   inactive: {
-    icon: LayoutIcon,
+    icon: LayoutTemplateIcon,
     title: 'No inactive templates',
     description: 'New templates start as inactive until you activate them.',
   },

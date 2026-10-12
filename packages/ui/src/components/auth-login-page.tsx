@@ -1,4 +1,4 @@
-import { KeyIcon } from '@phosphor-icons/react';
+import { KeyIcon } from 'lucide-react';
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useState } from 'react';
 import { Button } from './button';
 import { ComitiumMark } from './comitium-mark';

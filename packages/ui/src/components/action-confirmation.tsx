@@ -1,4 +1,4 @@
-import { InfoIcon } from '@phosphor-icons/react';
+import { InfoIcon } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from './alert';
 

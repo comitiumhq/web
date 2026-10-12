@@ -1,0 +1,13 @@
+/* Animation effects and coordinate calculations; layout lives in the component. */
+.product-demo-cursor {
+  color: var(--product-cursor-color, color-mix(in oklab, var(--primary) 25%, var(--success)));
+  transform-origin: 1px 1px;
+}
+
+.product-demo-cursor > .product-demo-cursor-shape {
+  filter: drop-shadow(0 1px 1px rgb(31 41 55 / 12%));
+}
+
+.product-demo-cursor-name {
+  background: var(--product-cursor-color, color-mix(in oklab, var(--primary) 25%, var(--success)));
+}

@@ -1,5 +1,4 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ArchiveIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, type LucideIcon } from 'lucide-react';
 import { CancelRescheduleReasonsIcon } from '@/lib/constants/domain-icons';
 import type { ReasonAppliesTo, ReasonCategory, ReasonRow } from '@/lib/schemas/cancel-reschedule-reasons';
 
@@ -13,7 +12,7 @@ export const EMPTY_REASONS: ReasonRow[] = [];
 export const NOTE_MAX_LENGTH = 1000;
 
 interface EmptyStateConfig {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
 }

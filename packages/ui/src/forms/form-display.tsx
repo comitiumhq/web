@@ -18,8 +18,8 @@ import {
 import { Badge } from '@comitium/ui/badge';
 import { ExpandableContent, ExpandableText } from '@comitium/ui/expandable-content';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { DownloadIcon, LockIcon, PaperclipIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { format } from 'date-fns';
+import { DownloadIcon, LoaderCircleIcon, LockIcon, PaperclipIcon } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { useCallback } from 'react';
 
@@ -400,7 +400,7 @@ function FileAttachment({ question, file, meta, onDownloadAttachment, isDownload
           onClick={handleDownload}
           disabled={isDownloading}
         >
-          {isDownloading ? <SpinnerGapIcon className="animate-spin" /> : <DownloadIcon />}
+          {isDownloading ? <LoaderCircleIcon className="animate-spin" /> : <DownloadIcon />}
         </AttachmentAction>
       </AttachmentActions>
     </Attachment>

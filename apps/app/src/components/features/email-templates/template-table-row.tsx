@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { TableCell, TableRow } from '@comitium/ui/table';
-import { ArchiveIcon, ArrowCounterClockwiseIcon, DotsThreeIcon, PencilIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, PencilIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { useArchiveEmailTemplate, useRestoreEmailTemplate } from '@/hooks/mutations/use-email-template';
 import type { EmailTemplateResponse } from '@/lib/schemas/emails';
@@ -94,14 +94,14 @@ export const TemplateTableRow = memo(function TemplateTableRow({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
-                  <DotsThreeIcon />
+                  <EllipsisIcon />
                   <span className="sr-only">Actions for {template.name}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>
                 {isArchived ? (
                   <DropdownMenuItem onClick={handleRestore} disabled={isRestoring}>
-                    <ArrowCounterClockwiseIcon />
+                    <ArchiveRestoreIcon />
                     {isRestoring ? 'Restoring…' : 'Restore'}
                   </DropdownMenuItem>
                 ) : (

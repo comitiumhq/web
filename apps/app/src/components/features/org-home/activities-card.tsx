@@ -1,10 +1,10 @@
+import { ActivityIcon } from '@comitium/ui/activity-icon';
 import { Badge } from '@comitium/ui/badge';
 import { CardContent, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { CalendarDotsIcon, CheckCircleIcon, FlagIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
-import { ApplicationReviewIcon } from '@/lib/constants/domain-icons';
+import { CircleCheckIcon, FlagIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { HomeCard, HomeCardHeader } from './home-card';
 import { getAttentionCounts } from './home-data';
@@ -22,15 +22,10 @@ interface ActivitiesCardProps {
 
 interface PipelineActivityRowProps {
   countLabel: string;
-  icon: PhosphorIcon;
+  icon: ReactNode;
   label: string;
   orgId: string;
-  tab: 'review' | 'offer';
-}
-
-interface InterviewActivityRowProps {
-  countLabel: string;
-  orgId: string;
+  tab: 'review' | 'active' | 'offer';
 }
 
 export function ActivitiesCard({
@@ -61,15 +56,25 @@ export function ActivitiesCard({
           <HomeList>
             <PipelineActivityRow
               countLabel={counts.reviewLabel}
-              icon={ApplicationReviewIcon}
+              icon={<ActivityIcon kind="review" />}
               label="Reviews assigned to me"
               orgId={orgId}
               tab="review"
             />
-            <InterviewActivityRow countLabel={counts.interviewLabel} orgId={orgId} />
+            <PipelineActivityRow
+              countLabel={counts.interviewLabel}
+              icon={<ActivityIcon kind="schedule" />}
+              label="Interviews to schedule"
+              orgId={orgId}
+              tab="active"
+            />
             <PipelineActivityRow
               countLabel={counts.offerLabel}
-              icon={FlagIcon}
+              icon={
+                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-meta-foreground">
+                  <FlagIcon className="size-4" />
+                </span>
+              }
               label="Offers to extend"
               orgId={orgId}
               tab="offer"
@@ -79,7 +84,7 @@ export function ActivitiesCard({
 
         {!isLoading && counts.total === 0 && (
           <HomeEmptyState
-            icon={CheckCircleIcon}
+            icon={CircleCheckIcon}
             title="You're all caught up"
             description="Tasks and offers requiring action will appear here."
           />
@@ -89,7 +94,7 @@ export function ActivitiesCard({
   );
 }
 
-function PipelineActivityRow({ countLabel, icon: Icon, label, orgId, tab }: PipelineActivityRowProps) {
+function PipelineActivityRow({ countLabel, icon, label, orgId, tab }: PipelineActivityRowProps) {
   return (
     <Link
       to="/org/$orgId/pipeline"
@@ -97,23 +102,8 @@ function PipelineActivityRow({ countLabel, icon: Icon, label, orgId, tab }: Pipe
       search={{ tab }}
       className={cn(homeListRowClassName, 'grid-cols-[auto_minmax(0,1fr)_auto]')}
     >
-      <Icon className="size-5 text-muted-foreground" />
-      <span className="min-w-0 truncate text-label-14 text-foreground">{label}</span>
-      <ActivityCountBadge label={countLabel} />
-    </Link>
-  );
-}
-
-function InterviewActivityRow({ countLabel, orgId }: InterviewActivityRowProps) {
-  return (
-    <Link
-      to="/org/$orgId/pipeline"
-      params={{ orgId }}
-      search={{ tab: 'active' }}
-      className={cn(homeListRowClassName, 'grid-cols-[auto_minmax(0,1fr)_auto]')}
-    >
-      <CalendarDotsIcon className="size-5 text-muted-foreground" />
-      <span className="min-w-0 truncate text-label-14 text-foreground">Interviews to schedule</span>
+      {icon}
+      <span className="min-w-0 truncate text-label-14 text-content-foreground">{label}</span>
       <ActivityCountBadge label={countLabel} />
     </Link>
   );

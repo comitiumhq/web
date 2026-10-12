@@ -9,7 +9,7 @@ import { richTextToMarkdown } from '@comitium/ui/rich-text';
 import { ScrollArea } from '@comitium/ui/scroll-area';
 import { Sheet, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { FileTextIcon } from '@phosphor-icons/react';
+import { FileTextIcon } from 'lucide-react';
 import { useQueryOrg } from '@/hooks/queries/use-query-org';
 import {
   formatCompensationSalary,

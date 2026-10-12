@@ -6,9 +6,9 @@ import type { JobApplicationData } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Spinner } from '@comitium/ui/spinner';
-import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useApplyJob } from '@/hooks/mutations/use-apply-job';
 import { qk } from '@/hooks/query-keys';
@@ -57,7 +57,7 @@ export function AuthenticatedApplicationForm({
   if (applicationStatusQuery.isError) {
     return (
       <EmptyState
-        icon={WarningCircleIcon}
+        icon={CircleAlertIcon}
         title="Application status could not be loaded"
         description="Try again in a moment."
         className="min-h-80"

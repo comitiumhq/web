@@ -7,8 +7,8 @@ import { Form } from '@comitium/ui/form';
 import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { EyeIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { CircleAlertIcon, EyeIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { type FieldValues, useForm } from 'react-hook-form';
 import { buildDefaultValues, FormRenderer } from '@/components/features/form-runtime';
@@ -53,7 +53,7 @@ export function ApplicationFormPicker({ orgId, owner, formId, onChange }: Applic
     return (
       <div className="flex flex-col gap-4">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Failed to load application forms"
           description="Try loading the available forms again."
         />

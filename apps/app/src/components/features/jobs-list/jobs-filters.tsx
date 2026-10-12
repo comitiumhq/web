@@ -2,7 +2,7 @@ import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Combobox } from '@comitium/ui/combobox';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { ArrowCounterClockwiseIcon, FunnelIcon } from '@phosphor-icons/react';
+import { ListFilterIcon, RotateCcwIcon } from 'lucide-react';
 
 const ALL_FILTER_VALUE = 'all';
 
@@ -36,7 +36,7 @@ export function JobsFilters({
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline">
-          <FunnelIcon data-icon="inline-start" />
+          <ListFilterIcon data-icon="inline-start" />
           Filters
           {activeCount > 0 && (
             <Badge variant="secondary" className="ml-1 h-4 min-w-4 justify-center px-1 tabular-nums">
@@ -84,7 +84,7 @@ export function JobsFilters({
 
         {activeCount > 0 && (
           <Button variant="ghost" size="sm" className="justify-start gap-1.5 text-muted-foreground" onClick={onClear}>
-            <ArrowCounterClockwiseIcon data-icon="inline-start" />
+            <RotateCcwIcon data-icon="inline-start" />
             Clear filters
           </Button>
         )}

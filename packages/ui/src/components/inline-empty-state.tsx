@@ -1,10 +1,10 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
 
 interface InlineEmptyStateProps {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
   action?: ReactNode;

@@ -1,6 +1,6 @@
 import { Button } from '@comitium/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CreateJobButtonProps {

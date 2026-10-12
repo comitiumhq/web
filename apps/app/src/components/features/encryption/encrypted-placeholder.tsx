@@ -1,4 +1,4 @@
-import { LockIcon } from '@phosphor-icons/react';
+import { LockIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';

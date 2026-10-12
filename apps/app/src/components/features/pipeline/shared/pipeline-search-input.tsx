@@ -1,5 +1,5 @@
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@comitium/ui/input-group';
-import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
+import { SearchIcon, XIcon } from 'lucide-react';
 import { type ChangeEvent, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -24,7 +24,7 @@ export function PipelineSearchInput({ value, placeholder, onValueChange, classNa
   return (
     <InputGroup className={cn('h-11', className)}>
       <InputGroupAddon>
-        <MagnifyingGlassIcon aria-hidden />
+        <SearchIcon aria-hidden />
       </InputGroupAddon>
       <InputGroupInput
         type="text"

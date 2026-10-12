@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { TableCell, TableRow } from '@comitium/ui/table';
-import { ArchiveIcon, ArrowCounterClockwiseIcon, DotsThreeIcon, PencilIcon, StarIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, PencilIcon, StarIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { useArchiveForm, useRestoreForm } from '@/hooks/mutations/use-form';
 import { cn } from '@/lib/utils';
@@ -107,14 +107,14 @@ export const FormListRow = memo(function FormListRow({ orgId, form, canManage, o
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
-                  <DotsThreeIcon />
+                  <EllipsisIcon />
                   <span className="sr-only">Actions for {form.title}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>
                 {isArchived ? (
                   <DropdownMenuItem onClick={handleRestore} disabled={isRestoring}>
-                    <ArrowCounterClockwiseIcon />
+                    <ArchiveRestoreIcon />
                     {isRestoring ? 'Restoring…' : 'Restore'}
                   </DropdownMenuItem>
                 ) : (

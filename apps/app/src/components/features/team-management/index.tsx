@@ -1,6 +1,6 @@
 import { EmptyState } from '@comitium/ui/empty-state';
 import { PageHeader } from '@comitium/ui/page-header';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
 import { useQueryOrgInvites } from '@/hooks/queries/use-query-org-invites';
@@ -41,7 +41,7 @@ export function TeamManagement({ org }: TeamManagementProps) {
   if (error) {
     return (
       <div className="flex h-full items-center justify-center pb-8">
-        <EmptyState icon={WarningCircleIcon} title="Failed to load members" description={error.message} />
+        <EmptyState icon={CircleAlertIcon} title="Failed to load members" description={error.message} />
       </div>
     );
   }

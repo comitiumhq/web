@@ -11,7 +11,7 @@ import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { type DragDropEventHandlers, DragDropProvider } from '@dnd-kit/react';
-import { PlusIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, PlusIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useCreateForm, useUpdateForm } from '@/hooks/mutations/use-form';
@@ -306,7 +306,7 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
     return (
       <div className="h-full flex items-center justify-center px-4 sm:px-6 pb-8">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Something went wrong"
           description="We couldn't load this form. Please try again."
         />

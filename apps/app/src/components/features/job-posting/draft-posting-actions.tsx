@@ -1,6 +1,6 @@
 import { Button } from '@comitium/ui/button';
 import { Spinner } from '@comitium/ui/spinner';
-import { EyeIcon } from '@phosphor-icons/react';
+import { EyeIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDraftFormContext } from '@/components/features/job-draft/draft-form-context';
 import { DraftPreviewDialog } from '@/components/features/job-draft/draft-preview-dialog';

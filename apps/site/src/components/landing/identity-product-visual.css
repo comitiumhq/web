@@ -1,0 +1,158 @@
+/* Animation effects and coordinate calculations; layout lives in the component. */
+.identity-demo-scene {
+  --identity-phone-width: clamp(132px, 45cqw, 190px);
+  --identity-profile-width: clamp(128px, 34cqw, 136px);
+}
+
+.identity-demo-phone {
+  width: var(--identity-phone-width);
+  background: linear-gradient(140deg, white, #edf1f7 65%, #d8e0ec);
+  box-shadow:
+    inset 0 0 0 1px white,
+    0 2px 4px -2px rgb(31 41 55 / 12%),
+    0 18px 30px -18px rgb(31 41 55 / 22%);
+}
+
+.identity-demo-scene[data-proof-rendered="true"] .identity-demo-phone {
+  background: transparent;
+}
+
+.identity-demo-speaker {
+  transform: translateX(-50%);
+}
+
+.identity-demo-id {
+  background: linear-gradient(145deg, #fafbfc, #f2f4f5);
+}
+
+.identity-demo-scan {
+  --identity-scan-progress: 0;
+  top: calc(var(--identity-scan-progress) * 100% - 20px);
+  border-bottom: 1px solid color-mix(in oklab, var(--primary) 45%, transparent);
+  background: linear-gradient(transparent, color-mix(in oklab, var(--primary) 9%, transparent));
+}
+
+.identity-demo-proof-action {
+  --identity-action-success: 0%;
+  background: color-mix(in oklab, var(--success) var(--identity-action-success), var(--primary));
+  color: color-mix(in oklab, var(--success-foreground) var(--identity-action-success), var(--primary-foreground));
+}
+
+.identity-demo-proof-action[data-verified="true"] {
+  --identity-action-success: 100%;
+}
+
+.identity-demo-generating,
+.identity-demo-sending,
+.identity-demo-action-verifying {
+  color: color-mix(in oklab, var(--primary-foreground) 80%, transparent);
+}
+
+.identity-demo-status-indicator {
+  --identity-ring-length: 0.74;
+  --identity-ring-rotation: 0deg;
+  --identity-check-progress: 0;
+  stroke: currentColor;
+  stroke-width: 1.6px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.identity-demo-status-indicator[data-verified="true"] {
+  --identity-ring-length: 1;
+  --identity-check-progress: 1;
+  opacity: 1;
+}
+
+.identity-demo-status-ring {
+  stroke-dasharray: calc(var(--identity-ring-length) * 1px) 1px;
+  transform: rotate(var(--identity-ring-rotation));
+  transform-origin: center;
+}
+
+.identity-demo-status-check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1px - var(--identity-check-progress) * 1px);
+  opacity: var(--identity-check-progress);
+}
+
+.identity-demo-proof-action .identity-demo-phone-indicator {
+  opacity: 0;
+  transform: translateY(-50%);
+}
+
+.identity-demo-proof-action .identity-demo-phone-indicator[data-verified="true"] {
+  opacity: 1;
+}
+
+.identity-demo-profile {
+  width: var(--identity-profile-width);
+  transform: translateY(-50%);
+  box-shadow:
+    0 2px 6px -2px rgb(31 41 55 / 10%),
+    0 18px 36px -14px rgb(31 41 55 / 14%);
+}
+
+.identity-demo-account-avatar {
+  --identity-receipt-emphasis: 0;
+  box-shadow: 0 0 0 calc(4px * var(--identity-receipt-emphasis)) color-mix(in oklab, var(--primary) 14%, transparent);
+}
+
+.identity-demo-result-indicator {
+  --identity-ring-length: 1;
+  --identity-status-success: 0%;
+  opacity: 0;
+  color: color-mix(in oklab, var(--success) var(--identity-status-success), var(--primary));
+}
+
+.identity-demo-result-indicator[data-verified="true"] {
+  --identity-status-success: 100%;
+  opacity: 1;
+}
+
+.identity-demo-connection {
+  left: calc(var(--identity-phone-width) - 1px);
+  width: calc(100% - var(--identity-phone-width) - var(--identity-profile-width) + 2px);
+  color: color-mix(in oklab, var(--primary) 25%, #ced7e5);
+}
+
+.identity-demo-connection path {
+  stroke: currentColor;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.identity-demo-connection .identity-demo-connection-signal {
+  stroke: var(--primary);
+  stroke-width: 3px;
+}
+
+.identity-demo-scene[data-proof-rendered="true"] .identity-demo-connection-signal {
+  visibility: hidden;
+}
+
+.identity-demo-cursor {
+  --product-cursor-color: #ffad1f;
+  --identity-pointer-progress: 0;
+  top: calc(244px - 5px * var(--identity-pointer-progress));
+  left: calc(
+    (var(--identity-phone-width) - 30px) *
+    (1 - var(--identity-pointer-progress)) +
+    (var(--identity-phone-width) / 2 - 4px) *
+    var(--identity-pointer-progress)
+  );
+}
+
+@container identity-demo (width < 360px) {
+  .identity-demo-chip {
+    height: calc(49px / 6);
+  }
+}
+
+@media (1280px <= width < 1440px) {
+  .identity-demo-scene {
+    --identity-phone-width: 178px;
+    --identity-profile-width: 136px;
+    transform: scale(0.84);
+  }
+}

@@ -1,0 +1,56 @@
+/* These clocks are sampled on the scene, never by its hundreds of glyphs. */
+@property --packet-x {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 5;
+}
+
+@property --cipher-time {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.encryption-demo-stream {
+  mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+}
+
+.encryption-demo-input-mask {
+  clip-path: inset(0 50% 0 0);
+}
+
+.encryption-demo-output-mask {
+  clip-path: inset(0 0 0 50%);
+}
+
+.encryption-demo-paper {
+  filter: drop-shadow(0 12px 12px rgb(49 78 110 / 13%));
+}
+
+.encryption-demo-glyph {
+  transition: color 600ms ease;
+}
+
+.encryption-demo-glyph[data-lit] {
+  color: #c85d20;
+  font-weight: 600;
+}
+
+.encryption-demo-cipher {
+  mask-image: linear-gradient(transparent, black 5%, black 95%, transparent);
+}
+
+.encryption-demo-boundary {
+  background: linear-gradient(transparent, #78aae0 20%, #e3f2ff 50%, #78aae0 80%, transparent);
+  box-shadow: 0 0 14px 2px rgb(96 157 225 / 20%);
+}
+
+.encryption-demo-scene[data-encryption-rendered] .encryption-demo-boundary {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .encryption-demo-glyph {
+    transition: none;
+  }
+}

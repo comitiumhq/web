@@ -1,4 +1,4 @@
-import type { Icon } from '@phosphor-icons/react';
+import type { LucideIcon } from 'lucide-react';
 import {
   EvaluationCriteriaIcon,
   InterviewPlanIcon,
@@ -10,7 +10,7 @@ interface TemplateSectionDefinition {
   id: string;
   label: string;
   title: string;
-  icon: Icon;
+  icon: LucideIcon;
 }
 
 export const TEMPLATE_SECTION_ITEMS = [

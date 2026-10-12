@@ -11,7 +11,7 @@ import {
 } from '@comitium/ui/dropdown-menu';
 import { TableCell, TableRow } from '@comitium/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { DotsThreeIcon, EnvelopeIcon, XCircleIcon } from '@phosphor-icons/react';
+import { CircleXIcon, EllipsisIcon, MailIcon } from 'lucide-react';
 import { memo, type ReactNode, useCallback, useState } from 'react';
 import { useResendInvite } from '@/hooks/mutations/use-resend-invite';
 import { useRevokeInvite } from '@/hooks/mutations/use-revoke-invite';
@@ -136,18 +136,18 @@ function InviteActionsMenu({ inviteName, isPending, isResending, onResend, onRev
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button type="button" variant="ghost" size="sm" className="size-8 p-0" disabled={isPending}>
-            <DotsThreeIcon />
+            <EllipsisIcon />
             <span className="sr-only">Actions for {inviteName}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[160px]">
           <DropdownMenuItem onClick={onResend} disabled={isPending}>
-            <EnvelopeIcon />
+            <MailIcon />
             {isResending ? 'Resending…' : 'Resend invite'}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={onRevoke} disabled={isPending}>
-            <XCircleIcon />
+            <CircleXIcon />
             Revoke invite
           </DropdownMenuItem>
         </DropdownMenuContent>

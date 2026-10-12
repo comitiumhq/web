@@ -5,7 +5,7 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { GoogleIcon } from '@comitium/ui/google';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
-import { CheckCircleIcon } from '@phosphor-icons/react';
+import { CircleCheckIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useDisconnectCalendar } from '@/hooks/mutations/use-disconnect-calendar';
 import { useFinalizeCalendarConnect } from '@/hooks/mutations/use-finalize-calendar-connect';
@@ -97,7 +97,7 @@ export function CalendarCard({ orgId }: CalendarCardProps) {
             </div>
             {isConnected && (
               <Badge variant="success">
-                <CheckCircleIcon data-icon="inline-start" />
+                <CircleCheckIcon data-icon="inline-start" />
                 Connected
               </Badge>
             )}

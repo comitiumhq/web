@@ -3,7 +3,7 @@ import { Button } from '@comitium/ui/button';
 import { Card, CardContent } from '@comitium/ui/card';
 import { PageHeader } from '@comitium/ui/page-header';
 import { Spinner } from '@comitium/ui/spinner';
-import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, CircleCheckIcon } from 'lucide-react';
 import { type FormEvent, useCallback } from 'react';
 import { useCreateOrg } from '@/hooks/mutations/use-create-org';
 
@@ -42,7 +42,7 @@ export function CreateOrgStep({ domain, email }: CreateOrgStepProps) {
             <CardContent className="flex items-center justify-between gap-3">
               <span className="min-w-0 truncate text-copy-14 text-foreground">{domain}</span>
               <span className="flex shrink-0 items-center gap-1.5 text-label-12 text-success-text">
-                <CheckCircleIcon className="size-4" weight="fill" />
+                <CircleCheckIcon className="size-4 [&>circle]:fill-current [&>path]:stroke-background" />
                 Verified
               </span>
             </CardContent>
@@ -52,7 +52,7 @@ export function CreateOrgStep({ domain, email }: CreateOrgStepProps) {
 
         {hasCreationError ? (
           <Alert variant="destructive">
-            <WarningCircleIcon />
+            <CircleAlertIcon />
             <AlertTitle>Couldn’t create organization</AlertTitle>
             <AlertDescription>
               {error

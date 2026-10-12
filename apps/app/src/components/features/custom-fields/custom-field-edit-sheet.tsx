@@ -13,7 +13,7 @@ import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
 import { Textarea } from '@comitium/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LockIcon } from '@phosphor-icons/react';
+import { LockIcon } from 'lucide-react';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useUpdateCustomField } from '@/hooks/mutations/use-custom-field';

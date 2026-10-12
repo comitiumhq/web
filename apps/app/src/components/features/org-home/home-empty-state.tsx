@@ -1,7 +1,7 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import type { LucideIcon } from 'lucide-react';
 
 interface HomeEmptyStateProps {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
 }

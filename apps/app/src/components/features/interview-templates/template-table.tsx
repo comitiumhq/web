@@ -7,8 +7,7 @@ import {
 } from '@comitium/ui/data-table';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { TablePagination } from '@comitium/ui/table-pagination';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ArchiveIcon, CalendarIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, CalendarIcon, type LucideIcon } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import type { InterviewTemplate } from '@/lib/schemas/interview-templates';
 
@@ -33,7 +32,7 @@ interface TemplateTableProps {
   onEdit: (template: InterviewTemplate) => void;
 }
 
-const EMPTY_STATE_CONFIG: Record<TabValue, { icon: PhosphorIcon; title: string; description: string }> = {
+const EMPTY_STATE_CONFIG: Record<TabValue, { icon: LucideIcon; title: string; description: string }> = {
   active: {
     icon: CalendarIcon,
     title: 'No interview templates yet',

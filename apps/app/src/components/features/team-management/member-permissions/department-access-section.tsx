@@ -1,5 +1,5 @@
 import type { JobAccessRole } from '@comitium/schemas/jobs';
-import { LockKeyIcon } from '@phosphor-icons/react';
+import { LockKeyholeIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import type { DepartmentGrant, OrgDepartment } from '@/lib/schemas/org-structure';
 
@@ -85,7 +85,7 @@ export const DepartmentAccessSection = memo(function DepartmentAccessSection({
     >
       {grants.length === 0 ? (
         <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-muted/50 px-4 py-5 text-center">
-          <LockKeyIcon className="size-4 text-muted-foreground" />
+          <LockKeyholeIcon className="size-4 text-muted-foreground" />
           <p className="text-label-14">No Access Roles</p>
         </div>
       ) : (

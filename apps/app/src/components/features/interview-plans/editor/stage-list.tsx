@@ -2,7 +2,7 @@ import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import type { DragDropEventHandlers } from '@dnd-kit/react';
 import { DragDropProvider } from '@dnd-kit/react';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { applyDndReorder } from '@/lib/utils/dnd';
 

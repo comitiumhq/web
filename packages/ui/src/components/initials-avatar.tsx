@@ -1,4 +1,4 @@
-import { UserCircleIcon } from '@phosphor-icons/react';
+import { CircleUserRoundIcon } from 'lucide-react';
 import { memo } from 'react';
 import { cn } from '../lib/cn';
 import { getNameInitials } from '../lib/get-name-initials';
@@ -41,7 +41,7 @@ export const InitialsAvatar = memo(function InitialsAvatar({
     <Avatar className={cn(sizeClasses[size], className)}>
       {imageSrc ? <AvatarImage src={imageSrc} alt={imageAlt} /> : null}
       <AvatarFallback className="text-[length:inherit] leading-none">
-        {initials ?? <UserCircleIcon size={iconSizes[size]} />}
+        {initials ?? <CircleUserRoundIcon size={iconSizes[size]} />}
       </AvatarFallback>
     </Avatar>
   );

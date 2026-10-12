@@ -6,8 +6,9 @@ const API_REQUEST_TIMEOUT_MS = 30_000;
 
 type ResponseSchema<T> = z.ZodType<T, unknown>;
 
-async function get<T>(path: string, schema: ResponseSchema<T>): Promise<T> {
+async function request<T>(path: string, schema: ResponseSchema<T>, init: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
+    ...init,
     credentials: 'omit',
     signal: AbortSignal.timeout(API_REQUEST_TIMEOUT_MS),
   });
@@ -22,4 +23,12 @@ async function get<T>(path: string, schema: ResponseSchema<T>): Promise<T> {
   return schema.parse(await response.json());
 }
 
-export const api = { get };
+export const api = {
+  get: <T>(path: string, schema: ResponseSchema<T>) => request(path, schema),
+  post: <T>(path: string, body: unknown, schema: ResponseSchema<T>) =>
+    request(path, schema, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
+};

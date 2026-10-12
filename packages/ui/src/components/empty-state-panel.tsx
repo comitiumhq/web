@@ -1,4 +1,4 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import { Card } from './card';
@@ -6,7 +6,7 @@ import { EmptyState } from './empty-state';
 import { PageContainer } from './page-container';
 
 interface EmptyStatePanelProps {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description?: string;
   children?: ReactNode;

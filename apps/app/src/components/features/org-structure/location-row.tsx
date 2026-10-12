@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { TableCell, TableRow } from '@comitium/ui/table';
-import { ArchiveIcon, ArrowCounterClockwiseIcon, DotsThreeIcon, PencilIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, PencilIcon } from 'lucide-react';
 import { type MouseEvent, memo, useCallback, useState } from 'react';
 import { useArchiveOrgLocation, useRestoreOrgLocation } from '@/hooks/mutations/use-org-structure';
 import type { OrgLocation } from '@/lib/schemas/org-structure';
@@ -88,14 +88,14 @@ export const LocationRow = memo(function LocationRow({ orgId, location, onEdit }
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
-                <DotsThreeIcon />
+                <EllipsisIcon />
                 <span className="sr-only">Actions for {location.name}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[160px]">
               {location.isArchived ? (
                 <DropdownMenuItem onClick={handleRestore} disabled={isRestoring}>
-                  <ArrowCounterClockwiseIcon />
+                  <ArchiveRestoreIcon />
                   {isRestoring ? 'Restoring…' : 'Restore'}
                 </DropdownMenuItem>
               ) : (

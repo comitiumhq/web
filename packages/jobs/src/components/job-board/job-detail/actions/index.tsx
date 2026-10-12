@@ -1,6 +1,6 @@
 import { Button } from '@comitium/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
-import { CopyIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
+import { CopyIcon, EllipsisVerticalIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
@@ -25,7 +25,7 @@ export function JobActions({ jobUrl }: JobActionsProps) {
           className="text-foreground/80 hover:bg-muted hover:text-foreground"
           aria-label="Open job actions"
         >
-          <DotsThreeVerticalIcon weight="bold" />
+          <EllipsisVerticalIcon strokeWidth={2} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-56">

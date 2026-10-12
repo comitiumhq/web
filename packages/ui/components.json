@@ -17,7 +17,7 @@
     "lib": "@comitium/ui",
     "hooks": "@comitium/ui"
   },
-  "iconLibrary": "phosphor",
+  "iconLibrary": "lucide",
   "rtl": false,
   "menuColor": "default",
   "menuAccent": "subtle",

@@ -1,9 +1,9 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import type { LucideIcon } from 'lucide-react';
 
 export type EntityTabValue = 'active' | 'archived';
 
 export interface EntityEmptyState {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
 }

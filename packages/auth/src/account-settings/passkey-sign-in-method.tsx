@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { Spinner } from '@comitium/ui/spinner';
-import { KeyIcon } from '@phosphor-icons/react';
 import { useLinkWithPasskey } from '@privy-io/react-auth';
+import { KeyIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { SignInMethodRow } from './sign-in-method-row';

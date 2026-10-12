@@ -10,8 +10,8 @@ import {
   DrawerTrigger,
 } from '@comitium/ui/drawer';
 import { ScrollArea } from '@comitium/ui/scroll-area';
-import { CaretDownIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -68,7 +68,7 @@ export function SettingsMobileNav({ entries, pathname, activeLabel }: SettingsMo
         <DrawerTrigger asChild>
           <Button variant="outline" size="sm" className="rounded-full gap-2">
             {activeLabel ?? 'Settings'}
-            <CaretDownIcon data-icon="inline-end" className={cn('transition-transform', { 'rotate-180': open })} />
+            <ChevronDownIcon data-icon="inline-end" className={cn('transition-transform', { 'rotate-180': open })} />
           </Button>
         </DrawerTrigger>
         <DrawerContent>
@@ -119,7 +119,7 @@ function MobileGroup({ group, pathname, open, onOpenChange }: MobileGroupProps) 
   return (
     <Collapsible open={open} onOpenChange={handleOpenChange}>
       <CollapsibleTrigger className="group flex h-10 w-full items-center gap-2 rounded-xl px-3 text-left text-label-14 font-medium text-card-foreground/70 transition-colors hover:bg-accent hover:text-card-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-        <CaretRightIcon className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
+        <ChevronRightIcon className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
         <span className="min-w-0 flex-1 truncate">{group.label}</span>
       </CollapsibleTrigger>
       <CollapsibleContent>

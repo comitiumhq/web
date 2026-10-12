@@ -2,8 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
 import { Progress } from '@comitium/ui/progress';
 import { Separator } from '@comitium/ui/separator';
-import { ArrowRightIcon, CaretDownIcon, CheckCircleIcon, CircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { ArrowRightIcon, ChevronDownIcon, CircleCheckIcon, CircleIcon } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 import type { WorkspaceSetup } from '@/lib/schemas/org';
 import { cn } from '@/lib/utils';
@@ -39,7 +39,7 @@ export function WorkspaceSetupCard({ orgId, profileComplete, setup }: WorkspaceS
             <span className="whitespace-nowrap text-label-12 text-muted-foreground tabular-nums">
               {completedRequired}/{requiredTotal}
             </span>
-            <CaretDownIcon
+            <ChevronDownIcon
               aria-hidden="true"
               className={cn(
                 'size-4 text-muted-foreground transition-transform! [transition-duration:200ms]! ease-[cubic-bezier(0.4,0,0.2,1)]! motion-reduce:transition-none!',
@@ -196,15 +196,14 @@ function SetupRowContent({
   complete: boolean;
   showAction?: boolean;
 }) {
-  const StatusIcon = complete ? CheckCircleIcon : CircleIcon;
+  const StatusIcon = complete ? CircleCheckIcon : CircleIcon;
 
   return (
     <>
       <StatusIcon
         aria-hidden="true"
-        weight={complete ? 'fill' : 'regular'}
         className={cn('size-4 shrink-0', {
-          'text-success': complete,
+          'text-success [&>circle]:fill-current [&>path]:stroke-popover': complete,
           'text-muted-foreground': !complete,
         })}
       />

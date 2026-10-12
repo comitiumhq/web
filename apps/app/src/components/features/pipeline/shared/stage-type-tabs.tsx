@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@comitium/ui/tabs';
-import { ArchiveIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { Fragment, memo, useCallback } from 'react';
+import { PipelineStageTabs } from '@comitium/ui/pipeline-stage-tabs';
+import { ArchiveIcon } from 'lucide-react';
+import { memo, useCallback, useMemo } from 'react';
 import type { StageTypeCounts } from '@/lib/schemas/pipeline';
 import { cn } from '@/lib/utils';
 
@@ -24,12 +24,6 @@ interface StageTypeTabsProps {
   onTabChange: (tab: PipelineTab) => void;
 }
 
-interface StageTypeTabTriggerProps {
-  tab: StagePipelineTab;
-  label: string;
-  count: number;
-}
-
 interface ArchivedPipelineButtonProps {
   count: number;
   active: boolean;
@@ -47,41 +41,13 @@ export function StageTypeTabs({ counts, activeTab, onTabChange }: StageTypeTabsP
   );
 
   const stageActiveTab = isStagePipelineTab(activeTab) ? activeTab : '';
-
-  return (
-    <Tabs value={stageActiveTab} onValueChange={handleValueChange} className="w-fit max-w-full">
-      <div className="w-fit max-w-full max-sm:overflow-x-auto max-sm:scrollbar-hide">
-        <TabsList className="min-w-max p-1 group-data-horizontal/tabs:h-auto">
-          {STAGE_PIPELINE_TABS.map((tab, index) => (
-            <Fragment key={tab.key}>
-              {index > 0 && (
-                <CaretRightIcon aria-hidden weight="bold" className="mx-0.5 size-4 shrink-0 text-muted-foreground/50" />
-              )}
-              <StageTypeTabTrigger tab={tab.key} label={tab.label} count={getTabCount(tab.key, counts)} />
-            </Fragment>
-          ))}
-        </TabsList>
-      </div>
-    </Tabs>
+  const tabs = useMemo(
+    () => STAGE_PIPELINE_TABS.map((tab) => ({ value: tab.key, label: tab.label, count: getTabCount(tab.key, counts) })),
+    [counts],
   );
+
+  return <PipelineStageTabs tabs={tabs} value={stageActiveTab} onValueChange={handleValueChange} />;
 }
-
-const StageTypeTabTrigger = memo(function StageTypeTabTrigger({ tab, label, count }: StageTypeTabTriggerProps) {
-  return (
-    <TabsTrigger
-      value={tab}
-      aria-label={`${label} ${count}`}
-      className="group h-9 flex-none items-center rounded-3xl px-3.5"
-    >
-      <span className="flex items-baseline gap-1.5">
-        <span className="text-label-13 font-medium leading-none text-muted-foreground tabular-nums transition-colors duration-200 ease-out group-hover:text-foreground/70 group-data-[state=active]:text-foreground/70 motion-reduce:transition-none">
-          {count}
-        </span>
-        <span className="text-label-14 leading-none">{label}</span>
-      </span>
-    </TabsTrigger>
-  );
-});
 
 export const ArchivedPipelineButton = memo(function ArchivedPipelineButton({
   count,

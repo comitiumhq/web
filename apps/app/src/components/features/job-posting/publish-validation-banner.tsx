@@ -1,5 +1,5 @@
 import { Alert } from '@comitium/ui/alert';
-import { WarningCircleIcon, XIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, XIcon } from 'lucide-react';
 
 export interface PublishValidationError<TTarget extends string> {
   label: string;
@@ -20,7 +20,7 @@ export function PublishValidationBanner<TTarget extends string>({
   return (
     <div className="border-b border-separator px-6 py-3">
       <Alert variant="destructive" className="relative pr-10">
-        <WarningCircleIcon />
+        <CircleAlertIcon />
         <p className="col-start-2 text-copy-14">
           Complete required fields:{' '}
           {errors.map((error, index) => (

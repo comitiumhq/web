@@ -3,7 +3,7 @@ import { Calendar } from '@comitium/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { TimezonePicker } from '@comitium/ui/timezone-picker';
 import { useIlamyCalendarContext } from '@ilamy/calendar';
-import { CaretDownIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { type ReactNode, useCallback, useState } from 'react';
 import type { OrgTeamMember } from '@/lib/schemas/org';
 
@@ -119,7 +119,7 @@ function DateNavigator() {
         aria-label="Previous day"
         onClick={prevPeriod}
       >
-        <CaretLeftIcon />
+        <ChevronLeftIcon />
       </Button>
 
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
@@ -131,7 +131,7 @@ function DateNavigator() {
             className="h-8 min-w-0 max-w-52 rounded-none px-2.5 font-normal"
           >
             <span className="truncate">{currentDate.format('ddd, MMM D, YYYY')}</span>
-            <CaretDownIcon data-icon="inline-end" className="shrink-0 opacity-60" />
+            <ChevronDownIcon data-icon="inline-end" className="shrink-0 opacity-60" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -156,7 +156,7 @@ function DateNavigator() {
         aria-label="Next day"
         onClick={nextPeriod}
       >
-        <CaretRightIcon />
+        <ChevronRightIcon />
       </Button>
     </div>
   );

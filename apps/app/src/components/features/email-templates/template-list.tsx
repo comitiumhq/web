@@ -8,8 +8,7 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { TablePagination } from '@comitium/ui/table-pagination';
 import { TableSkeleton, type TableSkeletonColumn } from '@comitium/ui/table-skeleton';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ArchiveIcon, EnvelopeIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, CircleAlertIcon, type LucideIcon, MailIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { EntitySettingsPage } from '@/components/features/settings-library/entity-settings-page';
 import { useQueryEmailTemplates } from '@/hooks/queries/use-query-email-templates';
@@ -43,9 +42,9 @@ const TEMPLATE_COLUMNS: DataTableColumn[] = [
 type DialogMode = 'edit' | 'create';
 type TabValue = 'active' | 'archived';
 
-const EMPTY_STATE_CONFIG: Record<TabValue, { icon: PhosphorIcon; title: string; description: string }> = {
+const EMPTY_STATE_CONFIG: Record<TabValue, { icon: LucideIcon; title: string; description: string }> = {
   active: {
-    icon: EnvelopeIcon,
+    icon: MailIcon,
     title: 'No email templates yet',
     description: 'Get started by creating your first template.',
   },
@@ -105,7 +104,7 @@ export function EmailTemplateList({ orgId }: EmailTemplateListProps) {
     return (
       <div className="h-full flex items-center justify-center px-4 sm:px-6 pb-8">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Something went wrong"
           description="We couldn't load email templates. Please try again."
         />

@@ -1,6 +1,6 @@
 import { Button } from '@comitium/ui/button';
 import type { MemberDisplayIdentity } from '@comitium/ui/display-name';
-import { XIcon } from '@phosphor-icons/react';
+import { XIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
 

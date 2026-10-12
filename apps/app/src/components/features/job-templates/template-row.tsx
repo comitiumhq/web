@@ -10,14 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { TableCell, TableRow } from '@comitium/ui/table';
-import {
-  ArchiveIcon,
-  ArrowCounterClockwiseIcon,
-  DotsThreeIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  PencilIcon,
-} from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, EyeIcon, EyeOffIcon, PencilIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
   useActivateJobTemplate,
@@ -128,7 +121,7 @@ export const TemplateRow = memo(function TemplateRow({ orgId, template, onEdit }
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="size-8 p-0" disabled={anyPending} onClick={stopRowClick}>
-                <DotsThreeIcon />
+                <EllipsisIcon />
                 <span className="sr-only">Actions for {template.title}</span>
               </Button>
             </DropdownMenuTrigger>
@@ -147,7 +140,7 @@ export const TemplateRow = memo(function TemplateRow({ orgId, template, onEdit }
               )}
               {isActive && (
                 <DropdownMenuItem className="h-8 text-label-13" onClick={handleDeactivate}>
-                  <EyeSlashIcon />
+                  <EyeOffIcon />
                   Deactivate
                 </DropdownMenuItem>
               )}
@@ -163,7 +156,7 @@ export const TemplateRow = memo(function TemplateRow({ orgId, template, onEdit }
               )}
               {isArchived && (
                 <DropdownMenuItem className="h-8 text-label-13" onClick={handleRestore}>
-                  <ArrowCounterClockwiseIcon />
+                  <ArchiveRestoreIcon />
                   Restore
                 </DropdownMenuItem>
               )}

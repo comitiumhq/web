@@ -10,7 +10,7 @@ import {
 } from '@comitium/ui/dialog';
 import { Input } from '@comitium/ui/input';
 import { SelectionCardIndicator, selectionCardVariants } from '@comitium/ui/selection-card';
-import { MagnifyingGlassIcon, PencilIcon } from '@phosphor-icons/react';
+import { PencilIcon, SearchIcon } from 'lucide-react';
 import { type ChangeEvent, memo, useCallback, useMemo, useState } from 'react';
 import type { InterviewPlanSummary } from '@/lib/schemas/pipeline';
 import { cn } from '@/lib/utils';
@@ -76,7 +76,7 @@ export const PlanPickerDialog = memo(function PlanPickerDialog({
         </DialogHeader>
 
         <div className="relative shrink-0">
-          <MagnifyingGlassIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
             onChange={handleQueryChange}

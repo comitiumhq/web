@@ -1,4 +1,4 @@
-import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { cn } from '../lib/cn';
 import { Button } from './button';
@@ -68,7 +68,7 @@ export function TablePagination({ page, pageSize, totalRows, onPageChange }: Tab
           onClick={handlePrev}
           disabled={page === 1}
         >
-          <CaretLeftIcon />
+          <ChevronLeftIcon />
         </Button>
 
         <div className="flex items-center gap-0.5">
@@ -106,7 +106,7 @@ export function TablePagination({ page, pageSize, totalRows, onPageChange }: Tab
           onClick={handleNext}
           disabled={page === totalPages}
         >
-          <CaretRightIcon />
+          <ChevronRightIcon />
         </Button>
       </nav>
     </div>

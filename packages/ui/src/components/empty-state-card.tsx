@@ -1,9 +1,9 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { Card, CardContent } from './card';
 
 interface EmptyStateCardProps {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
   className?: string;

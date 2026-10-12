@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@comitium/ui/select';
 import { Separator } from '@comitium/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@comitium/ui/toggle-group';
-import { ArrowCounterClockwiseIcon, SlidersHorizontalIcon } from '@phosphor-icons/react';
+import { RotateCcwIcon, SlidersHorizontalIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import type { PublicJobsApi } from '../../../api';
 import { SkillsFilter } from './skills-filter';
@@ -311,7 +311,7 @@ export function FiltersPopover({ api, filters, onFiltersChange }: FiltersPopover
               onClick={handleClear}
               disabled={advancedFilterCount === 0 && !hasPendingFilters}
             >
-              <ArrowCounterClockwiseIcon data-icon="inline-start" />
+              <RotateCcwIcon data-icon="inline-start" />
               Clear filters
             </Button>
             <Button variant="secondary" size="sm" className="flex-1" onClick={handleApply}>

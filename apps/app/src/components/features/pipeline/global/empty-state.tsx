@@ -1,5 +1,5 @@
 import { EmptyState } from '@comitium/ui/empty-state';
-import { BriefcaseIcon } from '@phosphor-icons/react';
+import { BriefcaseBusinessIcon } from 'lucide-react';
 import { CreateJobButton } from '@/components/features/job-creation/create-job-button';
 import { HiringTeamIcon } from '@/lib/constants/domain-icons';
 
@@ -13,7 +13,7 @@ export function DashboardEmptyState({ isAdmin, onCreateJob, createJobDisabledRea
   if (isAdmin || onCreateJob) {
     return (
       <EmptyState
-        icon={BriefcaseIcon}
+        icon={BriefcaseBusinessIcon}
         title="No open jobs yet"
         description="Create a job to get started."
         className="flex-1"

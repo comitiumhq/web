@@ -3,7 +3,7 @@ import { isUnauthorizedError } from '@comitium/schemas/api-query-policy';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { RouteNotFound } from '@comitium/ui/route-not-found';
-import { SignInIcon } from '@phosphor-icons/react';
+import { LogInIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { WorkspaceSetupShell } from '@/components/features/workspace-setup/workspace-setup-shell';
 import { type MyOrg, useQueryMyOrgs } from '@/hooks/queries/use-query-my-orgs';
@@ -62,7 +62,7 @@ function useOrgGuardState(orgId: string, isSignedIn: boolean) {
 
 function SignInRequired() {
   return (
-    <EmptyState icon={SignInIcon} title="Sign in required" description="Log in to continue.">
+    <EmptyState icon={LogInIcon} title="Sign in required" description="Log in to continue.">
       <LoginButton className="mt-6" />
     </EmptyState>
   );

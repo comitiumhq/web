@@ -1,6 +1,6 @@
 import { SEARCH_DEBOUNCE_DELAY } from '@comitium/ui/config';
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@comitium/ui/input-group';
-import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
+import { SearchIcon, XIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { useDebouncedInput } from '../../../hooks/use-debounced-input';
 
@@ -33,7 +33,7 @@ export function SearchInput({ value = '', onChange, skipRef }: SearchInputProps)
   return (
     <InputGroup className="h-11 flex-1">
       <InputGroupAddon>
-        <MagnifyingGlassIcon />
+        <SearchIcon />
       </InputGroupAddon>
       <InputGroupInput className="text-copy-16" placeholder="Search" value={inputValue} onChange={handleInputChange} />
 

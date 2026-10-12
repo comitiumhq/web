@@ -3,7 +3,7 @@ import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
-import { DotsThreeIcon } from '@phosphor-icons/react';
+import { EllipsisIcon } from 'lucide-react';
 import { memo, type ReactNode, useCallback, useMemo, useState } from 'react';
 import type { DepartmentGrant } from '@/lib/schemas/org-structure';
 
@@ -152,7 +152,7 @@ export const DepartmentGrantRow = memo(function DepartmentGrantRow({
                   disabled={disabled}
                   aria-label={`${grant.departmentName} access actions`}
                 >
-                  <DotsThreeIcon weight="bold" />
+                  <EllipsisIcon strokeWidth={2} />
                 </Button>
               </PopoverTrigger>
 

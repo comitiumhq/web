@@ -9,8 +9,8 @@ import {
 import { ThemeMenuSub } from '@comitium/ui/theme-menu';
 import { UserAccountSummary } from '@comitium/ui/user-account-summary';
 import { UserAvatar } from '@comitium/ui/user-avatar';
-import { GearIcon, SignOutIcon, UserCircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { CircleUserRoundIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
 import { useMemberAvatar } from '@/hooks/queries/use-member-avatar';
 import { AccountContextSwitcher } from './account-context-switcher';
 import type { ReadyUserMenuState } from './user-menu-state';
@@ -24,7 +24,7 @@ interface UserMenuDropdownProps {
 function LogoutMenuItem({ onDisconnect }: Pick<ReadyUserMenuState, 'onDisconnect'>) {
   return (
     <DropdownMenuItem className={menuItemClassName} variant="destructive" onClick={onDisconnect}>
-      <SignOutIcon className="size-4" />
+      <LogOutIcon className="size-4" />
       Logout
     </DropdownMenuItem>
   );
@@ -69,7 +69,7 @@ export function UserMenuDropdown({ state }: UserMenuDropdownProps) {
 
         <DropdownMenuItem asChild className={menuItemClassName}>
           <Link to="/account">
-            <UserCircleIcon className="size-4 text-muted-foreground" />
+            <CircleUserRoundIcon className="size-4 text-muted-foreground" />
             Account
           </Link>
         </DropdownMenuItem>
@@ -77,7 +77,7 @@ export function UserMenuDropdown({ state }: UserMenuDropdownProps) {
         {state.currentOrgId ? (
           <DropdownMenuItem asChild className={menuItemClassName}>
             <Link to="/org/$orgId/settings" params={{ orgId: state.currentOrgId }}>
-              <GearIcon className="size-4 text-muted-foreground" />
+              <SettingsIcon className="size-4 text-muted-foreground" />
               Settings
             </Link>
           </DropdownMenuItem>

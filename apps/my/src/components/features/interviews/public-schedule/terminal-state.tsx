@@ -1,12 +1,6 @@
 import { Card, CardContent } from '@comitium/ui/card';
 import { cn } from '@comitium/ui/cn';
-import {
-  CheckIcon,
-  LinkBreakIcon,
-  type Icon as PhosphorIcon,
-  WarningDiamondIcon,
-  XCircleIcon,
-} from '@phosphor-icons/react';
+import { CheckIcon, CircleXIcon, type LucideIcon, OctagonAlertIcon, UnlinkIcon } from 'lucide-react';
 import type { PublicScheduleStatus } from '@/lib/schemas/public-schedule';
 
 import { PublicScheduleFrame } from './public-schedule-frame';
@@ -15,7 +9,7 @@ type TerminalTone = 'success' | 'warning' | 'muted';
 
 const TERMINAL_COPY: Record<
   Exclude<PublicScheduleStatus, 'available'>,
-  { title: string; description: string; icon: PhosphorIcon; tone: TerminalTone }
+  { title: string; description: string; icon: LucideIcon; tone: TerminalTone }
 > = {
   booked: {
     title: 'This interview is already booked',
@@ -26,19 +20,19 @@ const TERMINAL_COPY: Record<
   cancelled: {
     title: 'This scheduling link was cancelled',
     description: 'Please contact the recruiting team if you still need to schedule this interview.',
-    icon: XCircleIcon,
+    icon: CircleXIcon,
     tone: 'warning',
   },
   expired: {
     title: 'This scheduling link expired',
     description: 'Please contact the recruiting team for a new link.',
-    icon: LinkBreakIcon,
+    icon: UnlinkIcon,
     tone: 'muted',
   },
   unavailable: {
     title: 'This scheduling link is unavailable',
     description: 'The link may be invalid, inactive, or no longer tied to an open interview.',
-    icon: WarningDiamondIcon,
+    icon: OctagonAlertIcon,
     tone: 'warning',
   },
 };

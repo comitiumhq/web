@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { TableCell, TableRow } from '@comitium/ui/table';
-import { ArchiveIcon, ArrowCounterClockwiseIcon, DotsThreeIcon, PencilIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, PencilIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
   useArchiveInterviewTemplate,
@@ -92,7 +92,7 @@ export const TemplateRow = memo(function TemplateRow({ orgId, template, onEdit }
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon-sm" disabled={anyPending} onClick={stopRowClick}>
-                <DotsThreeIcon />
+                <EllipsisIcon />
                 <span className="sr-only">Actions for {template.title}</span>
               </Button>
             </DropdownMenuTrigger>
@@ -112,7 +112,7 @@ export const TemplateRow = memo(function TemplateRow({ orgId, template, onEdit }
               )}
               {canRestore && (
                 <DropdownMenuItem onClick={handleRestore}>
-                  <ArrowCounterClockwiseIcon />
+                  <ArchiveRestoreIcon />
                   Restore
                 </DropdownMenuItem>
               )}

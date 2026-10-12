@@ -5,7 +5,7 @@ import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { Input } from '@comitium/ui/input';
 import { Textarea } from '@comitium/ui/textarea';
 import { useSortable } from '@dnd-kit/react/sortable';
-import { CaretDownIcon, DotsSixVerticalIcon, TrashIcon } from '@phosphor-icons/react';
+import { ChevronDownIcon, GripVerticalIcon, TrashIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   MAX_EVALUATION_CRITERION_PROMPT_LENGTH,
@@ -99,7 +99,7 @@ export const CriterionRow = memo(function CriterionRow({
             ref={handleRef}
             className="flex shrink-0 cursor-grab items-center self-stretch pl-2 pr-1 text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
           >
-            <DotsSixVerticalIcon className="size-4" />
+            <GripVerticalIcon className="size-4" />
           </span>
         ) : (
           <span aria-hidden="true" className="w-7 shrink-0" />
@@ -123,7 +123,7 @@ export const CriterionRow = memo(function CriterionRow({
               {isFilled ? criterion.title : 'Untitled criterion'}
             </span>
 
-            <CaretDownIcon
+            <ChevronDownIcon
               className={cn(
                 'size-4 shrink-0 text-muted-foreground transition-transform duration-150 motion-reduce:transition-none',
                 {

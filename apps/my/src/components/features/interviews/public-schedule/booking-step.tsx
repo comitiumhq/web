@@ -1,7 +1,7 @@
 import { Alert, AlertDescription } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
-import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { LoaderCircleIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import type { AvailablePublicScheduleState, PublicScheduleSlot } from '@/lib/schemas/public-schedule';
 
@@ -56,7 +56,7 @@ export function PublicScheduleBookingStep({
                   Back
                 </Button>
                 <Button type="button" size="lg" className="min-w-36" disabled={isPending} onClick={handleConfirm}>
-                  {isPending ? <SpinnerGapIcon className="size-4 animate-spin" /> : null}
+                  {isPending ? <LoaderCircleIcon className="size-4 animate-spin" /> : null}
                   {isPending ? 'Booking...' : 'Confirm booking'}
                 </Button>
               </div>

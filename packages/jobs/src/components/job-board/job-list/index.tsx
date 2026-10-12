@@ -2,8 +2,8 @@ import type { JobListItem as JobListItemType } from '@comitium/schemas/public-jo
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { EmptyState } from '@comitium/ui/empty-state';
-import { BriefcaseIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useVirtualizer, type VirtualItem, type Virtualizer } from '@tanstack/react-virtual';
+import { BriefcaseBusinessIcon, CircleAlertIcon } from 'lucide-react';
 import { type CSSProperties, memo, type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import { getJobListSkeletonWidthClassName, JobListSkeleton, JobListSkeletonItem } from '../skeletons';
 import { JobListItem } from './job-list-item';
@@ -208,7 +208,7 @@ export function JobList({
     return (
       <Card className="gap-0 py-0">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Jobs failed to load"
           description="Refresh the page or try again in a moment."
         />
@@ -221,7 +221,7 @@ export function JobList({
       return (
         <Card className="gap-0 py-0">
           <EmptyState
-            icon={BriefcaseIcon}
+            icon={BriefcaseBusinessIcon}
             title="No matching roles"
             description="Try a different search or clear the selected filters."
           >
@@ -236,7 +236,7 @@ export function JobList({
     return (
       <Card className="gap-0 py-0">
         <EmptyState
-          icon={BriefcaseIcon}
+          icon={BriefcaseBusinessIcon}
           title="No open roles yet"
           description="Check back soon for new opportunities."
         />

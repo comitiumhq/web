@@ -1,4 +1,4 @@
-import { TagIcon } from '@phosphor-icons/react';
+import { TagIcon } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { TableSelectionDock } from './table-selection-dock';

@@ -1,4 +1,4 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import type { LucideIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -8,7 +8,7 @@ import { TEMPLATE_SECTION_ITEMS, type TemplateSection } from './utils';
 interface SectionItemProps {
   id: TemplateSection;
   label: string;
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   isActive: boolean;
   onSelect: (id: TemplateSection) => void;
 }
@@ -64,7 +64,7 @@ export const TemplateSectionNav = memo(function TemplateSectionNav({
 interface MobileSectionItemProps {
   id: TemplateSection;
   label: string;
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   isActive: boolean;
   onSelect: (id: TemplateSection) => void;
 }

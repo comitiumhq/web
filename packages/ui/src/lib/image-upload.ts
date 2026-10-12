@@ -8,8 +8,12 @@ export function getSupportedImageFormats(acceptedTypes: string[]) {
           return 'SVG';
         }
 
-        if (extension === 'jpg') {
-          return 'JPEG';
+        if (extension === 'jpeg' || extension === 'jpg') {
+          return 'JPG';
+        }
+
+        if (extension === 'webp') {
+          return 'WebP';
         }
 
         return extension.toUpperCase();

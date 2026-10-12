@@ -1,5 +1,4 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ArchiveIcon } from '@phosphor-icons/react';
+import { ArchiveIcon, type LucideIcon } from 'lucide-react';
 
 import { CustomFieldsIcon } from '@/lib/constants/domain-icons';
 import type { CustomFieldRow } from '@/lib/schemas/custom-fields';
@@ -9,7 +8,7 @@ export type TabValue = 'active' | 'archived';
 export const EMPTY_FIELDS: CustomFieldRow[] = [];
 
 interface EmptyStateConfig {
-  icon: PhosphorIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
 }

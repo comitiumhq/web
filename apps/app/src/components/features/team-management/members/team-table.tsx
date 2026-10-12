@@ -8,7 +8,7 @@ import {
 } from '@comitium/ui/data-table';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { Tabs, TabsList, TabsTrigger } from '@comitium/ui/tabs';
-import { UsersIcon } from '@phosphor-icons/react';
+import { UsersIcon } from 'lucide-react';
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import type { OrgTeamMember } from '@/hooks/queries/use-query-org-team';
 import type { OrgInvite } from '@/lib/schemas/org';

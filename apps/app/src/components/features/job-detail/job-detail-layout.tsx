@@ -1,9 +1,8 @@
 import type { JobSummary } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { Skeleton } from '@comitium/ui/skeleton';
-import type { Icon } from '@phosphor-icons/react';
-import { ArrowLeftIcon, KanbanIcon } from '@phosphor-icons/react';
 import { Link, useLocation } from '@tanstack/react-router';
+import { ArrowLeftIcon, KanbanIcon, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { DRAFT_SECTIONS } from '@/components/features/job-draft/sections';
 import type { StepStatus } from '@/components/features/job-draft/utils';
@@ -155,7 +154,7 @@ type JobNavRoute =
 
 interface JobNavItem {
   label: string;
-  icon: Icon;
+  icon: LucideIcon;
   to: JobNavRoute;
   search?: Record<string, string>;
   isActive: (pathname: string) => boolean;

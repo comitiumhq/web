@@ -1,5 +1,5 @@
 import { Button } from '@comitium/ui/button';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from 'lucide-react';
 import { EvaluationCriteriaIcon } from '@/lib/constants/domain-icons';
 
 interface EmptyStateProps {

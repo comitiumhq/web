@@ -1,7 +1,7 @@
 import { Badge } from '@comitium/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { BuildingsIcon } from '@phosphor-icons/react';
+import { Building2Icon } from 'lucide-react';
 import type { OrgRole } from '@/lib/schemas/org';
 import { formatOrgRole } from '@/lib/utils/org';
 
@@ -54,7 +54,7 @@ function InviteOrgAvatar({ logo, name }: { logo: string | null; name: string }) 
 
   return (
     <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground ring-1 ring-border">
-      <BuildingsIcon className="size-5" />
+      <Building2Icon className="size-5" />
     </div>
   );
 }

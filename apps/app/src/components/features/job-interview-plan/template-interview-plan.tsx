@@ -1,6 +1,6 @@
 import { EmptyState } from '@comitium/ui/empty-state';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useUpdateJobTemplate } from '@/hooks/mutations/use-job-template-mutations';
 import { useQueryInterviewPlan } from '@/hooks/queries/use-query-interview-plan';
@@ -80,7 +80,7 @@ export function TemplateInterviewPlan({ orgId, templateId, selectedPlanId, isArc
   if (planError || activitiesError || activityOptionsError) {
     return (
       <EmptyState
-        icon={WarningCircleIcon}
+        icon={CircleAlertIcon}
         title="Failed to load interview plan"
         description="Refresh the page and try again."
       />

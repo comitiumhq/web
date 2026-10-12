@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
-import { PlusIcon, XIcon } from '@phosphor-icons/react';
+import { PlusIcon, XIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { type Control, useFieldArray, useFormState } from 'react-hook-form';
 

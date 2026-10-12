@@ -1,12 +1,11 @@
 import type { CandidateSheetActionState, CandidateSheetCurrentActivity } from '@comitium/schemas/applications';
+import { ActivityIcon, type ActivityIconKind } from '@comitium/ui/activity-icon';
 import { Button } from '@comitium/ui/button';
 import { formatDate } from '@comitium/ui/date';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { CalendarPlusIcon, ChatCenteredTextIcon, EnvelopeSimpleIcon, type Icon } from '@phosphor-icons/react';
 import { memo, useCallback } from 'react';
 import { useQueryCalendarStatus } from '@/hooks/queries/use-query-interviews';
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';
-import { ApplicationReviewIcon } from '@/lib/constants/domain-icons';
 import type { PendingInterviewEvent } from '@/lib/interviews/feedback';
 import type {
   ApplicationReviewActivity,
@@ -20,7 +19,7 @@ import { getCalendarActionDisabledReason } from './calendar-action-availability'
 import type { PendingInterviewFeedbackActivity } from './use-candidate-activities-model';
 
 interface ActivityCardProps {
-  icon: Icon;
+  kind: ActivityIconKind;
   primary: string;
   secondary?: string;
   actionLabel: string | null;
@@ -32,7 +31,7 @@ interface ActivityCardProps {
 }
 
 function ActivityCard({
-  icon: Icon,
+  kind,
   primary,
   secondary,
   actionLabel,
@@ -44,10 +43,10 @@ function ActivityCard({
 }: ActivityCardProps) {
   return (
     <div className="grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2.5">
-      <Icon className="size-4 shrink-0 text-muted-foreground" />
+      <ActivityIcon kind={kind} />
       <div className="min-w-0">
-        <p className="truncate text-label-14 font-medium">{primary}</p>
-        {secondary && <p className="mt-0.5 line-clamp-2 text-copy-12 text-muted-foreground">{secondary}</p>}
+        <p className="truncate text-label-14 font-medium text-content-foreground">{primary}</p>
+        {secondary && <p className="mt-0.5 line-clamp-2 text-copy-12 text-meta-foreground">{secondary}</p>}
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {secondaryActionLabel && onSecondaryClick && (
@@ -139,7 +138,7 @@ const ScheduleActivityRow = memo(function ScheduleActivityRow({
 
   return (
     <ActivityCard
-      icon={CalendarPlusIcon}
+      kind="schedule"
       primary={activity.interviewTitle}
       secondary={`${activity.durationMinutes} min`}
       actionLabel={canAct ? 'Schedule' : null}
@@ -172,7 +171,7 @@ const SendEmailActivityRow = memo(function SendEmailActivityRow({
 
   return (
     <ActivityCard
-      icon={EnvelopeSimpleIcon}
+      kind="email"
       primary={`Send: ${activity.emailTemplateName}`}
       actionLabel={canAct ? 'Send' : null}
       onClick={canAct ? handleClick : null}
@@ -208,7 +207,7 @@ const ApplicationReviewActivityRow = memo(function ApplicationReviewActivityRow(
 
   return (
     <ActivityCard
-      icon={ApplicationReviewIcon}
+      kind="review"
       primary="Application Review"
       secondary={secondary}
       actionLabel={canAct ? 'Review' : null}
@@ -239,7 +238,7 @@ export const InterviewFeedbackActivityRow = memo(function InterviewFeedbackActiv
 
   return (
     <ActivityCard
-      icon={ChatCenteredTextIcon}
+      kind="feedback"
       primary={event.title}
       secondary={secondary}
       actionLabel={canAct ? 'Submit feedback' : null}

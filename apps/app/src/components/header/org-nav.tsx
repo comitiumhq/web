@@ -1,8 +1,8 @@
 import { Button } from '@comitium/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
 import { HeaderNavLink } from '@comitium/ui/header-nav-link';
-import { ListIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { MenuIcon } from 'lucide-react';
 import { memo } from 'react';
 import type { HeaderNavItem } from './nav-items';
 
@@ -32,7 +32,7 @@ export function OrgNav({ items, pathname }: OrgNavProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="min-w-0 md:hidden">
-            <ListIcon data-icon="inline-start" />
+            <MenuIcon data-icon="inline-start" />
             <span className="max-w-20 truncate">{activeItem?.label ?? 'Org'}</span>
           </Button>
         </DropdownMenuTrigger>

@@ -1,4 +1,4 @@
-import { ArrowSquareOutIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
+import { DownloadIcon, ExternalLinkIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -133,20 +133,20 @@ function ResumePdfViewer({
           {pdfUrl ? (
             <Button variant="ghost" size="sm" asChild>
               <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-                <ArrowSquareOutIcon data-icon="inline-start" />
+                <ExternalLinkIcon data-icon="inline-start" />
                 Open in new tab
               </a>
             </Button>
           ) : (
             <Button variant="ghost" size="sm" disabled>
-              <ArrowSquareOutIcon data-icon="inline-start" />
+              <ExternalLinkIcon data-icon="inline-start" />
               Open in new tab
             </Button>
           )}
 
           {showDownload && (
             <Button type="button" variant="ghost" size="sm" onClick={onDownload}>
-              <DownloadSimpleIcon data-icon="inline-start" />
+              <DownloadIcon data-icon="inline-start" />
               Download
             </Button>
           )}

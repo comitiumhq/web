@@ -2,7 +2,7 @@ import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { EmptyState } from '@comitium/ui/empty-state';
-import { MagnifyingGlassMinusIcon, UsersIcon } from '@phosphor-icons/react';
+import { SearchXIcon, UsersIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { CandidateTable, type CandidateTableVariant } from '@/components/features/pipeline/shared/candidate-table';
 import { KanbanBoard } from '@/components/features/pipeline/shared/kanban-board';
@@ -165,7 +165,7 @@ export function PerJobPipelineContent({
       ) : (
         <Card size="sm" className="min-h-0 flex-1">
           <EmptyState
-            icon={MagnifyingGlassMinusIcon}
+            icon={SearchXIcon}
             title={searchEmptyState.title}
             description={searchEmptyState.description}
             className="min-h-80"

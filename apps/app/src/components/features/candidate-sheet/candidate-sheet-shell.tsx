@@ -2,7 +2,7 @@ import { Button } from '@comitium/ui/button';
 import { FeatureSheetContent } from '@comitium/ui/feature-sheet';
 import { Sheet, SheetClose, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { CaretLeftIcon, CaretRightIcon, XIcon } from '@phosphor-icons/react';
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from 'lucide-react';
 import { type ReactNode, useRef } from 'react';
 
 interface CandidateSheetPager {
@@ -84,7 +84,7 @@ function CandidateSheetEdgeControls({ pager }: { pager: CandidateSheetPager }) {
               onClick={pager.onPrev}
               aria-label="Previous candidate"
             >
-              <CaretLeftIcon />
+              <ChevronLeftIcon />
             </Button>
             <Button
               variant="secondary"
@@ -94,7 +94,7 @@ function CandidateSheetEdgeControls({ pager }: { pager: CandidateSheetPager }) {
               onClick={pager.onNext}
               aria-label="Next candidate"
             >
-              <CaretRightIcon />
+              <ChevronRightIcon />
             </Button>
           </div>
         )}

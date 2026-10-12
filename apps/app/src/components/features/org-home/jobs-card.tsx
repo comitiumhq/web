@@ -2,8 +2,8 @@ import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { CardAction, CardContent, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { BriefcaseIcon, CaretRightIcon, UsersIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { BriefcaseBusinessIcon, ChevronRightIcon, UsersIcon } from 'lucide-react';
 import { memo } from 'react';
 import type { PipelineJob } from '@/lib/schemas/pipeline';
 import { cn, formatLocation } from '@/lib/utils';
@@ -40,7 +40,7 @@ export function JobsCard({ className, isLoading, jobs, orgId, totalCount }: Jobs
         <CardAction>
           <Button variant="ghost" size="icon-sm" aria-label="Open jobs" asChild>
             <Link to="/org/$orgId/jobs" params={{ orgId }} search={{ status: 'all' }}>
-              <CaretRightIcon className="size-3.5" />
+              <ChevronRightIcon className="size-3.5" />
             </Link>
           </Button>
         </CardAction>
@@ -56,7 +56,7 @@ export function JobsCard({ className, isLoading, jobs, orgId, totalCount }: Jobs
         {!isLoading && jobs.length > 0 && <HomeList>{rows}</HomeList>}
 
         {!isLoading && jobs.length === 0 && (
-          <HomeEmptyState icon={BriefcaseIcon} title="No jobs yet" description="Open jobs will appear here." />
+          <HomeEmptyState icon={BriefcaseBusinessIcon} title="No jobs yet" description="Open jobs will appear here." />
         )}
       </CardContent>
     </HomeCard>

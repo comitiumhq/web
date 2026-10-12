@@ -1,9 +1,9 @@
 'use client';
 
 import type { Editor } from '@tiptap/react';
+import { ChevronDownIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
-// --- Icons ---
-import { ChevronDownIcon } from '@/components/tiptap-icons/chevron-down-icon';
+
 // --- Tiptap UI ---
 import { ListButton, type ListType } from '@/components/tiptap-ui/list-button';
 import { useListDropdownMenu } from '@/components/tiptap-ui/list-dropdown-menu/use-list-dropdown-menu';

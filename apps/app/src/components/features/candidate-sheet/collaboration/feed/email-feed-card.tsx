@@ -2,7 +2,7 @@ import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/ca
 import { Card } from '@comitium/ui/card';
 import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { EnvelopeSimpleIcon } from '@phosphor-icons/react';
+import { MailIcon } from 'lucide-react';
 import { memo } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
@@ -46,16 +46,16 @@ export const EmailFeedCard = memo(function EmailFeedCard({
         <div className="flex-1 min-w-0">
           <span className="text-label-13 font-medium">{sender.name}</span>
           {decryptedEmail?.content?.to && (
-            <p className="text-label-12 text-muted-foreground truncate">to: {decryptedEmail.content.to}</p>
+            <p className="text-label-12 text-meta-foreground truncate">to: {decryptedEmail.content.to}</p>
           )}
           {showJobContext && event.jobTitle && (
-            <p className="text-label-12 text-muted-foreground truncate">{event.jobTitle}</p>
+            <p className="text-label-12 text-meta-foreground truncate">{event.jobTitle}</p>
           )}
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <EnvelopeSimpleIcon className="size-3.5 text-muted-foreground" />
-          <span className="text-label-12 text-muted-foreground">{formatRelativeTime(event.createdAt)}</span>
+          <MailIcon className="size-3.5 text-meta-foreground" />
+          <span className="text-label-12 text-meta-foreground">{formatRelativeTime(event.createdAt)}</span>
         </div>
       </div>
 
@@ -83,7 +83,7 @@ function EmailBody({ orgId, decryptedEmail, isDecrypting, decryptionError }: Ema
     return (
       <>
         <p className="mb-1.5 text-label-13 font-medium">{decryptedEmail.content.subject}</p>
-        <div className="text-copy-13 text-muted-foreground">
+        <div className="text-copy-13 text-content-foreground">
           <ExpandableContent collapsedLines={4}>
             <RichTextEditor content={decryptedEmail.content.body} readOnly />
           </ExpandableContent>

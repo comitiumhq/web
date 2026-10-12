@@ -1,4 +1,4 @@
-import { MinusIcon } from '@phosphor-icons/react';
+import { MinusIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { BlockquoteButton } from '@/components/tiptap-ui/blockquote-button';
 import { HeadingDropdownMenu } from '@/components/tiptap-ui/heading-dropdown-menu';

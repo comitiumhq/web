@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { EyeSlashIcon } from '@phosphor-icons/react';
+import { EyeOffIcon } from 'lucide-react';
 
 export function LoadingState() {
   return (
@@ -53,7 +53,7 @@ export function Empty() {
 export function GatedEmpty() {
   return (
     <div className="flex flex-col items-center text-center gap-2 py-8 px-4 text-muted-foreground">
-      <EyeSlashIcon className="size-5" />
+      <EyeOffIcon className="size-5" />
       <p className="text-xs">Submit your own feedback to view other reviewers&apos; input.</p>
     </div>
   );

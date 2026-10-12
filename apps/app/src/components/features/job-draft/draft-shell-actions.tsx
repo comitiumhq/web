@@ -8,8 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
-import { ArchiveIcon, CopyIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { useNavigate } from '@tanstack/react-router';
+import { ArchiveIcon, CopyIcon, EllipsisVerticalIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useCreateDraft } from '@/hooks/mutations/use-create-draft';
 import { useArchiveJob } from '@/hooks/mutations/use-job-archive-mutations';
@@ -67,7 +67,7 @@ export function DraftShellActions() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={actionsDisabled}>
-            <DotsThreeVerticalIcon />
+            <EllipsisVerticalIcon />
             <span className="sr-only">More draft actions</span>
           </Button>
         </DropdownMenuTrigger>

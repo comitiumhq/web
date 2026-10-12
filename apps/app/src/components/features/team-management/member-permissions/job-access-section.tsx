@@ -1,8 +1,8 @@
 import { Button } from '@comitium/ui/button';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { ArrowUpRightIcon, BriefcaseIcon, InfoIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { ArrowUpRightIcon, BriefcaseBusinessIcon, CircleAlertIcon, InfoIcon } from 'lucide-react';
 import { memo } from 'react';
 import type { MemberDirectJobAssignment } from '@/lib/schemas/org-structure';
 
@@ -78,7 +78,7 @@ const JobAccessContent = memo(function JobAccessContent({
 function JobAccessError() {
   return (
     <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-muted/50 px-4 py-5 text-center">
-      <WarningCircleIcon className="size-4 text-muted-foreground" />
+      <CircleAlertIcon className="size-4 text-muted-foreground" />
       <p className="text-label-14">Could not load job access</p>
     </div>
   );
@@ -87,7 +87,7 @@ function JobAccessError() {
 function JobAccessEmpty() {
   return (
     <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-muted/50 px-4 py-5 text-center">
-      <BriefcaseIcon className="size-4 text-muted-foreground" />
+      <BriefcaseBusinessIcon className="size-4 text-muted-foreground" />
       <p className="text-label-14">No job-specific assignments</p>
     </div>
   );

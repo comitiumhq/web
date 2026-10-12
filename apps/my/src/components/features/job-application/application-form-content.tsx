@@ -5,7 +5,7 @@ import { Button } from '@comitium/ui/button';
 import { Form } from '@comitium/ui/form';
 import { Spinner } from '@comitium/ui/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
-import { WarningCircleIcon, XIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon, XIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { FormRenderer } from '@/components/features/form-runtime';
 import { ApplicationPrivacyNotice } from './application-privacy-notice';
@@ -84,7 +84,7 @@ export function ApplicationFormContent({
         >
           {validationIssues.length > 0 && (
             <Alert ref={validationSummaryRef} variant="destructive" aria-live="assertive" tabIndex={-1}>
-              <WarningCircleIcon />
+              <CircleAlertIcon />
               <AlertTitle>Your form needs corrections</AlertTitle>
               <AlertAction>
                 <button

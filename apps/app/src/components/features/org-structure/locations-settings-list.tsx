@@ -6,7 +6,7 @@ import {
 } from '@comitium/ui/data-table';
 import { EmptyStateCard } from '@comitium/ui/empty-state-card';
 import { TableSkeleton, type TableSkeletonColumn } from '@comitium/ui/table-skeleton';
-import { MapPinIcon } from '@phosphor-icons/react';
+import { MapPinIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { EntitySettingsPage } from '@/components/features/settings-library/entity-settings-page';
 import { useQueryOrgLocations } from '@/hooks/queries/use-query-org-structure';

@@ -5,7 +5,7 @@ import { Card } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { LockIcon, XIcon } from '@phosphor-icons/react';
+import { LockIcon, XIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
@@ -71,7 +71,7 @@ export const NoteCard = memo(function NoteCard({
           </Badge>
         )}
 
-        <span className="text-label-12 text-muted-foreground shrink-0">{formatRelativeTime(createdAt)}</span>
+        <span className="text-label-12 text-meta-foreground shrink-0">{formatRelativeTime(createdAt)}</span>
 
         {isOwnNote && onDelete && (
           <Button
@@ -122,7 +122,7 @@ interface NoteBodyProps {
 function NoteBody({ orgId, decryptedContent, isDecrypting, decryptionError, previewLines }: NoteBodyProps) {
   if (decryptedContent) {
     return (
-      <div className="text-copy-13 text-muted-foreground">
+      <div className="text-copy-13 text-content-foreground">
         <ExpandableContent collapsedLines={previewLines}>
           <RichTextEditor content={decryptedContent} readOnly />
         </ExpandableContent>

@@ -12,7 +12,7 @@ import { Input } from '@comitium/ui/input';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { EnvelopeSimpleIcon, WarningIcon } from '@phosphor-icons/react';
+import { MailIcon, TriangleAlertIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -234,7 +234,7 @@ export function EmailSheet({
             <FeatureSheetBody className="flex flex-col gap-5">
               {!candidateEmail && (
                 <Alert variant="warning">
-                  <WarningIcon />
+                  <TriangleAlertIcon />
                   <AlertTitle>Candidate email unavailable</AlertTitle>
                   <AlertDescription>Unlock candidate data or add an email address before sending.</AlertDescription>
                 </Alert>
@@ -285,7 +285,7 @@ export function EmailSheet({
                 Cancel
               </Button>
               <Button type="submit" disabled={isSending || !canSubmit}>
-                {isSending ? <Spinner data-icon="inline-start" /> : <EnvelopeSimpleIcon data-icon="inline-start" />}
+                {isSending ? <Spinner data-icon="inline-start" /> : <MailIcon data-icon="inline-start" />}
                 {isSending ? 'Sending...' : 'Send email'}
               </Button>
             </FeatureSheetFooter>

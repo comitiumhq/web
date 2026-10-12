@@ -1,6 +1,6 @@
 import { getMemberDisplayName } from '@comitium/ui/display-name';
-import { WarningIcon } from '@phosphor-icons/react';
 import { addMinutes } from 'date-fns';
+import { TriangleAlertIcon } from 'lucide-react';
 import { type RefObject, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
@@ -88,7 +88,7 @@ export function DraftSlotOverlay({
           >
             {conflicting && (
               <>
-                <WarningIcon className="size-3.5 shrink-0" />
+                <TriangleAlertIcon className="size-3.5 shrink-0" />
                 <span className="calendar-event-caption truncate font-medium">Conflict</span>
               </>
             )}

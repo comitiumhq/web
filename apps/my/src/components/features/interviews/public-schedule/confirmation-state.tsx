@@ -1,8 +1,8 @@
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { formatInTimezone } from '@comitium/ui/date';
-import { ArrowSquareOutIcon, CheckIcon } from '@phosphor-icons/react';
 import { addMinutes, parseISO } from 'date-fns';
+import { CheckIcon, ExternalLinkIcon } from 'lucide-react';
 import type {
   AvailablePublicScheduleState,
   BookPublicScheduleResponse,
@@ -62,7 +62,7 @@ export function PublicScheduleConfirmation({
               {confirmation.meetingUrl && (
                 <Button asChild variant="outline">
                   <a href={confirmation.meetingUrl} target="_blank" rel="noreferrer">
-                    <ArrowSquareOutIcon className="size-4" />
+                    <ExternalLinkIcon className="size-4" />
                     Open meeting link
                   </a>
                 </Button>

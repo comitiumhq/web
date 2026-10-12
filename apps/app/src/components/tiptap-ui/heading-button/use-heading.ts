@@ -2,15 +2,9 @@
 
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import type { Editor } from '@tiptap/react';
+import { Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { HeadingFiveIcon } from '@/components/tiptap-icons/heading-five-icon';
-import { HeadingFourIcon } from '@/components/tiptap-icons/heading-four-icon';
 
-// --- Icons ---
-import { HeadingOneIcon } from '@/components/tiptap-icons/heading-one-icon';
-import { HeadingSixIcon } from '@/components/tiptap-icons/heading-six-icon';
-import { HeadingThreeIcon } from '@/components/tiptap-icons/heading-three-icon';
-import { HeadingTwoIcon } from '@/components/tiptap-icons/heading-two-icon';
 // --- Hooks ---
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
 // --- Lib ---
@@ -49,12 +43,12 @@ export interface UseHeadingConfig {
 }
 
 export const headingIcons = {
-  1: HeadingOneIcon,
-  2: HeadingTwoIcon,
-  3: HeadingThreeIcon,
-  4: HeadingFourIcon,
-  5: HeadingFiveIcon,
-  6: HeadingSixIcon,
+  1: Heading1Icon,
+  2: Heading2Icon,
+  3: Heading3Icon,
+  4: Heading4Icon,
+  5: Heading5Icon,
+  6: Heading6Icon,
 };
 
 export const HEADING_SHORTCUT_KEYS: Record<Level, string> = {

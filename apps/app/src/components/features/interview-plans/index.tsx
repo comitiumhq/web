@@ -3,7 +3,7 @@ import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { PageHeader } from '@comitium/ui/page-header';
 import { Tabs, TabsList, TabsTrigger } from '@comitium/ui/tabs';
-import { WarningCircleIcon } from '@phosphor-icons/react';
+import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useQueryInterviewPlans } from '@/hooks/queries/use-query-interview-plans';
 import { TemplateEditorSheet } from './template-editor-sheet';
@@ -55,7 +55,7 @@ export function InterviewPlans({ orgId, activeTemplateId, onOpenTemplate, onClos
     return (
       <div className="h-full flex items-center justify-center px-4 sm:px-6 pb-8">
         <EmptyState
-          icon={WarningCircleIcon}
+          icon={CircleAlertIcon}
           title="Something went wrong"
           description="We couldn't load interview plans. Please try again."
         />

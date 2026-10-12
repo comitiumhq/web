@@ -1,7 +1,7 @@
 import { Button } from '@comitium/ui/button';
 import { EmptyState } from '@comitium/ui/empty-state';
-import { FileXIcon } from '@phosphor-icons/react';
 import { Link } from '@tanstack/react-router';
+import { FileXIcon } from 'lucide-react';
 
 export function DraftNotFound({ orgId }: { orgId: string }) {
   return (

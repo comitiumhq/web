@@ -1,15 +1,17 @@
 'use client';
 
 import type { Editor } from '@tiptap/react';
+import {
+  BoldIcon,
+  CodeXmlIcon,
+  ItalicIcon,
+  StrikethroughIcon,
+  SubscriptIcon,
+  SuperscriptIcon,
+  UnderlineIcon,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-// --- Icons ---
-import { BoldIcon } from '@/components/tiptap-icons/bold-icon';
-import { Code2Icon } from '@/components/tiptap-icons/code2-icon';
-import { ItalicIcon } from '@/components/tiptap-icons/italic-icon';
-import { StrikeIcon } from '@/components/tiptap-icons/strike-icon';
-import { SubscriptIcon } from '@/components/tiptap-icons/subscript-icon';
-import { SuperscriptIcon } from '@/components/tiptap-icons/superscript-icon';
-import { UnderlineIcon } from '@/components/tiptap-icons/underline-icon';
+
 // --- Hooks ---
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
 // --- Lib ---
@@ -44,8 +46,8 @@ export const markIcons = {
   bold: BoldIcon,
   italic: ItalicIcon,
   underline: UnderlineIcon,
-  strike: StrikeIcon,
-  code: Code2Icon,
+  strike: StrikethroughIcon,
+  code: CodeXmlIcon,
   superscript: SuperscriptIcon,
   subscript: SubscriptIcon,
 };

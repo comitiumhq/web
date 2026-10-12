@@ -1,0 +1,42 @@
+/* Animation effects and coordinate calculations; layout lives in the component. */
+.scheduling-demo-frame {
+  box-shadow:
+    0 2px 6px -2px rgb(31 41 55 / 10%),
+    0 18px 36px -14px rgb(31 41 55 / 14%);
+}
+
+.scheduling-demo-day:not([data-available="true"]):not([data-selected="true"]) {
+  color: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
+}
+
+.scheduling-demo-day[data-selected="true"] {
+  background: color-mix(in oklch, var(--primary) 10%, white);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--primary) 35%, transparent);
+}
+
+.scheduling-demo-slot-selected {
+  border: 1px solid color-mix(in oklch, var(--primary) 35%, transparent);
+  background: color-mix(in oklab, var(--primary) 10%, var(--card));
+}
+
+.scheduling-demo-pointer {
+  left: calc(100% - 99px);
+}
+
+.scheduling-demo-agenda {
+  mask-image: linear-gradient(black 70%, transparent 90%);
+}
+
+.scheduling-demo-event {
+  background: color-mix(in oklab, var(--primary) 7%, var(--card));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--primary) 9%, transparent),
+    0 4px 10px -5px color-mix(in oklab, var(--primary) 20%, transparent);
+  transform-origin: left top;
+}
+
+@media (1280px <= width < 1440px) {
+  .scheduling-demo-frame {
+    transform: scale(0.9);
+  }
+}
