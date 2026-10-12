@@ -1,12 +1,11 @@
-import { Button } from '@comitium/ui/button';
 import { cn } from '@comitium/ui/cn';
 import { PageContainer } from '@comitium/ui/page-container';
-import { ArrowRight } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { AiOrbVisual } from './ai-orb-visual';
 import { AtsProductVisual } from './ats-product-visual';
 import { EncryptionProductVisual } from './encryption-product-visual';
 import { IdentityProductVisual } from './identity-product-visual';
+import { LandingCtaSection } from './landing-cta-section';
 import { LandingFaqSection } from './landing-faq-section';
 import { LANDING_CONTAINER_CLASS_NAME, LANDING_TEXT_TONES_CLASS_NAME } from './landing-layout';
 import { LandingSurfaceLight, type LandingSurfaceTone } from './landing-surface-light';
@@ -62,7 +61,7 @@ function Moment({ title, description, children, surfaceTone, className = '', vis
   );
 }
 
-export function LandingFeaturesSection({ earlyAccessUrl }: { earlyAccessUrl: string }) {
+export function LandingFeaturesSection({ onRequestEarlyAccess }: { onRequestEarlyAccess: () => void }) {
   return (
     <div className={cn('landing-features relative z-10', LANDING_TEXT_TONES_CLASS_NAME)}>
       <section className="pt-16 pb-24 sm:pt-20 sm:pb-32" aria-labelledby="landing-features-heading">
@@ -71,8 +70,7 @@ export function LandingFeaturesSection({ earlyAccessUrl }: { earlyAccessUrl: str
             id="landing-features-heading"
             className="mb-9 text-2xl leading-[1.12] font-medium tracking-[-0.04em] sm:mb-12 sm:text-3xl lg:text-[2.75rem]"
           >
-            <span className="block lg:inline">Less busywork.</span>{' '}
-            <span className="block lg:inline">More time for people.</span>
+            <span className="block">Less busywork.</span> <span className="block">More time for people.</span>
           </h2>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-12 xl:gap-6">
             <Moment
@@ -125,14 +123,7 @@ export function LandingFeaturesSection({ earlyAccessUrl }: { earlyAccessUrl: str
             </Moment>
           </div>
           <LandingFaqSection />
-          <div className="mt-20 flex justify-center sm:mt-24">
-            <Button asChild size="lg" className="h-11 px-5">
-              <a href={earlyAccessUrl}>
-                Request early access
-                <ArrowRight aria-hidden data-icon="inline-end" />
-              </a>
-            </Button>
-          </div>
+          <LandingCtaSection onRequestEarlyAccess={onRequestEarlyAccess} />
         </PageContainer>
       </section>
     </div>

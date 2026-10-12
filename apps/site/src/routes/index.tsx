@@ -2,14 +2,14 @@ import { Button } from '@comitium/ui/button';
 import { cn } from '@comitium/ui/cn';
 import { PageContainer } from '@comitium/ui/page-container';
 import { createFileRoute } from '@tanstack/react-router';
-import { ArrowRight } from 'lucide-react';
+import { lazy, Suspense, useState } from 'react';
 import { HeroProductPreview } from '@/components/landing/hero-product-preview';
 import { LandingBackground } from '@/components/landing/landing-background';
 import { LandingFeaturesSection } from '@/components/landing/landing-features-section';
 import { LANDING_CONTAINER_CLASS_NAME } from '@/components/landing/landing-layout';
 import { buildSeoHead } from '@/lib/seo/public';
 
-const EARLY_ACCESS_URL = 'mailto:illia.yablonski@comitium.co?subject=Comitium%20early%20access';
+const EarlyAccessDialog = lazy(() => import('@/components/landing/early-access-dialog'));
 
 export const Route = createFileRoute('/')({
   head: () =>
@@ -22,6 +22,14 @@ export const Route = createFileRoute('/')({
 });
 
 function LandingPage() {
+  const [earlyAccessMounted, setEarlyAccessMounted] = useState(false);
+  const [earlyAccessOpen, setEarlyAccessOpen] = useState(false);
+
+  function openEarlyAccess() {
+    setEarlyAccessMounted(true);
+    setEarlyAccessOpen(true);
+  }
+
   return (
     <div className="relative isolate text-foreground">
       <section className="relative z-10 flex">
@@ -42,17 +50,19 @@ function LandingPage() {
               An ATS built for people on both sides.
             </p>
 
-            <Button asChild size="lg" className="mt-7 h-11 px-5">
-              <a href={EARLY_ACCESS_URL}>
-                Request early access
-                <ArrowRight aria-hidden data-icon="inline-end" />
-              </a>
+            <Button size="lg" className="mt-7 h-11 px-5" onClick={openEarlyAccess}>
+              Request early access
             </Button>
           </div>
           <HeroProductPreview />
         </PageContainer>
       </section>
-      <LandingFeaturesSection earlyAccessUrl={EARLY_ACCESS_URL} />
+      <LandingFeaturesSection onRequestEarlyAccess={openEarlyAccess} />
+      {earlyAccessMounted && (
+        <Suspense fallback={null}>
+          <EarlyAccessDialog open={earlyAccessOpen} onOpenChange={setEarlyAccessOpen} />
+        </Suspense>
+      )}
     </div>
   );
 }
