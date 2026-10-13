@@ -1,7 +1,7 @@
 import { isClient } from '@comitium/ui/browser';
 import { isProdEnv } from '@/lib/utils/environment';
 
-const DEFAULT_SOCIAL_IMAGE_PATH = '/comitium-og-1200x630.png';
+const DEFAULT_SOCIAL_IMAGE_PATH = '/comitium-social-1200x630.png';
 const MAX_DESCRIPTION_LENGTH = 160;
 
 type SeoHeadInput = {

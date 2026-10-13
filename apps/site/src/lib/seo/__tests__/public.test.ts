@@ -27,7 +27,7 @@ describe('public SEO helpers', () => {
         { title: 'Jobs | Comitium' },
         { name: 'description', content: 'Browse open roles.' },
         { property: 'og:url', content: 'https://comitium.co/jobs' },
-        { property: 'og:image', content: 'https://comitium.co/comitium-og-1200x630.png' },
+        { property: 'og:image', content: 'https://comitium.co/comitium-social-1200x630.png' },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'robots', content: 'noindex,follow' },
       ]),
