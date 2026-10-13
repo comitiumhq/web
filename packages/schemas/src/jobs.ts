@@ -36,7 +36,6 @@ export const jobSummarySchema = z.object({
   status: jobStatusSchema,
   archivedAt: z.string().nullable(),
   version: z.number().int().min(0),
-  totalApplications: z.number(),
   createdAt: z.string(),
   updatedAt: z.string(),
   title: z.string().nullable(),

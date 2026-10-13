@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import { build } from 'vite';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const APP_ROOT = fileURLToPath(new URL('../../../..', import.meta.url));
 const VIRTUAL_ENTRY = 'virtual:crypto-worker-build-test';
@@ -8,7 +9,7 @@ const RESOLVED_VIRTUAL_ENTRY = `\0${VIRTUAL_ENTRY}`;
 
 describe('crypto worker production build', () => {
   it(
-    'emits an executable worker chunk instead of embedding the TypeScript source as an asset',
+    'emits an executable worker that initializes without JavaScript string evaluation',
     { timeout: 60_000 },
     async () => {
       const result = await build({
@@ -52,8 +53,30 @@ describe('crypto worker production build', () => {
       expect(entry?.type).toBe('chunk');
       expect(embedsRawTypeScriptWorker).toBe(false);
       expect(entry?.type === 'chunk' ? entry.code : '').toContain('assets/crypto.worker-');
-      expect(worker?.type).toBe('asset');
-      expect(worker?.fileName).toMatch(/\.js$/);
+
+      if (worker?.type !== 'asset') {
+        throw new Error('Expected an executable crypto worker asset');
+      }
+
+      expect(worker.fileName).toMatch(/\.js$/);
+
+      const source = typeof worker.source === 'string' ? worker.source : new TextDecoder().decode(worker.source);
+      const functionConstructor = vi.fn(() => {
+        throw new EvalError('String evaluation is forbidden by CSP');
+      });
+      const endpoint = { addEventListener: vi.fn(), postMessage: vi.fn() };
+
+      runInNewContext(source, {
+        ...endpoint,
+        self: endpoint,
+        Function: functionConstructor,
+        TextEncoder,
+        TextDecoder,
+        crypto,
+      });
+
+      expect(endpoint.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+      expect(functionConstructor).not.toHaveBeenCalled();
     },
   );
 });

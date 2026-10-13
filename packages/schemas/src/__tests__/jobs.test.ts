@@ -23,7 +23,6 @@ describe('jobListItemSchema', () => {
       category: null,
       compensation: null,
       companyInfo: null,
-      totalApplications: 0,
     });
 
     expect(result.success).toBe(true);

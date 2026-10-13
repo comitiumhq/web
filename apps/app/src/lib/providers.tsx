@@ -2,6 +2,7 @@ import { createAuthAccountApi } from '@comitium/auth/account-api';
 import { PrivyAppProvider } from '@comitium/auth/privy-app-provider';
 import { STALE_TIME_DEFAULT } from '@comitium/schemas/api-query-policy';
 import { logger } from '@comitium/ui/logger';
+import { useCspNonce } from '@comitium/ui/security-headers';
 import { TooltipProvider } from '@comitium/ui/tooltip';
 import { type QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LucideProvider } from 'lucide-react';
@@ -17,8 +18,10 @@ function logWalletProvisioningError(message: string) {
 }
 
 export const Providers = ({ queryClient, children }: { queryClient: QueryClient; children: JSX.Element }) => {
+  const nonce = useCspNonce();
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}>
       <QueryClientProvider client={queryClient}>
         <PrivyAppProvider
           getSession={authAccountApi.getSession}

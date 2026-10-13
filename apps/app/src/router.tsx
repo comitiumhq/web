@@ -1,5 +1,6 @@
 import { RouteError } from '@comitium/ui/error-fallbacks';
 import { createQueryClient } from '@comitium/ui/query-client';
+import { getRequestCspNonce } from '@comitium/ui/start-security';
 import type { QueryClient } from '@tanstack/react-query';
 import { createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
@@ -21,6 +22,7 @@ export function getRouter() {
     defaultPendingMinMs: 300,
     defaultErrorComponent: RouteError,
     context: { queryClient },
+    ssr: { nonce: getRequestCspNonce() },
   });
 }
 

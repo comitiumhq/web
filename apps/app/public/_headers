@@ -1,0 +1,7 @@
+/assets/crypto.worker-*.js
+  Content-Security-Policy: default-src 'none'; script-src 'self'
+  X-Content-Type-Options: nosniff
+
+/assets/pdf.worker.min-*.mjs
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'
+  X-Content-Type-Options: nosniff

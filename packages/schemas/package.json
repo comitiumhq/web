@@ -27,6 +27,7 @@
     "./error": "./src/error.ts",
     "./guards": "./src/guards.ts",
     "./interview-status": "./src/interview-status.ts",
+    "./jitless": "./src/jitless.ts",
     "./job-enums": "./src/job-enums.ts",
     "./jobs": "./src/jobs.ts",
     "./patterns": "./src/patterns.ts",

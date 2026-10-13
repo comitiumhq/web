@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./context": "./src/context.ts",
     "./envelope-key": "./src/envelope-key.ts",
+    "./jitless": "./src/jitless.ts",
     "./key-bundle": "./src/key-bundle.ts",
     "./personal-key": "./src/personal-key.ts",
     "./schemas": "./src/schemas.ts",
