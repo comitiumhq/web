@@ -2,6 +2,7 @@ import { type QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LucideProvider } from 'lucide-react';
 import { ThemeProvider } from 'next-themes';
 import type { ReactNode } from 'react';
+import { useCspNonce } from '../lib/security-headers';
 import { TooltipProvider } from './tooltip';
 
 interface WebAppProvidersProps {
@@ -11,8 +12,16 @@ interface WebAppProvidersProps {
 }
 
 export function WebAppProviders({ children, queryClient, forcedTheme }: WebAppProvidersProps) {
+  const nonce = useCspNonce();
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem={!forcedTheme} forcedTheme={forcedTheme}>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem={!forcedTheme}
+      forcedTheme={forcedTheme}
+      nonce={nonce}
+    >
       <QueryClientProvider client={queryClient}>
         <LucideProvider strokeWidth={1.5}>
           <TooltipProvider>{children}</TooltipProvider>

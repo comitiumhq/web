@@ -14,6 +14,8 @@ if (isClient) {
   pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 }
 
+const PDF_OPTIONS = { isEvalSupported: false };
+
 interface ResumePreviewProps {
   className?: string;
   error: string | null;
@@ -157,6 +159,7 @@ function ResumePdfViewer({
         <Document
           className="w-full"
           file={file}
+          options={PDF_OPTIONS}
           onLoadSuccess={handleDocumentLoadSuccess}
           onLoadError={handleDocumentLoadError}
           loading={<ResumePageSkeleton />}

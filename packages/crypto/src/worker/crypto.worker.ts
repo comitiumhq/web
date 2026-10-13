@@ -1,3 +1,5 @@
+import '../jitless';
+
 import * as Comlink from 'comlink';
 
 import { CryptoWorkerApi } from './crypto-api';

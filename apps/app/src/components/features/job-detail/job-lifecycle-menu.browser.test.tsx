@@ -35,7 +35,6 @@ const draftJob = {
 const openJobWithApplications = {
   ...draftJob,
   status: 'open',
-  totalApplications: 2,
   lifecycle: {
     activeApplications: 2,
     allowedActions: ['close_job'],
