@@ -2,7 +2,7 @@ import { PageHeader } from '@comitium/ui/page-header';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { useUser } from '@privy-io/react-auth';
 
-import type { ZkIdentityApi } from '../zk-identity';
+import type { ZkIdentityApi } from '../../zk-identity';
 import { ZkIdentitySection } from './zk-identity-section';
 
 export function ZkIdentitySettingsPage({
