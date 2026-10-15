@@ -1,12 +1,14 @@
 import type { ProofResult } from '@zkpassport/sdk';
 import { z } from 'zod';
 
-const zkIdentityFailureCodeSchema = z.enum(['proof_invalid', 'identity_already_linked']);
+const zkIdentityFailureCodeSchema = z.enum(['proof_invalid', 'identity_already_linked', 'document_expired']);
 
 const verifiedZkIdentitySchema = z
   .object({
     status: z.literal('verified'),
     verifiedAt: z.iso.datetime({ offset: true }),
+    documentExpiresOn: z.iso.date(),
+    canReplace: z.boolean(),
   })
   .strict();
 
@@ -21,7 +23,17 @@ export const zkIdentityCompletionResultSchema = z.discriminatedUnion('status', [
 ]);
 
 export type ZkIdentityStatus = z.infer<typeof zkIdentityStatusSchema>;
+export type ZkIdentityFailureCode = z.infer<typeof zkIdentityFailureCodeSchema>;
 type ZkIdentityCompletionResult = z.infer<typeof zkIdentityCompletionResultSchema>;
+
+const zkIdentityQuerySchema = z
+  .object({
+    age: z.object({ gte: z.number().int().min(0).max(99) }).strict(),
+    expiry_date: z.object({ disclose: z.literal(true) }).strict(),
+    facematch: z.object({ mode: z.literal('strict') }).strict(),
+    sanctions: z.object({ countries: z.literal('all'), lists: z.literal('all'), strict: z.boolean() }).strict(),
+  })
+  .strict();
 
 export const zkIdentityAttemptSchema = z
   .object({
@@ -31,8 +43,9 @@ export const zkIdentityAttemptSchema = z
       .object({
         domain: z.string().min(1),
         oprfKeyId: z.string().min(1),
-        policyId: z.string().min(1),
         proofMode: z.enum(['fast', 'compressed', 'compressed-evm']),
+        purpose: z.string().min(1),
+        query: zkIdentityQuerySchema,
         scope: z.string().min(1),
       })
       .strict(),
@@ -44,6 +57,7 @@ export type ZkIdentityAttempt = z.infer<typeof zkIdentityAttemptSchema>;
 export interface CompleteZkIdentityAttemptInput {
   challenge: string;
   proofs: ProofResult[];
+  documentExpiresOn: string;
 }
 
 export interface ZkIdentityApi {
