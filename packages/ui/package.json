@@ -5,6 +5,7 @@
   "license": "GPL-3.0-or-later",
   "type": "module",
   "sideEffects": [
+    "./src/lib/start-client.tsx",
     "./src/styles.css"
   ],
   "exports": {
