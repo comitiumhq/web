@@ -20,12 +20,8 @@ vi.mock('@comitium/auth/use-account-readiness', () => ({
   useAccountReadiness: () => ({ stage: mocks.accountStage }),
 }));
 
-vi.mock('@comitium/auth/privy-account', () => ({
-  getPrivyAccountEmail: () => mocks.accountEmail,
-}));
-
-vi.mock('@privy-io/react-auth', () => ({
-  usePrivy: () => ({ user: {} }),
+vi.mock('@comitium/auth/auth-context', () => ({
+  useAuthClient: () => ({ useSession: () => ({ data: { user: { email: mocks.accountEmail } } }) }),
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -102,7 +98,6 @@ describe('InviteAcceptPage global account actions', () => {
     await expect
       .element(screen.getByText('Sign in or create your Comitium account to join this workspace.'))
       .toBeInTheDocument();
-    await expect.element(screen.getByText(/wallet|mailbox|merge/i)).not.toBeInTheDocument();
 
     await screen.getByRole('button', { name: 'Create account' }).click();
     expect(mocks.navigate).toHaveBeenCalledWith({

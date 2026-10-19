@@ -24,6 +24,7 @@ import {
   unpackEncryptedBlob,
 } from '../file-encryption';
 import { type CategoricalFormFieldKind, hashCategoricalFormFieldValue } from '../form-field-search-hash';
+import { generateStoragePassword } from '../password';
 import type { RecipientDescriptor } from '../recipients';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from '../schemas';
 import type { VaultKeyAccess } from '../schemas/vault-key';
@@ -39,7 +40,9 @@ export class CryptoWorkerApi {
   readonly #orgVault = new OrgVault(this.#userSession);
 
   readonly configure = this.#userSession.configure.bind(this.#userSession);
+  readonly generateStoragePassword = generateStoragePassword;
   readonly unlockWithPassword = this.#userSession.unlockWithPassword.bind(this.#userSession);
+  readonly verifyPassword = this.#userSession.verifyPassword.bind(this.#userSession);
   readonly unlockWithRecoveryCode = this.#userSession.unlockWithRecoveryCode.bind(this.#userSession);
   readonly tryUnlockWithRememberedDevice = this.#userSession.tryUnlockWithRememberedDevice.bind(this.#userSession);
   readonly initializeUserKey = this.#userSession.initializeUserKey.bind(this.#userSession);
@@ -47,7 +50,6 @@ export class CryptoWorkerApi {
   readonly rewrapUserKey = this.#userSession.rewrapUserKey.bind(this.#userSession);
   readonly rewrapWithRememberedDevice = this.#userSession.rewrapWithRememberedDevice.bind(this.#userSession);
   readonly forgetRememberedDevice = this.#userSession.forgetRememberedDevice.bind(this.#userSession);
-  readonly logout = this.#userSession.logout.bind(this.#userSession);
   readonly isActive = this.#userSession.isActive.bind(this.#userSession);
   readonly clear = this.#userSession.clear.bind(this.#userSession);
   readonly generateAndWrapVaultKey = this.#orgVault.generateAndWrapVaultKey.bind(this.#orgVault);

@@ -1,6 +1,7 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 
 const mocks = vi.hoisted(() => ({ hashCandidateProfileSearchValue: vi.fn() }));
 
@@ -11,13 +12,13 @@ vi.mock('@comitium/crypto', () => ({
 import { projectCandidateProfileSearch } from './profile-search-projection';
 
 const ORG_ID = '10000000-0000-4000-8000-000000000001';
-const WRAPPED_VAULT_KEY = { ek: 'wrapped-vault-key' } as WrappedKey;
+const WRAPPED_VAULT_KEY = mockVaultAccess();
 
 describe('projectCandidateProfileSearch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.hashCandidateProfileSearchValue.mockImplementation(
-      (_orgId: string, _wrappedKey: WrappedKey, field: string) => {
+      (_orgId: string, _wrappedKey: VaultKeyAccess, field: string) => {
         const digestCharacters = new Map([
           ['email', 'a'],
           ['cityId', 'b'],

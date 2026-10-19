@@ -1,4 +1,3 @@
-export { normalizeAddress } from '@comitium/auth/address';
 export { getErrorMessage } from '@comitium/schemas/error';
 export { isDefined, isNonNull } from '@comitium/schemas/guards';
 export { isClient } from '@comitium/ui/browser';

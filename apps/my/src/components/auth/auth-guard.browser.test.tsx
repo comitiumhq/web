@@ -7,7 +7,6 @@ const mocks = vi.hoisted(() => ({
   session: {
     isSessionLoading: false,
     isSignedIn: false,
-    needsSessionRecovery: false,
   },
 }));
 
@@ -28,17 +27,12 @@ vi.mock('@tanstack/react-router', async (importOriginal) => ({
     }),
 }));
 
-vi.mock('./auth-session-recovery', () => ({
-  AuthSessionRecovery: ({ returnTo }: { returnTo: string }) => <main>Recover to {returnTo}</main>,
-}));
-
 beforeEach(() => {
   mocks.navigate.mockReset();
   mocks.navigate.mockResolvedValue(undefined);
   mocks.session = {
     isSessionLoading: false,
     isSignedIn: false,
-    needsSessionRecovery: false,
   };
 });
 
@@ -58,19 +52,5 @@ describe('candidate AuthGuard', () => {
       }),
     );
     await expect.element(screen.getByText('My applications')).not.toBeInTheDocument();
-  });
-
-  it('recovers a broken session without exposing protected children', async () => {
-    mocks.session.needsSessionRecovery = true;
-    const screen = await render(
-      <AuthGuard>
-        <main>My applications</main>
-      </AuthGuard>,
-    );
-
-    await expect
-      .element(screen.getByText('Recover to /login?returnTo=%2Fapplications%3Ffilter%3Dactive%23deposit'))
-      .toBeInTheDocument();
-    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 });

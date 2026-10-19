@@ -1,7 +1,6 @@
 import { PageHeader } from '@comitium/ui/page-header';
 import { PageLoader } from '@comitium/ui/page-loader';
-import { useUser } from '@privy-io/react-auth';
-
+import { useSession } from '../../use-session';
 import type { ZkIdentityApi } from '../../zk-identity';
 import { ZkIdentitySection } from './zk-identity-section';
 
@@ -12,7 +11,7 @@ export function ZkIdentitySettingsPage({
   api: ZkIdentityApi;
   queryKey: (userId: string) => readonly unknown[];
 }) {
-  const { user } = useUser();
+  const { user } = useSession();
 
   if (!user) {
     return <PageLoader />;

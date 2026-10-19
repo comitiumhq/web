@@ -1,8 +1,8 @@
 import type { EncryptedEnvelope } from '@comitium/crypto';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook } from 'vitest-browser-react';
 import type { DecryptedEmailContent, EmailResponse } from '@/lib/schemas/emails';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 import { useDecryptEmails } from './use-decrypt-emails';
 
 interface Deferred<T> {
@@ -33,7 +33,7 @@ vi.mock('@comitium/crypto', () => ({
   },
 }));
 
-const wrappedVaultKey = { ek: 'wrapped-vault-key' } as WrappedKey;
+const wrappedVaultKey = mockVaultAccess();
 
 function deferred<T>(): Deferred<T> {
   let resolve!: (value: T) => void;

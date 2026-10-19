@@ -1,14 +1,13 @@
-import type { PublicEncryptionKey } from '@comitium/crypto/schemas';
 import { publicKeyMapSchema } from '@comitium/schemas/auth';
 
 import { api } from './client';
 
-function getPublicKeys(addresses: string[]) {
-  return api.post('/users/public-keys', { addresses }, publicKeyMapSchema);
+function getPublicKeys(userIds: string[]) {
+  return api.post('/users/public-keys', { userIds }, publicKeyMapSchema);
 }
 
-export async function getPublicKey(walletAddress: string): Promise<PublicEncryptionKey | null> {
-  const publicKeys = await getPublicKeys([walletAddress]);
+export async function getPublicKey(userId: string) {
+  const publicKeys = await getPublicKeys([userId]);
 
-  return publicKeys[walletAddress] ?? null;
+  return publicKeys[userId] ?? null;
 }

@@ -1,10 +1,10 @@
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook } from 'vitest-browser-react';
-
 import type { FeedbackSubmission } from '@/lib/schemas/feedback-submissions';
 import type { ApplicationReviewActivity } from '@/lib/schemas/stage-activities';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 
 const mocks = vi.hoisted(() => ({
   buildDefaultValues: vi.fn(),
@@ -46,7 +46,7 @@ const FORM_ID = '33333333-3333-4333-8333-333333333333';
 const USER_ID = '44444444-4444-4444-8444-444444444444';
 const ACTIVITY_ID = '55555555-5555-4555-8555-555555555555';
 const SUBMISSION_ID = '66666666-6666-4666-8666-666666666666';
-const wrappedVaultKey = { ek: 'wrapped-key' } as WrappedKey;
+const wrappedVaultKey = mockVaultAccess();
 
 function snapshot(formId = FORM_ID): FormDefinitionSnapshot {
   return {
@@ -95,9 +95,9 @@ function deferred<T>(): Deferred<T> {
   return { promise, resolve };
 }
 
-function renderFlow(source: FeedbackSubmissionSource, key: WrappedKey | null = wrappedVaultKey) {
+function renderFlow(source: FeedbackSubmissionSource, key: VaultKeyAccess | null = wrappedVaultKey) {
   return renderHook(
-    (props?: { currentSource: FeedbackSubmissionSource; wrappedKey: WrappedKey | null }) => {
+    (props?: { currentSource: FeedbackSubmissionSource; wrappedKey: VaultKeyAccess | null }) => {
       if (!props) {
         throw new Error('Hook props are required');
       }

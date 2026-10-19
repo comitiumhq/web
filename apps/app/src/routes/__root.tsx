@@ -6,9 +6,9 @@ import { Toaster } from '@comitium/ui/sonner';
 import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, HeadContent, Link, Outlet, Scripts, useRouterState } from '@tanstack/react-router';
 import { ErrorBoundary } from 'react-error-boundary';
+import { EncryptionSetup } from '@/components/auth/encryption-setup';
 import { WorkspaceHeader } from '@/components/header/workspace-header';
 import { Providers } from '@/lib/providers';
-import { WalletProviders } from '@/lib/wallet-providers';
 
 import appCss from '../../public/globals.css?url';
 
@@ -71,9 +71,10 @@ function RootLayout() {
       <body suppressHydrationWarning className="font-sans antialiased m-0 p-0 overflow-hidden">
         <ErrorBoundary FallbackComponent={RootErrorFallback}>
           <Providers queryClient={queryClient}>
-            <WalletProviders>
+            <Toaster position="bottom-right" offset={16} />
+            <EncryptionSetup>
               <AppShell showWorkspaceHeader={!routeOwnsHeader && !authPage} reserveWorkspaceHeaderSpace={!authPage} />
-            </WalletProviders>
+            </EncryptionSetup>
           </Providers>
         </ErrorBoundary>
         <Scripts />
@@ -91,7 +92,6 @@ function AppShell({
 }) {
   return (
     <div>
-      <Toaster position="bottom-right" offset={16} />
       {showWorkspaceHeader ? <WorkspaceHeader /> : null}
       <main
         data-app-scroll-container

@@ -62,12 +62,6 @@ export function deserializePrivateEncryptionKey(serialized: Uint8Array): Uint8Ar
   return privateEncryptionKeyToBytes(bundle);
 }
 
-export function serializePublicEncryptionKey(publicKey: PublicEncryptionKey): string {
-  const parsed = publicEncryptionKeySchema.parse(publicKey);
-
-  return JSON.stringify({ v: parsed.v, xwing: parsed.xwing });
-}
-
 export function isSamePublicEncryptionKey(left: PublicEncryptionKey, right: PublicEncryptionKey): boolean {
   return left.v === right.v && left.xwing === right.xwing;
 }

@@ -7,7 +7,6 @@ export type InvitePageState =
   | 'not_found'
   | 'revoked'
   | 'expired'
-  | 'account_recovery'
   | 'login'
   | 'preparing'
   | 'ready';
@@ -45,10 +44,6 @@ export function resolveInvitePageState({
 
   if (invite.isExpired && !invite.isAccepted) {
     return 'expired';
-  }
-
-  if (accountStage === 'unrecoverable') {
-    return 'account_recovery';
   }
 
   if (accountStage === 'anonymous') {

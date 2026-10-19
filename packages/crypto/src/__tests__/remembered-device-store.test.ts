@@ -21,7 +21,7 @@ vi.mock('idb-keyval', () => ({
   },
 }));
 
-import { RememberedDeviceStore } from '../worker/remembered-device-store';
+import { RememberedDeviceStore } from '../remembered-device-store';
 
 const identity = { userId: USER_ID, keyVersion: 1, encryptedKeyFingerprint: 'a'.repeat(64) };
 const params = { identity, userPublicKey: TEST_KEYS.alice.publicKey };

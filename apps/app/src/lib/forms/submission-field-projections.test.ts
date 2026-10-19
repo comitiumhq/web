@@ -1,6 +1,7 @@
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 
 const mocks = vi.hoisted(() => ({ hashCategoricalFormFieldValue: vi.fn() }));
 
@@ -19,7 +20,7 @@ const BOOLEAN_QUESTION_ID = '30000000-0000-4000-8000-000000000001';
 const OPTIONS_QUESTION_ID = '30000000-0000-4000-8000-000000000002';
 const NUMBER_QUESTION_ID = '30000000-0000-4000-8000-000000000003';
 const DATE_QUESTION_ID = '30000000-0000-4000-8000-000000000004';
-const WRAPPED_VAULT_KEY = { ek: 'wrapped-vault-key' } as WrappedKey;
+const WRAPPED_VAULT_KEY = mockVaultAccess();
 
 const FORM: FormDefinitionSnapshot = {
   v: 1,
@@ -49,7 +50,7 @@ describe('projectSubmissionFieldValues', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.hashCategoricalFormFieldValue.mockImplementation(
-      (_orgId: string, _wrappedKey: WrappedKey, _fieldId: string, _kind: string, value: boolean | string) => {
+      (_orgId: string, _wrappedKey: VaultKeyAccess, _fieldId: string, _kind: string, value: boolean | string) => {
         const digestCharacters = new Map([
           ['true', '1'],
           ['platform', '2'],

@@ -9,23 +9,30 @@ export function useEnsureMemberVaultGrant() {
   const { ensureUnlocked } = useCryptoUnlock();
 
   return useCallback(
-    async (orgId: string, walletAddress: string, memberHasVaultAccess: boolean): Promise<VaultGrant | undefined> => {
+    async (orgId: string, userId: string, memberHasVaultAccess: boolean): Promise<VaultGrant | undefined> => {
       if (memberHasVaultAccess) {
         return undefined;
       }
 
-      const memberPublicKey = await getPublicKey(walletAddress);
+      const memberKey = await getPublicKey(userId);
 
-      if (!memberPublicKey) {
+      if (!memberKey) {
         throw new Error("This member's encryption setup must finish before they can be granted access.");
       }
 
       await ensureUnlocked();
 
       const ownWrappedKey = await getWrappedVaultKey(orgId);
-      const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownWrappedKey, memberPublicKey);
+      const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownWrappedKey, memberKey.publicKey, {
+        recipientUserId: userId,
+        recipientKeyVersion: memberKey.userKeyVersion,
+      });
 
-      return { wrappedVaultKey };
+      return {
+        wrappedVaultKey,
+        vaultKeyVersion: ownWrappedKey.vaultKeyVersion,
+        recipientKeyVersion: memberKey.userKeyVersion,
+      };
     },
     [ensureUnlocked],
   );

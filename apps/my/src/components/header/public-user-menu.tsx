@@ -1,8 +1,6 @@
 import { isAccountLoading } from '@comitium/auth/account-stage';
-import { getPrivyAccountEmail } from '@comitium/auth/privy-account';
+import { useAuthClient } from '@comitium/auth/auth-context';
 import { useAccountReadiness } from '@comitium/auth/use-account-readiness';
-import { useCryptoResetListener } from '@comitium/auth/use-crypto-reset-listener';
-import { useActiveWalletConnectionStatus } from '@comitium/auth/use-wallet';
 import type { User } from '@comitium/schemas/auth';
 import { Button } from '@comitium/ui/button';
 import { createDisplayIdentity } from '@comitium/ui/display-name';
@@ -17,13 +15,10 @@ import { Skeleton } from '@comitium/ui/skeleton';
 import { ThemeMenuSub } from '@comitium/ui/theme-menu';
 import { UserAccountSummary } from '@comitium/ui/user-account-summary';
 import { UserAvatar } from '@comitium/ui/user-avatar';
-import { usePrivy } from '@privy-io/react-auth';
 import { Link } from '@tanstack/react-router';
 import { CircleUserRoundIcon, LogOutIcon } from 'lucide-react';
 import { useCallback } from 'react';
-import { AuthSessionRecovery } from '@/components/auth/auth-session-recovery';
 import { useLogout } from '@/hooks/use-logout';
-import { subscribeToCryptoReset } from '@/lib/crypto/crypto-reset';
 import { LoginButton } from './login-button';
 
 interface PublicUserMenuProps {
@@ -36,30 +31,22 @@ const menuItemClassName = 'h-10 gap-2 px-3 text-sm';
 export function PublicUserMenu(props: PublicUserMenuProps) {
   const { stage } = useAccountReadiness();
 
-  useCryptoResetListener(subscribeToCryptoReset);
-
   if (!props.isSignedIn || !props.user) {
     if (isAccountLoading(stage)) {
       return <Skeleton className="h-8 w-20" />;
     }
 
-    if (stage === 'unrecoverable') {
-      return <AuthSessionRecovery fallback={<Skeleton className="h-8 w-20" />} />;
-    }
-
     return <LoginButton />;
   }
 
-  return <SignedInPublicUserMenu user={props.user} />;
+  return <SignedInPublicUserMenu />;
 }
 
-function SignedInPublicUserMenu({ user }: { user: User }) {
-  const { user: privyUser } = usePrivy();
+function SignedInPublicUserMenu() {
+  const { data: auth } = useAuthClient().useSession();
   const logout = useLogout();
-  const connectionStatus = useActiveWalletConnectionStatus();
-  const accountEmail = getPrivyAccountEmail(privyUser);
+  const accountEmail = auth?.user.email ?? null;
   const identity = createDisplayIdentity({
-    walletAddress: user.walletAddress,
     name: null,
     email: accountEmail,
   });
@@ -67,8 +54,6 @@ function SignedInPublicUserMenu({ user }: { user: User }) {
   const handleDisconnect = useCallback(async () => {
     await logout({ returnTo: '/jobs' });
   }, [logout]);
-
-  const isWalletRestoring = connectionStatus === 'unknown' || connectionStatus === 'connecting';
 
   return (
     <DropdownMenu modal={false}>
@@ -99,12 +84,7 @@ function SignedInPublicUserMenu({ user }: { user: User }) {
 
         <ThemeMenuSub />
 
-        <DropdownMenuItem
-          className={menuItemClassName}
-          variant="destructive"
-          disabled={isWalletRestoring}
-          onClick={handleDisconnect}
-        >
+        <DropdownMenuItem className={menuItemClassName} variant="destructive" onClick={handleDisconnect}>
           <LogOutIcon className="size-4" />
           Logout
         </DropdownMenuItem>

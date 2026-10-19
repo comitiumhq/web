@@ -125,14 +125,13 @@ async function renderSettings() {
 }
 
 describe('native Authentication settings', () => {
-  it('renders verified email, connected Google and multiple passkeys without wallet metadata', async () => {
+  it('renders verified email, connected Google and multiple passkeys', async () => {
     const screen = await renderSettings();
 
     await expect.element(screen.getByText('person@example.com', { exact: true })).toBeInTheDocument();
     await expect.element(screen.getByText('Connected', { exact: true })).toBeInTheDocument();
     await expect.element(screen.getByText('1 passkey', { exact: true })).toBeInTheDocument();
     await expect.element(screen.getByRole('button', { name: 'Add another' })).toBeEnabled();
-    await expect.element(screen.getByText('Wallet address')).not.toBeInTheDocument();
   });
 
   it('shows personal email guidance on hover', async () => {

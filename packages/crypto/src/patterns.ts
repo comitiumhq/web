@@ -5,3 +5,4 @@ export const RECOVERY_CODE_GROUP_REGEX = /(.{4})(?=.)/g;
 export const RECOVERY_CODE_SEPARATOR_REGEX = /[\s-]/g;
 export const WHITESPACE_RUN_REGEX = /\s+/g;
 export const TRAILING_SLASH_REGEX = /\/$/;
+export const PASSPHRASE_WORD_REGEX = /^[a-z]{4,10}$/;

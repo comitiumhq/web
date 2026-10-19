@@ -3,8 +3,11 @@ import { createContext, useContext } from 'react';
 export interface CryptoUnlockContextValue {
   isCryptoActive: boolean;
   canUnlock: boolean;
+  isRestoring: boolean;
+  restoreError: string | null;
   ensureUnlocked: () => Promise<void>;
   requestUnlock: () => Promise<void>;
+  refreshSession: (keysChanged?: boolean) => Promise<void>;
 }
 
 export const CryptoUnlockContext = createContext<CryptoUnlockContextValue | null>(null);

@@ -4,13 +4,21 @@ import { OTHER_USER_ID, USER_ID } from './unlock-fixtures';
 
 const remote = vi.hoisted(() => ({
   unlockWithPassword: vi.fn(),
+  verifyPassword: vi.fn(),
   unlockWithRecoveryCode: vi.fn(),
   tryUnlockWithRememberedDevice: vi.fn(),
   decryptEmailContentForApplicant: vi.fn(),
   clear: vi.fn(),
-  logout: vi.fn(),
 }));
 const dispose = vi.hoisted(() => vi.fn());
+const deviceStore = vi.hoisted(() => ({ load: vi.fn(), forgetAll: vi.fn() }));
+
+vi.mock('../remembered-device-store', () => ({
+  RememberedDeviceStore: class {
+    load = deviceStore.load;
+    forgetAll = deviceStore.forgetAll;
+  },
+}));
 
 vi.mock('../worker/crypto-worker-client', () => ({
   CryptoWorkerClient: class {
@@ -31,6 +39,7 @@ beforeEach(async () => {
   vi.resetAllMocks();
   remote.unlockWithPassword.mockResolvedValue({ rememberedDevice: 'not_requested' });
   remote.unlockWithRecoveryCode.mockResolvedValue({ rememberedDevice: 'not_requested' });
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ success: true })));
   proxy = (await import('../proxy')).CryptoProxy;
 
   proxy.init('https://api.comitium.test/v1');
@@ -38,9 +47,60 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await proxy.destroy();
+  vi.unstubAllGlobals();
 });
 
 describe('crypto facade lifecycle', () => {
+  it('does not close an active session when password verification fails', async () => {
+    await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
+    remote.verifyPassword.mockRejectedValue(new DOMException('Invalid password', 'OperationError'));
+
+    await expect(proxy.verifyPassword(bundle, USER_ID, publicKey, 'incorrect password')).rejects.toThrow();
+    expect(proxy.isActiveFor(bundle, USER_ID)).toBe(true);
+    expect(remote.clear).not.toHaveBeenCalled();
+  });
+
+  it('revokes the stored device and session after the Worker has already been reset', async () => {
+    deviceStore.load.mockResolvedValue({ deviceId: '0199a000-0000-7000-8000-000000000004' });
+    proxy.reset();
+
+    await proxy.logout(false, { wrapped: bundle, userId: USER_ID, publicKey });
+
+    expect(fetch).toHaveBeenCalledWith(
+      'https://api.comitium.test/v1/auth/logout',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+        body: JSON.stringify({ deviceId: '0199a000-0000-7000-8000-000000000004' }),
+      }),
+    );
+    expect(deviceStore.forgetAll).toHaveBeenCalledOnce();
+    expect(proxy.isActive()).toBe(false);
+  });
+
+  it('still revokes authentication when local device metadata cannot be read, and reports incomplete cleanup', async () => {
+    deviceStore.load.mockRejectedValue(new Error('Storage blocked'));
+
+    await expect(proxy.logout(false, { wrapped: bundle, userId: USER_ID, publicKey })).rejects.toThrow(
+      'Storage blocked',
+    );
+    expect(fetch).toHaveBeenCalledWith('https://api.comitium.test/v1/auth/logout', expect.any(Object));
+    expect(deviceStore.forgetAll).toHaveBeenCalledOnce();
+  });
+
+  it('does not clear active keys when reset sign-in confirmation is cancelled', async () => {
+    await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
+    const cancel = async () => {
+      throw new DOMException('Cancelled', 'AbortError');
+    };
+
+    await expect(
+      proxy.resetUserKey(USER_ID, bundle, 'new password', false, async () => {}, cancel),
+    ).rejects.toMatchObject({ name: 'AbortError' });
+    expect(proxy.isActiveFor(bundle, USER_ID)).toBe(true);
+    expect(remote.clear).not.toHaveBeenCalled();
+  });
+
   it('rejects an overlapping credential attempt instead of returning another attempt’s result', async () => {
     await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
 
@@ -137,10 +197,12 @@ describe('crypto facade lifecycle', () => {
 
   it('clears local state and terminates even when server logout fails', async () => {
     await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
-    remote.logout.mockRejectedValue(new Error('server unavailable'));
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 503 }));
 
-    await expect(proxy.logout(true)).rejects.toThrow('server unavailable');
+    await expect(proxy.logout(true)).rejects.toThrow('(503)');
     expect(proxy.isActive()).toBe(false);
     expect(dispose).toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledWith('https://api.comitium.test/v1/users/devices/revoke-all', expect.any(Object));
+    expect(deviceStore.forgetAll).toHaveBeenCalledOnce();
   });
 });

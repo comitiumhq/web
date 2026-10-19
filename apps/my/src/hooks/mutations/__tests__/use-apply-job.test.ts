@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   applyJobWorkflow: vi.fn(),
-  assertEncryptionKeyBundle: vi.fn(),
   invalidateQueries: vi.fn(),
   isAuthenticated: true,
   mutationOptions: null as object | null,
@@ -22,8 +21,6 @@ const mocks = vi.hoisted(() => ({
 
     return { mutate: mocks.mutate, isPending: false };
   }),
-  user: null as { walletAddress: string } | null,
-  wallet: null as { address: string } | null,
 }));
 
 vi.mock('@tanstack/react-query', () => ({
@@ -44,20 +41,8 @@ vi.mock('sonner', () => ({
   },
 }));
 
-vi.mock('@comitium/auth/use-session', () => ({
-  useSession: () => ({ user: mocks.user }),
-}));
-
 vi.mock('@comitium/auth/use-is-authenticated', () => ({
   useIsAuthenticated: () => mocks.isAuthenticated,
-}));
-
-vi.mock('@comitium/auth/use-wallet', () => ({
-  useActiveWallet: () => mocks.wallet,
-}));
-
-vi.mock('@comitium/crypto/key-bundle', () => ({
-  assertEncryptionKeyBundle: mocks.assertEncryptionKeyBundle,
 }));
 
 vi.mock('@/lib/jobs/workflows/apply-job', async (importOriginal) => ({
@@ -97,12 +82,9 @@ describe('useApplyJob', () => {
       isErr: () => false,
       value: { kind: 'completed' },
     });
-    mocks.assertEncryptionKeyBundle.mockReturnValue(undefined);
     mocks.isAuthenticated = true;
     mocks.mutationOptions = null;
     mocks.routerInvalidate.mockResolvedValue(undefined);
-    mocks.user = { walletAddress: '0x1111111111111111111111111111111111111111' };
-    mocks.wallet = { address: '0x1111111111111111111111111111111111111111' };
   });
 
   it('fails before workflow work when the visitor is not authenticated', async () => {
@@ -113,15 +95,11 @@ describe('useApplyJob', () => {
     expect(mocks.applyJobWorkflow).not.toHaveBeenCalled();
   });
 
-  it('fails before workflow work when the encryption bundle is incomplete', async () => {
-    mocks.assertEncryptionKeyBundle.mockImplementation(() => {
-      throw new Error('Encryption key bundle is incomplete');
-    });
-
+  it('submits for an authenticated candidate without personal-key setup', async () => {
     const options = getMutationOptions();
 
-    await expect(options.mutationFn(variables)).rejects.toThrow('Encryption key bundle is incomplete');
-    expect(mocks.applyJobWorkflow).not.toHaveBeenCalled();
+    await expect(options.mutationFn(variables)).resolves.toEqual({ kind: 'completed' });
+    expect(mocks.applyJobWorkflow).toHaveBeenCalledWith(expect.objectContaining(variables));
   });
 
   it('completes an offchain application immediately', () => {
@@ -160,7 +138,7 @@ describe('useApplyJob', () => {
     );
   });
 
-  it('describes preparation failures without wallet terminology', async () => {
+  it('shows a retryable application preparation error', async () => {
     const options = getMutationOptions();
 
     await options.onError(new ApplicationRequestError(500, 'Application request failed'));

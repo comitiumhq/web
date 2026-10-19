@@ -14,33 +14,6 @@ const API_URL = import.meta.env.VITE_API;
 const API_REQUEST_TIMEOUT_MS = 30_000;
 const FILE_UPLOAD_TOKEN_HEADER = 'Upload-Token';
 
-type ApiAuthTokens = {
-  accessToken: string | null;
-  identityToken: string | null;
-};
-
-type ApiAuthTokenProvider = () => Promise<ApiAuthTokens>;
-
-let apiAuthTokenProvider: ApiAuthTokenProvider | null = null;
-
-export function registerApiAuthTokenProvider(provider: ApiAuthTokenProvider): () => void {
-  apiAuthTokenProvider = provider;
-
-  return () => {
-    if (apiAuthTokenProvider === provider) {
-      apiAuthTokenProvider = null;
-    }
-  };
-}
-
-async function getApiAuthTokens(): Promise<ApiAuthTokens | null> {
-  if (!apiAuthTokenProvider) {
-    return null;
-  }
-
-  return apiAuthTokenProvider();
-}
-
 function handleError(response: Response, data: unknown): never {
   const { message, code, details } = parseApiErrorPayload(data);
 
@@ -60,21 +33,6 @@ function parseResponse<T>(data: unknown, schema?: ResponseSchema<T>): T {
   return data as T;
 }
 
-async function createRequestHeaders(initialHeaders?: HeadersInit): Promise<Headers> {
-  const headers = new Headers(initialHeaders);
-  const tokens = await getApiAuthTokens();
-
-  if (!headers.has('Authorization') && tokens?.accessToken) {
-    headers.set('Authorization', `Bearer ${tokens.accessToken}`);
-  }
-
-  if (tokens?.identityToken) {
-    headers.set('privy-id-token', tokens.identityToken);
-  }
-
-  return headers;
-}
-
 async function request<T>(
   url: string,
   method?: string,
@@ -84,7 +42,7 @@ async function request<T>(
 ): Promise<T> {
   const response = await fetch(`${API_URL}${url}`, {
     method,
-    headers: await createRequestHeaders({ 'Content-Type': 'application/json' }),
+    headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: isDefined(body) ? JSON.stringify(body) : undefined,
     signal: options?.signal ?? AbortSignal.timeout(API_REQUEST_TIMEOUT_MS),
@@ -111,7 +69,6 @@ async function upload<T>(
 ): Promise<T> {
   const response = await fetch(`${API_URL}${url}`, {
     method: 'POST',
-    headers: await createRequestHeaders(),
     credentials: 'include',
     body: formData,
     signal: options?.signal ?? AbortSignal.timeout(API_REQUEST_TIMEOUT_MS),
@@ -130,7 +87,6 @@ async function upload<T>(
 
 async function getBinaryResponse(url: string): Promise<Response> {
   const response = await fetch(`${API_URL}${url}`, {
-    headers: await createRequestHeaders(),
     credentials: 'include',
   });
 
@@ -154,10 +110,10 @@ async function getFile(url: string): Promise<Blob> {
 async function putBlob<T>(url: string, body: Blob, uploadToken: string, schema?: ResponseSchema<T>): Promise<T> {
   const response = await fetch(`${API_URL}${url}`, {
     method: 'PUT',
-    headers: await createRequestHeaders({
+    headers: {
       [FILE_UPLOAD_TOKEN_HEADER]: uploadToken,
       'Content-Type': 'application/octet-stream',
-    }),
+    },
     credentials: 'include',
     body,
   });

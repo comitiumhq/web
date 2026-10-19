@@ -1,5 +1,4 @@
-import { base64BytesSchema, publicEncryptionKeySchema } from '@comitium/crypto/schemas';
-import { type WrappedUserKey, wrappedUserKeySchema } from '@comitium/crypto/user-key';
+import { publicEncryptionKeySchema, type WrappedUserKey, wrappedUserKeySchema } from '@comitium/crypto/schemas';
 import { z } from 'zod';
 
 export { wrappedUserKeySchema };
@@ -17,13 +16,7 @@ export const userSchema = z.object({
 
 export type User = z.infer<typeof userSchema>;
 
-export const userKeyShareSchema = z
-  .object({
-    keyShare: base64BytesSchema(32, 'Expected 32-byte key share encoded as base64'),
-    version: z.literal(1),
-  })
-  .strict();
-
-export type UserKeyShare = z.infer<typeof userKeyShareSchema>;
-
-export const publicKeyMapSchema = z.record(z.string(), publicEncryptionKeySchema);
+export const publicKeyMapSchema = z.record(
+  z.string(),
+  z.object({ publicKey: publicEncryptionKeySchema, userKeyVersion: z.number().int().positive() }),
+);

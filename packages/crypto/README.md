@@ -4,7 +4,7 @@
 
 ## Encryption model
 
-The illustration shows the existing Web wallet integration, which awaits the coordinated auth/unlock cutover. The package core uses the password/recovery model described below.
+The illustration summarizes password/recovery protection, remembered devices, and organization vault access.
 
 <p align="center">
   <img src="docs/encryption-flow.svg" alt="Comitium user keys, organization vault access, and payload encryption flow.">

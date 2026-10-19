@@ -18,6 +18,7 @@ import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as OrgCreateRouteImport } from './routes/org/create'
 import { Route as OrgOrgIdRouteImport } from './routes/org/$orgId'
 import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
+import { Route as AccountSecurityRouteImport } from './routes/account/security'
 import { Route as OrgOrgIdIndexRouteImport } from './routes/org/$orgId/index'
 import { Route as OrgOrgIdSettingsRouteImport } from './routes/org/$orgId/settings'
 import { Route as OrgOrgIdPipelineRouteImport } from './routes/org/$orgId/pipeline'
@@ -95,6 +96,11 @@ const OrgOrgIdRoute = OrgOrgIdRouteImport.update({
 const AccountZkIdentityRoute = AccountZkIdentityRouteImport.update({
   id: '/zk-identity',
   path: '/zk-identity',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountSecurityRoute = AccountSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => AccountRoute,
 } as any)
 const OrgOrgIdIndexRoute = OrgOrgIdIndexRouteImport.update({
@@ -295,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
   '/org/create': typeof OrgCreateRoute
@@ -338,6 +345,7 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/create': typeof OrgCreateRoute
   '/account': typeof AccountIndexRoute
@@ -377,6 +385,7 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
   '/org/create': typeof OrgCreateRoute
@@ -423,6 +432,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/signup'
+    | '/account/security'
     | '/account/zk-identity'
     | '/org/$orgId'
     | '/org/create'
@@ -466,6 +476,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/signup'
+    | '/account/security'
     | '/account/zk-identity'
     | '/org/create'
     | '/account'
@@ -504,6 +515,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/signup'
+    | '/account/security'
     | '/account/zk-identity'
     | '/org/$orgId'
     | '/org/create'
@@ -616,6 +628,13 @@ declare module '@tanstack/react-router' {
       path: '/zk-identity'
       fullPath: '/account/zk-identity'
       preLoaderRoute: typeof AccountZkIdentityRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/security': {
+      id: '/account/security'
+      path: '/security'
+      fullPath: '/account/security'
+      preLoaderRoute: typeof AccountSecurityRouteImport
       parentRoute: typeof AccountRoute
     }
     '/org/$orgId/': {
@@ -853,11 +872,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
+  AccountSecurityRoute: typeof AccountSecurityRoute
   AccountZkIdentityRoute: typeof AccountZkIdentityRoute
   AccountIndexRoute: typeof AccountIndexRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
+  AccountSecurityRoute: AccountSecurityRoute,
   AccountZkIdentityRoute: AccountZkIdentityRoute,
   AccountIndexRoute: AccountIndexRoute,
 }

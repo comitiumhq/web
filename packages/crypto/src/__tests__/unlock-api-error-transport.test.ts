@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CryptoWorkerApi } from '../worker/crypto-api';
 import { UnlockApiError } from '../worker/unlock-api-error';
 import { mockPublicEncryptionKey, mockWrappedUserKey } from './crypto-helpers';
-import { KEY_SHARE, PASSWORD, USER_ID } from './unlock-fixtures';
+import { KEY_SHARE, PASSWORD, USER_ID, userKeyFixture } from './unlock-fixtures';
 
 let api: CryptoWorkerApi;
 let remote: ReturnType<typeof wrap<CryptoWorkerApi>>;
@@ -30,6 +30,33 @@ afterEach(() => {
 });
 
 describe('safe unlock API errors across Comlink', () => {
+  it.each([
+    { failure: new DOMException('Cancelled', 'AbortError'), expected: { name: 'AbortError' } },
+    { failure: new UnlockApiError(503), expected: { status: 503, code: 'API_ERROR' } },
+  ])(
+    'preserves confirmation callback failure without generating a code: $failure.name',
+    async ({ failure, expected }) => {
+      const fixture = await userKeyFixture();
+      await remote.unlockWithRecoveryCode(fixture.bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, false);
+
+      const showCode = vi.fn(async () => {});
+      const confirm = async () => {
+        throw failure;
+      };
+
+      await expect(
+        remote.rewrapUserKey(
+          fixture.bundle,
+          { rotateRecoveryCode: true, repairShare: false },
+          proxy(showCode),
+          proxy(confirm),
+        ),
+      ).rejects.toMatchObject(expected);
+      expect(showCode).not.toHaveBeenCalled();
+      await expect(remote.isActive()).resolves.toBe(true);
+    },
+  );
+
   it.each([
     { status: 503, code: 'KEY_SHARE_UNAVAILABLE', expectedCode: 'KEY_SHARE_UNAVAILABLE' },
     { status: 403, code: 'FRESH_AUTHENTICATION_REQUIRED', expectedCode: 'FRESH_AUTHENTICATION_REQUIRED' },
@@ -84,7 +111,13 @@ describe('safe unlock API errors across Comlink', () => {
       'fetch',
       vi.fn(async (input: string) => {
         if (input.endsWith('/key-share')) {
-          return Response.json({ keyShare: KEY_SHARE, version: 1, keyVersion: null, wrapsFingerprint: null });
+          return Response.json({
+            userId: USER_ID,
+            keyShare: KEY_SHARE,
+            version: 1,
+            keyVersion: null,
+            wrapsFingerprint: null,
+          });
         }
 
         if (input.endsWith('/encryption-key-bundle')) {

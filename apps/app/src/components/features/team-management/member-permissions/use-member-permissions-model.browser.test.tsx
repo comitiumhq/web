@@ -7,7 +7,6 @@ import { useMemberPermissionsModel } from './use-member-permissions-model';
 
 const MEMBER_USER_ID = '11111111-1111-4111-8111-111111111111';
 const CALLER_USER_ID = '22222222-2222-4222-8222-222222222222';
-const MEMBER_ADDRESS = '0x1111111111111111111111111111111111111111';
 
 const mocks = vi.hoisted(() => ({
   callerUserId: '22222222-2222-4222-8222-222222222222',
@@ -78,6 +77,8 @@ vi.mock('./hooks/use-team-member-role', () => ({
 
 const org = { id: 'org-1' } as MyOrg;
 const vaultGrant: VaultGrant = {
+  vaultKeyVersion: 1,
+  recipientKeyVersion: 1,
   wrappedVaultKey: {
     v: 1,
     ek: 'vault-key',
@@ -90,7 +91,6 @@ const vaultGrant: VaultGrant = {
 function member(overrides: Partial<OrgTeamMember> = {}): OrgTeamMember {
   return {
     userId: MEMBER_USER_ID,
-    walletAddress: MEMBER_ADDRESS,
     email: 'member@example.com',
     name: 'Member',
     jobTitle: null,
@@ -131,7 +131,7 @@ describe('useMemberPermissionsModel mutation ordering', () => {
 
     await hook.result.current.actions.handleRoleChange('org_admin');
 
-    expect(mocks.ensureVaultGrant).toHaveBeenCalledExactlyOnceWith('org-1', MEMBER_ADDRESS, false);
+    expect(mocks.ensureVaultGrant).toHaveBeenCalledExactlyOnceWith('org-1', MEMBER_USER_ID, false);
     expect(mocks.changeRole.mutate).toHaveBeenCalledExactlyOnceWith({
       orgId: 'org-1',
       userId: MEMBER_USER_ID,

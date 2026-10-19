@@ -161,12 +161,12 @@ describe('password and recovery key wrappers', () => {
     expect(userKeyWrapsFingerprint(rewrapped.wraps)).not.toBe(userKeyWrapsFingerprint(fixture.bundle.wraps));
   });
 
-  it('keeps exact password bytes and rejects the UTF-8 byte cap before KDF', async () => {
+  it('keeps exact password bytes and rejects the UTF-8 byte cap before KDF', () => {
     expect(encodePassword(' a\u0301 ')).toEqual(new TextEncoder().encode(' a\u0301 '));
     expect(encodePassword('a\u0301')).not.toEqual(encodePassword('á'));
     expect(() => encodePassword('é'.repeat(513))).toThrow('1024');
-    await expect(assertNewStoragePassword('password123456')).rejects.toThrow('easy');
-    await expect(assertNewStoragePassword('short')).rejects.toThrow('12');
+    expect(() => assertNewStoragePassword('password123456')).toThrow('easy');
+    expect(() => assertNewStoragePassword('short')).toThrow('12');
   });
 
   it('freezes canonical AAD ordering and binds the mutation verifier to user/generation', () => {

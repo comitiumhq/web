@@ -48,7 +48,6 @@ export const TimelineEventRow = memo(function TimelineEventRow({
 
 function toDisplayIdentity(event: ActivityFeedRow): DisplayIdentity {
   return {
-    walletAddress: '',
     name: event.actor.name,
     email: null,
     avatarUrl: event.actor.avatarUrl,

@@ -16,7 +16,6 @@ const mocks = vi.hoisted(() => ({
   session: {
     isSessionLoading: false,
     isSignedIn: true,
-    needsSessionRecovery: false,
   },
 }));
 
@@ -86,7 +85,6 @@ beforeEach(() => {
   mocks.session = {
     isSessionLoading: false,
     isSignedIn: true,
-    needsSessionRecovery: false,
   };
 });
 

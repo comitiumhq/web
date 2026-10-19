@@ -18,10 +18,12 @@ import type { WrappedUserKey } from '../schemas/user-key';
 import { UnlockApiError } from './unlock-api-error';
 
 /**
- * Runs in the Worker so proofs, share responses and device keys bypass main-thread state.
+ * Secret-bearing requests run in the Worker; session revocation also runs without it.
  */
 export class UnlockApi {
-  constructor(private readonly baseUrl: string) {
+  private readonly baseUrl: string;
+
+  constructor(baseUrl: string) {
     const url = new URL(baseUrl);
 
     if (
@@ -34,17 +36,25 @@ export class UnlockApi {
     if (url.username || url.password || url.search || url.hash) {
       throw new Error('Invalid encryption API URL');
     }
+
+    this.baseUrl = baseUrl.replace(TRAILING_SLASH_REGEX, '');
   }
 
-  getKeyShare(signal: AbortSignal): Promise<KeyShareResponse> {
-    return this.request('GET', '/users/key-share', undefined, keyShareResponseSchema, signal);
+  async getKeyShare(userId: string, signal: AbortSignal): Promise<KeyShareResponse> {
+    const share = await this.request('GET', '/users/key-share', undefined, keyShareResponseSchema, signal);
+
+    if (share.userId !== userId) {
+      throw new UnlockApiError(409, 'API_ERROR');
+    }
+
+    return share;
   }
 
   getBundle(signal: AbortSignal): Promise<KeyBundleResponse> {
     return this.request('POST', '/auth/session', undefined, keyBundleResponseSchema, signal);
   }
 
-  initialize(body: KeyBundleWrite, signal: AbortSignal) {
+  initialize(body: KeyBundleWrite & { userId: string }, signal: AbortSignal) {
     return this.request('POST', '/users/encryption-key-bundle', body, successSchema, signal);
   }
 
@@ -88,6 +98,9 @@ export class UnlockApi {
     return this.request('POST', '/users/devices/revoke-all', undefined, successSchema, signal);
   }
 
+  /**
+   * Expose only status and allowlisted error codes; response bodies may contain secrets.
+   */
   private async request<T>(
     method: string,
     path: string,
@@ -95,7 +108,7 @@ export class UnlockApi {
     schema: z.ZodType<T>,
     signal: AbortSignal,
   ): Promise<T> {
-    const response = await fetch(`${this.baseUrl.replace(TRAILING_SLASH_REGEX, '')}${path}`, {
+    const response = await fetch(`${this.baseUrl}${path}`, {
       method,
       credentials: 'include',
       cache: 'no-store',
@@ -106,9 +119,6 @@ export class UnlockApi {
     });
 
     if (!response.ok) {
-      /**
-       * Do not serialize request bodies or server responses containing secret material into errors.
-       */
       const failure = unlockApiErrorResponseSchema.safeParse(await response.json().catch(() => null));
 
       throw new UnlockApiError(response.status, failure.success ? failure.data.error.code : 'API_ERROR');

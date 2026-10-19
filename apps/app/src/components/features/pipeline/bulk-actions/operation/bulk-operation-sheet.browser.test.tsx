@@ -43,6 +43,7 @@ function target(id: string, status: TargetStatus): PipelineBulkTarget {
     requiresEmail: false,
     childOperationId: null,
     recipientPublicKey: null,
+    recipientKeyVersion: null,
     deliveryGrant: null,
   };
   const { exclusion, error } = targetIssue(status);

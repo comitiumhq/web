@@ -5,14 +5,22 @@ import type { CryptoContextInput } from './context';
 import type { SearchableCustomFieldType } from './custom-field-search';
 import type { CategoricalFormFieldKind } from './form-field-search-hash';
 import type { RecipientDescriptor } from './recipients';
+import { RememberedDeviceStore } from './remembered-device-store';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from './schemas';
 import type { WrappedKey } from './schemas/keys';
-import type { RecoveryCodeHandler, RewrapOptions, UnlockResult, UserKeyIdentity } from './schemas/unlock-api';
+import type {
+  FreshAuthenticationHandler,
+  RecoveryCodeHandler,
+  RewrapOptions,
+  UnlockResult,
+  UserKeyIdentity,
+} from './schemas/unlock-api';
 import type { WrappedUserKey } from './schemas/user-key';
 import type { VaultKeyAccess, VaultKeyContext } from './schemas/vault-key';
 import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from './session';
 import type { CryptoWorkerApi } from './worker/crypto-api';
 import { CryptoWorkerClient } from './worker/crypto-worker-client';
+import { UnlockApi } from './worker/unlock-api';
 
 let workerClient: CryptoWorkerClient | null = null;
 let _isActive = false;
@@ -162,6 +170,19 @@ export const CryptoProxy = {
     return unlockIdentity(wrapped, userId, (api) =>
       api.unlockWithPassword(wrapped, userId, publicKey, password, rememberDevice),
     );
+  },
+
+  verifyPassword(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+    password: string,
+  ): Promise<void> {
+    return runOnWorker((api) => api.verifyPassword(wrapped, userId, publicKey, password));
+  },
+
+  generateStoragePassword(): Promise<string> {
+    return runOnWorker((api) => api.generateStoragePassword());
   },
 
   unlockWithRecoveryCode(
@@ -401,12 +422,21 @@ export const CryptoProxy = {
     password: string,
     rememberDevice: boolean,
     onRecoveryCode: RecoveryCodeHandler,
+    confirmFreshAuth: FreshAuthenticationHandler,
   ) {
+    await confirmFreshAuth();
     await this.clear();
 
     const generation = lifecycle;
     const result = await runOnWorker((api) =>
-      api.resetUserKey(userId, previous, password, rememberDevice, Comlink.proxy(onRecoveryCode)),
+      api.resetUserKey(
+        userId,
+        previous,
+        password,
+        rememberDevice,
+        Comlink.proxy(onRecoveryCode),
+        Comlink.proxy(confirmFreshAuth),
+      ),
     );
 
     assertLifecycle(generation);
@@ -419,8 +449,15 @@ export const CryptoProxy = {
     return result;
   },
 
-  rewrapUserKey(wrapped: WrappedUserKey, options: RewrapOptions, onRecoveryCode: RecoveryCodeHandler) {
-    return runOnWorker((api) => api.rewrapUserKey(wrapped, options, Comlink.proxy(onRecoveryCode)));
+  rewrapUserKey(
+    wrapped: WrappedUserKey,
+    options: RewrapOptions,
+    onRecoveryCode: RecoveryCodeHandler,
+    confirmFreshAuth: FreshAuthenticationHandler,
+  ) {
+    return runOnWorker((api) =>
+      api.rewrapUserKey(wrapped, options, Comlink.proxy(onRecoveryCode), Comlink.proxy(confirmFreshAuth)),
+    );
   },
 
   async rewrapWithRememberedDevice(
@@ -429,10 +466,18 @@ export const CryptoProxy = {
     publicKey: PublicEncryptionKey,
     options: RewrapOptions & { password: string },
     onRecoveryCode: RecoveryCodeHandler,
+    confirmFreshAuth: FreshAuthenticationHandler,
   ) {
     const generation = lifecycle;
     const result = await runOnWorker((api) =>
-      api.rewrapWithRememberedDevice(wrapped, userId, publicKey, options, Comlink.proxy(onRecoveryCode)),
+      api.rewrapWithRememberedDevice(
+        wrapped,
+        userId,
+        publicKey,
+        options,
+        Comlink.proxy(onRecoveryCode),
+        Comlink.proxy(confirmFreshAuth),
+      ),
     );
 
     assertLifecycle(generation);
@@ -453,14 +498,46 @@ export const CryptoProxy = {
   },
 
   async logout(allDevices: boolean, identity?: UserKeyIdentity): Promise<void> {
-    resetRuntimeState();
+    terminateWorker();
     notify();
 
+    if (!apiBaseUrl) {
+      throw new Error('Encryption API URL is not configured');
+    }
+
+    const api = new UnlockApi(apiBaseUrl);
+    const store = new RememberedDeviceStore();
+
+    let deviceId: string | undefined;
+    let storageError: unknown;
+
+    if (!allDevices && identity) {
+      try {
+        const record = await store.load({
+          identity: createCryptoSessionIdentity(identity.wrapped, identity.userId),
+          userPublicKey: identity.publicKey,
+        });
+
+        deviceId = record?.deviceId;
+      } catch (error) {
+        storageError = error;
+      }
+    }
+
     try {
-      await runOnWorker((api) => api.logout(allDevices, identity));
+      const signal = AbortSignal.timeout(30_000);
+
+      if (allDevices) {
+        await api.revokeAll(signal);
+      } else {
+        await api.logout(deviceId, signal);
+      }
+
+      if (storageError) {
+        throw storageError;
+      }
     } finally {
-      terminateWorker();
-      notify();
+      await store.forgetAll();
     }
   },
 

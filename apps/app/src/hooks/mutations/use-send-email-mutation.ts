@@ -13,6 +13,7 @@ interface SendEmailMutationParams extends ComposeEmailData {
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
   applicantPublicKey: PublicEncryptionKey | null;
+  applicantKeyVersion: number | null;
   applicantEmail: string;
   activityId?: string;
 }

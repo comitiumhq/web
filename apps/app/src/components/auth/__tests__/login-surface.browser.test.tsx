@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
   loginWithCode: vi.fn(),
   loginWithPasskey: vi.fn(),
   navigate: vi.fn(),
-  recoverSession: vi.fn(),
   sendCode: vi.fn(),
 }));
 const originalUrl = window.location.href;
@@ -29,9 +28,8 @@ function renderSurface(mode: AuthMode) {
       mode={mode}
       navigate={mocks.navigate}
       privacyHref="/privacy"
-      recoverSession={mocks.recoverSession}
       returnTo="/org/example"
-      session={{ isSessionLoading: false, isSignedIn: false, needsSessionRecovery: false }}
+      session={{ isSessionLoading: false, isSignedIn: false }}
       termsHref="/terms"
     />,
   );
@@ -46,8 +44,6 @@ beforeEach(() => {
   mocks.loginWithPasskey.mockResolvedValue({ data: {}, error: null });
   mocks.navigate.mockReset();
   window.history.replaceState(null, '', originalUrl);
-  mocks.recoverSession.mockReset();
-  mocks.recoverSession.mockResolvedValue(true);
   mocks.sendCode.mockReset();
   mocks.sendCode.mockResolvedValue({ data: {}, error: null });
 });

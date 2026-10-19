@@ -1,7 +1,7 @@
-import type { WrappedKey } from '@comitium/schemas/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook } from 'vitest-browser-react';
 import type { AnswerBucket } from '@/lib/forms/decrypt-answers';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 import { useDecryptApplication } from './use-decrypt-application';
 
 interface Deferred<T> {
@@ -28,7 +28,7 @@ vi.mock('@/lib/forms/decrypt-answers', () => ({
   decryptAnswerBuckets: mocks.decryptAnswerBuckets,
 }));
 
-const wrappedVaultKey = { ek: 'wrapped-vault-key' } as WrappedKey;
+const wrappedVaultKey = mockVaultAccess();
 const answers = [{ visibility: 'standard', answers: { ct: 'ciphertext' } }] as AnswerBucket[];
 
 function deferred<T>(): Deferred<T> {

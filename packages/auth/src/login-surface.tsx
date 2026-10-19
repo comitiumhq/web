@@ -6,12 +6,10 @@ import { sendSignInCode, signInWithGoogle, verifySignInCode } from './auth-actio
 import { useAuthClient } from './auth-context';
 import { unwrapAuthResult } from './auth-result';
 import { buildAuthRoute, resolveNonAuthReturnTo } from './navigation';
-import { type RecoverSession, SessionRecovery } from './session-recovery';
 
 interface AuthSessionState {
   isSessionLoading: boolean;
   isSignedIn: boolean;
-  needsSessionRecovery: boolean;
 }
 
 interface AuthLoginSurfaceProps {
@@ -21,7 +19,6 @@ interface AuthLoginSurfaceProps {
   mode: AuthMode;
   navigate: (destination: string) => void;
   privacyHref: string;
-  recoverSession: RecoverSession;
   returnTo?: string;
   session: AuthSessionState;
   termsHref: string;
@@ -34,7 +31,6 @@ export function AuthLoginSurface({
   mode,
   navigate,
   privacyHref,
-  recoverSession,
   returnTo,
   session,
   termsHref,
@@ -128,10 +124,6 @@ export function AuthLoginSurface({
 
   if (isRedirecting || session.isSessionLoading || session.isSignedIn) {
     return <PageLoader />;
-  }
-
-  if (session.needsSessionRecovery) {
-    return <SessionRecovery recoverSession={recoverSession} returnTo={buildAuthRoute(authPath, destination)} />;
   }
 
   return (

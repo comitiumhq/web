@@ -23,10 +23,6 @@ vi.mock('@comitium/auth/use-session', () => ({
   useSession: () => mocks.session,
 }));
 
-vi.mock('@comitium/auth/use-wallet', () => ({
-  useAccount: () => ({ address: undefined, isConnected: false }),
-}));
-
 vi.mock('@tanstack/react-query', async (importOriginal) => ({
   ...(await importOriginal()),
   useQuery: ({ queryKey }: { queryKey: readonly unknown[] }) =>

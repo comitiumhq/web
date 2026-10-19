@@ -30,6 +30,7 @@ export async function prepareSchedulingLinkEmail(
     vaultPublicKey: params.vaultPublicKey,
     vaultKeyVersion: params.vaultKeyVersion,
     applicantPublicKey: recipient.publicKey,
+    applicantKeyVersion: recipient.userKeyVersion,
     applicantEmail: params.applicantEmail,
     subject: params.subject,
     messageDoc,

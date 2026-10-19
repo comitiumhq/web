@@ -16,7 +16,6 @@ import {
   XWING_SECRET_KEY_BYTES,
 } from '../schemas';
 import { wrappedKeySchema } from '../schemas/keys';
-import { wrappedUserKeySchema } from '../schemas/user-key';
 
 const testPublicKey = 'a'.repeat(64);
 const testIv = base64.encode(new Uint8Array(12));
@@ -148,24 +147,6 @@ describe('crypto schemas', () => {
     expect(wrappedKeySchema.safeParse({ ...wrappedKey, epk: 'abc' }).success).toBe(false);
     expect(wrappedKeySchema.safeParse({ ...wrappedKey, kemCt: testCiphertext }).success).toBe(false);
     expect(wrappedKeySchema.safeParse({ ...wrappedKey, extra: true }).success).toBe(false);
-  });
-
-  it('rejects the removed wallet-signature personal-key format', () => {
-    const walletWrapper = {
-      method: 'wallet_signature',
-      kdf: 'signature+share',
-      id: 'evm:0x1111111111111111111111111111111111111111',
-      ek: testCiphertext,
-      iv: testIv,
-      salt: base64.encode(new Uint8Array(32)),
-    };
-    const wrappedUserKey = {
-      v: 1,
-      pk: { ek: testCiphertext, iv: testIv },
-      wraps: [walletWrapper],
-    };
-
-    expect(wrappedUserKeySchema.safeParse(wrappedUserKey).success).toBe(false);
   });
 
   it('validates post-quantum public key bundles', () => {

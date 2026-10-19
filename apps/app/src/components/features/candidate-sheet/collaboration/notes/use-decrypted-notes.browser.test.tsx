@@ -1,8 +1,8 @@
-import type { EncryptedEnvelope } from '@comitium/crypto';
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope, VaultKeyAccess } from '@comitium/crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook } from 'vitest-browser-react';
 import type { ActivityFeedRow } from '@/lib/schemas/emails';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 import { useDecryptedNotes } from './use-decrypted-notes';
 
 interface Deferred<T> {
@@ -17,7 +17,7 @@ const mocks = vi.hoisted(() => ({
   isVaultKeyError: false,
   isVaultKeyLoading: false,
   notes: [] as Array<{ id: string; content: EncryptedEnvelope }>,
-  wrappedVaultKey: { ek: 'wrapped-vault-key' } as WrappedKey | undefined,
+  wrappedVaultKey: undefined as VaultKeyAccess | undefined,
 }));
 
 vi.mock('@comitium/auth/use-is-crypto-active', () => ({
@@ -89,7 +89,7 @@ beforeEach(() => {
   mocks.isVaultKeyError = false;
   mocks.isVaultKeyLoading = false;
   mocks.notes = [];
-  mocks.wrappedVaultKey = { ek: 'wrapped-vault-key' } as WrappedKey;
+  mocks.wrappedVaultKey = mockVaultAccess();
 });
 
 describe('useDecryptedNotes', () => {

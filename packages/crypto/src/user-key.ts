@@ -118,7 +118,7 @@ export async function createPasswordWrap(
   keyShare: string,
 ): Promise<PasswordWrap> {
   assertUnlockKey(unlockKey);
-  await assertNewStoragePassword(password);
+  assertNewStoragePassword(password);
 
   const metadata = {
     method: 'password' as const,

@@ -87,7 +87,7 @@ function tree(getSession = vi.fn(async () => productUser()), children: ReactNode
 }
 
 describe('native auth readiness and identity lifecycle', () => {
-  it('bootstraps the authenticated account without wallet or token provisioning', async () => {
+  it('bootstraps the authenticated product account', async () => {
     const getSession = vi.fn(async () => productUser());
     const { ui } = tree(getSession);
     const screen = await render(ui);

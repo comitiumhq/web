@@ -1,3 +1,3 @@
 export const vitestEnv = {
-  VITE_PRIVY_APP_ID: 'test-privy-app-id',
+  VITE_API: 'https://api.comitium.test/v1',
 };

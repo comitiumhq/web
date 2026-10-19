@@ -12,14 +12,12 @@ interface CandidateDisplayNameInput {
 }
 
 interface DisplayIdentityInput {
-  walletAddress: string | null;
   name: string | null;
   email: string | null;
   avatarUrl?: string | null;
 }
 
 export interface MemberDisplayIdentity {
-  walletAddress?: string | null;
   name?: string | null;
   email?: string | null;
   avatarUrl?: string | null;
@@ -57,18 +55,12 @@ export function getMemberDisplayName(identity: MemberDisplayIdentity): string {
   return 'Team member';
 }
 
-export function createDisplayIdentity({
-  walletAddress,
-  name,
-  email,
-  avatarUrl,
-}: DisplayIdentityInput): DisplayIdentity | null {
-  if (!walletAddress) {
+export function createDisplayIdentity({ name, email, avatarUrl }: DisplayIdentityInput): DisplayIdentity | null {
+  if (!name && !email && !avatarUrl) {
     return null;
   }
 
   return {
-    walletAddress,
     name,
     email,
     avatarUrl,

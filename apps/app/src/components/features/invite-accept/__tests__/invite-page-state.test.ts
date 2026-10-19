@@ -35,9 +35,7 @@ describe('resolveInvitePageState', () => {
   it('routes active invitations according to the global account stage', () => {
     expect(resolve({ accountStage: 'anonymous' })).toBe('login');
     expect(resolve({ accountStage: 'authenticating' })).toBe('preparing');
-    expect(resolve({ accountStage: 'provisioning-wallet' })).toBe('preparing');
     expect(resolve({ accountStage: 'resolving-session' })).toBe('preparing');
-    expect(resolve({ accountStage: 'unrecoverable' })).toBe('account_recovery');
     expect(resolve({ accountStage: 'ready' })).toBe('ready');
   });
 

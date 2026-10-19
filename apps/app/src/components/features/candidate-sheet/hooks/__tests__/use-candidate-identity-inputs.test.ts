@@ -2,7 +2,7 @@ import { CryptoProxy } from '@comitium/crypto';
 import type { EncryptedEnvelope } from '@comitium/crypto/schemas';
 import { describe, expect, it, vi } from 'vitest';
 import { decryptCandidateIdentityInputs } from '@/hooks/use-candidate-identity-inputs';
-import { mockWrappedKey } from '@/test/crypto-helpers';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 
 describe('candidate identity inputs', () => {
   it('decrypts identity slots into form answers through their application-bound contexts', async () => {
@@ -10,7 +10,7 @@ describe('candidate identity inputs', () => {
       value: 'applicant@example.com',
     });
     const envelope = { purpose: 'candidate_identity_input', keys: [] } as unknown as EncryptedEnvelope;
-    const wrappedVaultKey = mockWrappedKey();
+    const wrappedVaultKey = mockVaultAccess();
     const identities = await decryptCandidateIdentityInputs({
       candidateIdentityInputs: [
         {

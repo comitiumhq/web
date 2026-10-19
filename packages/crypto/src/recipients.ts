@@ -3,7 +3,7 @@ import type { PublicEncryptionKey } from './schemas';
 import { type EnvelopeRecipient, isEnvelopeRecipient } from './schemas/recipients';
 
 export type { EnvelopeRecipient } from './schemas/recipients';
-export { envelopeRecipientSchema, isEnvelopeRecipient } from './schemas/recipients';
+export { isEnvelopeRecipient } from './schemas/recipients';
 
 const DEFAULT_KEY_VERSION = 1;
 

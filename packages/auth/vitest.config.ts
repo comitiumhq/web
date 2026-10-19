@@ -10,7 +10,6 @@ export default defineConfig({
 		include: [
 			'react/jsx-dev-runtime',
 			'vitest-browser-react',
-			'@privy-io/react-auth',
 			'@tanstack/react-query',
 			'@zkpassport/sdk/query',
 			'@date-fns/tz',

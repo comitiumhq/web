@@ -1,7 +1,9 @@
 import { randomBytes } from '@noble/hashes/utils.js';
 import { base64 } from '@scure/base';
+import { RememberedDeviceStore } from '../remembered-device-store';
 import type { PublicEncryptionKey } from '../schemas';
 import type {
+  FreshAuthenticationHandler,
   KeyBundleResponse,
   KeyBundleWrite,
   KeyShareResponse,
@@ -9,7 +11,6 @@ import type {
   RememberedDeviceStatus,
   RewrapOptions,
   UnlockResult,
-  UserKeyIdentity,
 } from '../schemas/unlock-api';
 import type { UnlockedUserKey, WrappedUserKey } from '../schemas/user-key';
 import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from '../session';
@@ -26,7 +27,6 @@ import {
 } from '../user-key';
 import { isSamePublicEncryptionKey } from '../xwing';
 import { KeyStore } from './key-store';
-import { RememberedDeviceStore } from './remembered-device-store';
 import { UnlockApi } from './unlock-api';
 import { isUnlockApiClientError, UnlockApiError } from './unlock-api-error';
 
@@ -35,14 +35,10 @@ import { isUnlockApiClientError, UnlockApiError } from './unlock-api-error';
  */
 export class UserKeySession {
   readonly keys = new KeyStore();
-  private rememberedDeviceStore = new RememberedDeviceStore();
-
+  private readonly rememberedDeviceStore = new RememberedDeviceStore();
   private activeSession: CryptoSessionIdentity | null = null;
-
   private userPublicKey: PublicEncryptionKey | null = null;
-
   private unlockApi: UnlockApi | null = null;
-
   private requests = new AbortController();
 
   configure(apiBaseUrl: string): void {
@@ -63,15 +59,7 @@ export class UserKeySession {
     this.clear();
 
     const generation = this.keys.captureGeneration();
-    const share = await this.api().getKeyShare(this.requests.signal);
-
-    this.assertShareBinding(share, wrapped);
-
-    const userKey = await unlockUserKey(wrapped, userId, publicKey, {
-      method: 'password',
-      password,
-      keyShare: share.keyShare,
-    });
+    const userKey = await this.decryptWithPassword(wrapped, userId, publicKey, password);
 
     return this.installUserKey(userKey, wrapped, userId, publicKey, generation, rememberDevice);
   }
@@ -89,6 +77,32 @@ export class UserKeySession {
     const userKey = await unlockUserKey(wrapped, userId, publicKey, { method: 'recovery_code', recoveryCode });
 
     return this.installUserKey(userKey, wrapped, userId, publicKey, generation, rememberDevice);
+  }
+
+  async verifyPassword(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+    password: string,
+  ): Promise<void> {
+    const identity = this.requireIdentity();
+
+    if (
+      !isSameCryptoSession(identity, createCryptoSessionIdentity(wrapped, userId)) ||
+      !this.matchesPublicKey(publicKey)
+    ) {
+      throw new Error('User key bundle does not match the unlocked identity');
+    }
+
+    const generation = this.keys.captureGeneration();
+    const verified = await this.decryptWithPassword(wrapped, userId, publicKey, password);
+
+    try {
+      this.keys.assertGeneration(generation);
+    } finally {
+      verified.userPrivateKey.fill(0);
+      verified.unlockKey.fill(0);
+    }
   }
 
   async tryUnlockWithRememberedDevice(
@@ -167,7 +181,7 @@ export class UserKeySession {
     this.clear();
 
     const generation = this.keys.captureGeneration();
-    const share = await this.api().getKeyShare(this.requests.signal);
+    const share = await this.api().getKeyShare(userId, this.requests.signal);
 
     if (share.keyVersion !== null || share.wrapsFingerprint !== null) {
       throw new Error('User key bundle already exists');
@@ -182,6 +196,7 @@ export class UserKeySession {
     password: string,
     rememberDevice: boolean,
     onRecoveryCode: RecoveryCodeHandler,
+    confirmFreshAuth: FreshAuthenticationHandler,
   ) {
     this.clear();
 
@@ -197,7 +212,7 @@ export class UserKeySession {
         generation,
         rememberDevice,
         onRecoveryCode,
-        previous,
+        { previous, confirmFreshAuth },
       );
     } finally {
       shareBytes.fill(0);
@@ -208,7 +223,10 @@ export class UserKeySession {
     wrapped: WrappedUserKey,
     options: RewrapOptions,
     onRecoveryCode: RecoveryCodeHandler,
+    confirmFreshAuth: FreshAuthenticationHandler,
   ): Promise<{ encryptedUserKey: WrappedUserKey; recoveryCode: string | null }> {
+    await confirmFreshAuth();
+
     const identity = this.requireIdentity();
     const target = createCryptoSessionIdentity(wrapped, identity.userId);
 
@@ -237,7 +255,7 @@ export class UserKeySession {
         if (replacement) {
           keyShare = base64.encode(replacement);
         } else {
-          const share = await this.api().getKeyShare(this.requests.signal);
+          const share = await this.api().getKeyShare(identity.userId, this.requests.signal);
 
           this.assertShareBinding(share, wrapped);
 
@@ -259,17 +277,17 @@ export class UserKeySession {
 
       this.keys.assertGeneration(generation);
 
-      const saved = await this.readBackBundle(
-        this.api().rewrap(
-          {
-            keyVersion: wrapped.keyVersion,
-            prevWrapsFingerprint: userKeyWrapsFingerprint(wrapped.wraps),
-            wraps,
-            keyAuthSecret: encodeKeyAuthSecret(unlockKey, identity),
-            ...(replacement ? { replacementKeyShare: base64.encode(replacement) } : {}),
-          },
-          this.requests.signal,
-        ),
+      const body = {
+        keyVersion: wrapped.keyVersion,
+        prevWrapsFingerprint: userKeyWrapsFingerprint(wrapped.wraps),
+        wraps,
+        keyAuthSecret: encodeKeyAuthSecret(unlockKey, identity),
+        ...(replacement ? { replacementKeyShare: base64.encode(replacement) } : {}),
+      };
+
+      const saved = await this.writeWithFreshAuth(
+        () => this.api().rewrap(body, this.requests.signal),
+        confirmFreshAuth,
         generation,
       );
 
@@ -295,6 +313,7 @@ export class UserKeySession {
     publicKey: PublicEncryptionKey,
     options: RewrapOptions & { password: string },
     onRecoveryCode: RecoveryCodeHandler,
+    confirmFreshAuth: FreshAuthenticationHandler,
   ) {
     const unlocked = await this.tryUnlockWithRememberedDevice(wrapped, userId, publicKey);
 
@@ -302,7 +321,7 @@ export class UserKeySession {
       throw new Error('Remembered device is unavailable');
     }
 
-    return this.rewrapUserKey(wrapped, options, onRecoveryCode);
+    return this.rewrapUserKey(wrapped, options, onRecoveryCode, confirmFreshAuth);
   }
 
   async forgetRememberedDevice(wrapped: WrappedUserKey, userId: string, publicKey: PublicEncryptionKey): Promise<void> {
@@ -316,33 +335,6 @@ export class UserKeySession {
     try {
       if (record) {
         await this.api().revokeDevice(record.deviceId, this.requests.signal);
-      }
-    } finally {
-      await this.rememberedDeviceStore.forgetAll();
-    }
-  }
-
-  async logout(allDevices: boolean, identity?: UserKeyIdentity): Promise<void> {
-    let params: { identity: CryptoSessionIdentity; userPublicKey: PublicEncryptionKey } | null = null;
-
-    if (identity) {
-      params = {
-        identity: createCryptoSessionIdentity(identity.wrapped, identity.userId),
-        userPublicKey: identity.publicKey,
-      };
-    } else if (this.activeSession && this.userPublicKey) {
-      params = { identity: this.activeSession, userPublicKey: this.userPublicKey };
-    }
-
-    this.clear();
-
-    const record = params ? await this.rememberedDeviceStore.load(params) : null;
-
-    try {
-      if (allDevices) {
-        await this.api().revokeAll(this.requests.signal);
-      } else {
-        await this.api().logout(record?.deviceId, this.requests.signal);
       }
     } finally {
       await this.rememberedDeviceStore.forgetAll();
@@ -378,7 +370,7 @@ export class UserKeySession {
     try {
       await mutation;
     } catch (error) {
-      if (isUnlockApiClientError(error)) {
+      if (isUnlockApiClientError(error) || (error instanceof Error && error.name === 'AbortError')) {
         throw error;
       }
 
@@ -390,12 +382,31 @@ export class UserKeySession {
     try {
       return await this.api().getBundle(this.requests.signal);
     } catch (error) {
-      if (isUnlockApiClientError(error)) {
+      if (isUnlockApiClientError(error) || (error instanceof Error && error.name === 'AbortError')) {
         throw error;
       }
 
       throw writeError ?? error;
     }
+  }
+
+  private async writeWithFreshAuth(
+    write: () => Promise<unknown>,
+    confirmFreshAuth: FreshAuthenticationHandler,
+    generation: number,
+  ): Promise<KeyBundleResponse> {
+    try {
+      return await this.readBackBundle(write(), generation);
+    } catch (error) {
+      if (!(error instanceof UnlockApiError) || error.code !== 'FRESH_AUTHENTICATION_REQUIRED') {
+        throw error;
+      }
+    }
+
+    await confirmFreshAuth(true);
+    this.keys.assertGeneration(generation);
+
+    return this.readBackBundle(write(), generation);
   }
 
   private api(): UnlockApi {
@@ -410,6 +421,19 @@ export class UserKeySession {
     if (share.keyVersion !== wrapped.keyVersion || share.wrapsFingerprint !== userKeyWrapsFingerprint(wrapped.wraps)) {
       throw new Error('Key share snapshot does not match the user key wrappers');
     }
+  }
+
+  private async decryptWithPassword(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+    password: string,
+  ): Promise<UnlockedUserKey> {
+    const share = await this.api().getKeyShare(userId, this.requests.signal);
+
+    this.assertShareBinding(share, wrapped);
+
+    return unlockUserKey(wrapped, userId, publicKey, { method: 'password', password, keyShare: share.keyShare });
   }
 
   private async installUserKey(
@@ -432,9 +456,7 @@ export class UserKeySession {
       this.keys.assertGeneration(generation);
 
       this.keys.storeUserKey(userKey, generation);
-
       this.activeSession = identity;
-
       this.userPublicKey = publicKey;
 
       return { rememberedDevice };
@@ -565,7 +587,7 @@ export class UserKeySession {
     generation: number,
     rememberDevice: boolean,
     onRecoveryCode: RecoveryCodeHandler,
-    previous?: WrappedUserKey,
+    reset?: { previous: WrappedUserKey; confirmFreshAuth: FreshAuthenticationHandler },
   ) {
     const { privateKey, publicKey } = generateUserKeyPair();
     const unlockKey = randomBytes(32);
@@ -586,24 +608,24 @@ export class UserKeySession {
 
       this.keys.assertGeneration(generation);
 
-      if (previous) {
-        saved = await this.readBackBundle(
-          this.api().reset(
-            {
-              ...body,
-              keyVersion: previous.keyVersion,
-              prevWrapsFingerprint: userKeyWrapsFingerprint(previous.wraps),
-              replacementKeyShare: keyShare,
-            },
-            this.requests.signal,
-          ),
+      if (reset) {
+        const resetBody = {
+          ...body,
+          keyVersion: reset.previous.keyVersion,
+          prevWrapsFingerprint: userKeyWrapsFingerprint(reset.previous.wraps),
+          replacementKeyShare: keyShare,
+        };
+
+        saved = await this.writeWithFreshAuth(
+          () => this.api().reset(resetBody, this.requests.signal),
+          reset.confirmFreshAuth,
           generation,
         );
       } else {
-        saved = await this.readBackBundle(this.api().initialize(body, this.requests.signal), generation);
+        saved = await this.readBackBundle(this.api().initialize({ ...body, userId }, this.requests.signal), generation);
       }
 
-      const share = await this.api().getKeyShare(this.requests.signal);
+      const share = await this.api().getKeyShare(userId, this.requests.signal);
 
       this.assertShareBinding(share, saved.encryptedUserKey);
 
