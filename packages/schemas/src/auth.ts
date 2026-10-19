@@ -1,18 +1,16 @@
 import { base64BytesSchema, publicEncryptionKeySchema } from '@comitium/crypto/schemas';
 import { type WrappedUserKey, wrappedUserKeySchema } from '@comitium/crypto/user-key';
 import { z } from 'zod';
-import { walletAddressSchema } from './public';
-
-// --- User ---
 
 export { wrappedUserKeySchema };
 export type { WrappedUserKey };
 
 export const userSchema = z.object({
   id: z.string(),
-  walletAddress: walletAddressSchema,
+  authUserId: z.string(),
   publicKey: publicEncryptionKeySchema.nullable(),
   encryptedUserKey: wrappedUserKeySchema.nullable(),
+  userKeyVersion: z.number().int().positive().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -27,7 +25,5 @@ export const userKeyShareSchema = z
   .strict();
 
 export type UserKeyShare = z.infer<typeof userKeyShareSchema>;
-
-// --- Public keys ---
 
 export const publicKeyMapSchema = z.record(z.string(), publicEncryptionKeySchema);

@@ -2,50 +2,37 @@ import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { GoogleIcon } from '@comitium/ui/google';
 import { Spinner } from '@comitium/ui/spinner';
-import { useLinkAccount, useUnlinkOAuth } from '@privy-io/react-auth';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
+import { useAuthClient } from '../auth-context';
+import { AuthFormError } from '../auth-form-error';
+import { unwrapAuthResult } from '../auth-result';
+import { useFreshAuthentication } from '../fresh-authentication';
 import { canUnlinkGoogle, type LinkedSignInMethods } from '../linked-sign-in-methods';
 import { getAccountMethodError } from './account-method-error';
 import { SignInMethodRow } from './sign-in-method-row';
-import type { RefreshUser } from './types';
+import type { RefreshMethods } from './types';
 
 interface GoogleSignInMethodProps {
   methods: LinkedSignInMethods;
-  refreshUser: RefreshUser;
+  refreshMethods: RefreshMethods;
 }
 
-export function GoogleSignInMethod({ methods, refreshUser }: GoogleSignInMethodProps) {
-  const [linkError, setLinkError] = useState<string | null>(null);
+export function GoogleSignInMethod({ methods, refreshMethods }: GoogleSignInMethodProps) {
+  const [linkError, setLinkError] = useState<string | null>(() => {
+    const code = new URLSearchParams(window.location.search).get('error');
+
+    return code ? getAccountMethodError(code, 'link-google') : null;
+  });
   const [removeError, setRemoveError] = useState<string | null>(null);
   const [isLinking, setIsLinking] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
-  const { unlink } = useUnlinkOAuth();
-
-  const { linkGoogle } = useLinkAccount({
-    onSuccess: ({ linkMethod }) => {
-      if (linkMethod !== 'google') {
-        return;
-      }
-
-      setLinkError(null);
-      setIsLinking(false);
-      void refreshUser().catch(() => undefined);
-    },
-    onError: (linkError, { linkMethod }) => {
-      if (linkMethod !== 'google') {
-        return;
-      }
-
-      setLinkError(getAccountMethodError(linkError, 'link-google'));
-      setIsLinking(false);
-    },
-  });
-
+  const client = useAuthClient();
+  const runWithFreshAuth = useFreshAuthentication();
   const googleCanBeRemoved = canUnlinkGoogle(methods);
 
-  const handleLinkGoogle = useCallback(() => {
+  async function handleLinkGoogle() {
     if (isLinking) {
       return;
     }
@@ -54,20 +41,33 @@ export function GoogleSignInMethod({ methods, refreshUser }: GoogleSignInMethodP
     setIsLinking(true);
 
     try {
-      linkGoogle();
+      const callbackURL = new URL(window.location.href);
+
+      callbackURL.searchParams.delete('error');
+      callbackURL.searchParams.delete('error_description');
+
+      await runWithFreshAuth(async () =>
+        unwrapAuthResult(
+          await client.linkSocial({
+            provider: 'google',
+            callbackURL: callbackURL.href,
+            errorCallbackURL: callbackURL.href,
+          }),
+        ),
+      );
     } catch (linkError) {
       setLinkError(getAccountMethodError(linkError, 'link-google'));
       setIsLinking(false);
     }
-  }, [isLinking, linkGoogle]);
+  }
 
-  const handleOpenRemoveDialog = useCallback(() => {
+  function handleOpenRemoveDialog() {
     setRemoveError(null);
     setRemoveDialogOpen(true);
-  }, []);
+  }
 
-  const handleRemoveGoogle = useCallback(async () => {
-    if (!methods.google || !canUnlinkGoogle(methods) || isRemoving) {
+  async function handleRemoveGoogle() {
+    if (!methods.google || !googleCanBeRemoved || isRemoving) {
       return;
     }
 
@@ -75,22 +75,24 @@ export function GoogleSignInMethod({ methods, refreshUser }: GoogleSignInMethodP
     setIsRemoving(true);
 
     try {
-      await unlink({ provider: 'google', subject: methods.google.subject });
-      await refreshUser().catch(() => undefined);
+      const accountId = methods.google.accountId;
+
+      await runWithFreshAuth(async () => unwrapAuthResult(await client.unlinkAccount({ accountId })));
+      await refreshMethods();
       setRemoveDialogOpen(false);
     } catch {
       setRemoveError('We could not remove Google. Try again.');
     } finally {
       setIsRemoving(false);
     }
-  }, [isRemoving, methods, refreshUser, unlink]);
+  }
 
   return (
     <>
       <SignInMethodRow
         icon={<GoogleIcon />}
         label="Google"
-        value={methods.google?.email ?? 'Not added'}
+        value={methods.google ? 'Connected' : 'Not added'}
         note={methods.google && !googleCanBeRemoved ? 'Add an email before removing Google.' : null}
         error={linkError}
         action={
@@ -116,13 +118,7 @@ export function GoogleSignInMethod({ methods, refreshUser }: GoogleSignInMethodP
         pendingLabel="Removing..."
         isPending={isRemoving}
         onConfirm={handleRemoveGoogle}
-        extraContent={
-          removeError ? (
-            <p role="alert" className="text-copy-13 text-destructive-text">
-              {removeError}
-            </p>
-          ) : null
-        }
+        extraContent={<AuthFormError message={removeError} />}
       />
     </>
   );

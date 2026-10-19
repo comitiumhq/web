@@ -1,6 +1,6 @@
 import { AuthLoginSurface } from '@comitium/auth/login-surface';
 import type { AuthMode } from '@comitium/ui/auth-login-page';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 
 const mocks = vi.hoisted(() => ({
@@ -8,29 +8,15 @@ const mocks = vi.hoisted(() => ({
   loginWithCode: vi.fn(),
   loginWithPasskey: vi.fn(),
   navigate: vi.fn(),
-  oauthState: { status: 'initial' } as
-    | { status: 'initial' }
-    | { status: 'loading' }
-    | { status: 'done' }
-    | { status: 'error'; error: Error | null },
   recoverSession: vi.fn(),
   sendCode: vi.fn(),
 }));
+const originalUrl = window.location.href;
 
-vi.mock('@privy-io/react-auth', () => ({
-  useLoginWithEmail: () => ({
-    loginWithCode: mocks.loginWithCode,
-    sendCode: mocks.sendCode,
-    state: { status: 'initial' },
-  }),
-  useLoginWithOAuth: () => ({
-    initOAuth: mocks.initOAuth,
-    loading: false,
-    state: mocks.oauthState,
-  }),
-  useLoginWithPasskey: () => ({
-    loginWithPasskey: mocks.loginWithPasskey,
-    state: { status: 'initial' },
+vi.mock('@comitium/auth/auth-context', () => ({
+  useAuthClient: () => ({
+    emailOtp: { sendVerificationOtp: mocks.sendCode },
+    signIn: { emailOtp: mocks.loginWithCode, social: mocks.initOAuth, passkey: mocks.loginWithPasskey },
   }),
 }));
 
@@ -53,17 +39,21 @@ function renderSurface(mode: AuthMode) {
 
 beforeEach(() => {
   mocks.initOAuth.mockReset();
-  mocks.initOAuth.mockResolvedValue(undefined);
+  mocks.initOAuth.mockResolvedValue({ data: {}, error: null });
   mocks.loginWithCode.mockReset();
-  mocks.loginWithCode.mockResolvedValue(undefined);
+  mocks.loginWithCode.mockResolvedValue({ data: {}, error: null });
   mocks.loginWithPasskey.mockReset();
-  mocks.loginWithPasskey.mockResolvedValue(undefined);
+  mocks.loginWithPasskey.mockResolvedValue({ data: {}, error: null });
   mocks.navigate.mockReset();
-  mocks.oauthState = { status: 'initial' };
+  window.history.replaceState(null, '', originalUrl);
   mocks.recoverSession.mockReset();
   mocks.recoverSession.mockResolvedValue(true);
   mocks.sendCode.mockReset();
-  mocks.sendCode.mockResolvedValue(undefined);
+  mocks.sendCode.mockResolvedValue({ data: {}, error: null });
+});
+
+afterEach(() => {
+  window.history.replaceState(null, '', originalUrl);
 });
 
 describe('AuthLoginSurface intent boundaries', () => {
@@ -72,11 +62,11 @@ describe('AuthLoginSurface intent boundaries', () => {
 
     await screen.getByPlaceholder('Email address').fill('person@example.com');
     await screen.getByRole('button', { name: 'Continue', exact: true }).click();
-    expect(mocks.sendCode).toHaveBeenCalledWith({ email: 'person@example.com', disableSignup: true });
+    expect(mocks.sendCode).toHaveBeenCalledWith({ email: 'person@example.com', type: 'sign-in' }, { query: undefined });
 
     await screen.getByRole('button', { name: 'Use another email' }).click();
     await screen.getByRole('button', { name: 'Continue with Google' }).click();
-    expect(mocks.initOAuth).toHaveBeenCalledWith({ provider: 'google', disableSignup: true });
+    expect(mocks.initOAuth).toHaveBeenCalledWith(expect.objectContaining({ provider: 'google', requestSignUp: false }));
   });
 
   it('does not offer passkey account creation on Sign up', async () => {
@@ -118,14 +108,17 @@ describe('AuthLoginSurface intent boundaries', () => {
 
     await screen.getByPlaceholder('Email address').fill('new@example.com');
     await screen.getByRole('button', { name: 'Continue with email' }).click();
-    expect(mocks.sendCode).toHaveBeenCalledWith({ email: 'new@example.com', disableSignup: false });
+    expect(mocks.sendCode).toHaveBeenCalledWith(
+      { email: 'new@example.com', type: 'sign-in' },
+      { query: { mode: 'signup' } },
+    );
   });
 
   it('allows account creation from the explicit Google signup action', async () => {
     const screen = await renderSurface('sign-up');
 
     await screen.getByRole('button', { name: 'Continue with Google' }).click();
-    expect(mocks.initOAuth).toHaveBeenCalledWith({ provider: 'google', disableSignup: false });
+    expect(mocks.initOAuth).toHaveBeenCalledWith(expect.objectContaining({ provider: 'google', requestSignUp: true }));
   });
 
   it('uses only the login passkey hook on Sign in', async () => {
@@ -164,7 +157,7 @@ describe('AuthLoginSurface intent boundaries', () => {
   });
 
   it('renders the OAuth callback failure after returning from Google', async () => {
-    mocks.oauthState = { status: 'error', error: new Error('oauth_error') };
+    window.history.replaceState(null, '', '?error=access_denied');
     const screen = await renderSurface('sign-in');
 
     await expect

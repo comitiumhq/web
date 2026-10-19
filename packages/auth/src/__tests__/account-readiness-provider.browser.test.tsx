@@ -32,14 +32,15 @@ const canonicalWallet = {
   walletIndex: 0,
 };
 
-const user = {
+const user: User = {
   id: 'user-1',
-  walletAddress: canonicalWallet.address,
+  authUserId: 'auth-user-1',
   publicKey: null,
   encryptedUserKey: null,
+  userKeyVersion: null,
   createdAt: '2026-08-28T00:00:00.000Z',
   updatedAt: '2026-08-28T00:00:00.000Z',
-} as User;
+};
 
 function StageProbe() {
   const { stage } = useAccountReadiness();

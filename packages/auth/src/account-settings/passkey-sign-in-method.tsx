@@ -1,15 +1,17 @@
 import { Button } from '@comitium/ui/button';
 import { Spinner } from '@comitium/ui/spinner';
-import { useLinkWithPasskey } from '@privy-io/react-auth';
 import { KeyIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
+import { useAuthClient } from '../auth-context';
+import { unwrapAuthResult } from '../auth-result';
+import { useFreshAuthentication } from '../fresh-authentication';
 import { SignInMethodRow } from './sign-in-method-row';
-import type { RefreshUser } from './types';
+import type { RefreshMethods } from './types';
 
 interface PasskeySignInMethodProps {
   passkeyCount: number;
-  refreshUser: RefreshUser;
+  refreshMethods: RefreshMethods;
 }
 
 function getPasskeySummary(passkeyCount: number): string {
@@ -24,12 +26,13 @@ function getPasskeySummary(passkeyCount: number): string {
   return `${passkeyCount} passkeys`;
 }
 
-export function PasskeySignInMethod({ passkeyCount, refreshUser }: PasskeySignInMethodProps) {
+export function PasskeySignInMethod({ passkeyCount, refreshMethods }: PasskeySignInMethodProps) {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { linkWithPasskey } = useLinkWithPasskey();
+  const client = useAuthClient();
+  const runWithFreshAuth = useFreshAuthentication();
 
-  const handleAddPasskey = useCallback(async () => {
+  async function handleAddPasskey() {
     if (isPending) {
       return;
     }
@@ -38,14 +41,14 @@ export function PasskeySignInMethod({ passkeyCount, refreshUser }: PasskeySignIn
     setIsPending(true);
 
     try {
-      await linkWithPasskey();
-      await refreshUser().catch(() => undefined);
+      await runWithFreshAuth(async () => unwrapAuthResult(await client.passkey.addPasskey()));
+      await refreshMethods();
     } catch {
       setError('We could not add the passkey. Try again.');
     } finally {
       setIsPending(false);
     }
-  }, [isPending, linkWithPasskey, refreshUser]);
+  }
 
   const actionLabel = passkeyCount > 0 ? 'Add another' : 'Add passkey';
 

@@ -1,0 +1,170 @@
+import { Button } from '@comitium/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
+import { Input } from '@comitium/ui/input';
+import { Label } from '@comitium/ui/label';
+import { Spinner } from '@comitium/ui/spinner';
+import { VERIFICATION_CODE_LENGTH, VerificationCodeInput } from '@comitium/ui/verification-code-input';
+import { type ChangeEvent, type FormEvent, useState } from 'react';
+
+import { useAuthClient } from '../auth-context';
+import { AuthFormError } from '../auth-form-error';
+import { unwrapAuthResult } from '../auth-result';
+import { useFreshAuthentication } from '../fresh-authentication';
+import { getAccountMethodError } from './account-method-error';
+import type { RefreshMethods } from './types';
+
+interface EmailMethodDialogProps {
+  hasEmail: boolean;
+  onComplete: () => void;
+  onOpenChange: (open: boolean) => void;
+  refreshMethods: RefreshMethods;
+}
+
+export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshMethods }: EmailMethodDialogProps) {
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const client = useAuthClient();
+  const runWithFreshAuth = useFreshAuthentication();
+
+  async function sendCode() {
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail || isPending) {
+      return;
+    }
+
+    setError(null);
+    setIsPending(true);
+
+    try {
+      await runWithFreshAuth(async () =>
+        unwrapAuthResult(await client.emailOtp.requestEmailChange({ newEmail: normalizedEmail })),
+      );
+
+      setEmail(normalizedEmail);
+      setStep('code');
+    } catch (sendError) {
+      setError(getAccountMethodError(sendError, 'send-email-code'));
+    } finally {
+      setIsPending(false);
+    }
+  }
+
+  async function verifyCode(verificationCode: string) {
+    if (verificationCode.length !== VERIFICATION_CODE_LENGTH || isPending) {
+      return;
+    }
+
+    setError(null);
+    setIsPending(true);
+
+    try {
+      await runWithFreshAuth(async () =>
+        unwrapAuthResult(await client.emailOtp.changeEmail({ newEmail: email, otp: verificationCode })),
+      );
+
+      await refreshMethods();
+      onComplete();
+    } catch (verifyError) {
+      setError(getAccountMethodError(verifyError, 'verify-email'));
+    } finally {
+      setIsPending(false);
+    }
+  }
+
+  async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await sendCode();
+  }
+
+  async function handleCodeSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await verifyCode(code);
+  }
+
+  function handleEmailChange(event: ChangeEvent<HTMLInputElement>) {
+    setEmail(event.target.value);
+    setError(null);
+  }
+
+  function handleCodeChange(value: string) {
+    setCode(value);
+    setError(null);
+  }
+
+  function handleChangeEmail() {
+    setCode('');
+    setError(null);
+    setStep('email');
+  }
+
+  function handleCancel() {
+    onOpenChange(false);
+  }
+
+  return (
+    <Dialog open onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{hasEmail ? 'Change email' : 'Add email'}</DialogTitle>
+          <DialogDescription>
+            {step === 'email'
+              ? 'We will send a verification code to this address.'
+              : `Enter the 6-digit code sent to ${email}.`}
+          </DialogDescription>
+        </DialogHeader>
+
+        {step === 'email' ? (
+          <form className="grid gap-4" onSubmit={handleEmailSubmit}>
+            <div className="grid gap-2">
+              <Label htmlFor="account-email">Email address</Label>
+              <Input
+                id="account-email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={handleEmailChange}
+                disabled={isPending}
+                autoFocus
+                required
+              />
+            </div>
+            <AuthFormError message={error} />
+            <DialogFooter>
+              <Button type="button" variant="outline" disabled={isPending} onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending || !email.trim()}>
+                {isPending && <Spinner data-icon="inline-start" />}
+                {isPending ? 'Sending...' : 'Send code'}
+              </Button>
+            </DialogFooter>
+          </form>
+        ) : (
+          <form className="grid gap-4" onSubmit={handleCodeSubmit}>
+            <VerificationCodeInput
+              value={code}
+              onChange={handleCodeChange}
+              onComplete={verifyCode}
+              disabled={isPending}
+              autoFocus
+            />
+            <AuthFormError message={error} />
+            <DialogFooter>
+              <Button type="button" variant="outline" disabled={isPending} onClick={handleChangeEmail}>
+                Change email
+              </Button>
+              <Button type="submit" disabled={isPending || code.length !== VERIFICATION_CODE_LENGTH}>
+                {isPending && <Spinner data-icon="inline-start" />}
+                {isPending ? 'Verifying...' : 'Verify email'}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

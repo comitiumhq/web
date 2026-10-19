@@ -1,11 +1,12 @@
-import { z } from 'zod';
+import { ApiError } from '@comitium/schemas/api-errors';
 
 type AccountMethodOperation = 'link-google' | 'send-email-code' | 'verify-email';
 
-const LINKED_ACCOUNT_CONFLICT_CODE = 'linked_to_another_user';
-const linkedAccountConflictSchema = z.union([
-  z.literal(LINKED_ACCOUNT_CONFLICT_CODE),
-  z.object({ privyErrorCode: z.literal(LINKED_ACCOUNT_CONFLICT_CODE) }),
+const ACCOUNT_CONFLICT_CODES = new Set([
+  'account_already_linked_to_different_user',
+  'SOCIAL_ACCOUNT_ALREADY_LINKED',
+  'USER_ALREADY_EXISTS',
+  'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL',
 ]);
 
 const operationErrorMessages: Record<AccountMethodOperation, string> = {
@@ -15,7 +16,9 @@ const operationErrorMessages: Record<AccountMethodOperation, string> = {
 };
 
 export function getAccountMethodError(error: unknown, operation: AccountMethodOperation): string {
-  if (linkedAccountConflictSchema.safeParse(error).success) {
+  const code = error instanceof ApiError ? error.code : error;
+
+  if (typeof code === 'string' && ACCOUNT_CONFLICT_CODES.has(code)) {
     if (operation === 'link-google') {
       return 'This Google account is already used by another Comitium account.';
     }

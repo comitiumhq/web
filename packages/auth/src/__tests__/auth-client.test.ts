@@ -1,0 +1,117 @@
+import { ApiError } from '@comitium/schemas/api-errors';
+import type { AuthMode } from '@comitium/ui/auth-login-page';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { sendSignInCode, signInWithGoogle, verifySignInCode } from '../auth-actions';
+import { createIdentityClient } from '../auth-client';
+import { unwrapAuthResult } from '../auth-result';
+import { API_URL, identitySession } from './identity-fixtures';
+
+const fetchMock = vi.fn<typeof fetch>();
+
+beforeEach(() => {
+  fetchMock.mockReset();
+  fetchMock.mockResolvedValue(Response.json({ success: true }));
+  vi.stubGlobal('fetch', fetchMock);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+function lastRequest() {
+  const [input, options] = fetchMock.mock.calls.at(-1) ?? [];
+
+  if (!input || !options) {
+    throw new Error('Expected a native auth request');
+  }
+
+  return {
+    url: new URL(String(input)),
+    options,
+    body: options.body ? JSON.parse(String(options.body)) : null,
+  };
+}
+
+describe('native auth client transport and intent', () => {
+  it.each(['sign-in', 'sign-up'] satisfies AuthMode[])(
+    'preserves %s intent for sending and verifying OTP',
+    async (mode) => {
+      const client = createIdentityClient(API_URL);
+
+      await sendSignInCode(client, 'person@example.com', mode);
+
+      let request = lastRequest();
+
+      expect(request.url.pathname).toBe('/v1/auth/identity/email-otp/send-verification-otp');
+      expect(request.url.searchParams.get('mode')).toBe(mode === 'sign-up' ? 'signup' : null);
+      expect(request.body).toEqual({ email: 'person@example.com', type: 'sign-in' });
+      expect(request.options.credentials).toBe('include');
+      expect(request.options.cache).toBe('no-store');
+      expect(new Headers(request.options.headers).has('Authorization')).toBe(false);
+
+      fetchMock.mockResolvedValueOnce(Response.json({ user: identitySession().user }));
+
+      await verifySignInCode(client, 'person@example.com', '123456', mode);
+
+      request = lastRequest();
+
+      expect(request.url.pathname).toBe('/v1/auth/identity/sign-in/email-otp');
+      expect(request.url.searchParams.get('mode')).toBe(mode === 'sign-up' ? 'signup' : null);
+      expect(request.body).toEqual({ email: 'person@example.com', otp: '123456' });
+    },
+  );
+
+  it.each(['sign-in', 'sign-up'] satisfies AuthMode[])('preserves %s intent and callbacks for Google', async (mode) => {
+    const client = createIdentityClient(`${API_URL}/`);
+    const callbackURL = 'https://app.comitium.test/org/example';
+    const errorCallbackURL = 'https://app.comitium.test/login?returnTo=%2Forg%2Fexample';
+
+    fetchMock.mockResolvedValueOnce(Response.json({ redirect: false, url: 'https://accounts.google.com/' }));
+
+    await signInWithGoogle(client, mode, callbackURL, errorCallbackURL);
+
+    const request = lastRequest();
+
+    expect(request.url.pathname).toBe('/v1/auth/identity/sign-in/social');
+    expect(request.body).toMatchObject({
+      provider: 'google',
+      requestSignUp: mode === 'sign-up',
+      callbackURL,
+      newUserCallbackURL: callbackURL,
+      errorCallbackURL,
+    });
+  });
+
+  it('keeps normal session refresh enabled on the native endpoint', async () => {
+    const client = createIdentityClient(API_URL);
+
+    fetchMock.mockResolvedValueOnce(Response.json(identitySession()));
+
+    unwrapAuthResult(await client.getSession());
+
+    const request = lastRequest();
+
+    expect(request.url.pathname).toBe('/v1/auth/identity/get-session');
+    expect(request.url.searchParams.has('disableRefresh')).toBe(false);
+  });
+
+  it('preserves safe native error metadata without exposing provider messages', async () => {
+    const client = createIdentityClient(API_URL);
+
+    fetchMock.mockResolvedValueOnce(
+      Response.json({ code: 'FRESH_AUTHENTICATION_REQUIRED', message: 'Private provider details' }, { status: 403 }),
+    );
+
+    const result = await client.emailOtp.requestEmailChange({ newEmail: 'next@example.com' });
+
+    expect(() => unwrapAuthResult(result)).toThrow(ApiError);
+    expect(() => unwrapAuthResult(result)).toThrow('Authentication request failed');
+
+    try {
+      unwrapAuthResult(result);
+    } catch (error) {
+      expect(error).toMatchObject({ status: 403, code: 'FRESH_AUTHENTICATION_REQUIRED' });
+      expect(String(error)).not.toContain('Private provider details');
+    }
+  });
+});

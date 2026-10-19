@@ -24,7 +24,7 @@ export const deviceResponseSchema = z.object({
   serverDeviceKey: base64BytesSchema(32, 'Expected 32-byte device key'),
 });
 
-export const unlockApiErrorCodeSchema = z.enum(['API_ERROR', 'KEY_SHARE_UNAVAILABLE']);
+export const unlockApiErrorCodeSchema = z.enum(['API_ERROR', 'KEY_SHARE_UNAVAILABLE', 'FRESH_AUTHENTICATION_REQUIRED']);
 export const unlockApiErrorResponseSchema = z.object({ error: z.object({ code: unlockApiErrorCodeSchema }) });
 export const serializedUnlockApiErrorSchema = z.object({
   kind: z.literal('comitium.unlock-api-error'),

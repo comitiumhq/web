@@ -30,29 +30,30 @@ afterEach(() => {
 });
 
 describe('safe unlock API errors across Comlink', () => {
-  it.each(['KEY_SHARE_UNAVAILABLE', 'UNRECOGNIZED_SERVER_CODE'])(
-    'preserves status and allowlisted error code: %s',
-    async (code) => {
-      vi.stubGlobal(
-        'fetch',
-        vi.fn(async () =>
-          Response.json(
-            { error: { code, message: 'Do not propagate this response', details: { private: 'sensitive' } } },
-            { status: 503 },
-          ),
+  it.each([
+    { status: 503, code: 'KEY_SHARE_UNAVAILABLE', expectedCode: 'KEY_SHARE_UNAVAILABLE' },
+    { status: 403, code: 'FRESH_AUTHENTICATION_REQUIRED', expectedCode: 'FRESH_AUTHENTICATION_REQUIRED' },
+    { status: 403, code: 'UNRECOGNIZED_SERVER_CODE', expectedCode: 'API_ERROR' },
+  ])('preserves status and allowlisted error code: $code', async ({ status, code, expectedCode }) => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json(
+          { error: { code, message: 'Do not propagate this response', details: { private: 'sensitive' } } },
+          { status },
         ),
-      );
+      ),
+    );
 
-      const error = await remote
-        .unlockWithPassword(mockWrappedUserKey(), USER_ID, mockPublicEncryptionKey(), PASSWORD, false)
-        .catch((value: unknown) => value);
+    const error = await remote
+      .unlockWithPassword(mockWrappedUserKey(), USER_ID, mockPublicEncryptionKey(), PASSWORD, false)
+      .catch((value: unknown) => value);
 
-      expect(error).toBeInstanceOf(UnlockApiError);
-      expect(error).toMatchObject({ status: 503, code: code === 'KEY_SHARE_UNAVAILABLE' ? code : 'API_ERROR' });
-      expect(String(error)).not.toContain('Do not propagate');
-      expect(JSON.stringify(error)).not.toContain('sensitive');
-    },
-  );
+    expect(error).toBeInstanceOf(UnlockApiError);
+    expect(error).toMatchObject({ status, code: expectedCode });
+    expect(String(error)).not.toContain('Do not propagate');
+    expect(JSON.stringify(error)).not.toContain('sensitive');
+  });
 
   it('preserves ordinary transport failures without classifying them as an API response', async () => {
     vi.stubGlobal(

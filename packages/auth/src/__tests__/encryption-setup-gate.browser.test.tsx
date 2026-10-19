@@ -22,9 +22,10 @@ vi.mock('@comitium/auth/use-wallet', () => ({
 function user(id: string, ready: boolean): User {
   return {
     id,
-    walletAddress: '0x1111111111111111111111111111111111111111',
+    authUserId: `auth-${id}`,
     publicKey: ready ? ({ v: 1, xwing: 'public-key' } as User['publicKey']) : null,
     encryptedUserKey: ready ? ({ wrapped: true } as unknown as User['encryptedUserKey']) : null,
+    userKeyVersion: ready ? 1 : null,
     createdAt: '2026-08-28T00:00:00.000Z',
     updatedAt: '2026-08-28T00:00:00.000Z',
   };

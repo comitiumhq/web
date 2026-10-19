@@ -45,9 +45,10 @@ const wrappedKeys = {
 };
 const readyUser = {
   id: 'user-1',
-  walletAddress: WALLET_ADDRESS,
+  authUserId: 'auth-user-1',
   publicKey: wrappedKeys.publicKey,
   encryptedUserKey: wrappedKeys.encryptedUserKey,
+  userKeyVersion: 1,
   createdAt: '2026-08-28T00:00:00.000Z',
   updatedAt: '2026-08-28T00:00:00.000Z',
 } satisfies User;
