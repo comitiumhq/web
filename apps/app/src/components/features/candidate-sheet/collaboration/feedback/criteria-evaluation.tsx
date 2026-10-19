@@ -1,5 +1,5 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { CriteriaAssessment, CriterionSummary } from '@comitium/schemas/applications';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@comitium/ui/accordion';
 import { Badge } from '@comitium/ui/badge';
 import { Card } from '@comitium/ui/card';
@@ -24,7 +24,7 @@ interface CriteriaEvaluationProps {
   assessment: CriteriaAssessment[];
   summary: CriterionSummary;
   orgId: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
 }
 
 export function CriteriaEvaluation({ assessment, summary, orgId, wrappedVaultKey }: CriteriaEvaluationProps) {
@@ -58,7 +58,7 @@ export function CriteriaEvaluation({ assessment, summary, orgId, wrappedVaultKey
 interface CriteriaEvaluationItemProps {
   item: CriteriaAssessment;
   orgId: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
 }
 
 function CriteriaEvaluationItem({ item, orgId, wrappedVaultKey }: CriteriaEvaluationItemProps) {

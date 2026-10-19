@@ -1,4 +1,4 @@
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { VaultKeyResponse } from '@comitium/schemas/vault';
 import { logger } from '@comitium/ui/logger';
 import { useQueries } from '@tanstack/react-query';
@@ -145,7 +145,7 @@ interface ProjectSubmissionValueParams {
   submissionId: string;
   op: ProjectionOp;
   vaultKey: VaultKeyResponse;
-  wrappedVaultKey: WrappedKey;
+  wrappedVaultKey: VaultKeyAccess;
   projectValue: (params: {
     candidateId: string;
     body: ProjectCandidateCustomFieldValueBody;

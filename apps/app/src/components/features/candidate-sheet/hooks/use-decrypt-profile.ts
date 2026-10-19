@@ -1,8 +1,8 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateProfileContext } from '@comitium/crypto/context';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { useCallback, useEffect, useState } from 'react';
 import { useQueryCandidate } from '@/hooks/queries/use-query-candidate';
 import { parseDecryptedCandidateProfile } from '@/lib/crypto/decrypted-payloads';
@@ -12,7 +12,11 @@ type ProfileDecryptionState =
   | { candidateId: string; status: 'success'; profile: CandidateProfile }
   | { candidateId: string; status: 'error'; profile: null };
 
-export function useDecryptProfile(candidateId: string | null | undefined, orgId: string, wrappedVaultKey?: WrappedKey) {
+export function useDecryptProfile(
+  candidateId: string | null | undefined,
+  orgId: string,
+  wrappedVaultKey?: VaultKeyAccess,
+) {
   const { data: candidateData, isLoading, isError, refetch } = useQueryCandidate(candidateId ?? null);
   const isCryptoActive = useIsCryptoActive();
   const [decryptionState, setDecryptionState] = useState<ProfileDecryptionState | null>(null);

@@ -1,8 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
-import type { EncryptedEnvelope } from '@comitium/crypto';
+import type { EncryptedEnvelope, VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { emailContentContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DecryptedEmail, DecryptedEmailContent, EmailResponse } from '@/lib/schemas/emails';
 
@@ -17,7 +16,7 @@ export function useDecryptEmails(
   applicationId: string | null,
   encryptedEmails: EmailResponse[] | undefined,
   isOrgMember: boolean,
-  wrappedVaultKey?: WrappedKey,
+  wrappedVaultKey?: VaultKeyAccess,
 ) {
   const [state, setState] = useState<DecryptEmailsState>({ data: null, error: null, isDecrypting: false });
   const { canUnlock, ensureUnlocked, isCryptoActive } = useCryptoUnlock();

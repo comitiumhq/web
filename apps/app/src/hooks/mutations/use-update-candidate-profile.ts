@@ -1,8 +1,8 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy, type PublicEncryptionKey } from '@comitium/crypto';
 import { candidateProfileContext } from '@comitium/crypto/context';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { showMutationError } from '@/hooks/mutations/mutation-error';
@@ -16,7 +16,7 @@ interface UpdateCandidateProfileParams {
   profile: CandidateProfile;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: WrappedKey;
+  wrappedVaultKey: VaultKeyAccess;
 }
 
 export function useUpdateCandidateProfile() {

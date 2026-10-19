@@ -1,14 +1,14 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { type CandidateProfileSearchField, CryptoProxy } from '@comitium/crypto';
 import {
   CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION,
   type CandidateProfile,
   type CandidateProfileSearchProjection,
 } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 
 export async function projectCandidateProfileSearch(
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  wrappedVaultKey: VaultKeyAccess,
   profile: CandidateProfile,
 ): Promise<CandidateProfileSearchProjection> {
   const [contactEmailDigest, locationCityDigest, locationCountryDigest] = await Promise.all([
@@ -27,7 +27,7 @@ export async function projectCandidateProfileSearch(
 
 function hashOptionalProfileValue(
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  wrappedVaultKey: VaultKeyAccess,
   field: CandidateProfileSearchField,
   value: string | number | null,
 ): Promise<string | null> {

@@ -1,4 +1,4 @@
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { FormSubmissionResponse } from '@comitium/schemas/forms/form-submission';
 import { useCallback, useMemo } from 'react';
 import type { ApplicationFormState } from '@/components/features/application-submission/application-submission-view';
@@ -14,7 +14,7 @@ interface UseInterviewBriefingApplicationParams {
   interviewEventId: string;
   orgId: string;
   submission: FormSubmissionResponse | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
 }
 
 export function useInterviewBriefingApplication({

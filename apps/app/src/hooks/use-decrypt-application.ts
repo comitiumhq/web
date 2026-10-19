@@ -1,5 +1,5 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type AnswerBucket, decryptAnswerBuckets } from '@/lib/forms/decrypt-answers';
 
@@ -16,7 +16,7 @@ export function useDecryptApplication(
   submissionId: string | null,
   formId: string | null,
   answerEnvelopes: AnswerBucket[] | null,
-  wrappedVaultKey?: WrappedKey,
+  wrappedVaultKey?: VaultKeyAccess,
 ) {
   const [state, setState] = useState<DecryptState>(INITIAL_STATE);
   const generationRef = useRef(0);

@@ -1,6 +1,7 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { applicationAnswerBucketContext, feedbackAnswerBucketContext } from '@comitium/crypto/context';
-import type { EncryptedEnvelope, WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope } from '@comitium/schemas/common';
 
 export interface AnswerBucket {
   visibility: string;
@@ -12,7 +13,7 @@ export async function decryptFeedbackBuckets(
   applicationId: string,
   formId: string,
   buckets: AnswerBucket[],
-  wrappedVaultKey: WrappedKey,
+  wrappedVaultKey: VaultKeyAccess,
 ): Promise<Record<string, unknown>> {
   const merged: Record<string, unknown> = {};
 
@@ -34,7 +35,7 @@ export async function decryptAnswerBuckets(
   orgId: string,
   formId: string,
   buckets: AnswerBucket[],
-  wrappedVaultKey: WrappedKey,
+  wrappedVaultKey: VaultKeyAccess,
 ): Promise<Record<string, unknown>> {
   const merged: Record<string, unknown> = {};
 

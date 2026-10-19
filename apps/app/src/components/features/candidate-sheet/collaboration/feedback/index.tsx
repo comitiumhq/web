@@ -1,3 +1,4 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type {
   ApplicationProcessingStatus,
   CandidateSheetStageActivity,
@@ -5,7 +6,6 @@ import type {
   CriterionSummary,
   ReviewStatus,
 } from '@comitium/schemas/applications';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
@@ -41,7 +41,7 @@ interface FeedbackTabProps {
   processing: ApplicationProcessingStatus | null;
   reviewStatus: ReviewStatus;
   access: FeedbackTabAccess;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   onReviewActivity: ((activity: ApplicationReviewActivity) => void) | null;
   onSubmitInterviewFeedback: ((event: InterviewEventRef) => void) | null;
 }
@@ -187,7 +187,7 @@ interface GroupsListProps {
   applicationId: string | null;
   candidateId: string | null;
   orgId: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   canProjectFormFields: boolean;
   currentUserId: string;
   onReviewActivity: ((activity: ApplicationReviewActivity) => void) | null;

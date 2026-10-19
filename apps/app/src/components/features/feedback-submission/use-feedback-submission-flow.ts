@@ -1,5 +1,5 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { getErrorMessage } from '@comitium/schemas/error';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { useEffect, useMemo, useState } from 'react';
@@ -31,7 +31,7 @@ interface UseFeedbackSubmissionFlowParams {
   orgId: string;
   source: FeedbackSubmissionSource | null;
   currentUserId: string | undefined;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
 }
 
 export interface FeedbackSubmissionFlowResult {
@@ -78,7 +78,7 @@ async function buildEditState(
   previous: FeedbackSubmission,
   applicationId: string,
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  wrappedVaultKey: VaultKeyAccess,
   ensureUnlocked: () => Promise<void>,
 ): Promise<ReadyState> {
   await ensureUnlocked();

@@ -1,8 +1,9 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateProfileContext } from '@comitium/crypto/context';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
-import type { EncryptedEnvelope, WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope } from '@comitium/schemas/common';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { parseDecryptedCandidateProfile } from '@/lib/crypto/decrypted-payloads';
 
@@ -150,7 +151,7 @@ export function useDecryptCandidateNames(
           const data = await CryptoProxy.decryptApplication(
             profile,
             orgId,
-            wrappedVaultKey as WrappedKey,
+            wrappedVaultKey as VaultKeyAccess,
             candidateProfileContext(orgId, candidateId),
           );
 

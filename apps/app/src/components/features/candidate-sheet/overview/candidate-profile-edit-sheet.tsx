@@ -1,6 +1,5 @@
-import type { PublicEncryptionKey } from '@comitium/crypto';
+import type { PublicEncryptionKey, VaultKeyAccess } from '@comitium/crypto';
 import { type CandidateProfile, formatCandidateLocation } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { httpsUrlSchema } from '@comitium/schemas/common';
 import { candidateLocationValueSchema } from '@comitium/schemas/forms/field-types/candidate-location';
 import { Button } from '@comitium/ui/button';
@@ -98,7 +97,7 @@ interface CandidateProfileEditSheetProps {
   profile: CandidateProfile | null;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: WrappedKey;
+  wrappedVaultKey: VaultKeyAccess;
 }
 
 const FORM_ID = 'candidate-profile-edit-form';

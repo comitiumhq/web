@@ -1,4 +1,4 @@
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { FORM_FIELD_PROJECTION_VERSION, type FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { logger } from '@comitium/ui/logger';
 import { useEffect, useRef } from 'react';
@@ -12,7 +12,7 @@ interface UseProjectApplicationFormSearchParams {
   form: FormDefinitionSnapshot | null;
   answers: Record<string, unknown> | null;
   storedVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   enabled: boolean;
 }
 
@@ -67,7 +67,7 @@ interface ApplicationFormProjectionInput {
   applicationId: string;
   form: FormDefinitionSnapshot;
   answers: Record<string, unknown>;
-  wrappedVaultKey: WrappedKey;
+  wrappedVaultKey: VaultKeyAccess;
 }
 
 function getApplicationFormProjectionInput(
@@ -75,7 +75,7 @@ function getApplicationFormProjectionInput(
   applicationId: string | null,
   form: FormDefinitionSnapshot | null,
   answers: Record<string, unknown> | null,
-  wrappedVaultKey: WrappedKey | undefined,
+  wrappedVaultKey: VaultKeyAccess | undefined,
 ): ApplicationFormProjectionInput | null {
   if (!enabled) {
     return null;

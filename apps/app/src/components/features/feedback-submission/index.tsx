@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy, type PublicEncryptionKey } from '@comitium/crypto';
 import { feedbackAnswerBucketContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { splitAnswersByVisibility } from '@comitium/schemas/forms/visibility';
 import { Badge } from '@comitium/ui/badge';
@@ -39,7 +39,7 @@ interface FeedbackSubmissionSheetProps {
   currentUserId: string | undefined;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   candidateName: string | null;
 }
 
@@ -51,7 +51,7 @@ interface FeedbackSubmissionPanelProps {
   currentUserId: string | undefined;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   onComplete: () => void;
   onCancel?: () => void;
 }
@@ -158,7 +158,7 @@ interface FeedbackSubmissionViewProps {
   source: FeedbackSubmissionSource | null;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   onComplete: () => void;
   onCancel?: () => void;
   showFormContext?: boolean;
@@ -284,7 +284,7 @@ interface FeedbackFormProps {
   previousSubmissionId: string | null;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   onComplete: () => void;
   onCancel?: () => void;
   contained?: boolean;
@@ -408,7 +408,7 @@ function FeedbackForm(props: FeedbackFormProps) {
 interface FeedbackEncryptionContext {
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: WrappedKey;
+  wrappedVaultKey: VaultKeyAccess;
 }
 
 function getFeedbackEncryptionContext({

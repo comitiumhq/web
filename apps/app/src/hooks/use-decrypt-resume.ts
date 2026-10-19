@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { encryptedFileContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchEncryptedResume } from '@/lib/api/resume';
 import { triggerFileDownload } from '@/lib/utils';
@@ -19,7 +19,7 @@ export function useDecryptResume(
   applicationId: string | null,
   hasResume: boolean,
   resumeFileId: string | null,
-  wrappedVaultKey?: WrappedKey,
+  wrappedVaultKey?: VaultKeyAccess,
   interviewEventId?: string,
 ) {
   const [state, setState] = useState<ResumeState>(INITIAL_STATE);

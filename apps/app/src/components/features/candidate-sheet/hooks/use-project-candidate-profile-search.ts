@@ -1,6 +1,6 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { logger } from '@comitium/ui/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
@@ -14,7 +14,7 @@ interface UseProjectCandidateProfileSearchParams {
   orgId: string;
   profile: CandidateProfile | null;
   storedVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   enabled: boolean;
 }
 
@@ -80,14 +80,14 @@ export function useProjectCandidateProfileSearch({
 interface CandidateProfileProjectionInput {
   candidateId: string;
   profile: CandidateProfile;
-  wrappedVaultKey: WrappedKey;
+  wrappedVaultKey: VaultKeyAccess;
 }
 
 function getCandidateProfileProjectionInput(
   enabled: boolean,
   candidateId: string | null,
   profile: CandidateProfile | null,
-  wrappedVaultKey: WrappedKey | undefined,
+  wrappedVaultKey: VaultKeyAccess | undefined,
 ): CandidateProfileProjectionInput | null {
   if (!enabled) {
     return null;

@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { encryptedFileContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { fetchEncryptedApplicationFile } from '@/lib/api/application-files';
@@ -11,7 +11,7 @@ interface UseDownloadApplicationFileOptions {
   orgId: string;
   applicationId: string | null;
   interviewEventId?: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
 }
 
 export function useDownloadApplicationFile({

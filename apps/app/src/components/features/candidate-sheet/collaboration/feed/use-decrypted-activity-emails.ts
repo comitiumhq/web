@@ -1,7 +1,7 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { emailContentContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { logger } from '@comitium/ui/logger';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ActivityFeedRow, DecryptedEmail, DecryptedEmailContent, EmailPayload } from '@/lib/schemas/emails';
@@ -16,7 +16,7 @@ export function useDecryptedActivityEmails(
   candidateId: string | null,
   orgId: string,
   events: ActivityFeedRow[],
-  wrappedVaultKey?: WrappedKey,
+  wrappedVaultKey?: VaultKeyAccess,
 ) {
   const isCryptoActive = useIsCryptoActive();
   const [decryptedEmails, setDecryptedEmails] = useState<Record<string, DecryptedEmail>>({});

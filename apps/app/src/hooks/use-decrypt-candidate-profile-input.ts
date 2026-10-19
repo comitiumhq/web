@@ -1,7 +1,8 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateProfileInputContext } from '@comitium/crypto/context';
-import type { EncryptedEnvelope, WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope } from '@comitium/schemas/common';
 import { candidateProfileInputValueSchema } from '@comitium/schemas/forms/application-required-fields';
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { qk } from '@/hooks/query-keys';
@@ -11,7 +12,7 @@ export function useDecryptCandidateProfileInput(params: {
   enabled: boolean;
   envelope: EncryptedEnvelope | null;
   orgId: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
 }) {
   const { ensureUnlocked } = useCryptoUnlock();
   const applicationId = params.applicationId;

@@ -1,7 +1,6 @@
-import type { PublicEncryptionKey } from '@comitium/crypto';
+import type { PublicEncryptionKey, VaultKeyAccess } from '@comitium/crypto';
 import type { ApplicationApiResponse } from '@comitium/schemas/applications';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { ScrollArea } from '@comitium/ui/scroll-area';
 import { CustomFieldValuesSection } from '@/components/features/custom-fields/custom-field-values-section';
 
@@ -19,7 +18,7 @@ interface CandidateOverviewProps {
   onRetryProfile: () => void;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
 }
 
 export function CandidateOverview({

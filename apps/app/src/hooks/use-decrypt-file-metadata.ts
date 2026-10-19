@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy, type EncryptedEnvelope } from '@comitium/crypto';
 import { encryptedFileMetadataContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { type FileDisplayMetadata, fileDisplayMetadataSchema } from '@comitium/schemas/forms/form-submission';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -19,7 +19,11 @@ interface DecryptState {
 
 const INITIAL_STATE: DecryptState = { data: null, error: null, isDecrypting: false };
 
-export function useDecryptFileMetadata(orgId: string, files: FileMetadataInput[] | null, wrappedVaultKey?: WrappedKey) {
+export function useDecryptFileMetadata(
+  orgId: string,
+  files: FileMetadataInput[] | null,
+  wrappedVaultKey?: VaultKeyAccess,
+) {
   const [state, setState] = useState<DecryptState>(INITIAL_STATE);
   const generationRef = useRef(0);
   const { canUnlock, ensureUnlocked, isCryptoActive } = useCryptoUnlock();

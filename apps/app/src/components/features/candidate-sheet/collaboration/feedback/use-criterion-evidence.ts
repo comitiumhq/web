@@ -1,8 +1,9 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { criterionEvidenceContext } from '@comitium/crypto/context';
 import { type CriterionEvidence, criterionEvidenceSchema } from '@comitium/schemas/applications';
-import type { EncryptedEnvelope, WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope } from '@comitium/schemas/common';
 import { useEffect, useState } from 'react';
 
 export type CriterionEvidenceState =
@@ -16,7 +17,7 @@ interface UseCriterionEvidenceParams {
   criterionId: string;
   encryptedEvidence: EncryptedEnvelope | null;
   orgId: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   enabled: boolean;
 }
 

@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateIdentityInputContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import type { CandidateIdentityInput } from '@comitium/schemas/forms/form-submission';
 import { requireNonEmptyText } from '@comitium/schemas/forms/text-value';
 import { skipToken, useQuery } from '@tanstack/react-query';
@@ -11,7 +11,7 @@ import type { CandidateIdentityAnswers } from '@/lib/forms/application-answers';
 export async function decryptCandidateIdentityInputs(params: {
   candidateIdentityInputs: CandidateIdentityInput[];
   orgId: string;
-  wrappedVaultKey: WrappedKey;
+  wrappedVaultKey: VaultKeyAccess;
 }): Promise<CandidateIdentityAnswers> {
   const entries = await Promise.all(
     params.candidateIdentityInputs.map(async (identity) => {
@@ -35,7 +35,7 @@ export async function decryptCandidateIdentityInputs(params: {
 export function useCandidateIdentityInputs(params: {
   candidateIdentityInputs: CandidateIdentityInput[];
   orgId: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  wrappedVaultKey: VaultKeyAccess | undefined;
   enabled: boolean;
 }) {
   const { ensureUnlocked } = useCryptoUnlock();

@@ -1,6 +1,6 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy, isSearchableCustomFieldType, type PublicEncryptionKey } from '@comitium/crypto';
 import { customFieldValueContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import type { FieldTypeId } from '@comitium/schemas/forms';
 
 interface EncodeCandidateCustomFieldValueParams {
@@ -11,7 +11,7 @@ interface EncodeCandidateCustomFieldValueParams {
   value: unknown;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: WrappedKey;
+  wrappedVaultKey: VaultKeyAccess;
 }
 
 export async function encodeCandidateCustomFieldValue({

@@ -1,8 +1,8 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateTagContext } from '@comitium/crypto/context';
 import { STALE_TIME_DEFAULT } from '@comitium/schemas/api-query-policy';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { logger } from '@comitium/ui/logger';
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -17,7 +17,7 @@ const EMPTY_TAGS: readonly DecryptedCandidateTag[] = [];
 export async function decryptTag(
   raw: CandidateTag,
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  wrappedVaultKey: VaultKeyAccess,
 ): Promise<DecryptedCandidateTag | null> {
   try {
     const payload = await CryptoProxy.decryptApplication(raw.label, orgId, wrappedVaultKey, candidateTagContext(orgId));
@@ -37,7 +37,10 @@ export async function decryptTag(
   }
 }
 
-export async function fetchDecryptedTags(orgId: string, wrappedVaultKey: WrappedKey): Promise<DecryptedCandidateTag[]> {
+export async function fetchDecryptedTags(
+  orgId: string,
+  wrappedVaultKey: VaultKeyAccess,
+): Promise<DecryptedCandidateTag[]> {
   const res = await getCandidateTags(orgId, true);
   const results = await Promise.all(res.data.map((raw) => decryptTag(raw, orgId, wrappedVaultKey)));
 

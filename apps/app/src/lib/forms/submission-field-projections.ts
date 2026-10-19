@@ -1,5 +1,5 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
-import type { WrappedKey } from '@comitium/schemas/common';
 import type { FormDefinitionSnapshot, FormSubmissionFieldProjection } from '@comitium/schemas/forms/form-submission';
 import {
   extractSubmissionFieldProjectionSources,
@@ -8,7 +8,7 @@ import {
 
 export async function projectSubmissionFieldValues(
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  wrappedVaultKey: VaultKeyAccess,
   form: FormDefinitionSnapshot,
   answers: Record<string, unknown>,
 ): Promise<FormSubmissionFieldProjection[]> {
@@ -19,7 +19,7 @@ export async function projectSubmissionFieldValues(
 
 async function projectFieldValue(
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  wrappedVaultKey: VaultKeyAccess,
   source: SubmissionFieldProjectionSource,
 ): Promise<FormSubmissionFieldProjection> {
   const identity = {
