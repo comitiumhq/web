@@ -1,51 +1,24 @@
 import * as Comlink from 'comlink';
-import { type Address, type Hex, hashMessage, sha256 } from 'viem';
 
 import type { CandidateProfileSearchField } from './candidate-profile-search-hash';
 import type { CryptoContextInput } from './context';
 import type { SearchableCustomFieldType } from './custom-field-search';
-import type { WrappedKey } from './envelope-key';
 import type { CategoricalFormFieldKind } from './form-field-search-hash';
-import { canonicalizeEvmSignature, type WrappedPersonalKey } from './personal-key';
 import type { RecipientDescriptor } from './recipients';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from './schemas';
+import type { WrappedKey } from './schemas/keys';
+import type { WrappedUserKey } from './schemas/user-key';
+import type { VaultKeyAccess, VaultKeyContext } from './schemas/vault-key';
 import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from './session';
 import type { CryptoWorkerApi } from './worker/crypto-api';
 import { CryptoWorkerClient } from './worker/crypto-worker-client';
-
-export type SignMessageFn = (message: string) => Promise<Hex>;
-export type GetUserKeyShareFn = () => Promise<{ keyShare: string; version: number }>;
-
-export interface SignatureStabilityResult {
-  providerId: string;
-  address: Address;
-  messageHash: string;
-  firstSignatureHash: string;
-  secondSignatureHash: string;
-  stable: boolean;
-}
-
-const ENCRYPTION_UNLOCK_NAMESPACE = 'comitium.personal-key-wrapping';
-
-export function createEncryptionUnlockMessage(address: string): string {
-  const wallet = address.toLowerCase();
-
-  return [
-    'Comitium encryption unlock',
-    '',
-    `Key namespace: ${ENCRYPTION_UNLOCK_NAMESPACE}`,
-    `Wallet: ${wallet}`,
-    '',
-    'This signature unlocks your encrypted personal key.',
-    'It does not authorize a blockchain transaction or server action.',
-  ].join('\n');
-}
 
 let workerClient: CryptoWorkerClient | null = null;
 let _isActive = false;
 let activeSession: CryptoSessionIdentity | null = null;
 let isResetting = false;
-let pendingSignature: { message: string; promise: Promise<Hex> } | null = null;
+let apiBaseUrl: string | null = null;
+let lifecycle = 0;
 let unlockPromise: Promise<void> | null = null;
 let unlockSession: CryptoSessionIdentity | null = null;
 
@@ -60,13 +33,14 @@ function notify(): void {
 function resetRuntimeState(): void {
   _isActive = false;
   activeSession = null;
-  pendingSignature = null;
+  lifecycle += 1;
   unlockPromise = null;
   unlockSession = null;
 }
 
 function terminateWorker(): void {
   const currentClient = workerClient;
+
   workerClient = null;
   currentClient?.dispose();
   resetRuntimeState();
@@ -81,164 +55,165 @@ function ensureWorker(): CryptoWorkerClient {
     return workerClient;
   }
 
+  if (!apiBaseUrl) {
+    throw new Error('Call CryptoProxy.init with the API URL before using crypto');
+  }
+
   const client = new CryptoWorkerClient(() => {
     if (workerClient === client) {
       workerClient = null;
+
       resetRuntimeState();
       notify();
     }
-  });
+  }, apiBaseUrl);
+
   workerClient = client;
 
   return client;
 }
 
-function runOnWorker<Result>(operation: (api: Comlink.Remote<CryptoWorkerApi>) => Promise<Result>): Promise<Result> {
-  return ensureWorker().run(operation);
+async function runOnWorker<Result>(
+  operation: (api: Comlink.Remote<CryptoWorkerApi>) => Promise<Result>,
+): Promise<Result> {
+  const generation = lifecycle;
+  const result = await ensureWorker().run(operation);
+
+  assertLifecycle(generation);
+
+  return result;
+}
+
+function assertLifecycle(generation: number): void {
+  if (generation !== lifecycle || isResetting) {
+    throw new Error('Crypto runtime was cleared during the operation');
+  }
+}
+
+async function unlockIdentity(
+  wrapped: WrappedUserKey,
+  userId: string,
+  operation: (api: Comlink.Remote<CryptoWorkerApi>) => Promise<void>,
+): Promise<void> {
+  const identity = createCryptoSessionIdentity(wrapped, userId);
+
+  if (unlockPromise) {
+    if (isSameCryptoSession(unlockSession, identity)) {
+      return unlockPromise;
+    }
+
+    await unlockPromise.catch(() => undefined);
+  }
+
+  if (_isActive) {
+    await CryptoProxy.clear();
+  }
+
+  const generation = lifecycle;
+
+  unlockSession = identity;
+
+  const pending = (async () => {
+    await runOnWorker(operation);
+
+    assertLifecycle(generation);
+
+    activeSession = identity;
+    _isActive = true;
+
+    notify();
+  })();
+
+  unlockPromise = pending;
+
+  try {
+    await pending;
+  } finally {
+    if (unlockPromise === pending) {
+      unlockPromise = null;
+      unlockSession = null;
+    }
+  }
 }
 
 /**
  * CryptoProxy — main thread facade for the Crypto Worker.
  *
- * Long-lived key material stays inside the Worker; signature/share inputs are handed through once per fallback unlock.
+ * Long-lived keys and secret API responses remain inside the Worker.
  *
  * React integration:
  * - `subscribe()` + `isActive()` work with `useSyncExternalStore`
- * - State changes in `unlock()` and `clear()` notify subscribers
+ * - Unlock and clear operations notify subscribers
  */
 export const CryptoProxy = {
   /**
    * Eagerly initialize the crypto Worker.
-   * Optional — Worker auto-initializes on first use.
+   * Configure once with the product API URL before using the Worker.
    */
-  init(): void {
+  init(baseUrl: string): void {
+    if (apiBaseUrl && apiBaseUrl !== baseUrl) {
+      throw new Error('Crypto API URL cannot change during the page lifetime');
+    }
+
+    apiBaseUrl = baseUrl;
+
     ensureWorker();
   },
 
-  /**
-   * Get or request wallet signature. One popup per session.
-   * Deduplicates concurrent calls — only one wallet popup.
-   */
-  async ensureSignature(signMessage: SignMessageFn, address: Address): Promise<Hex> {
-    const message = createEncryptionUnlockMessage(address);
-
-    if (pendingSignature?.message === message) {
-      return pendingSignature.promise;
-    }
-
-    if (pendingSignature) {
-      await pendingSignature.promise.catch(() => undefined);
-    }
-
-    const pending = { message, promise: signMessage(message) };
-    pendingSignature = pending;
-
-    try {
-      return await pending.promise;
-    } finally {
-      if (pendingSignature === pending) {
-        pendingSignature = null;
-      }
-    }
-  },
-
-  /**
-   * Diagnostic only: signs the same unlock message twice to verify provider byte stability.
-   */
-  async checkSignatureStability(
-    signMessage: SignMessageFn,
-    address: Address,
-    providerId: string,
-  ): Promise<SignatureStabilityResult> {
-    const message = createEncryptionUnlockMessage(address);
-    const firstSignature = await signMessage(message);
-    const secondSignature = await signMessage(message);
-    const firstCanonicalSignature = canonicalizeEvmSignature(firstSignature);
-    const secondCanonicalSignature = canonicalizeEvmSignature(secondSignature);
-
-    return {
-      providerId,
-      address: address.toLowerCase() as Address,
-      messageHash: hashMessage(message),
-      firstSignatureHash: sha256(firstCanonicalSignature),
-      secondSignatureHash: sha256(secondCanonicalSignature),
-      stable: firstCanonicalSignature === secondCanonicalSignature,
-    };
-  },
-
-  /**
-   * Unlock crypto session through remembered-device first, wallet signature fallback second.
-   * Deduplicates concurrent calls for the same session.
-   */
-  async unlock(
-    signMessage: SignMessageFn,
-    wrappedPersonalKey: WrappedPersonalKey,
-    address: Address,
-    personalPublicKey: PublicEncryptionKey,
-    getUserKeyShare: GetUserKeyShareFn,
+  unlockWithPassword(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+    password: string,
+    rememberDevice: boolean,
   ): Promise<void> {
-    const targetSession = createCryptoSessionIdentity(wrappedPersonalKey, address);
-
-    if (_isActive && isSameCryptoSession(activeSession, targetSession)) {
-      return;
-    }
-
-    if (unlockPromise) {
-      if (isSameCryptoSession(unlockSession, targetSession)) {
-        return unlockPromise;
-      }
-
-      await unlockPromise.catch(() => undefined);
-    }
-
-    if (_isActive) {
-      await this.clear();
-    }
-
-    unlockSession = targetSession;
-    unlockPromise = (async () => {
-      await runOnWorker(async (api) => {
-        const didUnlockWithRememberedDevice = await api
-          .tryUnlockWithRememberedDevice(wrappedPersonalKey, address, personalPublicKey)
-          .catch(() => false);
-
-        if (isResetting) {
-          throw new Error('Crypto runtime was reset while unlocking');
-        }
-
-        if (!didUnlockWithRememberedDevice) {
-          const signature = await this.ensureSignature(signMessage, address);
-          const { keyShare } = await getUserKeyShare();
-
-          await api.unlock(signature, wrappedPersonalKey, address, personalPublicKey, keyShare);
-        }
-
-        if (isResetting) {
-          throw new Error('Crypto runtime was reset while unlocking');
-        }
-      });
-
-      activeSession = targetSession;
-      _isActive = true;
-      notify();
-    })();
-
-    try {
-      await unlockPromise;
-    } finally {
-      if (isSameCryptoSession(unlockSession, targetSession)) {
-        unlockPromise = null;
-        unlockSession = null;
-      }
-    }
+    return unlockIdentity(wrapped, userId, (api) =>
+      api.unlockWithPassword(wrapped, userId, publicKey, password, rememberDevice),
+    );
   },
 
-  isActiveFor(wrappedPersonalKey: WrappedPersonalKey, address: Address): boolean {
-    return _isActive && isSameCryptoSession(activeSession, createCryptoSessionIdentity(wrappedPersonalKey, address));
+  unlockWithRecoveryCode(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+    recoveryCode: string,
+    rememberDevice: boolean,
+  ): Promise<void> {
+    return unlockIdentity(wrapped, userId, (api) =>
+      api.unlockWithRecoveryCode(wrapped, userId, publicKey, recoveryCode, rememberDevice),
+    );
+  },
+
+  async tryUnlockWithRememberedDevice(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+  ): Promise<boolean> {
+    resetRuntimeState();
+    notify();
+
+    const generation = lifecycle;
+    const unlocked = await runOnWorker((api) => api.tryUnlockWithRememberedDevice(wrapped, userId, publicKey));
+
+    assertLifecycle(generation);
+
+    if (unlocked) {
+      activeSession = createCryptoSessionIdentity(wrapped, userId);
+
+      _isActive = true;
+
+      notify();
+    }
+
+    return unlocked;
+  },
+
+  isActiveFor(wrapped: WrappedUserKey, userId: string): boolean {
+    return _isActive && isSameCryptoSession(activeSession, createCryptoSessionIdentity(wrapped, userId));
   },
 
   /**
-   * Session is fully initialized (personal key available in Worker).
+   * Session is fully initialized (user key available in Worker).
    * Synchronous — uses cached value on main thread.
    */
   isActive(): boolean {
@@ -249,6 +224,9 @@ export const CryptoProxy = {
    * Wipe all cached keys in Worker + reset main thread state.
    */
   async clear(): Promise<void> {
+    resetRuntimeState();
+    notify();
+
     try {
       if (workerClient) {
         await workerClient.run((api) => api.clear());
@@ -266,6 +244,7 @@ export const CryptoProxy = {
 
   reset(): void {
     isResetting = true;
+
     terminateWorker();
     notify();
   },
@@ -288,8 +267,6 @@ export const CryptoProxy = {
       listeners.delete(listener);
     };
   },
-
-  // --- Application Encryption ---
 
   async encryptApplication(
     vaultPublicKey: PublicEncryptionKey,
@@ -315,7 +292,7 @@ export const CryptoProxy = {
   async decryptApplication(
     envelope: EncryptedEnvelope,
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    wrappedVaultKey: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<Record<string, unknown>> {
     return runOnWorker((api) => api.decryptApplication(envelope, orgId, wrappedVaultKey, context));
@@ -323,15 +300,13 @@ export const CryptoProxy = {
 
   async rewrapEnvelopeKey(
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    wrappedVaultKey: VaultKeyAccess,
     sourceKey: EnvelopeKey,
     context: CryptoContextInput,
     recipient: RecipientDescriptor,
   ): Promise<EnvelopeKey> {
     return runOnWorker((api) => api.rewrapEnvelopeKey(orgId, wrappedVaultKey, sourceKey, context, recipient));
   },
-
-  // --- File Encryption (Resume PDF) ---
 
   async encryptFile(
     vaultPublicKey: PublicEncryptionKey,
@@ -365,15 +340,13 @@ export const CryptoProxy = {
   async decryptFile(
     blob: Uint8Array,
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    wrappedVaultKey: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<Uint8Array> {
     return runOnWorker((api) =>
       api.decryptFile(Comlink.transfer(blob, [blob.buffer]), orgId, wrappedVaultKey, context),
     );
   },
-
-  // --- Email Content Encryption ---
 
   async encryptEmailContent(
     data: unknown,
@@ -397,7 +370,7 @@ export const CryptoProxy = {
   async decryptEmailContentForOrganization(
     envelope: EncryptedEnvelope,
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    wrappedVaultKey: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<unknown> {
     return runOnWorker((api) => api.decryptEmailContentForOrganization(envelope, orgId, wrappedVaultKey, context));
@@ -407,39 +380,105 @@ export const CryptoProxy = {
     return runOnWorker((api) => api.decryptEmailContentForApplicant(envelope, context));
   },
 
-  // --- Key Generation ---
+  async initializeUserKey(userId: string, password: string, rememberDevice: boolean) {
+    await this.clear();
 
-  async generateAndWrapPersonalKey(
-    signature: Hex,
-    address: Address,
-    keyShare: string,
-  ): Promise<{ publicKey: PublicEncryptionKey; encryptedPersonalKey: WrappedPersonalKey }> {
-    return runOnWorker((api) => api.generateAndWrapPersonalKey(signature, address, keyShare));
+    const generation = lifecycle;
+    const result = await runOnWorker((api) => api.initializeUserKey(userId, password, rememberDevice));
+
+    assertLifecycle(generation);
+
+    activeSession = createCryptoSessionIdentity(result.encryptedUserKey, userId);
+    _isActive = true;
+
+    notify();
+
+    return result;
   },
 
-  async generateAndWrapVaultKey(
-    ownerPublicKey: PublicEncryptionKey,
-  ): Promise<{ vaultPublicKey: PublicEncryptionKey; wrappedVaultKey: WrappedKey }> {
-    return runOnWorker((api) => api.generateAndWrapVaultKey(ownerPublicKey));
+  async resetUserKey(userId: string, previous: WrappedUserKey, password: string, rememberDevice: boolean) {
+    await this.clear();
+
+    const generation = lifecycle;
+    const result = await runOnWorker((api) => api.resetUserKey(userId, previous, password, rememberDevice));
+
+    assertLifecycle(generation);
+
+    activeSession = createCryptoSessionIdentity(result.encryptedUserKey, userId);
+    _isActive = true;
+
+    notify();
+
+    return result;
   },
 
-  // --- Vault Access ---
-
-  async grantVaultAccess(ownWrappedVaultKey: WrappedKey, memberPublicKey: PublicEncryptionKey): Promise<WrappedKey> {
-    return runOnWorker((api) => api.grantVaultAccess(ownWrappedVaultKey, memberPublicKey));
+  rewrapUserKey(
+    wrapped: WrappedUserKey,
+    options: { password?: string; rotateRecoveryCode: boolean; repairShare: boolean },
+  ) {
+    return runOnWorker((api) => api.rewrapUserKey(wrapped, options));
   },
 
-  // --- Tag Hash ---
+  async rewrapWithRememberedDevice(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+    options: { password: string; rotateRecoveryCode: boolean; repairShare: boolean },
+  ) {
+    const generation = lifecycle;
+    const result = await runOnWorker((api) => api.rewrapWithRememberedDevice(wrapped, userId, publicKey, options));
 
-  async hashTagLabel(orgId: string, wrappedVaultKey: WrappedKey, label: string): Promise<string> {
+    assertLifecycle(generation);
+
+    activeSession = createCryptoSessionIdentity(result.encryptedUserKey, userId);
+    _isActive = true;
+
+    notify();
+
+    return result;
+  },
+
+  async forgetRememberedDevice(wrapped: WrappedUserKey, userId: string, publicKey: PublicEncryptionKey): Promise<void> {
+    resetRuntimeState();
+    notify();
+
+    await runOnWorker((api) => api.forgetRememberedDevice(wrapped, userId, publicKey));
+  },
+
+  async logout(
+    allDevices: boolean,
+    identity?: { wrapped: WrappedUserKey; userId: string; publicKey: PublicEncryptionKey },
+  ): Promise<void> {
+    resetRuntimeState();
+    notify();
+
+    try {
+      await runOnWorker((api) => api.logout(allDevices, identity));
+    } finally {
+      terminateWorker();
+      notify();
+    }
+  },
+
+  generateAndWrapVaultKey(orgId: string, ownerPublicKey: PublicEncryptionKey): Promise<VaultKeyAccess> {
+    return runOnWorker((api) => api.generateAndWrapVaultKey(orgId, ownerPublicKey));
+  },
+
+  grantVaultAccess(
+    ownAccess: VaultKeyAccess,
+    memberPublicKey: PublicEncryptionKey,
+    recipient: Pick<VaultKeyContext, 'recipientUserId' | 'recipientKeyVersion'>,
+  ): Promise<WrappedKey> {
+    return runOnWorker((api) => api.grantVaultAccess(ownAccess, memberPublicKey, recipient));
+  },
+
+  async hashTagLabel(orgId: string, wrappedVaultKey: VaultKeyAccess, label: string): Promise<string> {
     return runOnWorker((api) => api.hashTagLabel(orgId, wrappedVaultKey, label));
   },
 
-  // --- Custom Field Hash ---
-
   async hashCustomFieldValue(
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    wrappedVaultKey: VaultKeyAccess,
     fieldId: string,
     fieldType: SearchableCustomFieldType,
     plaintext: unknown,
@@ -449,7 +488,7 @@ export const CryptoProxy = {
 
   async hashCandidateProfileSearchValue(
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    wrappedVaultKey: VaultKeyAccess,
     field: CandidateProfileSearchField,
     value: string | number,
   ): Promise<string> {
@@ -458,7 +497,7 @@ export const CryptoProxy = {
 
   async hashCategoricalFormFieldValue(
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    wrappedVaultKey: VaultKeyAccess,
     fieldId: string,
     kind: CategoricalFormFieldKind,
     value: boolean | string,

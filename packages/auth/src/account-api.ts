@@ -16,7 +16,7 @@ interface AuthApiTransport {
 }
 
 interface InitializeEncryptionKeyBundleInput {
-  encryptedPersonalKey: unknown;
+  encryptedUserKey: unknown;
   publicKey: PublicEncryptionKey;
 }
 

@@ -1,22 +1,18 @@
-import {
-  type WalletSignaturePersonalKeyWrapper,
-  type WrappedPersonalKey,
-  wrappedPersonalKeySchema,
-} from '@comitium/crypto/personal-key';
 import { base64BytesSchema, publicEncryptionKeySchema } from '@comitium/crypto/schemas';
+import { type WrappedUserKey, wrappedUserKeySchema } from '@comitium/crypto/user-key';
 import { z } from 'zod';
 import { walletAddressSchema } from './public';
 
 // --- User ---
 
-export { wrappedPersonalKeySchema };
-export type { WalletSignaturePersonalKeyWrapper, WrappedPersonalKey };
+export { wrappedUserKeySchema };
+export type { WrappedUserKey };
 
 export const userSchema = z.object({
   id: z.string(),
   walletAddress: walletAddressSchema,
   publicKey: publicEncryptionKeySchema.nullable(),
-  encryptedPersonalKey: wrappedPersonalKeySchema.nullable(),
+  encryptedUserKey: wrappedUserKeySchema.nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

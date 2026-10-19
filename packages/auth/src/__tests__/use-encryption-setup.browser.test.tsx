@@ -8,7 +8,7 @@ import { useEncryptionSetup } from '../use-encryption-setup';
 const mocks = vi.hoisted(() => ({
   address: '0x1111111111111111111111111111111111111111' as string | undefined,
   ensureSignature: vi.fn(),
-  generateAndWrapPersonalKey: vi.fn(),
+  generateAndWrapUserKey: vi.fn(),
   signMessage: vi.fn(),
 }));
 
@@ -20,22 +20,22 @@ vi.mock('@comitium/auth/use-wallet', () => ({
 vi.mock('@comitium/crypto', () => ({
   CryptoProxy: {
     ensureSignature: mocks.ensureSignature,
-    generateAndWrapPersonalKey: mocks.generateAndWrapPersonalKey,
+    generateAndWrapUserKey: mocks.generateAndWrapUserKey,
   },
 }));
 
 const SESSION_QUERY_KEY = ['session', 'did:privy:user-1'] as const;
 const WALLET_ADDRESS = '0x1111111111111111111111111111111111111111';
 const wrappedKeys = {
-  encryptedPersonalKey: {
+  encryptedUserKey: {
     v: 1 as const,
-    pk: { ek: 'personal-key', iv: 'personal-key-iv' },
+    pk: { ek: 'user-key', iv: 'user-key-iv' },
     wraps: [
       {
         method: 'wallet_signature' as const,
         kdf: 'signature+share' as const,
         id: `evm:${WALLET_ADDRESS}`,
-        ek: 'wrapped-personal-key',
+        ek: 'wrapped-user-key',
         iv: 'wrapper-iv',
         salt: 'wrapper-salt',
       },
@@ -47,7 +47,7 @@ const readyUser = {
   id: 'user-1',
   walletAddress: WALLET_ADDRESS,
   publicKey: wrappedKeys.publicKey,
-  encryptedPersonalKey: wrappedKeys.encryptedPersonalKey,
+  encryptedUserKey: wrappedKeys.encryptedUserKey,
   createdAt: '2026-08-28T00:00:00.000Z',
   updatedAt: '2026-08-28T00:00:00.000Z',
 } satisfies User;
@@ -76,8 +76,8 @@ beforeEach(() => {
   mocks.address = '0x1111111111111111111111111111111111111111';
   mocks.ensureSignature.mockReset();
   mocks.ensureSignature.mockResolvedValue('0xsignature');
-  mocks.generateAndWrapPersonalKey.mockReset();
-  mocks.generateAndWrapPersonalKey.mockResolvedValue(wrappedKeys);
+  mocks.generateAndWrapUserKey.mockReset();
+  mocks.generateAndWrapUserKey.mockResolvedValue(wrappedKeys);
   mocks.signMessage.mockReset();
 });
 
@@ -97,7 +97,7 @@ describe('useEncryptionSetup', () => {
 
     expect(mocks.ensureSignature).toHaveBeenCalledWith(mocks.signMessage, '0x1111111111111111111111111111111111111111');
     expect(getUserKeyShare).toHaveBeenCalledTimes(1);
-    expect(mocks.generateAndWrapPersonalKey).toHaveBeenCalledWith(
+    expect(mocks.generateAndWrapUserKey).toHaveBeenCalledWith(
       '0xsignature',
       '0x1111111111111111111111111111111111111111',
       'server-share',
@@ -126,7 +126,7 @@ describe('useEncryptionSetup', () => {
   });
 
   it('fails when the session still has no complete key bundle after initialization', async () => {
-    const client = createQueryClient({ ...readyUser, encryptedPersonalKey: null });
+    const client = createQueryClient({ ...readyUser, encryptedUserKey: null });
     const hook = await renderHook(
       () =>
         useEncryptionSetup({

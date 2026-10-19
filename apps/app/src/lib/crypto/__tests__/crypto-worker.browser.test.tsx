@@ -12,9 +12,9 @@ afterEach(async () => {
 
 describe('crypto worker connection', () => {
   it('executes a cryptographic operation through the real Worker and Comlink remote', async () => {
-    const result = await CryptoProxy.generateAndWrapPersonalKey(SIGNATURE, ADDRESS, KEY_SHARE);
+    const result = await CryptoProxy.generateAndWrapUserKey(SIGNATURE, ADDRESS, KEY_SHARE);
 
     expect(result.publicKey.xwing).toBeTypeOf('string');
-    expect(result.encryptedPersonalKey.wraps).toHaveLength(1);
+    expect(result.encryptedUserKey.wraps).toHaveLength(1);
   });
 });

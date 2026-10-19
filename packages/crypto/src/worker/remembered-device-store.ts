@@ -1,227 +1,173 @@
-import { bytesToHex, randomBytes } from '@noble/hashes/utils.js';
+import { randomBytes } from '@noble/hashes/utils.js';
 import { base64 } from '@scure/base';
-import { createStore, del, get, set } from 'idb-keyval';
-import type { Address } from 'viem';
-import { z } from 'zod';
+import { clear, createStore, del, get, keys, update } from 'idb-keyval';
 
-import { isCanonicalAddress, isCanonicalIsoDateString, isCryptoKey, isDefined } from '../runtime-guards';
-import { aesGcmIvSchema, base64StringSchema, type PublicEncryptionKey, publicEncryptionKeySchema } from '../schemas';
-import type { CryptoSessionIdentity } from '../session';
-import { formatCryptoSessionIdentity } from '../session';
-import { isSamePublicEncryptionKey, serializePublicEncryptionKey } from '../xwing';
+import { aesGcmParams, decryptBinaryData, encryptBinaryData } from '../data-encryption';
+import { keyContextBytes } from '../key-context';
+import {
+  type DeviceBinding,
+  type RememberedDeviceContext,
+  type RememberedDeviceRecord,
+  rememberedDeviceCiphertextSchema,
+  rememberedDeviceRecordSchema,
+} from '../schemas/remembered-device';
+import { type CryptoSessionIdentity, formatCryptoSessionIdentity } from '../session';
+import { isSamePublicEncryptionKey } from '../xwing';
 
-const DB_NAME = 'comitium_crypto';
-const STORE_NAME = 'comitium_crypto_device_unlocks';
-const REMEMBERED_DEVICE_RECORD_VERSION = 1;
-const REMEMBERED_DEVICE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const REMEMBERED_DEVICE_CLOCK_TOLERANCE_MS = 5 * 60 * 1000;
-const REMEMBERED_DEVICE_PURPOSE = 'comitium.remembered-device-unlock';
-const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/;
-const DEVICE_ID_HEX_REGEX = /^[a-f0-9]{32}$/;
-const nonEmptyStringSchema = z.string().min(1);
-const sha256HexSchema = z.string().regex(SHA256_HEX_REGEX);
-const deviceIdHexSchema = z.string().regex(DEVICE_ID_HEX_REGEX);
+const rememberedDeviceStore = createStore('comitium_crypto', 'comitium_crypto_device_unlocks');
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value instanceof Object && !Array.isArray(value);
-}
-
-const rememberedDeviceStore = createStore(DB_NAME, STORE_NAME);
-
-export interface RememberedDeviceUnlockRecord {
-  v: 1;
-  walletAddress: Address;
-  personalPublicKey: PublicEncryptionKey;
-  wrappedPersonalKeyFingerprint: string;
-  deviceId: string;
-  deviceUnlockKey: CryptoKey;
-  iv: string;
-  ct: string;
-  createdAt: string;
-  expiresAt: string;
-}
-
-export interface RememberedDeviceStoreParams {
-  identity: CryptoSessionIdentity;
-  personalPublicKey: PublicEncryptionKey;
-}
-
-type RememberedDeviceAadRecord = Omit<RememberedDeviceUnlockRecord, 'deviceUnlockKey' | 'iv' | 'ct'>;
-
+/**
+ * IndexedDB holds only the outer, non-extractable key and doubly encrypted U.
+ */
 export class RememberedDeviceStore {
-  async load(params: RememberedDeviceStoreParams): Promise<RememberedDeviceUnlockRecord | null> {
-    if (!canUseRememberedDeviceStorage()) {
+  private generation = 0;
+
+  async load(params: RememberedDeviceContext): Promise<RememberedDeviceRecord | null> {
+    if (!globalThis.indexedDB) {
       return null;
     }
 
     const key = formatCryptoSessionIdentity(params.identity);
-    const record = await get<unknown>(key, rememberedDeviceStore);
+    const value = await get<unknown>(key, rememberedDeviceStore);
 
-    if (!isDefined(record)) {
+    if (value === undefined) {
       return null;
     }
 
-    if (!isUsableRecord(record, params)) {
+    const result = rememberedDeviceRecordSchema.safeParse(value);
+
+    if (
+      !result.success ||
+      result.data.userId !== params.identity.userId ||
+      result.data.keyVersion !== params.identity.keyVersion ||
+      result.data.encryptedKeyFingerprint !== params.identity.encryptedKeyFingerprint ||
+      !isSamePublicEncryptionKey(result.data.userPublicKey, params.userPublicKey)
+    ) {
       await del(key, rememberedDeviceStore);
 
       return null;
     }
 
-    return record;
+    return result.data;
   }
 
-  async save(params: RememberedDeviceStoreParams, personalKeyWrappingKey: Uint8Array): Promise<void> {
-    if (!canUseRememberedDeviceStorage()) {
-      return;
+  async save(
+    params: RememberedDeviceContext,
+    deviceId: string,
+    serverDeviceKey: Uint8Array,
+    unlockKey: Uint8Array,
+    assertSessionCurrent: () => void = () => {},
+  ): Promise<void> {
+    if (!globalThis.indexedDB) {
+      throw new Error('Remembered-device storage is unavailable');
     }
 
-    const record = await createRememberedDeviceRecord(params, personalKeyWrappingKey);
+    const generation = this.generation;
 
-    await set(formatCryptoSessionIdentity(params.identity), record, rememberedDeviceStore);
-  }
+    const assertCurrent = () => {
+      assertSessionCurrent();
 
-  async delete(identity: CryptoSessionIdentity): Promise<void> {
-    if (!canUseRememberedDeviceStorage()) {
-      return;
+      if (generation !== this.generation) {
+        throw new Error('Remembered-device storage was cleared during the operation');
+      }
+    };
+
+    const localDeviceKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, [
+      'encrypt',
+      'decrypt',
+    ]);
+
+    const binding: DeviceBinding = { v: 1, ...params.identity, userPublicKey: params.userPublicKey, deviceId };
+    const inner = await encryptBinaryData(unlockKey, serverDeviceKey, deviceAad(binding, 'server'));
+    const plaintext = new TextEncoder().encode(JSON.stringify({ ct: base64.encode(inner.ct), iv: inner.iv }));
+    const iv = randomBytes(12);
+
+    try {
+      const encrypted = await crypto.subtle.encrypt(
+        aesGcmParams(iv, deviceAad(binding, 'local')),
+        localDeviceKey,
+        plaintext,
+      );
+
+      const record = rememberedDeviceRecordSchema.parse({
+        ...binding,
+        localDeviceKey,
+        iv: base64.encode(iv),
+        ct: base64.encode(new Uint8Array(encrypted)),
+      });
+
+      const allKeys = await keys(rememberedDeviceStore);
+
+      for (const key of allKeys) {
+        if (typeof key === 'string' && key.startsWith(`${params.identity.userId}:`)) {
+          assertCurrent();
+
+          await del(key, rememberedDeviceStore);
+        }
+      }
+
+      await update(
+        formatCryptoSessionIdentity(params.identity),
+        () => {
+          /**
+           * This runs synchronously inside the IDB write transaction, after any pending logout/clear.
+           */
+          assertCurrent();
+
+          return record;
+        },
+        rememberedDeviceStore,
+      );
+    } finally {
+      inner.ct.fill(0);
+      plaintext.fill(0);
     }
-
-    await del(formatCryptoSessionIdentity(identity), rememberedDeviceStore);
   }
 
-  /**
-   * Decrypt a remembered-device record to its PersonalKeyWrappingKey. Bound by the
-   * non-extractable `deviceUnlockKey`; AAD rejects changes to authenticated record metadata.
-   */
-  async decrypt(record: RememberedDeviceUnlockRecord): Promise<Uint8Array> {
-    const plaintext = await crypto.subtle.decrypt(
-      {
-        name: 'AES-GCM',
-        iv: base64.decode(record.iv) as BufferSource,
-        additionalData: rememberedDeviceAad(record),
-      },
-      record.deviceUnlockKey,
+  async decrypt(record: RememberedDeviceRecord, serverDeviceKey: Uint8Array): Promise<Uint8Array> {
+    const outer = await crypto.subtle.decrypt(
+      aesGcmParams(base64.decode(record.iv), deviceAad(record, 'local')),
+      record.localDeviceKey,
       base64.decode(record.ct) as BufferSource,
     );
 
-    return new Uint8Array(plaintext);
+    const plaintext = new Uint8Array(outer);
+
+    try {
+      const inner = rememberedDeviceCiphertextSchema.parse(JSON.parse(new TextDecoder().decode(plaintext)));
+
+      return await decryptBinaryData(base64.decode(inner.ct), inner.iv, serverDeviceKey, deviceAad(record, 'server'));
+    } finally {
+      plaintext.fill(0);
+    }
+  }
+
+  async delete(identity: CryptoSessionIdentity): Promise<void> {
+    if (globalThis.indexedDB) {
+      await del(formatCryptoSessionIdentity(identity), rememberedDeviceStore);
+    }
+  }
+
+  async forgetAll(): Promise<void> {
+    this.generation += 1;
+
+    if (globalThis.indexedDB) {
+      await clear(rememberedDeviceStore);
+    }
   }
 }
 
-async function createRememberedDeviceRecord(
-  params: RememberedDeviceStoreParams,
-  personalKeyWrappingKey: Uint8Array,
-): Promise<RememberedDeviceUnlockRecord> {
-  const deviceUnlockKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, [
-    'encrypt',
-    'decrypt',
-  ]);
-  const now = new Date();
-  const expiresAt = new Date(now.getTime() + REMEMBERED_DEVICE_TTL_MS);
-  const recordBase = {
-    v: REMEMBERED_DEVICE_RECORD_VERSION,
-    walletAddress: params.identity.address,
-    personalPublicKey: params.personalPublicKey,
-    wrappedPersonalKeyFingerprint: params.identity.wrappedPersonalKeyFingerprint,
-    deviceId: bytesToHex(randomBytes(16)),
-    createdAt: now.toISOString(),
-    expiresAt: expiresAt.toISOString(),
-  } satisfies RememberedDeviceAadRecord;
-  const iv = randomBytes(12);
-  const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv: iv as BufferSource, additionalData: rememberedDeviceAad(recordBase) },
-    deviceUnlockKey,
-    personalKeyWrappingKey as BufferSource,
-  );
-
-  return {
-    ...recordBase,
-    deviceUnlockKey,
-    iv: base64.encode(iv),
-    ct: base64.encode(new Uint8Array(encrypted)),
-  };
-}
-
-function isUsableRecord(record: unknown, params: RememberedDeviceStoreParams): record is RememberedDeviceUnlockRecord {
-  if (!isRememberedDeviceRecord(record)) {
-    return false;
-  }
-
-  return (
-    record.walletAddress === params.identity.address &&
-    isSamePublicEncryptionKey(record.personalPublicKey, params.personalPublicKey) &&
-    record.wrappedPersonalKeyFingerprint === params.identity.wrappedPersonalKeyFingerprint &&
-    hasValidLifetime(record)
-  );
-}
-
-function hasValidLifetime(record: RememberedDeviceUnlockRecord): boolean {
-  if (!isCanonicalIsoDateString(record.createdAt) || !isCanonicalIsoDateString(record.expiresAt)) {
-    return false;
-  }
-
-  const createdAt = Date.parse(record.createdAt);
-  const expiresAt = Date.parse(record.expiresAt);
-  const now = Date.now();
-
-  return (
-    createdAt <= now + REMEMBERED_DEVICE_CLOCK_TOLERANCE_MS &&
-    expiresAt - createdAt === REMEMBERED_DEVICE_TTL_MS &&
-    expiresAt > now
-  );
-}
-
-function isRememberedDeviceRecord(record: unknown): record is RememberedDeviceUnlockRecord {
-  if (!isRecord(record)) {
-    return false;
-  }
-
-  return (
-    record.v === REMEMBERED_DEVICE_RECORD_VERSION &&
-    isCanonicalAddress(record.walletAddress) &&
-    publicEncryptionKeySchema.safeParse(record.personalPublicKey).success &&
-    sha256HexSchema.safeParse(record.wrappedPersonalKeyFingerprint).success &&
-    deviceIdHexSchema.safeParse(record.deviceId).success &&
-    isRememberedDeviceCryptoKey(record.deviceUnlockKey) &&
-    aesGcmIvSchema.safeParse(record.iv).success &&
-    base64StringSchema.safeParse(record.ct).success &&
-    nonEmptyStringSchema.safeParse(record.createdAt).success &&
-    nonEmptyStringSchema.safeParse(record.expiresAt).success
-  );
-}
-
-function isRememberedDeviceCryptoKey(value: unknown): value is CryptoKey {
-  if (!isCryptoKey(value)) {
-    return false;
-  }
-
-  return (
-    value.type === 'secret' &&
-    value.extractable === false &&
-    value.algorithm.name === 'AES-GCM' &&
-    value.usages.includes('encrypt') &&
-    value.usages.includes('decrypt')
-  );
-}
-
-/**
- * AES-GCM AAD binding a remembered-device record to its identity (wallet, public key,
- * fingerprint, deviceId). Wire-frozen field set — changing authenticated metadata fails decryption.
- */
-function rememberedDeviceAad(record: RememberedDeviceAadRecord): Uint8Array {
-  return new TextEncoder().encode(
-    JSON.stringify({
-      purpose: REMEMBERED_DEVICE_PURPOSE,
-      v: record.v,
-      walletAddress: record.walletAddress,
-      personalPublicKey: serializePublicEncryptionKey(record.personalPublicKey),
-      wrappedPersonalKeyFingerprint: record.wrappedPersonalKeyFingerprint,
-      deviceId: record.deviceId,
-      createdAt: record.createdAt,
-      expiresAt: record.expiresAt,
-    }),
-  );
-}
-
-function canUseRememberedDeviceStorage(): boolean {
-  return isDefined(globalThis.indexedDB);
+function deviceAad(binding: DeviceBinding, layer: 'server' | 'local'): Uint8Array {
+  /**
+   * v1 transcript field names remain fixed when runtime properties are renamed.
+   */
+  return keyContextBytes({
+    purpose: `comitium.remembered-device-unlock.${layer}`,
+    v: binding.v,
+    userId: binding.userId,
+    keyVersion: binding.keyVersion,
+    personalKeyFingerprint: binding.encryptedKeyFingerprint,
+    personalPublicKey: binding.userPublicKey,
+    deviceId: binding.deviceId,
+  });
 }

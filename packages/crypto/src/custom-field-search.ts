@@ -1,7 +1,6 @@
-import { z } from 'zod';
+import { locationHashValueSchema } from './schemas/search';
 
 const SEARCHABLE_FIELD_TYPES = ['yes_no', 'multiple_choice', 'location'] as const;
-const locationHashValueSchema = z.object({ cityId: z.number() });
 
 export type SearchableCustomFieldType = (typeof SEARCHABLE_FIELD_TYPES)[number];
 

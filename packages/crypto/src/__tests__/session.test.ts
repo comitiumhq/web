@@ -1,38 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { createCryptoSessionIdentity, formatCryptoSessionIdentity, isSameCryptoSession } from '../session';
-import { mockWrappedPersonalKey } from './crypto-helpers';
+import { mockWrappedUserKey } from './crypto-helpers';
+import { OTHER_USER_ID, USER_ID } from './unlock-fixtures';
 
-describe('crypto session identity', () => {
-  it('normalizes wallet address and fingerprints wrapped personal key material', () => {
-    const wrapped = mockWrappedPersonalKey();
-    const identity = createCryptoSessionIdentity(wrapped, '0xABCDEF');
+describe('crypto identity', () => {
+  it('survives password/recovery wrapper changes but rejects pk, user or generation changes', () => {
+    const bundle = mockWrappedUserKey();
+    const identity = createCryptoSessionIdentity(bundle, USER_ID);
+    const changedWrap = structuredClone(bundle);
 
-    expect(identity.address).toBe('0xabcdef');
-    expect(identity.wrappedPersonalKeyFingerprint).toMatch(/^[0-9a-f]{64}$/);
-  });
+    changedWrap.wraps[0].ek = changedWrap.wraps[0].ek.replace(/^A/, 'B');
 
-  it('matches only the same address and wrapped key fingerprint', () => {
-    const wrapped = mockWrappedPersonalKey();
-    const identity = createCryptoSessionIdentity(wrapped, '0xABCDEF');
-    const same = createCryptoSessionIdentity(wrapped, '0xabcdef');
-    const differentAddress = createCryptoSessionIdentity(wrapped, '0x123456');
-    const differentKey = createCryptoSessionIdentity(
-      mockWrappedPersonalKey({
-        pk: { ek: 'different-ek', iv: wrapped.pk.iv },
-        wraps: wrapped.wraps,
-      }),
-      '0xABCDEF',
+    expect(isSameCryptoSession(identity, createCryptoSessionIdentity(changedWrap, USER_ID))).toBe(true);
+    expect(
+      isSameCryptoSession(
+        identity,
+        createCryptoSessionIdentity({ ...bundle, pk: { ...bundle.pk, ek: 'AQ==' } }, USER_ID),
+      ),
+    ).toBe(false);
+    expect(isSameCryptoSession(identity, createCryptoSessionIdentity(bundle, OTHER_USER_ID))).toBe(false);
+    expect(isSameCryptoSession(identity, createCryptoSessionIdentity({ ...bundle, keyVersion: 2 }, USER_ID))).toBe(
+      false,
     );
-
-    expect(isSameCryptoSession(identity, same)).toBe(true);
-    expect(isSameCryptoSession(identity, differentAddress)).toBe(false);
-    expect(isSameCryptoSession(identity, differentKey)).toBe(false);
-    expect(isSameCryptoSession(null, identity)).toBe(false);
-  });
-
-  it('formats identity for diagnostics without dropping fingerprint data', () => {
-    const identity = createCryptoSessionIdentity(mockWrappedPersonalKey(), '0xABCDEF');
-
-    expect(formatCryptoSessionIdentity(identity)).toBe(`${identity.address}:${identity.wrappedPersonalKeyFingerprint}`);
+    expect(formatCryptoSessionIdentity(identity)).toBe(`${USER_ID}:1`);
   });
 });

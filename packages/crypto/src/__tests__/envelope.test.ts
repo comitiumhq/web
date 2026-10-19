@@ -41,7 +41,7 @@ describe('encrypted envelope', () => {
     const data = { subject: 'Interview', body: 'Hello' };
     const envelope = await encryptEnvelope(data, emailContext, [
       orgVaultRecipient(vault.publicKey, 1),
-      applicantRecipient(TEST_KEYS.alice.publicKey),
+      applicantRecipient(TEST_KEYS.alice.publicKey, 1),
     ]);
 
     const orgDecrypted = await decryptEnvelope(envelope, emailContext, {
@@ -154,7 +154,7 @@ describe('encrypted envelope', () => {
     await expect(
       encryptEnvelope({ ok: true }, resumeContext, [
         orgVaultRecipient(vault.publicKey, 1),
-        applicantRecipient(TEST_KEYS.alice.publicKey),
+        applicantRecipient(TEST_KEYS.alice.publicKey, 1),
       ]),
     ).rejects.toThrow('encrypted_file can only use org_vault and processor recipients');
   });
@@ -220,7 +220,7 @@ describe('encrypted envelope', () => {
     const vault = generateVaultKeyPair();
     const envelope = await encryptEnvelope({ ok: true }, emailContext, [
       orgVaultRecipient(vault.publicKey, 1),
-      applicantRecipient(TEST_KEYS.alice.publicKey),
+      applicantRecipient(TEST_KEYS.alice.publicKey, 1),
     ]);
     const orgVaultKey = envelope.keys.find((key) => key.recipient === 'org_vault');
 

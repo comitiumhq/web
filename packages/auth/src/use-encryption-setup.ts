@@ -8,7 +8,7 @@ import { normalizeAddress } from './address';
 import { useAccount, useSignMessage } from './use-wallet';
 
 interface InitializeEncryptionKeyBundleInput {
-  encryptedPersonalKey: unknown;
+  encryptedUserKey: unknown;
   publicKey: PublicEncryptionKey;
 }
 
@@ -36,7 +36,7 @@ export function useEncryptionSetup({
       const signer = normalizeAddress(address);
       const signature = await CryptoProxy.ensureSignature(signMessage, signer);
       const { keyShare } = await getUserKeyShare();
-      const encryptionKeys = await CryptoProxy.generateAndWrapPersonalKey(signature, signer, keyShare);
+      const encryptionKeys = await CryptoProxy.generateAndWrapUserKey(signature, signer, keyShare);
 
       let requestError: unknown;
 

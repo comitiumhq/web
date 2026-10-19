@@ -1,35 +1,17 @@
 import { randomBytes } from '@noble/hashes/utils.js';
-import { z } from 'zod';
-import { type CryptoContextInput, cryptoPurposeSchema, dataAad, keyWrapAad } from './context';
+import { type CryptoContextInput, dataAad, keyWrapAad } from './context';
 import { decryptBinaryData, encryptBinaryData } from './data-encryption';
 import { envelopeKeyToWrappedKey, unwrapDek, wrapRecipientKey } from './envelope-key';
 import { assertAllowedRecipients } from './recipient-policy';
 import { orgVaultRecipient, type RecipientDescriptor } from './recipients';
-import {
-  aesGcmIvSchema,
-  algorithmSuiteVersionSchema,
-  type EnvelopeKey,
-  envelopeKeySchema,
-  type PublicEncryptionKey,
-} from './schemas';
+import type { EnvelopeKey, PublicEncryptionKey } from './schemas';
+import { type EncryptedFileMetadata, encryptedFileMetadataSchema } from './schemas/file';
 import { ALGORITHM_SUITE_VERSION } from './version';
 
 /**
  * Blob format: [4 bytes metadata length (uint32 BE)] [metadata JSON] [ciphertext]
  */
 const HEADER_SIZE = 4;
-
-const encryptedFileMetadataSchema = z
-  .object({
-    v: algorithmSuiteVersionSchema,
-    purpose: cryptoPurposeSchema,
-    iv: aesGcmIvSchema,
-    keys: z.array(envelopeKeySchema).min(1),
-    originalSize: z.number().int().min(0),
-  })
-  .strict();
-
-type EncryptedFileMetadata = z.infer<typeof encryptedFileMetadataSchema>;
 
 export type EncryptedFileWithOverlays = {
   blob: Uint8Array;
@@ -48,7 +30,7 @@ function packEncryptedBlob(metadata: EncryptedFileMetadata, ciphertext: Uint8Arr
   return result;
 }
 
-function unpackEncryptedBlob(blob: Uint8Array): { metadata: EncryptedFileMetadata; ciphertext: Uint8Array } {
+export function unpackEncryptedBlob(blob: Uint8Array): { metadata: EncryptedFileMetadata; ciphertext: Uint8Array } {
   if (blob.length < HEADER_SIZE) {
     throw new Error('Invalid encrypted blob: too short');
   }

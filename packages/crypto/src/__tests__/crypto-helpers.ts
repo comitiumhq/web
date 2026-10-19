@@ -1,9 +1,8 @@
 import { ml_kem768_x25519 } from '@noble/post-quantum/hybrid.js';
 import { base64 } from '@scure/base';
-import type { Address, Hex } from 'viem';
-import type { WrappedKey } from '../envelope-key';
-import type { WrappedPersonalKey } from '../personal-key';
 import type { PublicEncryptionKey } from '../schemas';
+import type { WrappedKey } from '../schemas/keys';
+import type { WrappedUserKey } from '../schemas/user-key';
 import { ALGORITHM_SUITE_VERSION } from '../version';
 
 function makeKeyPair(privHex: string) {
@@ -18,9 +17,6 @@ export const TEST_KEYS = {
   bob: makeKeyPair('abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789'),
   charlie: makeKeyPair('1111111111111111111111111111111111111111111111111111111111111111'),
 };
-
-export const TEST_ADDRESS = '0x1AD16Bd08fC819abc7D0F43cFFde517591D56b59' as Address;
-export const TEST_SIGNATURE = `0x${'11'.repeat(32)}${'22'.repeat(32)}1b` as Hex;
 
 export function randomDek(): Uint8Array {
   const dek = new Uint8Array(32);
@@ -85,19 +81,28 @@ export function mockWrappedKey(overrides?: Partial<WrappedKey>): WrappedKey {
   };
 }
 
-/** Mock WrappedPersonalKey structure for tests that don't need real crypto. */
-export function mockWrappedPersonalKey(overrides?: Partial<WrappedPersonalKey>): WrappedPersonalKey {
+/**
+ * Mock WrappedUserKey structure for tests that do not need real crypto.
+ */
+export function mockWrappedUserKey(overrides?: Partial<WrappedUserKey>): WrappedUserKey {
   return {
     v: 1,
-    pk: { ek: 'enc', iv: 'nn' },
+    keyVersion: 1,
+    pk: { ek: base64.encode(new Uint8Array(80)), iv: base64.encode(new Uint8Array(12)) },
     wraps: [
       {
-        method: 'wallet_signature',
-        kdf: 'signature+share',
-        id: 'evm:0x1ad16bd08fc819abc7d0f43cffde517591d56b59',
-        ek: 'wrap',
-        iv: 'ww',
-        salt: 'ss',
+        method: 'password',
+        id: '0199a000-0000-7000-8000-000000000010',
+        kdf: { alg: 'argon2id', m: 65536, t: 3, p: 4, salt: base64.encode(new Uint8Array(16)) },
+        ek: base64.encode(new Uint8Array(48)),
+        iv: base64.encode(new Uint8Array(12)),
+      },
+      {
+        method: 'recovery_code',
+        id: '0199a000-0000-7000-8000-000000000011',
+        kdf: { alg: 'hkdf-sha256', salt: base64.encode(new Uint8Array(32)) },
+        ek: base64.encode(new Uint8Array(48)),
+        iv: base64.encode(new Uint8Array(12)),
       },
     ],
     ...overrides,

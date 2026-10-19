@@ -72,6 +72,17 @@ export function isSamePublicEncryptionKey(left: PublicEncryptionKey, right: Publ
   return left.v === right.v && left.xwing === right.xwing;
 }
 
+export function assertEncryptionKeyPair(privateKey: Uint8Array, expectedPublicKey: PublicEncryptionKey): void {
+  assertXWingSecretKeyBytes(privateKey);
+
+  const expected = publicEncryptionKeySchema.parse(expectedPublicKey);
+  const actual = base64.encode(ml_kem768_x25519.getPublicKey(privateKey));
+
+  if (actual !== expected.xwing) {
+    throw new Error('Private key does not match the expected public key');
+  }
+}
+
 /**
  * Encapsulate to an X-Wing public key (X25519+ML-KEM-768). @noble combiner is
  * authoritative — don't reimplement; `epk` is not a standalone X25519 key.
@@ -95,7 +106,9 @@ export function encapsulateXWing(publicKey: PublicEncryptionKey): {
 
   return {
     sharedSecret,
-    // X-Wing returns kemCt || epk; envelopes keep them split for explicit validation.
+    /**
+     * X-Wing returns kemCt || epk; envelopes keep them split for explicit validation.
+     */
     ciphertext: {
       kemCt: base64.encode(cipherText.slice(0, XWING_MLKEM_CIPHERTEXT_BYTES)),
       epk: bytesToHex(cipherText.slice(XWING_MLKEM_CIPHERTEXT_BYTES)),
@@ -144,7 +157,7 @@ export async function deriveXWingKeyEncryptionKey(params: {
   ciphertext: XWingCiphertextParts;
   recipientPublicKeyBytes: Uint8Array;
   aad?: Uint8Array;
-  usages: KeyUsage[];
+  usages: ('encrypt' | 'decrypt')[];
 }): Promise<CryptoKey> {
   assertXWingSharedSecretBytes(params.sharedSecret);
 

@@ -18,7 +18,10 @@ export class CryptoWorkerClient {
   private disposed = false;
   private resolveFailure!: (error: Error) => void;
 
-  constructor(private readonly onFailure: () => void) {
+  constructor(
+    private readonly onFailure: () => void,
+    apiBaseUrl?: string,
+  ) {
     if (!globalThis.Worker) {
       throw new Error('CryptoProxy requires a browser environment (Web Workers not available)');
     }
@@ -41,10 +44,16 @@ export class CryptoWorkerClient {
     }, WORKER_STARTUP_TIMEOUT_MS);
 
     this.readyPromise = this.raceFailure(this.remote.ready())
-      .then(() => undefined)
+      .then(async () => {
+        if (apiBaseUrl) {
+          await this.raceFailure(this.remote.configure(apiBaseUrl));
+        }
+      })
       .finally(() => globalThis.clearTimeout(timeoutId));
 
-    // Eager init has no caller to observe a startup rejection.
+    /**
+     * Eager init has no caller to observe a startup rejection.
+     */
     void this.readyPromise.catch(() => undefined);
   }
 

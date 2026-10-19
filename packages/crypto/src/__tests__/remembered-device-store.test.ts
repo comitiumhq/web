@@ -1,229 +1,148 @@
-import type { Address } from 'viem';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockPublicEncryptionKey } from './crypto-helpers';
+import { publicEncryptionKeySchema } from '../schemas';
+import { TEST_KEYS } from './crypto-helpers';
+import vector from './fixtures/key-protocol-v1.json';
+import { DEVICE_ID, OTHER_USER_ID, UNLOCK_KEY, USER_ID } from './unlock-fixtures';
 
-const idbKeyvalMock = vi.hoisted(() => ({
-  createStore: vi.fn(() => 'remembered-device-store'),
-  del: vi.fn(),
-  delMany: vi.fn(),
-  entries: vi.fn(),
-  get: vi.fn(),
-  set: vi.fn(),
+const storage = vi.hoisted(() => new Map<string, unknown>());
+
+vi.mock('idb-keyval', () => ({
+  createStore: () => 'device-test-store',
+  get: async (key: string) => storage.get(key),
+  update: async (key: string, updater: (value: unknown) => unknown) => {
+    storage.set(key, updater(storage.get(key)));
+  },
+  del: async (key: string) => {
+    storage.delete(key);
+  },
+  keys: async () => [...storage.keys()],
+  clear: async () => {
+    storage.clear();
+  },
 }));
 
-vi.mock('idb-keyval', () => idbKeyvalMock);
+import { RememberedDeviceStore } from '../worker/remembered-device-store';
 
-import { RememberedDeviceStore, type RememberedDeviceUnlockRecord } from '../worker/remembered-device-store';
+const identity = { userId: USER_ID, keyVersion: 1, encryptedKeyFingerprint: 'a'.repeat(64) };
+const params = { identity, userPublicKey: TEST_KEYS.alice.publicKey };
+const serverKey = new Uint8Array(32).fill(19);
+const slot = `${USER_ID}:1`;
+let store: RememberedDeviceStore;
 
-const TEST_ADDRESS = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd' as Address;
-const OTHER_ADDRESS = '0x1111111111111111111111111111111111111111' as Address;
-const TEST_FINGERPRINT = 'f'.repeat(64);
-const TEST_PUBLIC_KEY = mockPublicEncryptionKey();
-const OTHER_PUBLIC_KEY = mockPublicEncryptionKey('33'.repeat(32));
-const TEST_IDENTITY = {
-  address: TEST_ADDRESS,
-  wrappedPersonalKeyFingerprint: TEST_FINGERPRINT,
-};
-const TEST_PARAMS = {
-  identity: TEST_IDENTITY,
-  personalPublicKey: TEST_PUBLIC_KEY,
-};
-const TEST_KEY = `${TEST_ADDRESS}:${TEST_FINGERPRINT}`;
-const PERSONAL_KEY_WRAPPING_KEY = new Uint8Array(32).fill(7);
+beforeEach(() => {
+  storage.clear();
+  vi.stubGlobal('indexedDB', {});
+  store = new RememberedDeviceStore();
+});
 
-describe('RememberedDeviceStore', () => {
-  let store: RememberedDeviceStore;
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.stubGlobal('indexedDB', {});
-    store = new RememberedDeviceStore();
+describe('server-assisted remembered-device record', () => {
+  it('preserves both v1 AAD transcripts independently of runtime property names', async () => {
+    const encrypt = vi.spyOn(crypto.subtle, 'encrypt');
+
+    try {
+      await store.save(
+        {
+          identity: {
+            userId: vector.userId,
+            keyVersion: vector.encryptedUserKey.keyVersion,
+            encryptedKeyFingerprint: vector.encryptedKeyFingerprint,
+          },
+          userPublicKey: publicEncryptionKeySchema.parse(vector.userPublicKey),
+        },
+        vector.deviceId,
+        serverKey,
+        UNLOCK_KEY,
+      );
+
+      const transcripts = encrypt.mock.calls.map(([algorithm]) =>
+        new TextDecoder().decode((algorithm as AesGcmParams).additionalData),
+      );
+
+      expect(transcripts).toEqual([vector.deviceAad.server, vector.deviceAad.local]);
+    } finally {
+      encrypt.mockRestore();
+    }
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
+  it('requires both local non-extractable CryptoKey and freshly supplied server key', async () => {
+    await store.save(params, DEVICE_ID, serverKey, UNLOCK_KEY);
 
-  it('saves a device-local wrapper and can decrypt it back', async () => {
-    idbKeyvalMock.set.mockResolvedValue(undefined);
+    const record = await loadRecord();
 
-    await store.save(TEST_PARAMS, PERSONAL_KEY_WRAPPING_KEY);
+    expect(record.localDeviceKey.extractable).toBe(false);
+    expect(record).not.toHaveProperty('expiresAt');
+    expect(record).not.toHaveProperty('serverKey');
+    expect(await store.decrypt(record, serverKey)).toEqual(UNLOCK_KEY);
+    await expect(store.decrypt(record, new Uint8Array(32))).rejects.toThrow();
+    await expect(crypto.subtle.exportKey('raw', record.localDeviceKey)).rejects.toThrow();
 
-    const [key, record] = idbKeyvalMock.set.mock.calls[0];
-
-    expect(key).toBe(TEST_KEY);
-    expect(record).toMatchObject({
-      v: 1,
-      walletAddress: TEST_ADDRESS,
-      personalPublicKey: TEST_PUBLIC_KEY,
-      wrappedPersonalKeyFingerprint: TEST_FINGERPRINT,
-    });
-    expect(record.deviceUnlockKey).toBeInstanceOf(CryptoKey);
-    expect(record.deviceUnlockKey.extractable).toBe(false);
-    expect(record.deviceUnlockKey.usages).toEqual(['encrypt', 'decrypt']);
-    expect(Date.parse(record.expiresAt)).toBeGreaterThan(Date.now());
-
-    const decrypted = await store.decrypt(record);
-
-    expect(decrypted).toEqual(PERSONAL_KEY_WRAPPING_KEY);
-  });
-
-  it('loads a usable record without cleanup', async () => {
-    const record = await createRecord();
-
-    idbKeyvalMock.get.mockResolvedValue(record);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBe(record);
-    expect(idbKeyvalMock.get).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
-    expect(idbKeyvalMock.del).not.toHaveBeenCalled();
-  });
-
-  it('deletes malformed records before returning null', async () => {
-    idbKeyvalMock.get.mockResolvedValue({ walletAddress: TEST_ADDRESS });
-    idbKeyvalMock.del.mockResolvedValue(undefined);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
-  });
-
-  it('deletes expired records before returning null', async () => {
-    const record = await createRecord({ expiresAt: new Date(Date.now() - 1_000).toISOString() });
-
-    idbKeyvalMock.get.mockResolvedValue(record);
-    idbKeyvalMock.del.mockResolvedValue(undefined);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
-  });
-
-  it('deletes records with mismatched wallet binding before returning null', async () => {
-    const record = await createRecord({ walletAddress: OTHER_ADDRESS });
-
-    idbKeyvalMock.get.mockResolvedValue(record);
-    idbKeyvalMock.del.mockResolvedValue(undefined);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
-  });
-
-  it('deletes records with mismatched personal public key before returning null', async () => {
-    const record = await createRecord({ personalPublicKey: OTHER_PUBLIC_KEY });
-
-    idbKeyvalMock.get.mockResolvedValue(record);
-    idbKeyvalMock.del.mockResolvedValue(undefined);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
-  });
-
-  it('deletes records with mismatched wrapped-key fingerprint before returning null', async () => {
-    const record = await createRecord({ wrappedPersonalKeyFingerprint: 'c'.repeat(64) });
-
-    idbKeyvalMock.get.mockResolvedValue(record);
-    idbKeyvalMock.del.mockResolvedValue(undefined);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
-  });
-
-  it('deletes records with malformed public keys before returning null', async () => {
-    const record = await createRecord({ personalPublicKey: 'not-a-public-key' as never });
-
-    idbKeyvalMock.get.mockResolvedValue(record);
-    idbKeyvalMock.del.mockResolvedValue(undefined);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
-  });
-
-  it('deletes records with malformed AES-GCM IVs before returning null', async () => {
-    const record = await createRecord({ iv: 'AQIDBA==' });
-
-    idbKeyvalMock.get.mockResolvedValue(record);
-    idbKeyvalMock.del.mockResolvedValue(undefined);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
-  });
-
-  it('deletes records with extractable device keys before returning null', async () => {
-    const extractableKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, [
+    const otherLocalKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, [
       'encrypt',
       'decrypt',
     ]);
-    const record = await createRecord({ deviceUnlockKey: extractableKey });
 
-    idbKeyvalMock.get.mockResolvedValue(record);
-    idbKeyvalMock.del.mockResolvedValue(undefined);
-
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
+    await expect(store.decrypt({ ...record, localDeviceKey: otherLocalKey }, serverKey)).rejects.toThrow();
   });
 
-  it('deletes non-canonical address records before returning null', async () => {
-    const record = await createRecord({ walletAddress: TEST_ADDRESS.toUpperCase() as Address });
+  it('authenticates device, identity, generation, public key and stable pk fingerprint', async () => {
+    await store.save(params, DEVICE_ID, serverKey, UNLOCK_KEY);
 
-    idbKeyvalMock.get.mockResolvedValue(record);
-    idbKeyvalMock.del.mockResolvedValue(undefined);
+    const record = await loadRecord();
 
-    const loaded = await store.load(TEST_PARAMS);
-
-    expect(loaded).toBeNull();
-    expect(idbKeyvalMock.del).toHaveBeenCalledWith(TEST_KEY, 'remembered-device-store');
+    for (const changed of [
+      { ...record, userId: OTHER_USER_ID },
+      { ...record, keyVersion: 2 },
+      { ...record, deviceId: '0199a000-0000-7000-8000-000000000005' },
+      { ...record, encryptedKeyFingerprint: 'b'.repeat(64) },
+      { ...record, userPublicKey: TEST_KEYS.bob.publicKey },
+    ]) {
+      await expect(store.decrypt(changed, serverKey)).rejects.toThrow();
+    }
   });
 
-  it('fails decrypt when record AAD-bound fields are tampered', async () => {
-    const record = await createRecord();
-    const tamperedRecord = {
-      ...record,
-      deviceId: 'tampered-device-id',
-    };
+  it('removes a mismatched record instead of attempting its unlock', async () => {
+    await store.save(params, DEVICE_ID, serverKey, UNLOCK_KEY);
 
-    await expect(store.decrypt(tamperedRecord)).rejects.toThrow();
+    expect(
+      await store.load({ ...params, identity: { ...identity, encryptedKeyFingerprint: 'b'.repeat(64) } }),
+    ).toBeNull();
+    expect(storage.has(slot)).toBe(false);
   });
 
-  it('does not touch IndexedDB when storage is unavailable', async () => {
-    vi.stubGlobal('indexedDB', undefined);
+  it('has no local TTL and stores only the current generation slot', async () => {
+    await store.save(params, DEVICE_ID, serverKey, UNLOCK_KEY);
 
-    await expect(store.load(TEST_PARAMS)).resolves.toBeNull();
-    await expect(store.save(TEST_PARAMS, PERSONAL_KEY_WRAPPING_KEY)).resolves.toBeUndefined();
-    await expect(store.delete(TEST_IDENTITY)).resolves.toBeUndefined();
+    vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 365 * 86400000);
 
-    expect(idbKeyvalMock.get).not.toHaveBeenCalled();
-    expect(idbKeyvalMock.set).not.toHaveBeenCalled();
-    expect(idbKeyvalMock.del).not.toHaveBeenCalled();
+    expect(await store.load(params)).not.toBeNull();
+
+    await store.save({ ...params, identity: { ...identity, keyVersion: 2 } }, DEVICE_ID, serverKey, UNLOCK_KEY);
+
+    expect(storage.has(slot)).toBe(false);
+    expect(storage.has(`${USER_ID}:2`)).toBe(true);
+
+    vi.restoreAllMocks();
+  });
+
+  it('forgets all local crypto records on explicit logout', async () => {
+    await store.save(params, DEVICE_ID, serverKey, UNLOCK_KEY);
+
+    await store.forgetAll();
+
+    expect(storage.size).toBe(0);
   });
 });
 
-async function createRecord(
-  overrides: Partial<RememberedDeviceUnlockRecord> = {},
-): Promise<RememberedDeviceUnlockRecord> {
-  idbKeyvalMock.set.mockClear();
-  idbKeyvalMock.set.mockResolvedValue(undefined);
+async function loadRecord() {
+  const record = await store.load(params);
 
-  const store = new RememberedDeviceStore();
+  if (!record) {
+    throw new Error('Expected a saved device record');
+  }
 
-  await store.save(TEST_PARAMS, PERSONAL_KEY_WRAPPING_KEY);
-
-  const record = idbKeyvalMock.set.mock.calls[0][1] as RememberedDeviceUnlockRecord;
-
-  return { ...record, ...overrides };
+  return record;
 }

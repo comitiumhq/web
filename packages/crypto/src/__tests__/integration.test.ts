@@ -4,16 +4,19 @@ import { describe, expect, it } from 'vitest';
 import { decryptApplicationWithVaultKey, encryptApplicationWithVaultKey } from '../application-encryption';
 import type { CryptoContextInput } from '../context';
 import {
-  decryptEmailContentWithPersonalKey,
+  decryptEmailContentWithUserKey,
   decryptEmailContentWithVaultKey,
   encryptEmailContent,
 } from '../email-encryption';
 import { decryptFileWithVaultKey, encryptFileWithVaultKey } from '../file-encryption';
-import { generatePersonalKeyPair, unwrapPersonalKey, wrapPersonalKey } from '../personal-key';
 import { applicantRecipient, orgVaultRecipient } from '../recipients';
 import type { PublicEncryptionKey } from '../schemas';
-import { generateVaultKeyPair, grantVaultAccess, unwrapVaultKey, wrapVaultKey } from '../vault-key';
-import { sampleFormData, TEST_ADDRESS, TEST_KEYS, TEST_SIGNATURE } from './crypto-helpers';
+import type { VaultKeyPair } from '../schemas/vault-key';
+import { generateRecoveryCode, generateUserKeyPair, unlockUserKey, wrapUserKey } from '../user-key';
+import { generateVaultKeyPair, grantVaultAccess, unwrapVaultKey, wrapSearchKey, wrapVaultKey } from '../vault-key';
+import { sampleFormData, TEST_KEYS } from './crypto-helpers';
+
+import { ORG_ID, OTHER_USER_ID, PASSWORD, SEARCH_KEY, UNLOCK_KEY, USER_ID } from './unlock-fixtures';
 
 describe('crypto integration', () => {
   const keyShare = base64.encode(new Uint8Array(32).fill(7));
@@ -40,14 +43,14 @@ describe('crypto integration', () => {
   };
 
   function emailRecipients(vaultPublicKey: PublicEncryptionKey, applicantPublicKey: PublicEncryptionKey) {
-    return [orgVaultRecipient(vaultPublicKey, 1), applicantRecipient(applicantPublicKey)];
+    return [orgVaultRecipient(vaultPublicKey, 1), applicantRecipient(applicantPublicKey, 1)];
   }
 
   describe('full apply flow: applicant submits → org decrypts', () => {
     it('encrypts form data and resume, org unwraps vault key and decrypts both', async () => {
       // --- Setup: Org creates vault key and wraps for owner ---
       const vault = generateVaultKeyPair();
-      const ownerWrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
+      const ownerWrapped = await ownerAccess(vault);
 
       // --- Applicant encrypts form data with vault public key ---
       const formData = sampleFormData();
@@ -60,7 +63,7 @@ describe('crypto integration', () => {
 
       const encryptedResume = await encryptFileWithVaultKey(vault.publicKey, 1, resumePdf, resumeContext);
 
-      // --- Org owner unwraps vault key (requires personal key) ---
+      // --- Org owner unwraps vault key (requires user key) ---
       const vaultPrivateKey = await unwrapVaultKey(ownerWrapped, TEST_KEYS.alice.privateKey);
 
       // --- Org decrypts form data ---
@@ -79,7 +82,7 @@ describe('crypto integration', () => {
     it('encrypted email content is readable by both sides', async () => {
       // --- Setup ---
       const vault = generateVaultKeyPair();
-      const applicant = generatePersonalKeyPair();
+      const applicant = generateUserKeyPair();
 
       // --- Org sends candidate email ---
       const emailContent = {
@@ -98,12 +101,8 @@ describe('crypto integration', () => {
 
       expect(orgDecrypted).toEqual(emailContent);
 
-      // --- Applicant decrypts with personal key ---
-      const applicantDecrypted = await decryptEmailContentWithPersonalKey(
-        encrypted,
-        applicant.privateKey,
-        emailContext,
-      );
+      // --- Applicant decrypts with user key ---
+      const applicantDecrypted = await decryptEmailContentWithUserKey(encrypted, applicant.privateKey, emailContext);
 
       expect(applicantDecrypted).toEqual(emailContent);
     });
@@ -115,10 +114,13 @@ describe('crypto integration', () => {
       const vault = generateVaultKeyPair();
 
       // --- Owner wraps vault key for themselves ---
-      const ownerWrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
+      const ownerWrapped = await ownerAccess(vault);
 
       // --- Owner grants access to Bob ---
-      const bobWrapped = await grantVaultAccess(ownerWrapped, TEST_KEYS.alice.privateKey, TEST_KEYS.bob.publicKey);
+      const bobWrapped = await grantVaultAccess(ownerWrapped, TEST_KEYS.alice.privateKey, TEST_KEYS.bob.publicKey, {
+        recipientUserId: OTHER_USER_ID,
+        recipientKeyVersion: 1,
+      });
 
       // --- Applicant encrypts form data ---
       const formData = sampleFormData();
@@ -131,25 +133,39 @@ describe('crypto integration', () => {
       expect(ownerDecrypted).toEqual(formData);
 
       // --- Bob decrypts ---
-      const bobVaultKey = await unwrapVaultKey(bobWrapped, TEST_KEYS.bob.privateKey);
+      const bobVaultKey = await unwrapVaultKey(
+        { ...ownerWrapped, wrappedVaultKey: bobWrapped, recipientUserId: OTHER_USER_ID },
+        TEST_KEYS.bob.privateKey,
+      );
       const bobDecrypted = await decryptApplicationWithVaultKey(encrypted, bobVaultKey, applicationContext);
 
       expect(bobDecrypted).toEqual(formData);
     });
   });
 
-  describe('personal key lifecycle: generate → wrap → unwrap → use', () => {
-    it('wraps personal key with signature, unwraps to decrypt email content', async () => {
-      // --- User generates personal keypair ---
-      const personal = generatePersonalKeyPair();
+  describe('user key lifecycle: generate → wrap → unwrap → use', () => {
+    it('wraps user key with a password, unwraps to decrypt email content', async () => {
+      // --- User generates user keypair ---
+      const userKey = generateUserKeyPair();
 
-      // --- Wrap personal key (simulates registration) ---
-      const encrypted = await wrapPersonalKey(personal.privateKey, TEST_SIGNATURE, TEST_ADDRESS, keyShare);
+      // --- Wrap user key (simulates registration) ---
+      const encrypted = await wrapUserKey(
+        userKey.privateKey,
+        UNLOCK_KEY,
+        { userId: USER_ID, keyVersion: 1 },
+        PASSWORD,
+        keyShare,
+        generateRecoveryCode(),
+      );
 
-      // --- Unwrap personal key (simulates login) ---
-      const unwrapped = await unwrapPersonalKey(encrypted, TEST_SIGNATURE, TEST_ADDRESS, keyShare);
+      // --- Unwrap user key (simulates login) ---
+      const { userPrivateKey: unwrapped } = await unlockUserKey(encrypted, USER_ID, userKey.publicKey, {
+        method: 'password',
+        password: PASSWORD,
+        keyShare,
+      });
 
-      expect(bytesToHex(unwrapped)).toBe(bytesToHex(personal.privateKey));
+      expect(bytesToHex(unwrapped)).toBe(bytesToHex(userKey.privateKey));
 
       // --- Use unwrapped key to decrypt email content ---
       const vault = generateVaultKeyPair();
@@ -158,13 +174,13 @@ describe('crypto integration', () => {
       const encryptedEmail = await encryptEmailContent(
         emailContent,
         emailContext,
-        emailRecipients(vault.publicKey, personal.publicKey),
+        emailRecipients(vault.publicKey, userKey.publicKey),
       );
 
-      const decrypted = await decryptEmailContentWithPersonalKey(encryptedEmail, unwrapped, emailContext);
+      const decrypted = await decryptEmailContentWithUserKey(encryptedEmail, unwrapped, emailContext);
 
       expect(decrypted).toEqual(emailContent);
-    });
+    }, 15000);
   });
 
   describe('key isolation', () => {
@@ -186,8 +202,8 @@ describe('crypto integration', () => {
 
     it("applicant A cannot read applicant B's email content", async () => {
       const vault = generateVaultKeyPair();
-      const applicantA = generatePersonalKeyPair();
-      const applicantB = generatePersonalKeyPair();
+      const applicantA = generateUserKeyPair();
+      const applicantB = generateUserKeyPair();
 
       const emailContent = { text: 'Private message for A' };
       const encrypted = await encryptEmailContent(
@@ -197,14 +213,12 @@ describe('crypto integration', () => {
       );
 
       // A can decrypt
-      const decryptedA = await decryptEmailContentWithPersonalKey(encrypted, applicantA.privateKey, emailContext);
+      const decryptedA = await decryptEmailContentWithUserKey(encrypted, applicantA.privateKey, emailContext);
 
       expect(decryptedA).toEqual(emailContent);
 
       // B cannot
-      await expect(
-        decryptEmailContentWithPersonalKey(encrypted, applicantB.privateKey, emailContext),
-      ).rejects.toThrow();
+      await expect(decryptEmailContentWithUserKey(encrypted, applicantB.privateKey, emailContext)).rejects.toThrow();
     });
 
     it('resume encrypted for org1 cannot be decrypted by org2', async () => {
@@ -227,3 +241,15 @@ describe('crypto integration', () => {
     });
   });
 });
+
+async function ownerAccess(vault: VaultKeyPair) {
+  const context = { orgId: ORG_ID, vaultKeyVersion: 1, recipientUserId: USER_ID, recipientKeyVersion: 1 };
+  const wrappedVaultKey = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey, context);
+  const searchKey = await wrapSearchKey(SEARCH_KEY, vault.privateKey, {
+    orgId: ORG_ID,
+    vaultKeyVersion: 1,
+    searchKeyVersion: 1,
+  });
+
+  return { ...context, wrappedVaultKey, searchKey, vaultPublicKey: vault.publicKey };
+}

@@ -36,7 +36,7 @@ const user = {
   id: 'user-1',
   walletAddress: canonicalWallet.address,
   publicKey: null,
-  encryptedPersonalKey: null,
+  encryptedUserKey: null,
   createdAt: '2026-08-28T00:00:00.000Z',
   updatedAt: '2026-08-28T00:00:00.000Z',
 } as User;

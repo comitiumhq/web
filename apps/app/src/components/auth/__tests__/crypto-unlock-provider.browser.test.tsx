@@ -57,7 +57,7 @@ function readyUser(): User {
     id: 'user-1',
     walletAddress: '0x1111111111111111111111111111111111111111',
     publicKey: { v: 1, xwing: 'public-key' } as User['publicKey'],
-    encryptedPersonalKey: { wrapped: true } as unknown as User['encryptedPersonalKey'],
+    encryptedUserKey: { wrapped: true } as unknown as User['encryptedUserKey'],
     createdAt: '2026-08-28T00:00:00.000Z',
     updatedAt: '2026-08-28T00:00:00.000Z',
   };

@@ -24,7 +24,7 @@ function user(id: string, ready: boolean): User {
     id,
     walletAddress: '0x1111111111111111111111111111111111111111',
     publicKey: ready ? ({ v: 1, xwing: 'public-key' } as User['publicKey']) : null,
-    encryptedPersonalKey: ready ? ({ wrapped: true } as unknown as User['encryptedPersonalKey']) : null,
+    encryptedUserKey: ready ? ({ wrapped: true } as unknown as User['encryptedUserKey']) : null,
     createdAt: '2026-08-28T00:00:00.000Z',
     updatedAt: '2026-08-28T00:00:00.000Z',
   };

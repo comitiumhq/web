@@ -1,29 +1,10 @@
-import { z } from 'zod';
 import { type CryptoContextInput, keyWrapAad } from './context';
 import { unwrapKeyMaterial, wrapKeyMaterial } from './key-wrapping';
 import type { RecipientDescriptor } from './recipients';
-import {
-  aesGcmIvSchema,
-  base64StringSchema,
-  type EnvelopeKey,
-  envelopeKeySchema,
-  type PublicEncryptionKey,
-  xWingMlKemCiphertextSchema,
-  xWingX25519CiphertextSchema,
-} from './schemas';
+import { type EnvelopeKey, envelopeKeySchema, type PublicEncryptionKey, type WrappedKey } from './schemas';
 import { ALGORITHM_SUITE_VERSION, assertSupportedAlgorithmSuiteVersion } from './version';
 
-export const wrappedKeySchema = z
-  .object({
-    v: z.literal(ALGORITHM_SUITE_VERSION),
-    ek: base64StringSchema,
-    epk: xWingX25519CiphertextSchema,
-    kemCt: xWingMlKemCiphertextSchema,
-    iv: aesGcmIvSchema,
-  })
-  .strict();
-
-export type WrappedKey = z.infer<typeof wrappedKeySchema>;
+export { type WrappedKey, wrappedKeySchema } from './schemas/keys';
 
 /**
  * Wrap a 32-byte DEK to a recipient public key.
