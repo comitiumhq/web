@@ -56,8 +56,11 @@ let share: string;
 let currentPublicKey: PublicEncryptionKey;
 let keyless: boolean;
 let deviceStatus: number;
+let deviceCleanupStatus: number;
+let lostEnrollmentResponse: boolean;
 let brokenReadBack: boolean;
 let lostWriteResponse: boolean;
+let readBackStatus: number;
 let requests: { path: string; method: string; body: Record<string, unknown> | null }[];
 
 beforeAll(async () => {
@@ -73,8 +76,11 @@ beforeEach(() => {
   currentPublicKey = fixture.publicKey;
   keyless = false;
   deviceStatus = 200;
+  deviceCleanupStatus = 200;
+  lostEnrollmentResponse = false;
   brokenReadBack = false;
   lostWriteResponse = false;
+  readBackStatus = 200;
   requests = [];
   vi.stubGlobal(
     'fetch',
@@ -98,6 +104,10 @@ beforeEach(() => {
       }
 
       if (path.endsWith('/auth/session')) {
+        if (readBackStatus !== 200) {
+          return new Response(null, { status: readBackStatus });
+        }
+
         return Response.json({
           id: USER_ID,
           publicKey: brokenReadBack ? TEST_KEYS.bob.publicKey : currentPublicKey,
@@ -125,13 +135,23 @@ beforeEach(() => {
           share = String(body.replacementKeyShare);
         }
 
-        return Response.json({ success: true });
+        return lostWriteResponse ? new Response(null, { status: 503 }) : Response.json({ success: true });
       }
 
       if (path.endsWith('/devices') || path.endsWith('/key')) {
-        return deviceStatus === 200
-          ? Response.json({ deviceId: DEVICE_ID, serverDeviceKey: base64.encode(DEVICE_KEY) })
-          : new Response(null, { status: deviceStatus });
+        if (deviceStatus !== 200) {
+          return new Response(null, { status: deviceStatus });
+        }
+
+        if (method === 'POST' && path.endsWith('/devices') && lostEnrollmentResponse) {
+          throw new TypeError('Enrollment response lost');
+        }
+
+        return Response.json({ deviceId: DEVICE_ID, serverDeviceKey: base64.encode(DEVICE_KEY) });
+      }
+
+      if (method === 'DELETE' && deviceCleanupStatus !== 200) {
+        return new Response(null, { status: deviceCleanupStatus });
       }
 
       return Response.json({ success: true });
@@ -144,6 +164,7 @@ beforeEach(() => {
 
 afterEach(() => {
   api.clear();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
@@ -163,6 +184,183 @@ async function rememberFixture() {
 }
 
 describe('Worker unlock and recovery flows', () => {
+  it.each(['initialize', 'reset', 'rewrap'] as const)(
+    'delivers and confirms recovery before %s writes, even if the committed write cannot be read back',
+    async (operation) => {
+      let shownCode = '';
+      let confirm!: () => void;
+      const confirmation = new Promise<void>((resolve) => {
+        confirm = resolve;
+      });
+      const onRecoveryCode = vi.fn(async (code: string) => {
+        shownCode = code;
+
+        await confirmation;
+      });
+
+      if (operation === 'initialize') {
+        keyless = true;
+      } else if (operation === 'rewrap') {
+        await recoveryUnlock();
+      }
+
+      readBackStatus = 503;
+
+      let pending: Promise<unknown>;
+
+      if (operation === 'initialize') {
+        pending = api.initializeUserKey(USER_ID, PASSWORD, false, onRecoveryCode);
+      } else if (operation === 'reset') {
+        pending = api.resetUserKey(USER_ID, bundle, PASSWORD, false, onRecoveryCode);
+      } else {
+        pending = api.rewrapUserKey(bundle, { rotateRecoveryCode: true, repairShare: false }, onRecoveryCode);
+      }
+
+      const rejected = expect(pending).rejects.toThrow('(503)');
+
+      await vi.waitFor(() => expect(onRecoveryCode).toHaveBeenCalledOnce(), { timeout: 10000 });
+
+      expect(shownCode).not.toBe('');
+      expect(requests.some((request) => request.path.includes('/encryption-key-bundle'))).toBe(false);
+
+      confirm();
+
+      await rejected;
+
+      expect(requests.filter((request) => request.path.includes('/encryption-key-bundle'))).toHaveLength(1);
+      await api.unlockWithRecoveryCode(bundle, USER_ID, currentPublicKey, shownCode, false);
+
+      expect(api.isActive()).toBe(true);
+    },
+    15000,
+  );
+
+  it('does not save a bundle when recovery confirmation is cancelled', async () => {
+    keyless = true;
+
+    await expect(
+      api.initializeUserKey(USER_ID, PASSWORD, false, async () => {
+        throw new Error('Recovery setup cancelled');
+      }),
+    ).rejects.toThrow('cancelled');
+
+    expect(keyless).toBe(true);
+    expect(requests.some((request) => request.path.includes('/encryption-key-bundle'))).toBe(false);
+    expect(api.isActive()).toBe(false);
+  }, 15000);
+
+  it('preserves authoritative auth failure when read-back follows an ambiguous write', async () => {
+    await recoveryUnlock();
+
+    lostWriteResponse = true;
+    readBackStatus = 401;
+
+    await expect(
+      api.rewrapUserKey(bundle, { rotateRecoveryCode: true, repairShare: false }, async () => {}),
+    ).rejects.toMatchObject({ name: 'UnlockApiError', status: 401 });
+  });
+
+  it('cancels a pending recovery screen on clear without waiting for UI confirmation or writing the bundle', async () => {
+    keyless = true;
+    const onRecoveryCode = vi.fn(() => new Promise<void>(() => {}));
+    const pending = api.initializeUserKey(USER_ID, PASSWORD, false, onRecoveryCode);
+    const rejected = expect(pending).rejects.toThrow('cleared');
+
+    await vi.waitFor(() => expect(onRecoveryCode).toHaveBeenCalledOnce(), { timeout: 10000 });
+
+    api.clear();
+
+    await rejected;
+
+    expect(keyless).toBe(true);
+    expect(requests.some((request) => request.path.includes('/encryption-key-bundle'))).toBe(false);
+    expect(api.isActive()).toBe(false);
+  }, 15000);
+
+  it('unlocks without enrolling when IndexedDB is unavailable', async () => {
+    vi.stubGlobal('indexedDB', undefined);
+
+    const result = await api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true);
+
+    expect(result.rememberedDevice).toBe('unavailable');
+    expect(api.isActive()).toBe(true);
+    expect(requests.some((request) => request.path.endsWith('/devices'))).toBe(false);
+  });
+
+  it('opens storage before enrollment and skips remembering if it cannot be read', async () => {
+    vi.spyOn(RememberedDeviceStore.prototype, 'load').mockRejectedValueOnce(new Error('Storage blocked'));
+
+    const result = await api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true);
+
+    expect(result.rememberedDevice).toBe('unavailable');
+    expect(api.isActive()).toBe(true);
+    expect(requests.some((request) => request.path.endsWith('/devices'))).toBe(false);
+  });
+
+  it.each([false, true])('keeps a valid unlock and reports failed device cleanup: %s', async (cleanupFails) => {
+    vi.spyOn(RememberedDeviceStore.prototype, 'save').mockRejectedValueOnce(new Error('Quota exceeded'));
+
+    deviceCleanupStatus = cleanupFails ? 503 : 200;
+
+    const result = await api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true);
+
+    expect(result.rememberedDevice).toBe(cleanupFails ? 'cleanup_failed' : 'unavailable');
+    expect(api.isActive()).toBe(true);
+    expect(requests.some((request) => request.path.endsWith('/devices'))).toBe(true);
+
+    expect(requests.some((request) => request.method === 'DELETE' && request.path.endsWith(DEVICE_ID))).toBe(true);
+  });
+
+  it('does not turn auth loss during enrollment into a successful unlock', async () => {
+    deviceStatus = 401;
+
+    await expect(
+      api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true),
+    ).rejects.toThrow('(401)');
+    expect(api.isActive()).toBe(false);
+  });
+
+  it.each([401, 403])('does not turn auth loss during device cleanup into a successful unlock: %s', async (status) => {
+    vi.spyOn(RememberedDeviceStore.prototype, 'save').mockRejectedValueOnce(new Error('Quota exceeded'));
+
+    deviceCleanupStatus = status;
+
+    await expect(
+      api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true),
+    ).rejects.toThrow(`(${status})`);
+    expect(api.isActive()).toBe(false);
+  });
+
+  it('reports unknown cleanup when the enrollment response is lost', async () => {
+    lostEnrollmentResponse = true;
+
+    const result = await api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true);
+
+    expect(result.rememberedDevice).toBe('cleanup_failed');
+    expect(api.isActive()).toBe(true);
+    expect(requests.some((request) => request.path.endsWith('/devices'))).toBe(true);
+    expect(requests.some((request) => request.method === 'DELETE')).toBe(false);
+  });
+
+  it('passes the previous device ID when replacing a remembered record', async () => {
+    await rememberFixture();
+
+    const result = await api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true);
+
+    expect(result.rememberedDevice).toBe('remembered');
+    expect(requests.find((request) => request.path.endsWith('/devices'))?.body?.previousDeviceId).toBe(DEVICE_ID);
+  });
+
+  it('passes the stored device ID on logout while crypto is locked', async () => {
+    await rememberFixture();
+
+    api.clear();
+    await api.logout(false, { wrapped: bundle, userId: USER_ID, publicKey: fixture.publicKey });
+
+    expect(requests.find((request) => request.path.endsWith('/auth/logout'))?.body?.deviceId).toBe(DEVICE_ID);
+    expect(storage.size).toBe(0);
+  });
+
   it('does not expose the internal key store through Comlink property traversal', async () => {
     await recoveryUnlock();
 
@@ -282,7 +480,7 @@ describe('Worker unlock and recovery flows', () => {
   it('saves, reads back and decrypts the persisted bundle before completing setup/enrolling a device', async () => {
     keyless = true;
 
-    const result = await api.initializeUserKey(USER_ID, PASSWORD, true);
+    const result = await api.initializeUserKey(USER_ID, PASSWORD, true, async () => {});
 
     expect(api.isActive()).toBe(true);
     expect(result.recoveryCode).toMatch(/^[A-Z0-9-]+$/);
@@ -303,7 +501,7 @@ describe('Worker unlock and recovery flows', () => {
     keyless = true;
     lostWriteResponse = true;
 
-    const result = await api.initializeUserKey(USER_ID, PASSWORD, false);
+    const result = await api.initializeUserKey(USER_ID, PASSWORD, false, async () => {});
 
     expect(api.isActive()).toBe(true);
     expect(result.encryptedUserKey).toEqual(bundle);
@@ -314,7 +512,9 @@ describe('Worker unlock and recovery flows', () => {
     keyless = true;
     brokenReadBack = true;
 
-    await expect(api.initializeUserKey(USER_ID, PASSWORD, true)).rejects.toThrow('Saved user key bundle');
+    await expect(api.initializeUserKey(USER_ID, PASSWORD, true, async () => {})).rejects.toThrow(
+      'Saved user key bundle',
+    );
     expect(api.isActive()).toBe(false);
     expect(requests.some((request) => request.path.endsWith('/devices'))).toBe(false);
     expect(storage.size).toBe(0);
@@ -324,11 +524,13 @@ describe('Worker unlock and recovery flows', () => {
     await rememberFixture();
 
     const newPassword = 'satellite apricot harbor glacier 91';
-    const result = await api.rewrapWithRememberedDevice(bundle, USER_ID, fixture.publicKey, {
-      password: newPassword,
-      rotateRecoveryCode: true,
-      repairShare: true,
-    });
+    const result = await api.rewrapWithRememberedDevice(
+      bundle,
+      USER_ID,
+      fixture.publicKey,
+      { password: newPassword, rotateRecoveryCode: true, repairShare: true },
+      async () => {},
+    );
     const mutation = requests.find((request) => request.path.endsWith('/wraps'));
 
     expect(result.encryptedUserKey.pk).toEqual(fixture.bundle.pk);

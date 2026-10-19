@@ -1,7 +1,16 @@
 import { randomBytes } from '@noble/hashes/utils.js';
 import { base64 } from '@scure/base';
 import type { PublicEncryptionKey } from '../schemas';
-import type { KeyBundleResponse, KeyBundleWrite, KeyShareResponse } from '../schemas/unlock-api';
+import type {
+  KeyBundleResponse,
+  KeyBundleWrite,
+  KeyShareResponse,
+  RecoveryCodeHandler,
+  RememberedDeviceStatus,
+  RewrapOptions,
+  UnlockResult,
+  UserKeyIdentity,
+} from '../schemas/unlock-api';
 import type { UnlockedUserKey, WrappedUserKey } from '../schemas/user-key';
 import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from '../session';
 import {
@@ -18,7 +27,8 @@ import {
 import { isSamePublicEncryptionKey } from '../xwing';
 import { KeyStore } from './key-store';
 import { RememberedDeviceStore } from './remembered-device-store';
-import { UnlockApi, UnlockApiError } from './unlock-api';
+import { UnlockApi } from './unlock-api';
+import { isUnlockApiClientError, UnlockApiError } from './unlock-api-error';
 
 /**
  * Owns user unlock, recovery and device lifecycle inside the Worker.
@@ -49,7 +59,7 @@ export class UserKeySession {
     publicKey: PublicEncryptionKey,
     password: string,
     rememberDevice: boolean,
-  ): Promise<void> {
+  ): Promise<UnlockResult> {
     this.clear();
 
     const generation = this.keys.captureGeneration();
@@ -63,7 +73,7 @@ export class UserKeySession {
       keyShare: share.keyShare,
     });
 
-    await this.installUserKey(userKey, wrapped, userId, publicKey, generation, rememberDevice);
+    return this.installUserKey(userKey, wrapped, userId, publicKey, generation, rememberDevice);
   }
 
   async unlockWithRecoveryCode(
@@ -72,13 +82,13 @@ export class UserKeySession {
     publicKey: PublicEncryptionKey,
     recoveryCode: string,
     rememberDevice: boolean,
-  ): Promise<void> {
+  ): Promise<UnlockResult> {
     this.clear();
 
     const generation = this.keys.captureGeneration();
     const userKey = await unlockUserKey(wrapped, userId, publicKey, { method: 'recovery_code', recoveryCode });
 
-    await this.installUserKey(userKey, wrapped, userId, publicKey, generation, rememberDevice);
+    return this.installUserKey(userKey, wrapped, userId, publicKey, generation, rememberDevice);
   }
 
   async tryUnlockWithRememberedDevice(
@@ -148,7 +158,12 @@ export class UserKeySession {
     }
   }
 
-  async initializeUserKey(userId: string, password: string, rememberDevice: boolean) {
+  async initializeUserKey(
+    userId: string,
+    password: string,
+    rememberDevice: boolean,
+    onRecoveryCode: RecoveryCodeHandler,
+  ) {
     this.clear();
 
     const generation = this.keys.captureGeneration();
@@ -158,10 +173,16 @@ export class UserKeySession {
       throw new Error('User key bundle already exists');
     }
 
-    return this.createAndSaveUserKey(userId, 1, password, share.keyShare, generation, rememberDevice);
+    return this.createAndSaveUserKey(userId, 1, password, share.keyShare, generation, rememberDevice, onRecoveryCode);
   }
 
-  async resetUserKey(userId: string, previous: WrappedUserKey, password: string, rememberDevice: boolean) {
+  async resetUserKey(
+    userId: string,
+    previous: WrappedUserKey,
+    password: string,
+    rememberDevice: boolean,
+    onRecoveryCode: RecoveryCodeHandler,
+  ) {
     this.clear();
 
     const generation = this.keys.captureGeneration();
@@ -175,6 +196,7 @@ export class UserKeySession {
         base64.encode(shareBytes),
         generation,
         rememberDevice,
+        onRecoveryCode,
         previous,
       );
     } finally {
@@ -184,7 +206,8 @@ export class UserKeySession {
 
   async rewrapUserKey(
     wrapped: WrappedUserKey,
-    options: { password?: string; rotateRecoveryCode: boolean; repairShare: boolean },
+    options: RewrapOptions,
+    onRecoveryCode: RecoveryCodeHandler,
   ): Promise<{ encryptedUserKey: WrappedUserKey; recoveryCode: string | null }> {
     const identity = this.requireIdentity();
     const target = createCryptoSessionIdentity(wrapped, identity.userId);
@@ -230,6 +253,8 @@ export class UserKeySession {
         const index = wraps.findIndex((wrap) => wrap.method === 'recovery_code');
 
         wraps[index] = await createRecoveryWrap(unlockKey, identity, recoveryCode);
+
+        await this.confirmRecoveryCode(recoveryCode, onRecoveryCode, generation);
       }
 
       this.keys.assertGeneration(generation);
@@ -268,7 +293,8 @@ export class UserKeySession {
     wrapped: WrappedUserKey,
     userId: string,
     publicKey: PublicEncryptionKey,
-    options: { password: string; rotateRecoveryCode: boolean; repairShare: boolean },
+    options: RewrapOptions & { password: string },
+    onRecoveryCode: RecoveryCodeHandler,
   ) {
     const unlocked = await this.tryUnlockWithRememberedDevice(wrapped, userId, publicKey);
 
@@ -276,7 +302,7 @@ export class UserKeySession {
       throw new Error('Remembered device is unavailable');
     }
 
-    return this.rewrapUserKey(wrapped, options);
+    return this.rewrapUserKey(wrapped, options, onRecoveryCode);
   }
 
   async forgetRememberedDevice(wrapped: WrappedUserKey, userId: string, publicKey: PublicEncryptionKey): Promise<void> {
@@ -296,10 +322,7 @@ export class UserKeySession {
     }
   }
 
-  async logout(
-    allDevices: boolean,
-    identity?: { wrapped: WrappedUserKey; userId: string; publicKey: PublicEncryptionKey },
-  ): Promise<void> {
+  async logout(allDevices: boolean, identity?: UserKeyIdentity): Promise<void> {
     let params: { identity: CryptoSessionIdentity; userPublicKey: PublicEncryptionKey } | null = null;
 
     if (identity) {
@@ -355,7 +378,7 @@ export class UserKeySession {
     try {
       await mutation;
     } catch (error) {
-      if (error instanceof UnlockApiError && error.status < 500) {
+      if (isUnlockApiClientError(error)) {
         throw error;
       }
 
@@ -367,6 +390,10 @@ export class UserKeySession {
     try {
       return await this.api().getBundle(this.requests.signal);
     } catch (error) {
+      if (isUnlockApiClientError(error)) {
+        throw error;
+      }
+
       throw writeError ?? error;
     }
   }
@@ -392,54 +419,141 @@ export class UserKeySession {
     publicKey: PublicEncryptionKey,
     generation: number,
     rememberDevice: boolean,
-  ): Promise<void> {
+  ): Promise<UnlockResult> {
     const identity = createCryptoSessionIdentity(wrapped, userId);
 
     try {
       this.keys.assertGeneration(generation);
 
-      if (rememberDevice) {
-        const keyAuthSecret = encodeKeyAuthSecret(userKey.unlockKey, identity);
-        let serverDeviceKey: Uint8Array | undefined;
+      const rememberedDevice = rememberDevice
+        ? await this.rememberCurrentDevice(userKey, wrapped, identity, publicKey, generation)
+        : 'not_requested';
 
-        try {
-          const device = await this.api().enrollDevice(
-            {
-              keyVersion: wrapped.keyVersion,
-              prevWrapsFingerprint: userKeyWrapsFingerprint(wrapped.wraps),
-              keyAuthSecret,
-            },
-            this.requests.signal,
-          );
-
-          serverDeviceKey = base64.decode(device.serverDeviceKey);
-
-          this.keys.assertGeneration(generation);
-
-          await this.rememberedDeviceStore.save(
-            { identity, userPublicKey: publicKey },
-            device.deviceId,
-            serverDeviceKey,
-            userKey.unlockKey,
-            () => this.keys.assertGeneration(generation),
-          );
-
-          this.keys.assertGeneration(generation);
-        } finally {
-          serverDeviceKey?.fill(0);
-        }
-      }
+      this.keys.assertGeneration(generation);
 
       this.keys.storeUserKey(userKey, generation);
 
       this.activeSession = identity;
 
       this.userPublicKey = publicKey;
+
+      return { rememberedDevice };
     } catch (error) {
       userKey.userPrivateKey.fill(0);
       userKey.unlockKey.fill(0);
 
       throw error;
+    }
+  }
+
+  private async rememberCurrentDevice(
+    userKey: UnlockedUserKey,
+    wrapped: WrappedUserKey,
+    identity: CryptoSessionIdentity,
+    publicKey: PublicEncryptionKey,
+    generation: number,
+  ): Promise<RememberedDeviceStatus> {
+    if (!this.rememberedDeviceStore.isSupported()) {
+      return 'unavailable';
+    }
+
+    let deviceId: string | undefined;
+    let serverDeviceKey: Uint8Array | undefined;
+    let enrollmentStarted = false;
+
+    try {
+      const context = { identity, userPublicKey: publicKey };
+      const previous = await this.rememberedDeviceStore.load(context);
+
+      this.keys.assertGeneration(generation);
+
+      enrollmentStarted = true;
+
+      const device = await this.api().enrollDevice(
+        {
+          keyVersion: wrapped.keyVersion,
+          prevWrapsFingerprint: userKeyWrapsFingerprint(wrapped.wraps),
+          keyAuthSecret: encodeKeyAuthSecret(userKey.unlockKey, identity),
+          ...(previous ? { previousDeviceId: previous.deviceId } : {}),
+        },
+        this.requests.signal,
+      );
+
+      deviceId = device.deviceId;
+      serverDeviceKey = base64.decode(device.serverDeviceKey);
+
+      this.keys.assertGeneration(generation);
+
+      await this.rememberedDeviceStore.save(context, deviceId, serverDeviceKey, userKey.unlockKey, () =>
+        this.keys.assertGeneration(generation),
+      );
+
+      this.keys.assertGeneration(generation);
+
+      return 'remembered';
+    } catch (error) {
+      let result: RememberedDeviceStatus = enrollmentStarted ? 'cleanup_failed' : 'unavailable';
+
+      if (deviceId) {
+        result = await this.cleanupDeviceEnrollment(deviceId);
+      }
+
+      this.keys.assertGeneration(generation);
+
+      if (isUnlockApiClientError(error)) {
+        throw error;
+      }
+
+      return result;
+    } finally {
+      serverDeviceKey?.fill(0);
+    }
+  }
+
+  private async cleanupDeviceEnrollment(deviceId: string): Promise<'unavailable' | 'cleanup_failed'> {
+    try {
+      await this.api().revokeDevice(deviceId, this.requests.signal);
+
+      return 'unavailable';
+    } catch (error) {
+      if (isUnlockApiClientError(error)) {
+        throw error;
+      }
+
+      return 'cleanup_failed';
+    }
+  }
+
+  /**
+   * Wait for the recovery screen before writing, while allowing clear/logout to wipe pending keys.
+   */
+  private async confirmRecoveryCode(
+    recoveryCode: string,
+    handler: RecoveryCodeHandler,
+    generation: number,
+  ): Promise<void> {
+    this.keys.assertGeneration(generation);
+
+    const signal = this.requests.signal;
+    let rejectOnAbort!: () => void;
+    const aborted = new Promise<never>((_, reject) => {
+      rejectOnAbort = () => reject(new Error('Crypto session was cleared during recovery confirmation'));
+
+      signal.addEventListener('abort', rejectOnAbort, { once: true });
+    });
+
+    try {
+      const confirmation = Promise.resolve().then(() => {
+        this.keys.assertGeneration(generation);
+
+        return handler(recoveryCode);
+      });
+
+      await Promise.race([confirmation, aborted]);
+
+      this.keys.assertGeneration(generation);
+    } finally {
+      signal.removeEventListener('abort', rejectOnAbort);
     }
   }
 
@@ -450,6 +564,7 @@ export class UserKeySession {
     keyShare: string,
     generation: number,
     rememberDevice: boolean,
+    onRecoveryCode: RecoveryCodeHandler,
     previous?: WrappedUserKey,
   ) {
     const { privateKey, publicKey } = generateUserKeyPair();
@@ -466,6 +581,8 @@ export class UserKeySession {
         encryptedUserKey,
         keyAuthSecret: encodeKeyAuthSecret(unlockKey, context),
       };
+
+      await this.confirmRecoveryCode(recoveryCode, onRecoveryCode, generation);
 
       this.keys.assertGeneration(generation);
 
@@ -509,9 +626,16 @@ export class UserKeySession {
         keyShare: share.keyShare,
       });
 
-      await this.installUserKey(userKey, saved.encryptedUserKey, userId, saved.publicKey, generation, rememberDevice);
+      const result = await this.installUserKey(
+        userKey,
+        saved.encryptedUserKey,
+        userId,
+        saved.publicKey,
+        generation,
+        rememberDevice,
+      );
 
-      return { publicKey: saved.publicKey, encryptedUserKey: saved.encryptedUserKey, recoveryCode };
+      return { publicKey: saved.publicKey, encryptedUserKey: saved.encryptedUserKey, recoveryCode, ...result };
     } finally {
       privateKey.fill(0);
       unlockKey.fill(0);

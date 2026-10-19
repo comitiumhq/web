@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { TRAILING_SLASH_REGEX } from '../patterns';
 import {
   type CurrentKeyProof,
+  type DeviceEnrollment,
   deviceIdSchema,
   deviceResponseSchema,
   type KeyBundleResponse,
@@ -11,14 +12,10 @@ import {
   keyBundleResponseSchema,
   keyShareResponseSchema,
   successSchema,
+  unlockApiErrorResponseSchema,
 } from '../schemas/unlock-api';
 import type { WrappedUserKey } from '../schemas/user-key';
-
-export class UnlockApiError extends Error {
-  constructor(readonly status: number) {
-    super(`Encryption API request failed (${status})`);
-  }
-}
+import { UnlockApiError } from './unlock-api-error';
 
 /**
  * Runs in the Worker so proofs, share responses and device keys bypass main-thread state.
@@ -65,7 +62,7 @@ export class UnlockApi {
     return this.request('POST', '/users/encryption-key-bundle/reset', body, successSchema, signal);
   }
 
-  enrollDevice(body: CurrentKeyProof, signal: AbortSignal) {
+  enrollDevice(body: DeviceEnrollment, signal: AbortSignal) {
     return this.request('POST', '/users/devices', body, deviceResponseSchema, signal);
   }
 
@@ -112,7 +109,9 @@ export class UnlockApi {
       /**
        * Do not serialize request bodies or server responses containing secret material into errors.
        */
-      throw new UnlockApiError(response.status);
+      const failure = unlockApiErrorResponseSchema.safeParse(await response.json().catch(() => null));
+
+      throw new UnlockApiError(response.status, failure.success ? failure.data.error.code : 'API_ERROR');
     }
 
     return schema.parse(await response.json());

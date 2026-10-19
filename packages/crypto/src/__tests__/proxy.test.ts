@@ -29,6 +29,8 @@ const publicKey = mockPublicEncryptionKey();
 beforeEach(async () => {
   vi.resetModules();
   vi.resetAllMocks();
+  remote.unlockWithPassword.mockResolvedValue({ rememberedDevice: 'not_requested' });
+  remote.unlockWithRecoveryCode.mockResolvedValue({ rememberedDevice: 'not_requested' });
   proxy = (await import('../proxy')).CryptoProxy;
 
   proxy.init('https://api.comitium.test/v1');
@@ -39,13 +41,31 @@ afterEach(async () => {
 });
 
 describe('crypto facade lifecycle', () => {
-  it('deduplicates concurrent unlocks for one identity', async () => {
-    await Promise.all([
-      proxy.unlockWithPassword(bundle, USER_ID, publicKey, 'password', false),
-      proxy.unlockWithPassword(bundle, USER_ID, publicKey, 'password', false),
-    ]);
+  it('rejects an overlapping credential attempt instead of returning another attempt’s result', async () => {
+    await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
 
-    expect(remote.unlockWithPassword).toHaveBeenCalledTimes(1);
+    let complete!: () => void;
+
+    remote.unlockWithPassword.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          complete = resolve;
+        }),
+    );
+
+    const first = proxy.unlockWithPassword(bundle, USER_ID, publicKey, 'first password', false);
+
+    await expect(proxy.unlockWithPassword(bundle, USER_ID, publicKey, 'corrected password', false)).rejects.toThrow(
+      'already in progress',
+    );
+    await vi.waitFor(() => expect(remote.unlockWithPassword).toHaveBeenCalledOnce());
+
+    complete();
+    await first;
+
+    await proxy.unlockWithPassword(bundle, USER_ID, publicKey, 'corrected password', false);
+
+    expect(remote.unlockWithPassword).toHaveBeenCalledTimes(2);
     expect(proxy.isActiveFor(bundle, USER_ID)).toBe(true);
   });
 

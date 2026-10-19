@@ -22,8 +22,12 @@ const rememberedDeviceStore = createStore('comitium_crypto', 'comitium_crypto_de
 export class RememberedDeviceStore {
   private generation = 0;
 
+  isSupported(): boolean {
+    return Boolean(globalThis.indexedDB);
+  }
+
   async load(params: RememberedDeviceContext): Promise<RememberedDeviceRecord | null> {
-    if (!globalThis.indexedDB) {
+    if (!this.isSupported()) {
       return null;
     }
 
@@ -58,7 +62,7 @@ export class RememberedDeviceStore {
     unlockKey: Uint8Array,
     assertSessionCurrent: () => void = () => {},
   ): Promise<void> {
-    if (!globalThis.indexedDB) {
+    if (!this.isSupported()) {
       throw new Error('Remembered-device storage is unavailable');
     }
 

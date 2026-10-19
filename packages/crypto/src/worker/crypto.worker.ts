@@ -1,4 +1,5 @@
 import '../jitless';
+import './unlock-api-error-transport';
 
 import * as Comlink from 'comlink';
 

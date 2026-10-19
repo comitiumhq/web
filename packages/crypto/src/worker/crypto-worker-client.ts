@@ -1,4 +1,5 @@
 import * as Comlink from 'comlink';
+import './unlock-api-error-transport';
 
 import type { CryptoWorkerApi } from './crypto-api';
 

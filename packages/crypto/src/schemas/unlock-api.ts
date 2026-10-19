@@ -24,6 +24,14 @@ export const deviceResponseSchema = z.object({
   serverDeviceKey: base64BytesSchema(32, 'Expected 32-byte device key'),
 });
 
+export const unlockApiErrorCodeSchema = z.enum(['API_ERROR', 'KEY_SHARE_UNAVAILABLE']);
+export const unlockApiErrorResponseSchema = z.object({ error: z.object({ code: unlockApiErrorCodeSchema }) });
+export const serializedUnlockApiErrorSchema = z.object({
+  kind: z.literal('comitium.unlock-api-error'),
+  status: z.number().int().min(400).max(599),
+  code: unlockApiErrorCodeSchema,
+});
+
 export const successSchema = z.object({ success: z.literal(true) });
 export type KeyShareResponse = z.infer<typeof keyShareResponseSchema>;
 export type KeyBundleResponse = z.infer<typeof keyBundleResponseSchema>;
@@ -35,3 +43,10 @@ export type KeyBundleWrite = {
 };
 
 export type CurrentKeyProof = { keyVersion: number; prevWrapsFingerprint: string; keyAuthSecret: string };
+export type DeviceEnrollment = CurrentKeyProof & { previousDeviceId?: string };
+export type RecoveryCodeHandler = (recoveryCode: string) => Promise<void>;
+export type RememberedDeviceStatus = 'not_requested' | 'remembered' | 'unavailable' | 'cleanup_failed';
+export type UnlockResult = { rememberedDevice: RememberedDeviceStatus };
+export type RewrapOptions = { password?: string; rotateRecoveryCode: boolean; repairShare: boolean };
+export type UserKeyIdentity = { wrapped: WrappedUserKey; userId: string; publicKey: KeyBundleResponse['publicKey'] };
+export type UnlockApiErrorCode = z.infer<typeof unlockApiErrorCodeSchema>;

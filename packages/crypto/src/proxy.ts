@@ -7,6 +7,7 @@ import type { CategoricalFormFieldKind } from './form-field-search-hash';
 import type { RecipientDescriptor } from './recipients';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from './schemas';
 import type { WrappedKey } from './schemas/keys';
+import type { RecoveryCodeHandler, RewrapOptions, UnlockResult, UserKeyIdentity } from './schemas/unlock-api';
 import type { WrappedUserKey } from './schemas/user-key';
 import type { VaultKeyAccess, VaultKeyContext } from './schemas/vault-key';
 import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from './session';
@@ -19,8 +20,7 @@ let activeSession: CryptoSessionIdentity | null = null;
 let isResetting = false;
 let apiBaseUrl: string | null = null;
 let lifecycle = 0;
-let unlockPromise: Promise<void> | null = null;
-let unlockSession: CryptoSessionIdentity | null = null;
+let unlockPromise: Promise<UnlockResult> | null = null;
 
 const listeners = new Set<() => void>();
 
@@ -34,8 +34,6 @@ function resetRuntimeState(): void {
   _isActive = false;
   activeSession = null;
   lifecycle += 1;
-  unlockPromise = null;
-  unlockSession = null;
 }
 
 function terminateWorker(): void {
@@ -93,28 +91,21 @@ function assertLifecycle(generation: number): void {
 async function unlockIdentity(
   wrapped: WrappedUserKey,
   userId: string,
-  operation: (api: Comlink.Remote<CryptoWorkerApi>) => Promise<void>,
-): Promise<void> {
+  operation: (api: Comlink.Remote<CryptoWorkerApi>) => Promise<UnlockResult>,
+): Promise<UnlockResult> {
   const identity = createCryptoSessionIdentity(wrapped, userId);
 
   if (unlockPromise) {
-    if (isSameCryptoSession(unlockSession, identity)) {
-      return unlockPromise;
-    }
-
-    await unlockPromise.catch(() => undefined);
+    throw new Error('An unlock is already in progress; wait before submitting another credential');
   }
-
-  if (_isActive) {
-    await CryptoProxy.clear();
-  }
-
-  const generation = lifecycle;
-
-  unlockSession = identity;
 
   const pending = (async () => {
-    await runOnWorker(operation);
+    if (_isActive) {
+      await CryptoProxy.clear();
+    }
+
+    const generation = lifecycle;
+    const result = await runOnWorker(operation);
 
     assertLifecycle(generation);
 
@@ -122,16 +113,17 @@ async function unlockIdentity(
     _isActive = true;
 
     notify();
+
+    return result;
   })();
 
   unlockPromise = pending;
 
   try {
-    await pending;
+    return await pending;
   } finally {
     if (unlockPromise === pending) {
       unlockPromise = null;
-      unlockSession = null;
     }
   }
 }
@@ -166,7 +158,7 @@ export const CryptoProxy = {
     publicKey: PublicEncryptionKey,
     password: string,
     rememberDevice: boolean,
-  ): Promise<void> {
+  ): Promise<UnlockResult> {
     return unlockIdentity(wrapped, userId, (api) =>
       api.unlockWithPassword(wrapped, userId, publicKey, password, rememberDevice),
     );
@@ -178,7 +170,7 @@ export const CryptoProxy = {
     publicKey: PublicEncryptionKey,
     recoveryCode: string,
     rememberDevice: boolean,
-  ): Promise<void> {
+  ): Promise<UnlockResult> {
     return unlockIdentity(wrapped, userId, (api) =>
       api.unlockWithRecoveryCode(wrapped, userId, publicKey, recoveryCode, rememberDevice),
     );
@@ -380,53 +372,68 @@ export const CryptoProxy = {
     return runOnWorker((api) => api.decryptEmailContentForApplicant(envelope, context));
   },
 
-  async initializeUserKey(userId: string, password: string, rememberDevice: boolean) {
-    await this.clear();
-
-    const generation = lifecycle;
-    const result = await runOnWorker((api) => api.initializeUserKey(userId, password, rememberDevice));
-
-    assertLifecycle(generation);
-
-    activeSession = createCryptoSessionIdentity(result.encryptedUserKey, userId);
-    _isActive = true;
-
-    notify();
-
-    return result;
-  },
-
-  async resetUserKey(userId: string, previous: WrappedUserKey, password: string, rememberDevice: boolean) {
-    await this.clear();
-
-    const generation = lifecycle;
-    const result = await runOnWorker((api) => api.resetUserKey(userId, previous, password, rememberDevice));
-
-    assertLifecycle(generation);
-
-    activeSession = createCryptoSessionIdentity(result.encryptedUserKey, userId);
-    _isActive = true;
-
-    notify();
-
-    return result;
-  },
-
-  rewrapUserKey(
-    wrapped: WrappedUserKey,
-    options: { password?: string; rotateRecoveryCode: boolean; repairShare: boolean },
+  async initializeUserKey(
+    userId: string,
+    password: string,
+    rememberDevice: boolean,
+    onRecoveryCode: RecoveryCodeHandler,
   ) {
-    return runOnWorker((api) => api.rewrapUserKey(wrapped, options));
+    await this.clear();
+
+    const generation = lifecycle;
+    const result = await runOnWorker((api) =>
+      api.initializeUserKey(userId, password, rememberDevice, Comlink.proxy(onRecoveryCode)),
+    );
+
+    assertLifecycle(generation);
+
+    activeSession = createCryptoSessionIdentity(result.encryptedUserKey, userId);
+    _isActive = true;
+
+    notify();
+
+    return result;
+  },
+
+  async resetUserKey(
+    userId: string,
+    previous: WrappedUserKey,
+    password: string,
+    rememberDevice: boolean,
+    onRecoveryCode: RecoveryCodeHandler,
+  ) {
+    await this.clear();
+
+    const generation = lifecycle;
+    const result = await runOnWorker((api) =>
+      api.resetUserKey(userId, previous, password, rememberDevice, Comlink.proxy(onRecoveryCode)),
+    );
+
+    assertLifecycle(generation);
+
+    activeSession = createCryptoSessionIdentity(result.encryptedUserKey, userId);
+    _isActive = true;
+
+    notify();
+
+    return result;
+  },
+
+  rewrapUserKey(wrapped: WrappedUserKey, options: RewrapOptions, onRecoveryCode: RecoveryCodeHandler) {
+    return runOnWorker((api) => api.rewrapUserKey(wrapped, options, Comlink.proxy(onRecoveryCode)));
   },
 
   async rewrapWithRememberedDevice(
     wrapped: WrappedUserKey,
     userId: string,
     publicKey: PublicEncryptionKey,
-    options: { password: string; rotateRecoveryCode: boolean; repairShare: boolean },
+    options: RewrapOptions & { password: string },
+    onRecoveryCode: RecoveryCodeHandler,
   ) {
     const generation = lifecycle;
-    const result = await runOnWorker((api) => api.rewrapWithRememberedDevice(wrapped, userId, publicKey, options));
+    const result = await runOnWorker((api) =>
+      api.rewrapWithRememberedDevice(wrapped, userId, publicKey, options, Comlink.proxy(onRecoveryCode)),
+    );
 
     assertLifecycle(generation);
 
@@ -445,10 +452,7 @@ export const CryptoProxy = {
     await runOnWorker((api) => api.forgetRememberedDevice(wrapped, userId, publicKey));
   },
 
-  async logout(
-    allDevices: boolean,
-    identity?: { wrapped: WrappedUserKey; userId: string; publicKey: PublicEncryptionKey },
-  ): Promise<void> {
+  async logout(allDevices: boolean, identity?: UserKeyIdentity): Promise<void> {
     resetRuntimeState();
     notify();
 
