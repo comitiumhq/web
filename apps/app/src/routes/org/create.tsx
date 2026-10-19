@@ -1,9 +1,9 @@
+import { AuthGuard } from '@comitium/auth/auth-guard';
 import { PageContainer } from '@comitium/ui/page-container';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { AuthGuard } from '@/components/auth/auth-guard';
 import { AuthenticatedAppShell } from '@/components/auth/authenticated-app-shell';
 import { CreateOrg } from '@/components/features/create-org';
 import { useQueryMyOrgs } from '@/hooks/queries/use-query-my-orgs';

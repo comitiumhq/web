@@ -80,8 +80,8 @@ export function GoogleSignInMethod({ methods, refreshMethods }: GoogleSignInMeth
       await runWithFreshAuth(async () => unwrapAuthResult(await client.unlinkAccount({ accountId })));
       await refreshMethods();
       setRemoveDialogOpen(false);
-    } catch {
-      setRemoveError('We could not remove Google. Try again.');
+    } catch (removeError) {
+      setRemoveError(getAccountMethodError(removeError, 'unlink-google'));
     } finally {
       setIsRemoving(false);
     }

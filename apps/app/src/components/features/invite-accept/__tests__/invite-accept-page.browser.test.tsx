@@ -91,7 +91,7 @@ describe('InviteAcceptPage global account actions', () => {
     expect(mocks.acceptInvite.mock.calls[0]?.[0]).toBe('invite-token');
   });
 
-  it('offers ordinary Sign in and Create account actions without work-email warnings', async () => {
+  it('uses the shared Log in action and preserves the invite destination', async () => {
     mocks.accountStage = 'anonymous';
     const screen = await renderPage();
 
@@ -99,11 +99,12 @@ describe('InviteAcceptPage global account actions', () => {
       .element(screen.getByText('Sign in or create your Comitium account to join this workspace.'))
       .toBeInTheDocument();
 
-    await screen.getByRole('button', { name: 'Create account' }).click();
+    await screen.getByRole('button', { name: 'Continue', exact: true }).click();
     expect(mocks.navigate).toHaveBeenCalledWith({
       search: { returnTo: '/invite?token=invite-token' },
-      to: '/signup',
+      to: '/login',
     });
+    await expect.element(screen.getByRole('button', { name: 'Create account' })).not.toBeInTheDocument();
   });
 
   it('switches accounts only after an explicit action and preserves the invite URL', async () => {

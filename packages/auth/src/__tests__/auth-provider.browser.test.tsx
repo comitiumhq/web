@@ -5,7 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { createIdentityClient, type IdentityClient } from '../auth-client';
 import { AuthProvider } from '../auth-provider';
+import { AuthLoginSurface } from '../login-surface';
 import { useAccountReadiness } from '../use-account-readiness';
+import { useSession } from '../use-session';
 import { API_URL, AUTH_USER_ID, identitySession, OTHER_AUTH_USER_ID, productUser } from './identity-fixtures';
 
 vi.mock('@comitium/crypto', async (importOriginal) => ({
@@ -26,7 +28,13 @@ beforeEach(() => {
   vi.mocked(CryptoProxy.clear).mockResolvedValue(undefined);
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () => {
+    vi.fn(async (input) => {
+      const url = input instanceof Request ? input.url : String(input);
+
+      if (!url.includes('/get-session')) {
+        return Response.json({ success: true });
+      }
+
       sessionRequests += 1;
 
       return responseStatus === 200
@@ -49,6 +57,22 @@ function Probe() {
     <output aria-label="Account state">
       {stage}:{user?.authUserId ?? ''}
     </output>
+  );
+}
+
+function Login() {
+  const session = useSession();
+
+  return (
+    <AuthLoginSurface
+      defaultReturnTo="/"
+      homeHref="/"
+      homeLabel="Home"
+      navigate={vi.fn()}
+      privacyHref="/privacy"
+      session={session}
+      termsHref="/terms"
+    />
   );
 }
 
@@ -104,6 +128,37 @@ describe('native auth readiness and identity lifecycle', () => {
 
     await expect.element(screen.getByLabelText('Account state')).toHaveTextContent('anonymous:');
     expect(getSession).not.toHaveBeenCalled();
+  });
+
+  it.each([200, 503])('preserves OTP input across a session refresh on return (status: %s)', async (status) => {
+    nativeSession = null;
+    const screen = await render(tree(undefined, <Login />).ui);
+
+    await screen.getByPlaceholder('Email address').fill('person@example.com');
+    await screen.getByRole('button', { name: 'Continue', exact: true }).click();
+    await screen.getByRole('textbox', { name: 'Verification code' }).fill('12');
+
+    let finishRefetch!: () => void;
+
+    vi.mocked(fetch).mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          finishRefetch = () => resolve(Response.json(null, { status }));
+        }),
+    );
+
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    await vi.waitFor(() => expect(finishRefetch).toBeTypeOf('function'));
+
+    try {
+      await expect.element(screen.getByRole('textbox', { name: 'Verification code' })).toHaveValue('12');
+    } finally {
+      finishRefetch();
+    }
+
+    await expect.element(screen.getByRole('textbox', { name: 'Verification code' })).toHaveValue('12');
+    await expect.element(screen.getByText('person@example.com', { exact: true })).toBeInTheDocument();
   });
 
   it('rejects a bootstrap response belonging to a different auth identity', async () => {

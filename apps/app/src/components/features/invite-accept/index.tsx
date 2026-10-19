@@ -61,10 +61,6 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
     navigate({ to: '/login', search: { returnTo } });
   }, [navigate, returnTo]);
 
-  const handleCreateAccount = useCallback(() => {
-    navigate({ to: '/signup', search: { returnTo } });
-  }, [navigate, returnTo]);
-
   const submitInvite = useCallback(() => {
     if (!token) {
       return;
@@ -159,13 +155,8 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
       >
         <div className="grid gap-3">
           <Button size="lg" className="w-full font-semibold" onClick={handleSignIn}>
-            Sign in
+            Continue
           </Button>
-          {!invite.isAccepted ? (
-            <Button variant="outline" size="lg" className="w-full font-semibold" onClick={handleCreateAccount}>
-              Create account
-            </Button>
-          ) : null}
         </div>
       </InviteCard>
     );

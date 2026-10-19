@@ -2,6 +2,7 @@ import { Button } from '@comitium/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { VERIFICATION_CODE_LENGTH, VerificationCodeInput } from '@comitium/ui/verification-code-input';
 import { type FormEvent, useState } from 'react';
+import { getAuthActionError } from './auth-action-error';
 import { sendSignInCode, verifySignInCode } from './auth-actions';
 import { useAuthClient } from './auth-context';
 import { AuthFormError } from './auth-form-error';
@@ -34,11 +35,11 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
     setError(null);
 
     try {
-      await sendSignInCode(client, email, 'sign-in');
+      await sendSignInCode(client, email);
 
       setCodeSent(true);
-    } catch {
-      setError('We could not send a verification code. Try again.');
+    } catch (error) {
+      setError(getAuthActionError(error, 'send-code'));
     } finally {
       setIsPending(false);
     }
@@ -53,11 +54,11 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
     setError(null);
 
     try {
-      const result = await verifySignInCode(client, email, otp, 'sign-in');
+      const result = await verifySignInCode(client, email, otp);
 
       confirmUser(result?.user.id);
-    } catch {
-      setError('The code is invalid or has expired. Try again.');
+    } catch (error) {
+      setError(getAuthActionError(error, 'verify-code'));
     } finally {
       setIsPending(false);
     }
@@ -71,8 +72,8 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
       const result = unwrapAuthResult(await client.signIn.passkey());
 
       confirmUser(result?.user.id);
-    } catch {
-      setError('We could not confirm your sign-in with a passkey. Try again.');
+    } catch (error) {
+      setError(getAuthActionError(error, 'passkey'));
     } finally {
       setIsPending(false);
     }
@@ -114,7 +115,11 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
         )}
         <AuthFormError message={error} />
         <DialogFooter>
-          <Button variant="outline" disabled={isPending} onClick={confirmWithPasskey}>
+          <Button
+            variant="outline"
+            disabled={isPending || typeof PublicKeyCredential === 'undefined'}
+            onClick={confirmWithPasskey}
+          >
             Use a passkey
           </Button>
           <Button variant="ghost" onClick={onCancel}>

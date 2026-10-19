@@ -10,7 +10,6 @@ import { Spinner } from './spinner';
 import { VERIFICATION_CODE_LENGTH, VerificationCodeInput } from './verification-code-input';
 
 export type AuthActionResult = { ok: true } | { ok: false; error: string };
-export type AuthMode = 'sign-in' | 'sign-up';
 type AuthMethod = 'email' | 'google' | 'passkey';
 type PendingAuthAction = 'email' | 'code' | 'google' | 'passkey' | null;
 
@@ -21,7 +20,7 @@ interface AuthErrorState {
 
 interface LoginFormProps {
   authError?: string | null;
-  mode: AuthMode;
+  passkeyUnavailableReason: string | null;
   onSendCode: (email: string) => Promise<AuthActionResult>;
   onVerifyCode: (code: string) => Promise<AuthActionResult>;
   onGoogleLogin: () => Promise<AuthActionResult>;
@@ -29,7 +28,6 @@ interface LoginFormProps {
 }
 
 interface AuthLoginPageProps extends LoginFormProps {
-  alternateAuthHref: string;
   homeHref: string;
   homeLabel: string;
   privacyHref: string;
@@ -37,7 +35,6 @@ interface AuthLoginPageProps extends LoginFormProps {
 }
 
 export function AuthLoginPage({
-  alternateAuthHref,
   authError,
   homeHref,
   homeLabel,
@@ -47,11 +44,11 @@ export function AuthLoginPage({
   onVerifyCode,
   onGoogleLogin,
   onPasskeyLogin,
-  mode,
+  passkeyUnavailableReason,
 }: AuthLoginPageProps) {
   return (
     <div className="flex min-h-full items-center justify-center bg-background px-5 py-12 sm:px-8 sm:py-16">
-      <section aria-label={mode === 'sign-in' ? 'Sign in' : 'Sign up'} className="w-full max-w-88">
+      <section aria-label="Log in" className="w-full max-w-88">
         <a
           href={homeHref}
           aria-label={homeLabel}
@@ -61,50 +58,46 @@ export function AuthLoginPage({
         </a>
         <LoginForm
           authError={authError}
-          mode={mode}
+          passkeyUnavailableReason={passkeyUnavailableReason}
           onSendCode={onSendCode}
           onVerifyCode={onVerifyCode}
           onGoogleLogin={onGoogleLogin}
           onPasskeyLogin={onPasskeyLogin}
         />
-        <p className="mt-5 text-center text-copy-14 text-muted-foreground">
-          {mode === 'sign-in' ? 'Don’t have an account?' : 'Already have an account?'}{' '}
+        <p className="mt-5 text-center text-copy-12 text-muted-foreground sm:whitespace-nowrap">
+          By continuing, you agree to our{' '}
           <a
             className="font-medium text-foreground transition-colors hover:text-foreground/80"
-            href={alternateAuthHref}
+            href={termsHref}
+            target="_blank"
+            rel="noreferrer"
           >
-            {mode === 'sign-in' ? 'Sign up' : 'Sign in'}
+            Terms
+          </a>{' '}
+          and{' '}
+          <a
+            className="font-medium text-foreground transition-colors hover:text-foreground/80"
+            href={privacyHref}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Privacy Notice
           </a>
+          .
         </p>
-        {mode === 'sign-up' ? (
-          <p className="mt-5 text-center text-copy-12 text-muted-foreground sm:whitespace-nowrap">
-            By continuing, you agree to our{' '}
-            <a
-              className="font-medium text-foreground transition-colors hover:text-foreground/80"
-              href={termsHref}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Terms
-            </a>{' '}
-            and{' '}
-            <a
-              className="font-medium text-foreground transition-colors hover:text-foreground/80"
-              href={privacyHref}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Privacy Notice
-            </a>
-            .
-          </p>
-        ) : null}
       </section>
     </div>
   );
 }
 
-function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, onPasskeyLogin }: LoginFormProps) {
+function LoginForm({
+  authError,
+  passkeyUnavailableReason,
+  onSendCode,
+  onVerifyCode,
+  onGoogleLogin,
+  onPasskeyLogin,
+}: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code' | 'complete'>('email');
@@ -116,6 +109,10 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
   }, [authError]);
 
   const sendCode = useCallback(async () => {
+    if (pendingAction !== null) {
+      return;
+    }
+
     const normalizedEmail = email.trim();
 
     setError(null);
@@ -132,8 +129,9 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
     }
 
     setEmail(normalizedEmail);
+    setCode('');
     setStep('code');
-  }, [email, onSendCode]);
+  }, [email, onSendCode, pendingAction]);
 
   const handleEmailSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -185,6 +183,10 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
   }, []);
 
   const handleGoogleLogin = useCallback(async () => {
+    if (pendingAction !== null) {
+      return;
+    }
+
     setError(null);
     setPendingAction('google');
 
@@ -194,9 +196,13 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
       setPendingAction(null);
       setError({ message: result.error, method: 'google' });
     }
-  }, [onGoogleLogin]);
+  }, [onGoogleLogin, pendingAction]);
 
   const handlePasskeyLogin = useCallback(async () => {
+    if (pendingAction !== null || passkeyUnavailableReason) {
+      return;
+    }
+
     setError(null);
     setPendingAction('passkey');
 
@@ -206,7 +212,7 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
       setPendingAction(null);
       setError({ message: result.error, method: 'passkey' });
     }
-  }, [onPasskeyLogin]);
+  }, [onPasskeyLogin, passkeyUnavailableReason, pendingAction]);
 
   const handleChangeEmail = useCallback(() => {
     setCode('');
@@ -217,18 +223,15 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
 
   const emailError = error?.method === 'email' ? error.message : null;
   const alternativeMethodError = error && error.method !== 'email' ? error.message : null;
-  const emailStepTitle = mode === 'sign-in' ? 'Sign in to Comitium' : 'Sign up to Comitium';
-  const title = step === 'email' ? emailStepTitle : 'Check your email';
-  const emailActionLabel = mode === 'sign-in' ? 'Continue' : 'Continue with email';
-  const emailSubmitLabel = pendingAction === 'email' ? 'Sending code...' : emailActionLabel;
-  const codeActionLabel = mode === 'sign-in' ? 'Sign in' : 'Create account';
-  const codeSubmitLabel = pendingAction === 'code' ? 'Verifying...' : codeActionLabel;
+  const title = step === 'email' ? 'Log In to Comitium' : 'Check your email';
+  const emailSubmitLabel = pendingAction === 'email' ? 'Sending code...' : 'Continue';
+  const codeSubmitLabel = pendingAction === 'code' ? 'Verifying...' : 'Continue';
 
   if (step === 'complete') {
     return (
       <div className="flex min-h-72 flex-col items-center justify-center gap-3 text-center" aria-live="polite">
         <Spinner className="size-5 text-primary" />
-        <p className="text-heading-16">{mode === 'sign-in' ? 'Signing you in' : 'Creating your account'}</p>
+        <p className="text-heading-16">Signing you in</p>
       </div>
     );
   }
@@ -281,7 +284,7 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
           </form>
 
           <AuthMethodActions
-            mode={mode}
+            passkeyUnavailableReason={passkeyUnavailableReason}
             pendingAction={pendingAction}
             error={alternativeMethodError}
             onGoogleLogin={handleGoogleLogin}
@@ -340,13 +343,19 @@ function LoginForm({ authError, mode, onSendCode, onVerifyCode, onGoogleLogin, o
 
 interface AuthMethodActionsProps {
   error: string | null;
-  mode: AuthMode;
+  passkeyUnavailableReason: string | null;
   onGoogleLogin: () => void;
   onPasskeyLogin: () => void;
   pendingAction: PendingAuthAction;
 }
 
-function AuthMethodActions({ error, mode, onGoogleLogin, onPasskeyLogin, pendingAction }: AuthMethodActionsProps) {
+function AuthMethodActions({
+  error,
+  passkeyUnavailableReason,
+  onGoogleLogin,
+  onPasskeyLogin,
+  pendingAction,
+}: AuthMethodActionsProps) {
   return (
     <>
       <AuthSeparator />
@@ -356,14 +365,15 @@ function AuthMethodActions({ error, mode, onGoogleLogin, onPasskeyLogin, pending
           disabled={pendingAction !== null}
           onClick={onGoogleLogin}
         />
-        {mode === 'sign-in' ? (
-          <PasskeyAuthButton
-            isPending={pendingAction === 'passkey'}
-            disabled={pendingAction !== null}
-            onClick={onPasskeyLogin}
-          />
-        ) : null}
+        <PasskeyAuthButton
+          isPending={pendingAction === 'passkey'}
+          disabled={pendingAction !== null || passkeyUnavailableReason !== null}
+          onClick={onPasskeyLogin}
+        />
       </div>
+      {passkeyUnavailableReason ? (
+        <p className="mt-3 text-copy-13 text-muted-foreground">{passkeyUnavailableReason}</p>
+      ) : null}
       <AuthError message={error} />
     </>
   );

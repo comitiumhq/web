@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ApplicationsRouteImport } from './routes/applications'
@@ -26,11 +25,6 @@ import { Route as CareersOrgSlugJobsPostingSlugRouteImport } from './routes/care
 import { Route as CareersOrgSlugJobsPostingSlugIndexRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/index'
 import { Route as CareersOrgSlugJobsPostingSlugApplyRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/apply'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
@@ -116,7 +110,6 @@ export interface FileRoutesByFullPath {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/signup': typeof SignupRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
@@ -133,7 +126,6 @@ export interface FileRoutesByTo {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/signup': typeof SignupRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/schedule/$token': typeof ScheduleTokenRoute
@@ -150,7 +142,6 @@ export interface FileRoutesById {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/signup': typeof SignupRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
@@ -170,7 +161,6 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/signup'
     | '/account/security'
     | '/account/zk-identity'
     | '/careers/$orgSlug'
@@ -187,7 +177,6 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/signup'
     | '/account/security'
     | '/account/zk-identity'
     | '/schedule/$token'
@@ -203,7 +192,6 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/signup'
     | '/account/security'
     | '/account/zk-identity'
     | '/careers/$orgSlug'
@@ -222,7 +210,6 @@ export interface RootRouteChildren {
   ApplicationsRoute: typeof ApplicationsRoute
   LoginRoute: typeof LoginRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
-  SignupRoute: typeof SignupRoute
   CareersOrgSlugRoute: typeof CareersOrgSlugRouteWithChildren
   ScheduleTokenRoute: typeof ScheduleTokenRoute
   JobsIndexRoute: typeof JobsIndexRoute
@@ -230,13 +217,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/robots.txt': {
       id: '/robots.txt'
       path: '/robots.txt'
@@ -399,7 +379,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApplicationsRoute: ApplicationsRoute,
   LoginRoute: LoginRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
-  SignupRoute: SignupRoute,
   CareersOrgSlugRoute: CareersOrgSlugRouteWithChildren,
   ScheduleTokenRoute: ScheduleTokenRoute,
   JobsIndexRoute: JobsIndexRoute,

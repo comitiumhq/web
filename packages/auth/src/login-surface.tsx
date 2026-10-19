@@ -1,10 +1,13 @@
-import { type AuthActionResult, AuthLoginPage, type AuthMode } from '@comitium/ui/auth-login-page';
+import { ApiError } from '@comitium/schemas/api-errors';
+import { type AuthActionResult, AuthLoginPage } from '@comitium/ui/auth-login-page';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { useEffect, useRef, useState } from 'react';
 
+import { getAuthActionError } from './auth-action-error';
 import { sendSignInCode, signInWithGoogle, verifySignInCode } from './auth-actions';
 import { useAuthClient } from './auth-context';
 import { unwrapAuthResult } from './auth-result';
+import { getSessionUser } from './fresh-auth-session';
 import { buildAuthRoute, resolveNonAuthReturnTo } from './navigation';
 
 interface AuthSessionState {
@@ -16,7 +19,6 @@ interface AuthLoginSurfaceProps {
   defaultReturnTo: string;
   homeHref: string;
   homeLabel: string;
-  mode: AuthMode;
   navigate: (destination: string) => void;
   privacyHref: string;
   returnTo?: string;
@@ -28,7 +30,6 @@ export function AuthLoginSurface({
   defaultReturnTo,
   homeHref,
   homeLabel,
-  mode,
   navigate,
   privacyHref,
   returnTo,
@@ -36,17 +37,13 @@ export function AuthLoginSurface({
   termsHref,
 }: AuthLoginSurfaceProps) {
   const client = useAuthClient();
+  const nativeSession = client.useSession();
   const emailAddress = useRef('');
   const [isRedirecting, setIsRedirecting] = useState(false);
   const destination = resolveNonAuthReturnTo(returnTo, defaultReturnTo);
-  const oauthErrorMessage =
-    mode === 'sign-in'
-      ? 'We could not sign you in with Google. Try again or create an account.'
-      : 'We could not create your account with Google. Try again or sign in instead.';
-
-  const authPath = mode === 'sign-in' ? '/login' : '/signup';
-  const alternateAuthPath = mode === 'sign-in' ? '/signup' : '/login';
-  const alternateAuthHref = buildAuthRoute(alternateAuthPath, destination);
+  const callbackError = new URLSearchParams(window.location.search).get('error');
+  const passkeyUnavailableReason =
+    typeof PublicKeyCredential === 'undefined' ? getAuthActionError('PASSKEY_NOT_SUPPORTED', 'passkey') : null;
 
   useEffect(() => {
     if (!session.isSessionLoading && session.isSignedIn) {
@@ -56,37 +53,41 @@ export function AuthLoginSurface({
     }
 
     if (returnTo && returnTo !== destination) {
-      navigate(authPath);
+      navigate('/login');
     }
-  }, [authPath, destination, navigate, returnTo, session.isSessionLoading, session.isSignedIn]);
+  }, [destination, navigate, returnTo, session.isSessionLoading, session.isSignedIn]);
+
+  async function recoverSignIn(expectedEmail?: string): Promise<boolean> {
+    await nativeSession.refetch();
+
+    const user = getSessionUser(client);
+
+    return Boolean(user && (!expectedEmail || user.email.toLowerCase() === expectedEmail.toLowerCase()));
+  }
 
   async function handleSendCode(email: string): Promise<AuthActionResult> {
     try {
-      await sendSignInCode(client, email, mode);
+      await sendSignInCode(client, email);
 
       emailAddress.current = email;
 
       return { ok: true };
-    } catch {
-      return authError(
-        mode === 'sign-in'
-          ? 'We could not sign you in. Try again or create an account.'
-          : 'We could not create your account. Try again or sign in instead.',
-      );
+    } catch (error) {
+      return { ok: false, error: getAuthActionError(error, 'send-code') };
     }
   }
 
   async function handleVerifyCode(code: string): Promise<AuthActionResult> {
     try {
-      await verifySignInCode(client, emailAddress.current, code, mode);
+      await verifySignInCode(client, emailAddress.current, code);
 
       return { ok: true };
-    } catch {
-      return authError(
-        mode === 'sign-in'
-          ? 'We could not sign you in. Try again or create an account.'
-          : 'The code is invalid or has expired.',
-      );
+    } catch (error) {
+      if ((!(error instanceof ApiError) || error.status >= 500) && (await recoverSignIn(emailAddress.current))) {
+        return { ok: true };
+      }
+
+      return { ok: false, error: getAuthActionError(error, 'verify-code') };
     }
   }
 
@@ -94,16 +95,15 @@ export function AuthLoginSurface({
     try {
       await signInWithGoogle(
         client,
-        mode,
         new URL(destination, window.location.origin).href,
-        new URL(buildAuthRoute(authPath, destination), window.location.origin).href,
+        new URL(buildAuthRoute(destination), window.location.origin).href,
       );
 
       setIsRedirecting(true);
 
       return { ok: true };
-    } catch {
-      return authError(oauthErrorMessage);
+    } catch (error) {
+      return { ok: false, error: getAuthActionError(error, 'google') };
     }
   }
 
@@ -112,15 +112,16 @@ export function AuthLoginSurface({
       unwrapAuthResult(await client.signIn.passkey());
 
       return { ok: true };
-    } catch {
-      return authError('We could not sign you in with a passkey. Try again or create an account.');
+    } catch (error) {
+      const uncertain = !(error instanceof ApiError) || error.status >= 500 || error.code === 'AUTH_CANCELLED';
+
+      if (uncertain && (await recoverSignIn())) {
+        return { ok: true };
+      }
+
+      return { ok: false, error: getAuthActionError(error, 'passkey') };
     }
   }
-
-  const oauthError =
-    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('error')
-      ? oauthErrorMessage
-      : null;
 
   if (isRedirecting || session.isSessionLoading || session.isSignedIn) {
     return <PageLoader />;
@@ -128,11 +129,10 @@ export function AuthLoginSurface({
 
   return (
     <AuthLoginPage
-      alternateAuthHref={alternateAuthHref}
-      authError={oauthError}
+      authError={callbackError ? getAuthActionError(callbackError, 'google') : null}
       homeHref={homeHref}
       homeLabel={homeLabel}
-      mode={mode}
+      passkeyUnavailableReason={passkeyUnavailableReason}
       privacyHref={privacyHref}
       termsHref={termsHref}
       onSendCode={handleSendCode}
@@ -141,8 +141,4 @@ export function AuthLoginSurface({
       onPasskeyLogin={handlePasskeyLogin}
     />
   );
-}
-
-function authError(message: string): AuthActionResult {
-  return { ok: false, error: message };
 }

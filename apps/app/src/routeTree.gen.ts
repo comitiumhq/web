@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as AccountRouteImport } from './routes/account'
@@ -53,11 +52,6 @@ import { Route as OrgOrgIdJobsJobIdPipelineRouteImport } from './routes/org/$org
 import { Route as OrgOrgIdJobsJobIdInterviewPlanRouteImport } from './routes/org/$orgId/jobs/$jobId/interview-plan'
 import { Route as OrgOrgIdJobsJobIdCriteriaRouteImport } from './routes/org/$orgId/jobs/$jobId/criteria'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -300,7 +294,6 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRouteWithChildren
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
@@ -344,7 +337,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/create': typeof OrgCreateRoute
@@ -384,7 +376,6 @@ export interface FileRoutesById {
   '/account': typeof AccountRouteWithChildren
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
@@ -431,7 +422,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/invite'
     | '/login'
-    | '/signup'
     | '/account/security'
     | '/account/zk-identity'
     | '/org/$orgId'
@@ -475,7 +465,6 @@ export interface FileRouteTypes {
     | '/'
     | '/invite'
     | '/login'
-    | '/signup'
     | '/account/security'
     | '/account/zk-identity'
     | '/org/create'
@@ -514,7 +503,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/invite'
     | '/login'
-    | '/signup'
     | '/account/security'
     | '/account/zk-identity'
     | '/org/$orgId'
@@ -560,20 +548,12 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRouteWithChildren
   InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
-  SignupRoute: typeof SignupRoute
   OrgOrgIdRoute: typeof OrgOrgIdRouteWithChildren
   OrgCreateRoute: typeof OrgCreateRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -1041,7 +1021,6 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRouteWithChildren,
   InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
-  SignupRoute: SignupRoute,
   OrgOrgIdRoute: OrgOrgIdRouteWithChildren,
   OrgCreateRoute: OrgCreateRoute,
 }

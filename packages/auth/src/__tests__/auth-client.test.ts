@@ -1,5 +1,4 @@
 import { ApiError } from '@comitium/schemas/api-errors';
-import type { AuthMode } from '@comitium/ui/auth-login-page';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { sendSignInCode, signInWithGoogle, verifySignInCode } from '../auth-actions';
 import { createIdentityClient } from '../auth-client';
@@ -32,54 +31,51 @@ function lastRequest() {
   };
 }
 
-describe('native auth client transport and intent', () => {
-  it.each(['sign-in', 'sign-up'] satisfies AuthMode[])(
-    'preserves %s intent for sending and verifying OTP',
-    async (mode) => {
-      const client = createIdentityClient(API_URL);
+describe('native auth client transport', () => {
+  it('uses cookie-authenticated native OTP requests without custom modes', async () => {
+    const client = createIdentityClient(API_URL);
 
-      await sendSignInCode(client, 'person@example.com', mode);
+    await sendSignInCode(client, 'person@example.com');
 
-      let request = lastRequest();
+    let request = lastRequest();
 
-      expect(request.url.pathname).toBe('/v1/auth/identity/email-otp/send-verification-otp');
-      expect(request.url.searchParams.get('mode')).toBe(mode === 'sign-up' ? 'signup' : null);
-      expect(request.body).toEqual({ email: 'person@example.com', type: 'sign-in' });
-      expect(request.options.credentials).toBe('include');
-      expect(request.options.cache).toBe('no-store');
-      expect(new Headers(request.options.headers).has('Authorization')).toBe(false);
+    expect(request.url.pathname).toBe('/v1/auth/identity/email-otp/send-verification-otp');
+    expect(request.url.search).toBe('');
+    expect(request.body).toEqual({ email: 'person@example.com', type: 'sign-in' });
+    expect(request.options.credentials).toBe('include');
+    expect(request.options.cache).toBe('no-store');
+    expect(new Headers(request.options.headers).has('Authorization')).toBe(false);
 
-      fetchMock.mockResolvedValueOnce(Response.json({ user: identitySession().user }));
+    fetchMock.mockResolvedValueOnce(Response.json({ user: identitySession().user }));
 
-      await verifySignInCode(client, 'person@example.com', '123456', mode);
+    await verifySignInCode(client, 'person@example.com', '123456');
 
-      request = lastRequest();
+    request = lastRequest();
 
-      expect(request.url.pathname).toBe('/v1/auth/identity/sign-in/email-otp');
-      expect(request.url.searchParams.get('mode')).toBe(mode === 'sign-up' ? 'signup' : null);
-      expect(request.body).toEqual({ email: 'person@example.com', otp: '123456' });
-    },
-  );
+    expect(request.url.pathname).toBe('/v1/auth/identity/sign-in/email-otp');
+    expect(request.url.search).toBe('');
+    expect(request.body).toEqual({ email: 'person@example.com', otp: '123456' });
+  });
 
-  it.each(['sign-in', 'sign-up'] satisfies AuthMode[])('preserves %s intent and callbacks for Google', async (mode) => {
+  it('uses the native Google sign-in-or-up flow and preserves callbacks', async () => {
     const client = createIdentityClient(`${API_URL}/`);
     const callbackURL = 'https://app.comitium.test/org/example';
     const errorCallbackURL = 'https://app.comitium.test/login?returnTo=%2Forg%2Fexample';
 
     fetchMock.mockResolvedValueOnce(Response.json({ redirect: false, url: 'https://accounts.google.com/' }));
 
-    await signInWithGoogle(client, mode, callbackURL, errorCallbackURL);
+    await signInWithGoogle(client, callbackURL, errorCallbackURL);
 
     const request = lastRequest();
 
     expect(request.url.pathname).toBe('/v1/auth/identity/sign-in/social');
     expect(request.body).toMatchObject({
       provider: 'google',
-      requestSignUp: mode === 'sign-up',
       callbackURL,
       newUserCallbackURL: callbackURL,
       errorCallbackURL,
     });
+    expect(request.body).not.toHaveProperty('requestSignUp');
   });
 
   it('keeps normal session refresh enabled on the native endpoint', async () => {

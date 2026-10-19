@@ -324,6 +324,7 @@ describe('native Authentication settings', () => {
       .click();
 
     await expect.element(screen.getByRole('button', { name: 'Remove Google', exact: true })).toBeEnabled();
+    await expect.element(screen.getByRole('dialog').getByRole('alert')).not.toBeInTheDocument();
     expect(requests.filter((request) => request.path === '/unlink-account')).toHaveLength(1);
   });
 

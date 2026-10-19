@@ -1,9 +1,9 @@
-import { isAuthRoutePath } from '@comitium/auth/navigation';
-import { useSession } from '@comitium/auth/use-session';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
-import { useEffect } from 'react';
+import { type ReactNode, useEffect } from 'react';
+
+import { isAuthRoutePath } from './navigation';
+import { useSession } from './use-session';
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -12,11 +12,9 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const navigate = useNavigate();
   const returnTo = useRouterState({
-    select: (state) =>
-      isAuthRoutePath(state.location.pathname)
-        ? null
-        : `${state.location.pathname}${state.location.searchStr}${state.location.hash}`,
+    select: (state) => (isAuthRoutePath(state.location.pathname) ? null : state.location.href),
   });
+
   const { isSignedIn, isSessionLoading } = useSession();
 
   useEffect(() => {
@@ -25,11 +23,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }
   }, [isSessionLoading, isSignedIn, navigate, returnTo]);
 
-  if (isSessionLoading) {
-    return <PageLoader />;
-  }
-
-  if (!isSignedIn) {
+  if (isSessionLoading || !isSignedIn) {
     return <PageLoader />;
   }
 

@@ -22,8 +22,15 @@ export function AuthProvider({ children, client, getSession, sessionQueryKey, st
   const auth = client.useSession();
   const authUserId = auth.data?.user.id ?? null;
   const queryClient = useQueryClient();
+  const [hasCheckedSession, setHasCheckedSession] = useState(false);
   const [resolvedIdentity, setResolvedIdentity] = useState<string | null>(null);
   const [identityError, setIdentityError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!auth.isPending) {
+      setHasCheckedSession(true);
+    }
+  }, [auth.isPending]);
 
   useEffect(() => {
     if (authUserId === resolvedIdentity) {
@@ -81,7 +88,7 @@ export function AuthProvider({ children, client, getSession, sessionQueryKey, st
 
   let stage: AccountStage;
 
-  if (auth.isPending || !identityReady) {
+  if ((!hasCheckedSession && auth.isPending) || !identityReady) {
     stage = 'authenticating';
   } else if (!authUserId) {
     stage = 'anonymous';
@@ -98,7 +105,7 @@ export function AuthProvider({ children, client, getSession, sessionQueryKey, st
     throw identityError;
   }
 
-  if (auth.error && auth.error.status !== 401 && !auth.data) {
+  if (auth.error && auth.error.status !== 401 && !auth.data && !hasCheckedSession) {
     throw new ApiError(auth.error.status, 'Could not check your sign-in. Try again.');
   }
 

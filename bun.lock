@@ -169,6 +169,7 @@
         "@comitium/schemas": "workspace:*",
         "@comitium/ui": "workspace:*",
         "@tanstack/react-query": "5.90.21",
+        "@tanstack/react-router": "1.147.3",
         "@zkpassport/sdk": "0.18.2",
         "@zkpassport/ui": "0.18.2",
         "better-auth": "1.7.11",

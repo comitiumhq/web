@@ -7,16 +7,12 @@ export const authSearchSchema = z.object({
   returnTo: z.string().optional(),
 });
 
-export type AuthRoutePath = '/login' | '/signup';
-
-export function buildAuthRoute(path: AuthRoutePath, returnTo: string): string {
-  return `${path}?returnTo=${encodeURIComponent(returnTo)}`;
+export function buildAuthRoute(returnTo: string): string {
+  return `/login?returnTo=${encodeURIComponent(returnTo)}`;
 }
 
 export function isAuthRoutePath(pathname: string): boolean {
-  return (
-    pathname === '/login' || pathname.startsWith('/login/') || pathname === '/signup' || pathname.startsWith('/signup/')
-  );
+  return pathname === '/login' || pathname.startsWith('/login/');
 }
 
 export function resolveInternalReturnTo(value: unknown, fallback: string): string {

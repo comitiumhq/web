@@ -7,13 +7,7 @@ export function EncryptionSetup({ children }: { children: ReactNode }) {
     select: (state) => {
       const path = state.location.pathname;
 
-      return (
-        path === '/invite' ||
-        path === '/login' ||
-        path === '/signup' ||
-        path === '/account' ||
-        path.startsWith('/account/')
-      );
+      return path === '/invite' || path === '/login' || path === '/account' || path.startsWith('/account/');
     },
   });
 
