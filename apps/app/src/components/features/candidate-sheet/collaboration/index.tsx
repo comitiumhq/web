@@ -9,7 +9,7 @@ import type {
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { useCallback } from 'react';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import type { InterviewEventRef } from '@/lib/interviews/feedback';
 import type { ApplicationReviewActivity } from '@/lib/schemas/stage-activities';
 import { cn } from '@/lib/utils';
@@ -77,11 +77,7 @@ export function CandidateCollaboration({
   onReviewActivity,
   onSubmitInterviewFeedback,
 }: CandidateCollaborationProps) {
-  const {
-    data: wrappedVaultKey,
-    isLoading: isVaultKeyLoading,
-    isError: isVaultKeyError,
-  } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess, isLoading: isVaultKeyLoading, isError: isVaultKeyError } = useQueryOrgVaultAccess(orgId);
   const {
     decryptedNotes,
     notes,
@@ -146,9 +142,9 @@ export function CandidateCollaboration({
             candidateId={candidateId}
             orgId={orgId}
             candidateProfile={candidateProfile}
-            wrappedVaultKey={wrappedVaultKey}
+            vaultAccess={vaultAccess}
             isVaultKeyLoading={isVaultKeyLoading}
-            isVaultKeyError={isVaultKeyError && !wrappedVaultKey}
+            isVaultKeyError={isVaultKeyError && !vaultAccess}
             decryptedNotes={decryptedNotes}
             decryptingNoteIds={decryptingNoteIds}
             failedNoteIds={failedNoteIds}
@@ -199,7 +195,7 @@ export function CandidateCollaboration({
                 processing={processing}
                 reviewStatus={reviewStatus}
                 access={access}
-                wrappedVaultKey={wrappedVaultKey}
+                vaultAccess={vaultAccess}
                 onReviewActivity={onReviewActivity}
                 onSubmitInterviewFeedback={onSubmitInterviewFeedback}
               />

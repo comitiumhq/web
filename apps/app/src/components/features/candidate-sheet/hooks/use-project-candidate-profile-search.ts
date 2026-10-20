@@ -14,7 +14,7 @@ interface UseProjectCandidateProfileSearchParams {
   orgId: string;
   profile: CandidateProfile | null;
   storedVersion: number | null;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   enabled: boolean;
 }
 
@@ -23,7 +23,7 @@ export function useProjectCandidateProfileSearch({
   orgId,
   profile,
   storedVersion,
-  wrappedVaultKey,
+  vaultAccess,
   enabled,
 }: UseProjectCandidateProfileSearchParams) {
   const queryClient = useQueryClient();
@@ -36,7 +36,7 @@ export function useProjectCandidateProfileSearch({
       return;
     }
 
-    const projectionInput = getCandidateProfileProjectionInput(enabled, candidateId, profile, wrappedVaultKey);
+    const projectionInput = getCandidateProfileProjectionInput(enabled, candidateId, profile, vaultAccess);
 
     if (!isDefined(projectionInput)) {
       return;
@@ -49,13 +49,13 @@ export function useProjectCandidateProfileSearch({
     const {
       candidateId: projectionCandidateId,
       profile: projectionProfile,
-      wrappedVaultKey: projectionVaultKey,
+      vaultAccess: projectionVaultAccess,
     } = projectionInput;
 
     attemptedCandidateIdRef.current = projectionCandidateId;
     let cancelled = false;
 
-    projectCandidateProfileSearch(orgId, projectionVaultKey, projectionProfile)
+    projectCandidateProfileSearch(orgId, projectionVaultAccess, projectionProfile)
       .then((searchProjection) => saveCandidateProfileSearch(projectionCandidateId, searchProjection))
       .then(() => {
         if (cancelled) {
@@ -74,20 +74,20 @@ export function useProjectCandidateProfileSearch({
     return () => {
       cancelled = true;
     };
-  }, [candidateId, enabled, orgId, profile, queryClient, storedVersion, wrappedVaultKey]);
+  }, [candidateId, enabled, orgId, profile, queryClient, storedVersion, vaultAccess]);
 }
 
 interface CandidateProfileProjectionInput {
   candidateId: string;
   profile: CandidateProfile;
-  wrappedVaultKey: VaultKeyAccess;
+  vaultAccess: VaultKeyAccess;
 }
 
 function getCandidateProfileProjectionInput(
   enabled: boolean,
   candidateId: string | null,
   profile: CandidateProfile | null,
-  wrappedVaultKey: VaultKeyAccess | undefined,
+  vaultAccess: VaultKeyAccess | undefined,
 ): CandidateProfileProjectionInput | null {
   if (!enabled) {
     return null;
@@ -101,9 +101,9 @@ function getCandidateProfileProjectionInput(
     return null;
   }
 
-  if (!isDefined(wrappedVaultKey)) {
+  if (!isDefined(vaultAccess)) {
     return null;
   }
 
-  return { candidateId, profile, wrappedVaultKey };
+  return { candidateId, profile, vaultAccess };
 }

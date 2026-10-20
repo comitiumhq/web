@@ -34,7 +34,7 @@ export async function buildEncryptedLabel(
   label: string,
   vaultPublicKey: PublicEncryptionKey,
   vaultKeyVersion: number,
-  wrappedVaultKey: VaultKeyAccess,
+  vaultAccess: VaultKeyAccess,
 ): Promise<CreateCandidateTagBody> {
   const displayLabel = label.trim();
   const [labelCiphertext, labelHash] = await Promise.all([
@@ -44,7 +44,7 @@ export async function buildEncryptedLabel(
       { label: displayLabel },
       candidateTagContext(orgId),
     ),
-    CryptoProxy.hashTagLabel(orgId, wrappedVaultKey, label),
+    CryptoProxy.hashTagLabel(orgId, vaultAccess, label),
   ]);
 
   return { label: labelCiphertext, labelHash };
@@ -57,7 +57,7 @@ interface CreateTagParams {
   label: string;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: VaultKeyAccess;
+  vaultAccess: VaultKeyAccess;
 }
 
 export function useCreateCandidateTag() {
@@ -65,10 +65,10 @@ export function useCreateCandidateTag() {
   const { ensureUnlocked } = useCryptoUnlock();
 
   return useMutation({
-    mutationFn: async ({ orgId, label, vaultPublicKey, vaultKeyVersion, wrappedVaultKey }: CreateTagParams) => {
+    mutationFn: async ({ orgId, label, vaultPublicKey, vaultKeyVersion, vaultAccess }: CreateTagParams) => {
       await ensureUnlocked();
 
-      const body = await buildEncryptedLabel(orgId, label, vaultPublicKey, vaultKeyVersion, wrappedVaultKey);
+      const body = await buildEncryptedLabel(orgId, label, vaultPublicKey, vaultKeyVersion, vaultAccess);
 
       return createCandidateTag(orgId, body);
     },
@@ -93,10 +93,10 @@ export function useRenameCandidateTag() {
   const { ensureUnlocked } = useCryptoUnlock();
 
   return useMutation({
-    mutationFn: async ({ orgId, tagId, label, vaultPublicKey, vaultKeyVersion, wrappedVaultKey }: RenameTagParams) => {
+    mutationFn: async ({ orgId, tagId, label, vaultPublicKey, vaultKeyVersion, vaultAccess }: RenameTagParams) => {
       await ensureUnlocked();
 
-      const body = await buildEncryptedLabel(orgId, label, vaultPublicKey, vaultKeyVersion, wrappedVaultKey);
+      const body = await buildEncryptedLabel(orgId, label, vaultPublicKey, vaultKeyVersion, vaultAccess);
 
       return updateCandidateTag(orgId, tagId, body);
     },

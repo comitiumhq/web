@@ -28,7 +28,7 @@ vi.mock('@/lib/forms/decrypt-answers', () => ({
   decryptAnswerBuckets: mocks.decryptAnswerBuckets,
 }));
 
-const wrappedVaultKey = mockVaultAccess();
+const vaultAccess = mockVaultAccess();
 const answers = [{ visibility: 'standard', answers: { ct: 'ciphertext' } }] as AnswerBucket[];
 
 function deferred<T>(): Deferred<T> {
@@ -57,7 +57,7 @@ describe('useDecryptApplication', () => {
 
     const hook = await renderHook(
       (props?: { submissionId: string | null }) =>
-        useDecryptApplication('org-1', props?.submissionId ?? null, 'form-1', answers, wrappedVaultKey),
+        useDecryptApplication('org-1', props?.submissionId ?? null, 'form-1', answers, vaultAccess),
       { initialProps: { submissionId: 'submission-1' as string | null } },
     );
 
@@ -78,9 +78,7 @@ describe('useDecryptApplication', () => {
   it('keeps a failed decrypt retryable and clears the error after success', async () => {
     mocks.decryptAnswerBuckets.mockRejectedValueOnce(new Error('bad key')).mockResolvedValueOnce({ answer: 'ok' });
 
-    const hook = await renderHook(() =>
-      useDecryptApplication('org-1', 'submission-1', 'form-1', answers, wrappedVaultKey),
-    );
+    const hook = await renderHook(() => useDecryptApplication('org-1', 'submission-1', 'form-1', answers, vaultAccess));
 
     await vi.waitFor(() => expect(hook.result.current.error).toBe('Failed to decrypt data. Please try again.'));
 

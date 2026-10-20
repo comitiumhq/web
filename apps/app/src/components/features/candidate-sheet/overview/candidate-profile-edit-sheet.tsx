@@ -97,7 +97,7 @@ interface CandidateProfileEditSheetProps {
   profile: CandidateProfile | null;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: VaultKeyAccess;
+  vaultAccess: VaultKeyAccess;
 }
 
 const FORM_ID = 'candidate-profile-edit-form';
@@ -110,7 +110,7 @@ export function CandidateProfileEditSheet({
   profile,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
 }: CandidateProfileEditSheetProps) {
   const { mutateAsync: updateProfile, isPending } = useUpdateCandidateProfile();
   const form = useForm<CandidateProfileFormValues>({
@@ -144,12 +144,12 @@ export function CandidateProfileEditSheet({
         profile: toCandidateProfile(values),
         vaultPublicKey,
         vaultKeyVersion,
-        wrappedVaultKey,
+        vaultAccess,
       });
 
       onOpenChange(false);
     },
-    [candidateId, onOpenChange, orgId, updateProfile, vaultKeyVersion, vaultPublicKey, wrappedVaultKey],
+    [candidateId, onOpenChange, orgId, updateProfile, vaultKeyVersion, vaultPublicKey, vaultAccess],
   );
 
   return (

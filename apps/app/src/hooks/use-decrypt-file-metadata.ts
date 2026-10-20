@@ -19,17 +19,13 @@ interface DecryptState {
 
 const INITIAL_STATE: DecryptState = { data: null, error: null, isDecrypting: false };
 
-export function useDecryptFileMetadata(
-  orgId: string,
-  files: FileMetadataInput[] | null,
-  wrappedVaultKey?: VaultKeyAccess,
-) {
+export function useDecryptFileMetadata(orgId: string, files: FileMetadataInput[] | null, vaultAccess?: VaultKeyAccess) {
   const [state, setState] = useState<DecryptState>(INITIAL_STATE);
   const generationRef = useRef(0);
   const { canUnlock, ensureUnlocked, isCryptoActive } = useCryptoUnlock();
 
   const hasFiles = !!files && files.length > 0;
-  const canDecrypt = hasFiles && canUnlock && !!wrappedVaultKey;
+  const canDecrypt = hasFiles && canUnlock && !!vaultAccess;
   const fileSetKey = useMemo(() => {
     if (!files) {
       return `${orgId}:none`;
@@ -46,7 +42,7 @@ export function useDecryptFileMetadata(
   useEffect(reset, [fileSetKey, reset]);
 
   const decrypt = useCallback(async () => {
-    if (!canDecrypt || !files || !wrappedVaultKey) {
+    if (!canDecrypt || !files || !vaultAccess) {
       return;
     }
 
@@ -62,7 +58,7 @@ export function useDecryptFileMetadata(
           const payload = await CryptoProxy.decryptApplication(
             file.metadata,
             orgId,
-            wrappedVaultKey,
+            vaultAccess,
             encryptedFileMetadataContext(orgId, file.fileId, file.kind),
           );
 
@@ -78,7 +74,7 @@ export function useDecryptFileMetadata(
         setState({ ...INITIAL_STATE, error: 'Failed to decrypt file details. Please try again.' });
       }
     }
-  }, [canDecrypt, files, wrappedVaultKey, orgId, ensureUnlocked]);
+  }, [canDecrypt, files, vaultAccess, orgId, ensureUnlocked]);
 
   useEffect(() => {
     if (hasFiles && isCryptoActive && !state.data && !state.isDecrypting && !state.error) {

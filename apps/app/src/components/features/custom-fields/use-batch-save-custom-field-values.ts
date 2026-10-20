@@ -2,8 +2,8 @@ import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
 import type { FieldTypeId } from '@comitium/schemas/forms';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { useQueryOrgVaultKey } from '@/hooks/queries/use-query-org-vault-key';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
 import { qk } from '@/hooks/query-keys';
 import { batchWriteCandidateCustomFieldValues } from '@/lib/api/candidate-custom-field-values';
 import { encodeCandidateCustomFieldValue } from '@/lib/forms/custom-field-value-codec';
@@ -40,12 +40,12 @@ interface UseBatchSaveCustomFieldValuesArgs {
 export function useBatchSaveCustomFieldValues({ orgId, candidateId }: UseBatchSaveCustomFieldValuesArgs) {
   const queryClient = useQueryClient();
   const { data: vaultKey } = useQueryOrgVaultKey(orgId);
-  const { data: wrappedVaultKey } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess } = useQueryOrgVaultAccess(orgId);
   const { ensureUnlocked } = useCryptoUnlock();
 
   return useMutation({
     mutationFn: async (items: BatchSaveCustomFieldItem[]) => {
-      if (!vaultKey || !wrappedVaultKey) {
+      if (!vaultKey || !vaultAccess) {
         throw new Error('Vault not ready — unlock encryption first');
       }
 
@@ -65,7 +65,7 @@ export function useBatchSaveCustomFieldValues({ orgId, candidateId }: UseBatchSa
             value: item.value,
             vaultPublicKey: vaultKey.vaultPublicKey,
             vaultKeyVersion: vaultKey.keyVersion,
-            wrappedVaultKey,
+            vaultAccess,
           });
 
           return { fieldId: item.fieldId, encryptedValue, valueHash };

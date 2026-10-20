@@ -31,7 +31,7 @@ interface CandidateProfileCardProps {
   canEdit: boolean;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }
 
 export function CandidateProfileCard(props: CandidateProfileCardProps) {
@@ -91,7 +91,7 @@ interface CandidateProfileEditorProps {
   candidateId: string;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: VaultKeyAccess;
+  vaultAccess: VaultKeyAccess;
 }
 
 function getCandidateProfileEditorProps({
@@ -99,7 +99,7 @@ function getCandidateProfileEditorProps({
   candidateId,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
 }: CandidateProfileCardProps): CandidateProfileEditorProps | null {
   if (!canEdit) {
     return null;
@@ -117,11 +117,11 @@ function getCandidateProfileEditorProps({
     return null;
   }
 
-  if (!isDefined(wrappedVaultKey)) {
+  if (!isDefined(vaultAccess)) {
     return null;
   }
 
-  return { candidateId, vaultPublicKey, vaultKeyVersion, wrappedVaultKey };
+  return { candidateId, vaultPublicKey, vaultKeyVersion, vaultAccess };
 }
 
 interface CandidateProfileContentProps {

@@ -13,7 +13,7 @@ export async function decryptFeedbackBuckets(
   applicationId: string,
   formId: string,
   buckets: AnswerBucket[],
-  wrappedVaultKey: VaultKeyAccess,
+  vaultAccess: VaultKeyAccess,
 ): Promise<Record<string, unknown>> {
   const merged: Record<string, unknown> = {};
 
@@ -21,7 +21,7 @@ export async function decryptFeedbackBuckets(
     const decrypted = await CryptoProxy.decryptApplication(
       bucket.answers,
       orgId,
-      wrappedVaultKey,
+      vaultAccess,
       feedbackAnswerBucketContext(orgId, applicationId, formId, bucket.visibility),
     );
 
@@ -35,7 +35,7 @@ export async function decryptAnswerBuckets(
   orgId: string,
   formId: string,
   buckets: AnswerBucket[],
-  wrappedVaultKey: VaultKeyAccess,
+  vaultAccess: VaultKeyAccess,
 ): Promise<Record<string, unknown>> {
   const merged: Record<string, unknown> = {};
 
@@ -43,7 +43,7 @@ export async function decryptAnswerBuckets(
     const decrypted = await CryptoProxy.decryptApplication(
       bucket.answers,
       orgId,
-      wrappedVaultKey,
+      vaultAccess,
       applicationAnswerBucketContext(orgId, formId, bucket.visibility),
     );
 

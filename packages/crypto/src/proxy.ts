@@ -310,20 +310,20 @@ export const CryptoProxy = {
   async decryptApplication(
     envelope: EncryptedEnvelope,
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<Record<string, unknown>> {
-    return runOnWorker((api) => api.decryptApplication(envelope, orgId, wrappedVaultKey, context));
+    return runOnWorker((api) => api.decryptApplication(envelope, orgId, vaultAccess, context));
   },
 
   async rewrapEnvelopeKey(
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     sourceKey: EnvelopeKey,
     context: CryptoContextInput,
     recipient: RecipientDescriptor,
   ): Promise<EnvelopeKey> {
-    return runOnWorker((api) => api.rewrapEnvelopeKey(orgId, wrappedVaultKey, sourceKey, context, recipient));
+    return runOnWorker((api) => api.rewrapEnvelopeKey(orgId, vaultAccess, sourceKey, context, recipient));
   },
 
   async encryptFile(
@@ -358,12 +358,10 @@ export const CryptoProxy = {
   async decryptFile(
     blob: Uint8Array,
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<Uint8Array> {
-    return runOnWorker((api) =>
-      api.decryptFile(Comlink.transfer(blob, [blob.buffer]), orgId, wrappedVaultKey, context),
-    );
+    return runOnWorker((api) => api.decryptFile(Comlink.transfer(blob, [blob.buffer]), orgId, vaultAccess, context));
   },
 
   async encryptEmailContent(
@@ -388,10 +386,10 @@ export const CryptoProxy = {
   async decryptEmailContentForOrganization(
     envelope: EncryptedEnvelope,
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<unknown> {
-    return runOnWorker((api) => api.decryptEmailContentForOrganization(envelope, orgId, wrappedVaultKey, context));
+    return runOnWorker((api) => api.decryptEmailContentForOrganization(envelope, orgId, vaultAccess, context));
   },
 
   async decryptEmailContentForApplicant(envelope: EncryptedEnvelope, context: CryptoContextInput): Promise<unknown> {
@@ -563,36 +561,36 @@ export const CryptoProxy = {
     return runOnWorker((api) => api.grantVaultAccess(ownAccess, memberPublicKey, recipient));
   },
 
-  async hashTagLabel(orgId: string, wrappedVaultKey: VaultKeyAccess, label: string): Promise<string> {
-    return runOnWorker((api) => api.hashTagLabel(orgId, wrappedVaultKey, label));
+  async hashTagLabel(orgId: string, vaultAccess: VaultKeyAccess, label: string): Promise<string> {
+    return runOnWorker((api) => api.hashTagLabel(orgId, vaultAccess, label));
   },
 
   async hashCustomFieldValue(
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     fieldId: string,
     fieldType: SearchableCustomFieldType,
     plaintext: unknown,
   ): Promise<string> {
-    return runOnWorker((api) => api.hashCustomFieldValue(orgId, wrappedVaultKey, fieldId, fieldType, plaintext));
+    return runOnWorker((api) => api.hashCustomFieldValue(orgId, vaultAccess, fieldId, fieldType, plaintext));
   },
 
   async hashCandidateProfileSearchValue(
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     field: CandidateProfileSearchField,
     value: string | number,
   ): Promise<string> {
-    return runOnWorker((api) => api.hashCandidateProfileSearchValue(orgId, wrappedVaultKey, field, value));
+    return runOnWorker((api) => api.hashCandidateProfileSearchValue(orgId, vaultAccess, field, value));
   },
 
   async hashCategoricalFormFieldValue(
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     fieldId: string,
     kind: CategoricalFormFieldKind,
     value: boolean | string,
   ): Promise<string> {
-    return runOnWorker((api) => api.hashCategoricalFormFieldValue(orgId, wrappedVaultKey, fieldId, kind, value));
+    return runOnWorker((api) => api.hashCategoricalFormFieldValue(orgId, vaultAccess, fieldId, kind, value));
   },
 };

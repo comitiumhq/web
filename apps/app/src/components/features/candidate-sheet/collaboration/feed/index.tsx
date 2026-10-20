@@ -19,7 +19,7 @@ interface FeedTabProps {
   candidateId: string | null;
   orgId: string;
   candidateProfile: CandidateProfile | null;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   isVaultKeyLoading: boolean;
   isVaultKeyError: boolean;
   decryptedNotes: Record<string, TipTapDoc>;
@@ -36,7 +36,7 @@ export function FeedTab({
   candidateId,
   orgId,
   candidateProfile,
-  wrappedVaultKey,
+  vaultAccess,
   isVaultKeyLoading,
   isVaultKeyError,
   decryptedNotes,
@@ -69,7 +69,7 @@ export function FeedTab({
     candidateId,
     orgId,
     activityEvents,
-    wrappedVaultKey,
+    vaultAccess,
   );
   const isInitialLoading = isLoading && !activityData;
   const isInitialError = isError && !activityData;

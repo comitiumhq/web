@@ -27,7 +27,7 @@ vi.mock('@comitium/ui/logger', () => ({
   logger: { warn: vi.fn() },
 }));
 
-const wrappedVaultKey = mockVaultAccess();
+const vaultAccess = mockVaultAccess();
 
 function deferred<T>(): Deferred<T> {
   let resolve!: (value: T) => void;
@@ -80,7 +80,7 @@ describe('useDecryptedActivityEmails', () => {
 
     const hook = await renderHook(
       (props?: { candidateId: string; events: ActivityFeedRow[] }) =>
-        useDecryptedActivityEmails(props?.candidateId ?? null, 'org-1', props?.events ?? [], wrappedVaultKey),
+        useDecryptedActivityEmails(props?.candidateId ?? null, 'org-1', props?.events ?? [], vaultAccess),
       {
         initialProps: {
           candidateId: 'candidate-1',
@@ -113,7 +113,7 @@ describe('useDecryptedActivityEmails', () => {
     mocks.decryptEmailContentForOrganization.mockResolvedValue(decryptedContent('Decrypted'));
 
     const hook = await renderHook(() =>
-      useDecryptedActivityEmails('candidate-1', 'org-1', [first, duplicate], wrappedVaultKey),
+      useDecryptedActivityEmails('candidate-1', 'org-1', [first, duplicate], vaultAccess),
     );
 
     await vi.waitFor(() => expect(hook.result.current.decryptedEmails['email-1']?.content.subject).toBe('Decrypted'));
@@ -121,7 +121,7 @@ describe('useDecryptedActivityEmails', () => {
     expect(mocks.decryptEmailContentForOrganization).toHaveBeenCalledExactlyOnceWith(
       first.payload.kind === 'email' ? first.payload.content : null,
       'org-1',
-      wrappedVaultKey,
+      vaultAccess,
       expect.objectContaining({ orgId: 'org-1', subjectId: 'application-1' }),
     );
   });
@@ -130,7 +130,7 @@ describe('useDecryptedActivityEmails', () => {
     mocks.decryptEmailContentForOrganization.mockRejectedValue(new Error('bad key'));
 
     const hook = await renderHook(() =>
-      useDecryptedActivityEmails('candidate-1', 'org-1', [emailActivity('event-1', 'email-1')], wrappedVaultKey),
+      useDecryptedActivityEmails('candidate-1', 'org-1', [emailActivity('event-1', 'email-1')], vaultAccess),
     );
 
     await vi.waitFor(() => expect(hook.result.current.failedEmailIds.has('email-1')).toBe(true));

@@ -52,7 +52,7 @@ export function CandidateSheet({
     application,
     isLoadingApplication,
     vaultKeyData,
-    wrappedVaultKey,
+    vaultAccess,
     formSubmission,
     decryptedData,
     formDecryptionError,
@@ -284,7 +284,7 @@ export function CandidateSheet({
       onRetryProfile={retryProfileQuery}
       vaultPublicKey={vaultKeyData?.vaultPublicKey ?? null}
       vaultKeyVersion={vaultKeyData?.keyVersion ?? null}
-      wrappedVaultKey={wrappedVaultKey}
+      vaultAccess={vaultAccess}
     />
   );
 
@@ -455,7 +455,7 @@ export function CandidateSheet({
         currentUserId={user?.id}
         vaultPublicKey={vaultKeyData?.vaultPublicKey ?? null}
         vaultKeyVersion={vaultKeyData?.keyVersion ?? null}
-        wrappedVaultKey={wrappedVaultKey}
+        vaultAccess={vaultAccess}
         candidateName={candidateName}
       />
     </>

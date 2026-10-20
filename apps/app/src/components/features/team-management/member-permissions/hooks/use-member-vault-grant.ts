@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
 import { CryptoProxy } from '@comitium/crypto';
 import { useCallback } from 'react';
-import { getWrappedVaultKey } from '@/lib/api/orgs-vault';
+import { getOrgVaultAccess } from '@/lib/api/orgs-vault';
 import { getPublicKey } from '@/lib/api/users';
 import type { VaultGrant } from '@/lib/schemas/org-structure';
 
@@ -22,15 +22,15 @@ export function useEnsureMemberVaultGrant() {
 
       await ensureUnlocked();
 
-      const ownWrappedKey = await getWrappedVaultKey(orgId);
-      const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownWrappedKey, memberKey.publicKey, {
+      const ownAccess = await getOrgVaultAccess(orgId);
+      const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownAccess, memberKey.publicKey, {
         recipientUserId: userId,
         recipientKeyVersion: memberKey.userKeyVersion,
       });
 
       return {
         wrappedVaultKey,
-        vaultKeyVersion: ownWrappedKey.vaultKeyVersion,
+        vaultKeyVersion: ownAccess.vaultKeyVersion,
         recipientKeyVersion: memberKey.userKeyVersion,
       };
     },

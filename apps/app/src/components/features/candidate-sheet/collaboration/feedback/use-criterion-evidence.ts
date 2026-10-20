@@ -17,7 +17,7 @@ interface UseCriterionEvidenceParams {
   criterionId: string;
   encryptedEvidence: EncryptedEnvelope | null;
   orgId: string;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   enabled: boolean;
 }
 
@@ -26,7 +26,7 @@ export function useCriterionEvidence({
   criterionId,
   encryptedEvidence,
   orgId,
-  wrappedVaultKey,
+  vaultAccess,
   enabled,
 }: UseCriterionEvidenceParams): CriterionEvidenceState {
   const [state, setState] = useState<CriterionEvidenceState>({ status: 'idle' });
@@ -37,7 +37,7 @@ export function useCriterionEvidence({
   }, [applicationId, criterionId, encryptedEvidence]);
 
   useEffect(() => {
-    if (!enabled || !encryptedEvidence || !wrappedVaultKey || !isCryptoActive) {
+    if (!enabled || !encryptedEvidence || !vaultAccess || !isCryptoActive) {
       return;
     }
 
@@ -48,7 +48,7 @@ export function useCriterionEvidence({
     CryptoProxy.decryptApplication(
       encryptedEvidence,
       orgId,
-      wrappedVaultKey,
+      vaultAccess,
       criterionEvidenceContext(orgId, applicationId, criterionId),
     )
       .then((payload) => criterionEvidenceSchema.parse(payload))
@@ -66,7 +66,7 @@ export function useCriterionEvidence({
     return () => {
       cancelled = true;
     };
-  }, [applicationId, criterionId, enabled, encryptedEvidence, isCryptoActive, orgId, wrappedVaultKey]);
+  }, [applicationId, criterionId, enabled, encryptedEvidence, isCryptoActive, orgId, vaultAccess]);
 
   return state;
 }

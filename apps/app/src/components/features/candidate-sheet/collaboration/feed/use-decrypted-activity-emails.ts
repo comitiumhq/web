@@ -16,7 +16,7 @@ export function useDecryptedActivityEmails(
   candidateId: string | null,
   orgId: string,
   events: ActivityFeedRow[],
-  wrappedVaultKey?: VaultKeyAccess,
+  vaultAccess?: VaultKeyAccess,
 ) {
   const isCryptoActive = useIsCryptoActive();
   const [decryptedEmails, setDecryptedEmails] = useState<Record<string, DecryptedEmail>>({});
@@ -31,7 +31,7 @@ export function useDecryptedActivityEmails(
   failedEmailIdsRef.current = failedEmailIds;
 
   const decryptingEmailIds = useMemo<ReadonlySet<string>>(() => {
-    if (!candidateId || !wrappedVaultKey || !isCryptoActive) {
+    if (!candidateId || !vaultAccess || !isCryptoActive) {
       return EMPTY_EMAIL_IDS;
     }
 
@@ -42,7 +42,7 @@ export function useDecryptedActivityEmails(
         return decryptedEmails[emailId] || failedEmailIds.has(emailId) ? [] : [emailId];
       }),
     );
-  }, [candidateId, decryptedEmails, events, failedEmailIds, isCryptoActive, wrappedVaultKey]);
+  }, [candidateId, decryptedEmails, events, failedEmailIds, isCryptoActive, vaultAccess]);
 
   useEffect(() => {
     setDecryptedEmails({});
@@ -53,7 +53,7 @@ export function useDecryptedActivityEmails(
   }, [candidateId]);
 
   useEffect(() => {
-    if (!candidateId || !wrappedVaultKey || !isCryptoActive) {
+    if (!candidateId || !vaultAccess || !isCryptoActive) {
       return;
     }
 
@@ -86,7 +86,7 @@ export function useDecryptedActivityEmails(
         const content = (await CryptoProxy.decryptEmailContentForOrganization(
           event.payload.content,
           orgId,
-          wrappedVaultKey,
+          vaultAccess,
           emailContentContext(orgId, event.applicationId),
         )) as DecryptedEmailContent;
 
@@ -123,7 +123,7 @@ export function useDecryptedActivityEmails(
         setDecryptedEmails((current) => ({ ...current, ...Object.fromEntries(decryptedEntries) }));
       }
     });
-  }, [candidateId, events, isCryptoActive, orgId, wrappedVaultKey]);
+  }, [candidateId, events, isCryptoActive, orgId, vaultAccess]);
 
   return {
     decryptedEmails: isCryptoActive ? decryptedEmails : EMPTY_DECRYPTED_EMAILS,

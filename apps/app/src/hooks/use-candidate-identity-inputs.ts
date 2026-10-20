@@ -11,14 +11,14 @@ import type { CandidateIdentityAnswers } from '@/lib/forms/application-answers';
 export async function decryptCandidateIdentityInputs(params: {
   candidateIdentityInputs: CandidateIdentityInput[];
   orgId: string;
-  wrappedVaultKey: VaultKeyAccess;
+  vaultAccess: VaultKeyAccess;
 }): Promise<CandidateIdentityAnswers> {
   const entries = await Promise.all(
     params.candidateIdentityInputs.map(async (identity) => {
       const decrypted = await CryptoProxy.decryptApplication(
         identity.envelope,
         params.orgId,
-        params.wrappedVaultKey,
+        params.vaultAccess,
         candidateIdentityInputContext(params.orgId, identity.applicationId, identity.questionId),
       );
 
@@ -35,25 +35,25 @@ export async function decryptCandidateIdentityInputs(params: {
 export function useCandidateIdentityInputs(params: {
   candidateIdentityInputs: CandidateIdentityInput[];
   orgId: string;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   enabled: boolean;
 }) {
   const { ensureUnlocked } = useCryptoUnlock();
   const applicationId = params.candidateIdentityInputs[0]?.applicationId ?? null;
   const questionIds = params.candidateIdentityInputs.map((identity) => identity.questionId).sort();
-  const wrappedVaultKey = params.wrappedVaultKey;
+  const vaultAccess = params.vaultAccess;
 
   return useQuery({
     queryKey: qk.application.candidateIdentityInputs(applicationId, questionIds),
     enabled: params.enabled && params.candidateIdentityInputs.length > 0,
-    queryFn: wrappedVaultKey
+    queryFn: vaultAccess
       ? async () => {
           await ensureUnlocked();
 
           return decryptCandidateIdentityInputs({
             candidateIdentityInputs: params.candidateIdentityInputs,
             orgId: params.orgId,
-            wrappedVaultKey,
+            vaultAccess,
           });
         }
       : skipToken,

@@ -10,7 +10,7 @@ describe('candidate identity inputs', () => {
       value: 'applicant@example.com',
     });
     const envelope = { purpose: 'candidate_identity_input', keys: [] } as unknown as EncryptedEnvelope;
-    const wrappedVaultKey = mockVaultAccess();
+    const vaultAccess = mockVaultAccess();
     const identities = await decryptCandidateIdentityInputs({
       candidateIdentityInputs: [
         {
@@ -20,13 +20,13 @@ describe('candidate identity inputs', () => {
         },
       ],
       orgId: 'org-1',
-      wrappedVaultKey,
+      vaultAccess,
     });
 
     expect(identities).toEqual({
       'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb': 'applicant@example.com',
     });
-    expect(decrypt).toHaveBeenCalledWith(envelope, 'org-1', wrappedVaultKey, {
+    expect(decrypt).toHaveBeenCalledWith(envelope, 'org-1', vaultAccess, {
       purpose: 'candidate_identity_input',
       orgId: 'org-1',
       subjectId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',

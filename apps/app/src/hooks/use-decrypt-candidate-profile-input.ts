@@ -12,25 +12,25 @@ export function useDecryptCandidateProfileInput(params: {
   enabled: boolean;
   envelope: EncryptedEnvelope | null;
   orgId: string;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }) {
   const { ensureUnlocked } = useCryptoUnlock();
   const applicationId = params.applicationId;
   const envelope = params.envelope;
-  const wrappedVaultKey = params.wrappedVaultKey;
+  const vaultAccess = params.vaultAccess;
 
   return useQuery({
     queryKey: qk.application.candidateProfileInput(applicationId),
     enabled: params.enabled && envelope !== null,
     queryFn:
-      applicationId && envelope && wrappedVaultKey
+      applicationId && envelope && vaultAccess
         ? async () => {
             await ensureUnlocked();
 
             const decrypted = await CryptoProxy.decryptApplication(
               envelope,
               params.orgId,
-              wrappedVaultKey,
+              vaultAccess,
               candidateProfileInputContext(params.orgId, applicationId),
             );
 

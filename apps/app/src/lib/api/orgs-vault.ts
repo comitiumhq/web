@@ -6,6 +6,6 @@ export function getOrgVaultKey(orgId: string) {
   return api.get(`/orgs/${orgId}/vault-key`, vaultKeySchema);
 }
 
-export function getWrappedVaultKey(orgId: string) {
+export function getOrgVaultAccess(orgId: string) {
   return api.get(`/orgs/${orgId}/vault-access`, vaultKeyAccessSchema);
 }

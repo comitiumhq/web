@@ -11,7 +11,7 @@ interface EncodeCandidateCustomFieldValueParams {
   value: unknown;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: VaultKeyAccess;
+  vaultAccess: VaultKeyAccess;
 }
 
 export async function encodeCandidateCustomFieldValue({
@@ -22,7 +22,7 @@ export async function encodeCandidateCustomFieldValue({
   value,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
 }: EncodeCandidateCustomFieldValueParams) {
   const encryptedValue = await CryptoProxy.encryptApplication(
     vaultPublicKey,
@@ -32,7 +32,7 @@ export async function encodeCandidateCustomFieldValue({
   );
 
   const valueHash = isSearchableCustomFieldType(fieldType)
-    ? await CryptoProxy.hashCustomFieldValue(orgId, wrappedVaultKey, fieldId, fieldType, value)
+    ? await CryptoProxy.hashCustomFieldValue(orgId, vaultAccess, fieldId, fieldType, value)
     : undefined;
 
   return { encryptedValue, valueHash };

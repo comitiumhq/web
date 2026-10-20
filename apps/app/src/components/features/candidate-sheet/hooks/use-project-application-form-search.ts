@@ -12,7 +12,7 @@ interface UseProjectApplicationFormSearchParams {
   form: FormDefinitionSnapshot | null;
   answers: Record<string, unknown> | null;
   storedVersion: number | null;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   enabled: boolean;
 }
 
@@ -22,7 +22,7 @@ export function useProjectApplicationFormSearch({
   form,
   answers,
   storedVersion,
-  wrappedVaultKey,
+  vaultAccess,
   enabled,
 }: UseProjectApplicationFormSearchParams) {
   const attemptedApplicationIdRef = useRef<string | null>(null);
@@ -34,7 +34,7 @@ export function useProjectApplicationFormSearch({
       return;
     }
 
-    const projectionInput = getApplicationFormProjectionInput(enabled, applicationId, form, answers, wrappedVaultKey);
+    const projectionInput = getApplicationFormProjectionInput(enabled, applicationId, form, answers, vaultAccess);
 
     if (!isDefined(projectionInput)) {
       return;
@@ -48,26 +48,26 @@ export function useProjectApplicationFormSearch({
       applicationId: projectionApplicationId,
       form: projectionForm,
       answers: projectionAnswers,
-      wrappedVaultKey: projectionVaultKey,
+      vaultAccess: projectionVaultAccess,
     } = projectionInput;
 
     attemptedApplicationIdRef.current = projectionApplicationId;
 
-    projectSubmissionFieldValues(orgId, projectionVaultKey, projectionForm, projectionAnswers)
+    projectSubmissionFieldValues(orgId, projectionVaultAccess, projectionForm, projectionAnswers)
       .then((fieldValues) => projectApplicationFormSubmission(projectionApplicationId, fieldValues))
       .catch((error) => {
         if (import.meta.env.DEV) {
           logger.warn(`Application form search projection failed for application ${projectionApplicationId}:`, error);
         }
       });
-  }, [answers, applicationId, enabled, form, orgId, storedVersion, wrappedVaultKey]);
+  }, [answers, applicationId, enabled, form, orgId, storedVersion, vaultAccess]);
 }
 
 interface ApplicationFormProjectionInput {
   applicationId: string;
   form: FormDefinitionSnapshot;
   answers: Record<string, unknown>;
-  wrappedVaultKey: VaultKeyAccess;
+  vaultAccess: VaultKeyAccess;
 }
 
 function getApplicationFormProjectionInput(
@@ -75,7 +75,7 @@ function getApplicationFormProjectionInput(
   applicationId: string | null,
   form: FormDefinitionSnapshot | null,
   answers: Record<string, unknown> | null,
-  wrappedVaultKey: VaultKeyAccess | undefined,
+  vaultAccess: VaultKeyAccess | undefined,
 ): ApplicationFormProjectionInput | null {
   if (!enabled) {
     return null;
@@ -93,9 +93,9 @@ function getApplicationFormProjectionInput(
     return null;
   }
 
-  if (!isDefined(wrappedVaultKey)) {
+  if (!isDefined(vaultAccess)) {
     return null;
   }
 
-  return { applicationId, form, answers, wrappedVaultKey };
+  return { applicationId, form, answers, vaultAccess };
 }

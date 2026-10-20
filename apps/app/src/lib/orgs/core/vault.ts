@@ -3,7 +3,7 @@ import { VaultError } from '@comitium/schemas/product-errors';
 import { successSchema } from '@comitium/schemas/public';
 import { errAsync, ResultAsync } from 'neverthrow';
 import { api, hasApiErrorStatus } from '@/lib/api/client';
-import { getOrgVaultKey, getWrappedVaultKey } from '@/lib/api/orgs-vault';
+import { getOrgVaultAccess, getOrgVaultKey } from '@/lib/api/orgs-vault';
 
 /**
  * Generate vault keypair and wrap for owner.
@@ -31,7 +31,7 @@ export function ensureOrgVault(orgId: string, ownerPublicKey: PublicEncryptionKe
         .andThen((access) => saveVaultKeys(orgId, access))
         .andThen(() =>
           ResultAsync.fromPromise(
-            getWrappedVaultKey(orgId).then(() => undefined),
+            getOrgVaultAccess(orgId).then(() => undefined),
             (e) => new VaultError('load_vault', e),
           ),
         );

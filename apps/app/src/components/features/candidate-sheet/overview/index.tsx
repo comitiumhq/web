@@ -18,7 +18,7 @@ interface CandidateOverviewProps {
   onRetryProfile: () => void;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }
 
 export function CandidateOverview({
@@ -32,7 +32,7 @@ export function CandidateOverview({
   onRetryProfile,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
 }: CandidateOverviewProps) {
   const canEditCandidate = application.considerationContext.capabilities.candidate.canEditProfile;
 
@@ -51,7 +51,7 @@ export function CandidateOverview({
           canEdit={canEditCandidate}
           vaultPublicKey={vaultPublicKey}
           vaultKeyVersion={vaultKeyVersion}
-          wrappedVaultKey={wrappedVaultKey}
+          vaultAccess={vaultAccess}
         />
 
         <HiringTeamCard members={application.considerationContext.hiringTeam} />

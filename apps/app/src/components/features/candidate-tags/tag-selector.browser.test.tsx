@@ -39,8 +39,8 @@ vi.mock('@/hooks/queries/use-query-org-vault-key', () => ({
   }),
 }));
 
-vi.mock('@/hooks/queries/use-query-wrapped-vault-key', () => ({
-  useQueryWrappedVaultKey: () => ({ data: { v: 1, ciphertext: 'wrapped-key' } }),
+vi.mock('@/hooks/queries/use-query-org-vault-access', () => ({
+  useQueryOrgVaultAccess: () => ({ data: { v: 1, ciphertext: 'wrapped-key' } }),
 }));
 
 vi.mock('@/hooks/use-candidate-tags', () => ({

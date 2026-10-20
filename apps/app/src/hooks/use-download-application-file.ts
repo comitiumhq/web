@@ -11,23 +11,23 @@ interface UseDownloadApplicationFileOptions {
   orgId: string;
   applicationId: string | null;
   interviewEventId?: string;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }
 
 export function useDownloadApplicationFile({
   orgId,
   applicationId,
   interviewEventId,
-  wrappedVaultKey,
+  vaultAccess,
 }: UseDownloadApplicationFileOptions) {
   const [downloadingQuestionId, setDownloadingQuestionId] = useState<string | null>(null);
   const { canUnlock, ensureUnlocked } = useCryptoUnlock();
 
-  const canDownload = !!applicationId && canUnlock && !!wrappedVaultKey;
+  const canDownload = !!applicationId && canUnlock && !!vaultAccess;
 
   const download = useCallback(
     async (questionId: string, fileId: string, filename: string, mimeType?: string) => {
-      if (!canDownload || !applicationId || !wrappedVaultKey) {
+      if (!canDownload || !applicationId || !vaultAccess) {
         return;
       }
 
@@ -40,7 +40,7 @@ export function useDownloadApplicationFile({
         const bytes = await CryptoProxy.decryptFile(
           new Uint8Array(encryptedBuffer),
           orgId,
-          wrappedVaultKey,
+          vaultAccess,
           encryptedFileContext(orgId, fileId, 'attachment'),
         );
 
@@ -51,7 +51,7 @@ export function useDownloadApplicationFile({
         setDownloadingQuestionId(null);
       }
     },
-    [canDownload, applicationId, wrappedVaultKey, orgId, interviewEventId, ensureUnlocked],
+    [canDownload, applicationId, vaultAccess, orgId, interviewEventId, ensureUnlocked],
   );
 
   return { download, downloadingQuestionId, canDownload };

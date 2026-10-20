@@ -16,7 +16,7 @@ export function useDecryptEmails(
   applicationId: string | null,
   encryptedEmails: EmailResponse[] | undefined,
   isOrgMember: boolean,
-  wrappedVaultKey?: VaultKeyAccess,
+  vaultAccess?: VaultKeyAccess,
 ) {
   const [state, setState] = useState<DecryptEmailsState>({ data: null, error: null, isDecrypting: false });
   const { canUnlock, ensureUnlocked, isCryptoActive } = useCryptoUnlock();
@@ -26,7 +26,7 @@ export function useDecryptEmails(
 
   activeApplicationIdRef.current = applicationId;
 
-  const canDecrypt = !!encryptedEmails?.length && canUnlock && (!isOrgMember || Boolean(wrappedVaultKey));
+  const canDecrypt = !!encryptedEmails?.length && canUnlock && (!isOrgMember || Boolean(vaultAccess));
 
   const reset = useCallback(() => {
     decryptedApplicationIdRef.current = null;
@@ -43,7 +43,7 @@ export function useDecryptEmails(
   }, [applicationId, reset]);
 
   const decrypt = useCallback(async () => {
-    if (!canDecrypt || !encryptedEmails || !orgId || !applicationId || (isOrgMember && !wrappedVaultKey)) {
+    if (!canDecrypt || !encryptedEmails || !orgId || !applicationId || (isOrgMember && !vaultAccess)) {
       return;
     }
 
@@ -52,9 +52,9 @@ export function useDecryptEmails(
     let decryptFn: (encrypted: EncryptedEnvelope) => Promise<DecryptedEmailContent>;
 
     if (isOrgMember) {
-      const orgWrappedVaultKey = wrappedVaultKey;
+      const orgVaultAccess = vaultAccess;
 
-      if (!orgWrappedVaultKey) {
+      if (!orgVaultAccess) {
         return;
       }
 
@@ -62,7 +62,7 @@ export function useDecryptEmails(
         CryptoProxy.decryptEmailContentForOrganization(
           enc,
           orgId,
-          orgWrappedVaultKey,
+          orgVaultAccess,
           context,
         ) as Promise<DecryptedEmailContent>;
     } else {
@@ -105,7 +105,7 @@ export function useDecryptEmails(
         isDecrypting: false,
       }));
     }
-  }, [canDecrypt, encryptedEmails, applicationId, isOrgMember, orgId, wrappedVaultKey, ensureUnlocked]);
+  }, [canDecrypt, encryptedEmails, applicationId, isOrgMember, orgId, vaultAccess, ensureUnlocked]);
 
   const hasEmails = !!encryptedEmails?.length;
   const hasEveryEmail =

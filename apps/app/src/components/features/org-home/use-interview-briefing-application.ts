@@ -14,7 +14,7 @@ interface UseInterviewBriefingApplicationParams {
   interviewEventId: string;
   orgId: string;
   submission: FormSubmissionResponse | null;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }
 
 export function useInterviewBriefingApplication({
@@ -23,34 +23,34 @@ export function useInterviewBriefingApplication({
   interviewEventId,
   orgId,
   submission,
-  wrappedVaultKey,
+  vaultAccess,
 }: UseInterviewBriefingApplicationParams): ApplicationFormState {
   const decryptedAnswers = useDecryptApplication(
     orgId,
     submission?.id ?? null,
     submission?.formId ?? null,
     submission?.answerEnvelopes ?? null,
-    wrappedVaultKey,
+    vaultAccess,
   );
 
   const identityAnswers = useCandidateIdentityInputs({
     candidateIdentityInputs: submission?.candidateIdentityInputs ?? [],
     orgId,
-    wrappedVaultKey,
+    vaultAccess,
     enabled,
   });
 
   const decryptedFileMeta = useDecryptFileMetadata(
     orgId,
     submission?.files.map((file) => ({ ...file, kind: 'attachment' })) ?? null,
-    wrappedVaultKey,
+    vaultAccess,
   );
 
   const { download, downloadingQuestionId } = useDownloadApplicationFile({
     orgId,
     applicationId,
     interviewEventId,
-    wrappedVaultKey,
+    vaultAccess,
   });
 
   const answers = useMemo(

@@ -80,28 +80,28 @@ export class CryptoWorkerApi {
   async decryptApplication(
     envelope: EncryptedEnvelope,
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<Record<string, unknown>> {
-    this.assertVaultRecipient(envelope.keys, wrappedVaultKey);
+    this.assertVaultRecipient(envelope.keys, vaultAccess);
 
-    const vaultKey = await this.#orgVault.getVaultKey(orgId, wrappedVaultKey);
+    const vaultKey = await this.#orgVault.getVaultKey(orgId, vaultAccess);
 
     return decryptApplicationWithVaultKey<Record<string, unknown>>(envelope, vaultKey, context);
   }
 
   async rewrapEnvelopeKey(
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     sourceKey: EnvelopeKey,
     context: CryptoContextInput,
     recipient: RecipientDescriptor,
   ): Promise<EnvelopeKey> {
-    if (sourceKey.recipient !== 'org_vault' || sourceKey.rkv !== wrappedVaultKey.vaultKeyVersion) {
+    if (sourceKey.recipient !== 'org_vault' || sourceKey.rkv !== vaultAccess.vaultKeyVersion) {
       throw new Error('Processing regrant source key must target org_vault');
     }
 
-    const vaultKey = await this.#orgVault.getVaultKey(orgId, wrappedVaultKey);
+    const vaultKey = await this.#orgVault.getVaultKey(orgId, vaultAccess);
     const dek = await unwrapDek(envelopeKeyToWrappedKey(sourceKey), vaultKey, keyWrapAad(context, sourceKey.recipient));
 
     try {
@@ -143,12 +143,12 @@ export class CryptoWorkerApi {
   async decryptFile(
     blob: Uint8Array,
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<Uint8Array> {
-    this.assertVaultRecipient(unpackEncryptedBlob(blob).metadata.keys, wrappedVaultKey);
+    this.assertVaultRecipient(unpackEncryptedBlob(blob).metadata.keys, vaultAccess);
 
-    const vaultKey = await this.#orgVault.getVaultKey(orgId, wrappedVaultKey);
+    const vaultKey = await this.#orgVault.getVaultKey(orgId, vaultAccess);
     const result = await decryptFileWithVaultKey(blob, vaultKey, context);
 
     return Comlink.transfer(result, [result.buffer]);
@@ -174,12 +174,12 @@ export class CryptoWorkerApi {
   async decryptEmailContentForOrganization(
     envelope: EncryptedEnvelope,
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<unknown> {
-    this.assertVaultRecipient(envelope.keys, wrappedVaultKey);
+    this.assertVaultRecipient(envelope.keys, vaultAccess);
 
-    const vaultKey = await this.#orgVault.getVaultKey(orgId, wrappedVaultKey);
+    const vaultKey = await this.#orgVault.getVaultKey(orgId, vaultAccess);
 
     return decryptEmailContentWithVaultKey(envelope, vaultKey, context);
   }
@@ -196,43 +196,43 @@ export class CryptoWorkerApi {
     return decryptEmailContentWithUserKey(envelope, userPrivateKey, context);
   }
 
-  async hashTagLabel(orgId: string, wrappedVaultKey: VaultKeyAccess, label: string): Promise<string> {
-    const searchKey = await this.#orgVault.getSearchKey(orgId, wrappedVaultKey);
+  async hashTagLabel(orgId: string, vaultAccess: VaultKeyAccess, label: string): Promise<string> {
+    const searchKey = await this.#orgVault.getSearchKey(orgId, vaultAccess);
 
     return hashTagLabel(searchKey, label);
   }
 
   async hashCustomFieldValue(
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     fieldId: string,
     fieldType: SearchableCustomFieldType,
     plaintext: unknown,
   ): Promise<string> {
-    const searchKey = await this.#orgVault.getSearchKey(orgId, wrappedVaultKey);
+    const searchKey = await this.#orgVault.getSearchKey(orgId, vaultAccess);
 
     return hashCustomFieldValue(searchKey, orgId, fieldId, fieldType, plaintext);
   }
 
   async hashCandidateProfileSearchValue(
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     field: CandidateProfileSearchField,
     value: string | number,
   ): Promise<string> {
-    const searchKey = await this.#orgVault.getSearchKey(orgId, wrappedVaultKey);
+    const searchKey = await this.#orgVault.getSearchKey(orgId, vaultAccess);
 
     return hashCandidateProfileSearchValue(searchKey, orgId, field, value);
   }
 
   async hashCategoricalFormFieldValue(
     orgId: string,
-    wrappedVaultKey: VaultKeyAccess,
+    vaultAccess: VaultKeyAccess,
     fieldId: string,
     kind: CategoricalFormFieldKind,
     value: boolean | string,
   ): Promise<string> {
-    const searchKey = await this.#orgVault.getSearchKey(orgId, wrappedVaultKey);
+    const searchKey = await this.#orgVault.getSearchKey(orgId, vaultAccess);
 
     return hashCategoricalFormFieldValue(searchKey, orgId, fieldId, kind, value);
   }

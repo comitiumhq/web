@@ -24,10 +24,10 @@ interface CriteriaEvaluationProps {
   assessment: CriteriaAssessment[];
   summary: CriterionSummary;
   orgId: string;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }
 
-export function CriteriaEvaluation({ assessment, summary, orgId, wrappedVaultKey }: CriteriaEvaluationProps) {
+export function CriteriaEvaluation({ assessment, summary, orgId, vaultAccess }: CriteriaEvaluationProps) {
   const sortedAssessment = useMemo(
     () =>
       [...assessment].sort((first, second) => VERDICT_PRIORITY[first.assessment] - VERDICT_PRIORITY[second.assessment]),
@@ -48,7 +48,7 @@ export function CriteriaEvaluation({ assessment, summary, orgId, wrappedVaultKey
 
       <Accordion type="multiple" className="rounded-none border-0">
         {sortedAssessment.map((item) => (
-          <CriteriaEvaluationItem key={item.criterionId} item={item} orgId={orgId} wrappedVaultKey={wrappedVaultKey} />
+          <CriteriaEvaluationItem key={item.criterionId} item={item} orgId={orgId} vaultAccess={vaultAccess} />
         ))}
       </Accordion>
     </Card>
@@ -58,17 +58,17 @@ export function CriteriaEvaluation({ assessment, summary, orgId, wrappedVaultKey
 interface CriteriaEvaluationItemProps {
   item: CriteriaAssessment;
   orgId: string;
-  wrappedVaultKey: VaultKeyAccess | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }
 
-function CriteriaEvaluationItem({ item, orgId, wrappedVaultKey }: CriteriaEvaluationItemProps) {
+function CriteriaEvaluationItem({ item, orgId, vaultAccess }: CriteriaEvaluationItemProps) {
   const verdict = VERDICT_CONFIG[item.assessment];
   const evidenceState = useCriterionEvidence({
     applicationId: item.applicationId,
     criterionId: item.criterionId,
     encryptedEvidence: item.evidence,
     orgId,
-    wrappedVaultKey,
+    vaultAccess,
     enabled: Boolean(item.evidence),
   });
 

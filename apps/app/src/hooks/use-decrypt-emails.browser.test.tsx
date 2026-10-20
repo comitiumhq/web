@@ -33,7 +33,7 @@ vi.mock('@comitium/crypto', () => ({
   },
 }));
 
-const wrappedVaultKey = mockVaultAccess();
+const vaultAccess = mockVaultAccess();
 
 function deferred<T>(): Deferred<T> {
   let resolve!: (value: T) => void;
@@ -82,7 +82,7 @@ describe('useDecryptEmails', () => {
           throw new Error('Hook props are required');
         }
 
-        return useDecryptEmails('org-1', props.applicationId, props.emails, true, wrappedVaultKey);
+        return useDecryptEmails('org-1', props.applicationId, props.emails, true, vaultAccess);
       },
       {
         initialProps: {
@@ -113,7 +113,7 @@ describe('useDecryptEmails', () => {
     mocks.decryptAsOrg.mockRejectedValueOnce(new Error('bad key')).mockResolvedValueOnce(decryptedEmail('Recovered'));
 
     const hook = await renderHook(() =>
-      useDecryptEmails('org-1', 'application-1', [encryptedEmail('email-1', 'ciphertext')], true, wrappedVaultKey),
+      useDecryptEmails('org-1', 'application-1', [encryptedEmail('email-1', 'ciphertext')], true, vaultAccess),
     );
 
     await vi.waitFor(() => expect(hook.result.current.error).toBe('Failed to decrypt emails. Please try again.'));
@@ -133,14 +133,14 @@ describe('useDecryptEmails', () => {
     mocks.decryptAsOrg.mockResolvedValue(decryptedEmail('Organization'));
 
     const email = encryptedEmail('email-1', 'ciphertext');
-    const hook = await renderHook(() => useDecryptEmails('org-1', 'application-1', [email], true, wrappedVaultKey));
+    const hook = await renderHook(() => useDecryptEmails('org-1', 'application-1', [email], true, vaultAccess));
 
     await vi.waitFor(() => expect(hook.result.current.data?.[0]?.content.subject).toBe('Organization'));
 
     expect(mocks.decryptAsOrg).toHaveBeenCalledExactlyOnceWith(
       email.content,
       'org-1',
-      wrappedVaultKey,
+      vaultAccess,
       expect.objectContaining({ orgId: 'org-1', subjectId: 'application-1' }),
     );
     expect(mocks.decryptAsApplicant).not.toHaveBeenCalled();

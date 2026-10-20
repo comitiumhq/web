@@ -8,18 +8,18 @@ import {
 
 export async function projectSubmissionFieldValues(
   orgId: string,
-  wrappedVaultKey: VaultKeyAccess,
+  vaultAccess: VaultKeyAccess,
   form: FormDefinitionSnapshot,
   answers: Record<string, unknown>,
 ): Promise<FormSubmissionFieldProjection[]> {
   const sources = extractSubmissionFieldProjectionSources(form, answers);
 
-  return Promise.all(sources.map((source) => projectFieldValue(orgId, wrappedVaultKey, source)));
+  return Promise.all(sources.map((source) => projectFieldValue(orgId, vaultAccess, source)));
 }
 
 async function projectFieldValue(
   orgId: string,
-  wrappedVaultKey: VaultKeyAccess,
+  vaultAccess: VaultKeyAccess,
   source: SubmissionFieldProjectionSource,
 ): Promise<FormSubmissionFieldProjection> {
   const identity = {
@@ -36,7 +36,7 @@ async function projectFieldValue(
         kind: 'digest',
         value: await CryptoProxy.hashCategoricalFormFieldValue(
           orgId,
-          wrappedVaultKey,
+          vaultAccess,
           source.reusableFieldId,
           source.kind,
           source.value,

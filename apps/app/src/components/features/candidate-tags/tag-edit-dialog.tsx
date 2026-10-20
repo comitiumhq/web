@@ -8,8 +8,8 @@ import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useCreateCandidateTag, useRenameCandidateTag } from '@/hooks/mutations/use-candidate-tag';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { useQueryOrgVaultKey } from '@/hooks/queries/use-query-org-vault-key';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
 import { type DecryptedCandidateTag, TAG_LABEL_MAX, tagLabelFieldSchema } from '@/lib/schemas/candidate-tags';
 
 const tagFormSchema = z.object({
@@ -35,13 +35,13 @@ interface TagEditDialogProps {
 
 export function TagEditDialog({ orgId, tag, open, onOpenChange }: TagEditDialogProps) {
   const { data: vaultKey } = useQueryOrgVaultKey(orgId);
-  const { data: wrappedVaultKey } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess } = useQueryOrgVaultAccess(orgId);
   const createMutation = useCreateCandidateTag();
   const renameMutation = useRenameCandidateTag();
 
   const isEdit = tag !== null;
   const isPending = createMutation.isPending || renameMutation.isPending;
-  const hasKeys = !!vaultKey?.vaultPublicKey && !!wrappedVaultKey;
+  const hasKeys = !!vaultKey?.vaultPublicKey && !!vaultAccess;
 
   const form = useForm<TagFormData>({
     resolver: zodResolver(tagFormSchema),
@@ -56,7 +56,7 @@ export function TagEditDialog({ orgId, tag, open, onOpenChange }: TagEditDialogP
 
   const onSubmit = useCallback(
     async (data: TagFormData) => {
-      if (!vaultKey?.vaultPublicKey || !wrappedVaultKey) {
+      if (!vaultKey?.vaultPublicKey || !vaultAccess) {
         return;
       }
 
@@ -67,7 +67,7 @@ export function TagEditDialog({ orgId, tag, open, onOpenChange }: TagEditDialogP
           label: data.label,
           vaultPublicKey: vaultKey.vaultPublicKey,
           vaultKeyVersion: vaultKey.keyVersion,
-          wrappedVaultKey,
+          vaultAccess,
         });
       } else {
         await createMutation.mutateAsync({
@@ -75,13 +75,13 @@ export function TagEditDialog({ orgId, tag, open, onOpenChange }: TagEditDialogP
           label: data.label,
           vaultPublicKey: vaultKey.vaultPublicKey,
           vaultKeyVersion: vaultKey.keyVersion,
-          wrappedVaultKey,
+          vaultAccess,
         });
       }
 
       onOpenChange(false);
     },
-    [createMutation, isEdit, onOpenChange, orgId, renameMutation, tag, vaultKey?.vaultPublicKey, wrappedVaultKey],
+    [createMutation, isEdit, onOpenChange, orgId, renameMutation, tag, vaultKey?.vaultPublicKey, vaultAccess],
   );
 
   const handleCancel = useCallback(() => {

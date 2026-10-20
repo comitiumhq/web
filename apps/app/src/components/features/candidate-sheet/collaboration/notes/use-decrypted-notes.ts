@@ -6,7 +6,7 @@ import { logger } from '@comitium/ui/logger';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryCandidateActivity } from '@/hooks/queries/use-query-candidate-activity';
 import { useQueryCandidateNotes } from '@/hooks/queries/use-query-candidate-notes';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { parseDecryptedTipTapDoc } from '@/lib/crypto/decrypted-payloads';
 import type { ActivityFeedRow, NotePayload } from '@/lib/schemas/emails';
 
@@ -17,11 +17,7 @@ const EMPTY_NOTE_IDS: ReadonlySet<string> = new Set();
 export function useDecryptedNotes(applicationId: string | null, orgId: string, candidateId: string | null) {
   const { data: activityData } = useQueryCandidateActivity(candidateId, applicationId);
   const notesQuery = useQueryCandidateNotes(candidateId);
-  const {
-    data: wrappedVaultKey,
-    isLoading: isVaultKeyLoading,
-    isError: isVaultKeyError,
-  } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess, isLoading: isVaultKeyLoading, isError: isVaultKeyError } = useQueryOrgVaultAccess(orgId);
   const isCryptoActive = useIsCryptoActive();
 
   const [decryptedNotes, setDecryptedNotes] = useState<Record<string, TipTapDoc>>({});
@@ -45,14 +41,14 @@ export function useDecryptedNotes(applicationId: string | null, orgId: string, c
   }, [activityData?.data, notesQuery.notes]);
 
   const decryptingNoteIds = useMemo<ReadonlySet<string>>(() => {
-    if (!isCryptoActive || !candidateId || (!wrappedVaultKey && !isVaultKeyLoading)) {
+    if (!isCryptoActive || !candidateId || (!vaultAccess && !isVaultKeyLoading)) {
       return EMPTY_NOTE_IDS;
     }
 
     return new Set(
       encryptedNotes.flatMap((note) => (decryptedNotes[note.id] || failedNoteIds.has(note.id) ? [] : [note.id])),
     );
-  }, [candidateId, decryptedNotes, encryptedNotes, failedNoteIds, isCryptoActive, isVaultKeyLoading, wrappedVaultKey]);
+  }, [candidateId, decryptedNotes, encryptedNotes, failedNoteIds, isCryptoActive, isVaultKeyLoading, vaultAccess]);
 
   useEffect(() => {
     setDecryptedNotes({});
@@ -63,7 +59,7 @@ export function useDecryptedNotes(applicationId: string | null, orgId: string, c
   }, [candidateId]);
 
   useEffect(() => {
-    if (!wrappedVaultKey || !isCryptoActive || !candidateId) {
+    if (!vaultAccess || !isCryptoActive || !candidateId) {
       return;
     }
 
@@ -82,7 +78,7 @@ export function useDecryptedNotes(applicationId: string | null, orgId: string, c
 
       decryptingRef.current.add(noteId);
 
-      CryptoProxy.decryptApplication(note.content, orgId, wrappedVaultKey, candidateNoteContext(orgId, candidateId))
+      CryptoProxy.decryptApplication(note.content, orgId, vaultAccess, candidateNoteContext(orgId, candidateId))
         .then((data) => {
           if (candidateIdRef.current !== activeCandidateId) {
             return;
@@ -111,13 +107,13 @@ export function useDecryptedNotes(applicationId: string | null, orgId: string, c
           decryptingRef.current.delete(noteId);
         });
     }
-  }, [candidateId, encryptedNotes, isCryptoActive, orgId, wrappedVaultKey]);
+  }, [candidateId, encryptedNotes, isCryptoActive, orgId, vaultAccess]);
 
   return {
     decryptedNotes: isCryptoActive ? decryptedNotes : EMPTY_DECRYPTED_NOTES,
     decryptingNoteIds: isCryptoActive ? decryptingNoteIds : EMPTY_NOTE_IDS,
     failedNoteIds: isCryptoActive ? failedNoteIds : EMPTY_NOTE_IDS,
-    isVaultKeyError: isVaultKeyError && !wrappedVaultKey,
+    isVaultKeyError: isVaultKeyError && !vaultAccess,
     ...notesQuery,
   };
 }

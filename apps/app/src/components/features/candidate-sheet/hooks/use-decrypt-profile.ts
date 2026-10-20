@@ -12,11 +12,7 @@ type ProfileDecryptionState =
   | { candidateId: string; status: 'success'; profile: CandidateProfile }
   | { candidateId: string; status: 'error'; profile: null };
 
-export function useDecryptProfile(
-  candidateId: string | null | undefined,
-  orgId: string,
-  wrappedVaultKey?: VaultKeyAccess,
-) {
+export function useDecryptProfile(candidateId: string | null | undefined, orgId: string, vaultAccess?: VaultKeyAccess) {
   const { data: candidateData, isLoading, isError, refetch } = useQueryCandidate(candidateId ?? null);
   const isCryptoActive = useIsCryptoActive();
   const [decryptionState, setDecryptionState] = useState<ProfileDecryptionState | null>(null);
@@ -25,14 +21,14 @@ export function useDecryptProfile(
   const hasCurrentEncryptedProfile = Boolean(hasCurrentCandidateData && candidateData?.profile);
   const currentDecryptionState =
     hasCurrentEncryptedProfile && decryptionState?.candidateId === candidateId ? decryptionState : null;
-  const canDecrypt = hasCurrentEncryptedProfile && Boolean(wrappedVaultKey) && isCryptoActive;
+  const canDecrypt = hasCurrentEncryptedProfile && Boolean(vaultAccess) && isCryptoActive;
   const isAwaitingDecryption =
     canDecrypt && currentDecryptionState?.status !== 'success' && currentDecryptionState?.status !== 'error';
 
   useEffect(() => {
     let cancelled = false;
 
-    if (!candidateData?.profile || candidateData.id !== candidateId || !wrappedVaultKey || !isCryptoActive) {
+    if (!candidateData?.profile || candidateData.id !== candidateId || !vaultAccess || !isCryptoActive) {
       return;
     }
 
@@ -41,7 +37,7 @@ export function useDecryptProfile(
     CryptoProxy.decryptApplication(
       candidateData.profile,
       orgId,
-      wrappedVaultKey,
+      vaultAccess,
       candidateProfileContext(orgId, candidateData.id),
     )
       .then((data) => {
@@ -68,7 +64,7 @@ export function useDecryptProfile(
     return () => {
       cancelled = true;
     };
-  }, [candidateData, candidateId, wrappedVaultKey, orgId, isCryptoActive]);
+  }, [candidateData, candidateId, vaultAccess, orgId, isCryptoActive]);
 
   return {
     profile: currentDecryptionState?.status === 'success' ? currentDecryptionState.profile : null,

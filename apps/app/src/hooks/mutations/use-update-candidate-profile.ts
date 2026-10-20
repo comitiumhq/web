@@ -16,7 +16,7 @@ interface UpdateCandidateProfileParams {
   profile: CandidateProfile;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: VaultKeyAccess;
+  vaultAccess: VaultKeyAccess;
 }
 
 export function useUpdateCandidateProfile() {
@@ -30,7 +30,7 @@ export function useUpdateCandidateProfile() {
       profile,
       vaultPublicKey,
       vaultKeyVersion,
-      wrappedVaultKey,
+      vaultAccess,
     }: UpdateCandidateProfileParams) => {
       await ensureUnlocked();
 
@@ -41,7 +41,7 @@ export function useUpdateCandidateProfile() {
           profile,
           candidateProfileContext(orgId, candidateId),
         ),
-        projectCandidateProfileSearch(orgId, wrappedVaultKey, profile),
+        projectCandidateProfileSearch(orgId, vaultAccess, profile),
       ]);
 
       return updateCandidateProfile(candidateId, encryptedProfile, searchProjection);

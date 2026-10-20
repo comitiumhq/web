@@ -50,7 +50,7 @@ const SUBMISSION_ID = '77777777-7777-4777-8777-777777777777';
 const ACTIVITY_ID = '88888888-8888-4888-8888-888888888888';
 
 const vaultPublicKey = { v: 1, xwing: 'vault-key' } as PublicEncryptionKey;
-const wrappedVaultKey = mockVaultAccess();
+const vaultAccess = mockVaultAccess();
 
 const snapshot: FormDefinitionSnapshot = {
   v: 1,
@@ -130,7 +130,7 @@ function Harness({ publicKey = vaultPublicKey }: { publicKey?: PublicEncryptionK
       currentUserId="user-1"
       vaultPublicKey={publicKey}
       vaultKeyVersion={3}
-      wrappedVaultKey={wrappedVaultKey}
+      vaultAccess={vaultAccess}
       onComplete={() => undefined}
     />
   );
