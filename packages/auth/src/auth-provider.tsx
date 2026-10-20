@@ -105,11 +105,15 @@ export function AuthProvider({ children, client, getSession, sessionQueryKey, st
     throw identityError;
   }
 
-  if (auth.error && auth.error.status !== 401 && !auth.data && !hasCheckedSession) {
-    throw new ApiError(auth.error.status, 'Could not check your sign-in. Try again.');
+  const initialSessionError = !hasCheckedSession && !auth.data ? auth.error : null;
+
+  if (initialSessionError && initialSessionError.status !== 401) {
+    throw new ApiError(initialSessionError.status, 'Could not check your sign-in. Try again.');
   }
 
-  if (authUserId && identityReady && (query.isError || (query.isSuccess && !query.data))) {
+  const accountUnavailable = query.isError || (query.isSuccess && !query.data);
+
+  if (authUserId && identityReady && accountUnavailable) {
     throw new ApiError(
       query.error instanceof ApiError ? query.error.status : 503,
       'Could not load your account. Try again.',

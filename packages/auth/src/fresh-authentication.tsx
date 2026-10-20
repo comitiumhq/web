@@ -99,10 +99,11 @@ export function FreshAuthentication({ children }: { children: ReactNode }) {
       try {
         return await operation();
       } catch (error) {
-        if (
-          !(error instanceof ApiError || error instanceof UnlockApiError) ||
-          error.code !== 'FRESH_AUTHENTICATION_REQUIRED'
-        ) {
+        const requiresFreshAuth =
+          (error instanceof ApiError || error instanceof UnlockApiError) &&
+          error.code === 'FRESH_AUTHENTICATION_REQUIRED';
+
+        if (!requiresFreshAuth) {
           throw error;
         }
       }

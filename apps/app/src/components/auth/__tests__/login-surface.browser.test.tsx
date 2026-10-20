@@ -184,6 +184,19 @@ describe('unified Log in', () => {
     expect(mocks.sendCode).toHaveBeenCalledTimes(2);
   });
 
+  it('returns to the email step without sending another code or losing the address', async () => {
+    const screen = await renderSurface();
+    await screen.getByPlaceholder('Email address').fill('person@example.com');
+    await screen.getByRole('button', { name: 'Continue', exact: true }).click();
+    await screen.getByRole('textbox', { name: 'Verification code' }).fill('12');
+    await screen.getByRole('button', { name: 'Back', exact: true }).click();
+
+    await expect.element(screen.getByPlaceholder('Email address')).toHaveValue('person@example.com');
+    await expect.element(screen.getByRole('textbox', { name: 'Verification code' })).not.toBeInTheDocument();
+    expect(mocks.sendCode).toHaveBeenCalledOnce();
+    expect(mocks.loginWithCode).not.toHaveBeenCalled();
+  });
+
   it('prevents duplicate requests while sending a code', async () => {
     let finishSend!: () => void;
 

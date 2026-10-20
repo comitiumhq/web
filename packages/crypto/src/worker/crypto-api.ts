@@ -24,7 +24,6 @@ import {
   unpackEncryptedBlob,
 } from '../file-encryption';
 import { type CategoricalFormFieldKind, hashCategoricalFormFieldValue } from '../form-field-search-hash';
-import { generateStoragePassword } from '../password';
 import type { RecipientDescriptor } from '../recipients';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from '../schemas';
 import type { VaultKeyAccess } from '../schemas/vault-key';
@@ -40,7 +39,6 @@ export class CryptoWorkerApi {
   readonly #orgVault = new OrgVault(this.#userSession);
 
   readonly configure = this.#userSession.configure.bind(this.#userSession);
-  readonly generateStoragePassword = generateStoragePassword;
   readonly unlockWithPassword = this.#userSession.unlockWithPassword.bind(this.#userSession);
   readonly verifyPassword = this.#userSession.verifyPassword.bind(this.#userSession);
   readonly unlockWithRecoveryCode = this.#userSession.unlockWithRecoveryCode.bind(this.#userSession);

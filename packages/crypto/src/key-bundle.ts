@@ -13,6 +13,10 @@ export type EncryptionReadyUser<T extends EncryptionKeyBundleUser = EncryptionKe
   userKeyVersion: number;
 };
 
+export function hasRecoveryCodeWrap(wrapped?: WrappedUserKey | null): boolean {
+  return wrapped?.wraps.some((wrap) => wrap.method === 'recovery_code') ?? false;
+}
+
 export function hasEncryptionKeyBundle<T extends EncryptionKeyBundleUser>(
   user?: T | null,
 ): user is EncryptionReadyUser<T> {

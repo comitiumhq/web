@@ -11,6 +11,12 @@ import { CryptoUnlockContext } from './use-crypto-unlock';
 import { useIsCryptoActive } from './use-is-crypto-active';
 import { useSession } from './use-session';
 
+interface CryptoProviderProps {
+  apiUrl: string;
+  sessionQueryKey: readonly unknown[];
+  children: ReactNode;
+}
+
 interface UnlockPrompt {
   promise: Promise<void>;
   resolve: () => void;
@@ -28,15 +34,7 @@ interface RestoreState {
   error: string | null;
 }
 
-export function CryptoProvider({
-  apiUrl,
-  sessionQueryKey,
-  children,
-}: {
-  apiUrl: string;
-  sessionQueryKey: readonly unknown[];
-  children: ReactNode;
-}) {
+export function CryptoProvider({ apiUrl, sessionQueryKey, children }: CryptoProviderProps) {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const active = useIsCryptoActive();
@@ -228,8 +226,10 @@ export function CryptoProvider({
       {children}
       <Dialog open={promptOpen} onOpenChange={changePromptOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogTitle className="sr-only">Open personal storage</DialogTitle>
-          <DialogDescription className="sr-only">Unlock or set up your encrypted storage.</DialogDescription>
+          <DialogTitle className="sr-only">Open your encrypted data</DialogTitle>
+          <DialogDescription className="sr-only">
+            Enter or create a password to open your encrypted data.
+          </DialogDescription>
           {promptOpen ? <StorageAccess onSuccess={completePrompt} /> : null}
         </DialogContent>
       </Dialog>

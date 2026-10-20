@@ -1,3 +1,4 @@
+import { BackButton } from '@comitium/ui/back-button';
 import { Button } from '@comitium/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { Input } from '@comitium/ui/input';
@@ -108,6 +109,7 @@ export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshM
   return (
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
+        {step === 'code' ? <BackButton disabled={isPending} onClick={handleChangeEmail} /> : null}
         <DialogHeader>
           <DialogTitle>{hasEmail ? 'Change email' : 'Add email'}</DialogTitle>
           <DialogDescription>
@@ -154,9 +156,6 @@ export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshM
             />
             <AuthFormError message={error} />
             <DialogFooter>
-              <Button type="button" variant="outline" disabled={isPending} onClick={handleChangeEmail}>
-                Change email
-              </Button>
               <Button type="submit" disabled={isPending || code.length !== VERIFICATION_CODE_LENGTH}>
                 {isPending && <Spinner data-icon="inline-start" />}
                 {isPending ? 'Verifying...' : 'Verify email'}

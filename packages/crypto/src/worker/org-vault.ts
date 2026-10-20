@@ -78,11 +78,10 @@ export class OrgVault {
     const identity = this.session.requireIdentity();
     const access = vaultKeyAccessSchema.parse(value);
 
-    if (
-      access.orgId !== orgId ||
-      access.recipientUserId !== identity.userId ||
-      access.recipientKeyVersion !== identity.keyVersion
-    ) {
+    const matchesRecipient =
+      access.recipientUserId === identity.userId && access.recipientKeyVersion === identity.keyVersion;
+
+    if (access.orgId !== orgId || !matchesRecipient) {
       throw new Error('Vault access does not match the current crypto identity');
     }
 

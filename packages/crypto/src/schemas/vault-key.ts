@@ -36,10 +36,12 @@ export const vaultKeyAccessSchema = vaultKeyContextSchema
     wrappedVaultKey: wrappedKeySchema,
     searchKey: wrappedSearchKeySchema,
   })
-  .refine(
-    (access) => access.orgId === access.searchKey.orgId && access.vaultKeyVersion === access.searchKey.vaultKeyVersion,
-    'Search and vault descriptors must belong to the same organization and vault generation',
-  );
+  .refine((access) => {
+    const matchesOrganization = access.orgId === access.searchKey.orgId;
+    const matchesVaultVersion = access.vaultKeyVersion === access.searchKey.vaultKeyVersion;
+
+    return matchesOrganization && matchesVaultVersion;
+  }, 'Search and vault descriptors must belong to the same organization and vault generation');
 
 export type VaultKeyContext = z.infer<typeof vaultKeyContextSchema>;
 export type WrappedSearchKey = z.infer<typeof wrappedSearchKeySchema>;

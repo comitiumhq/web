@@ -206,9 +206,9 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
 
         <Button
           type="button"
-          variant="ghost"
+          variant="text"
           size="sm"
-          className="w-full text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
+          className="w-full"
           onClick={switchAccount}
           disabled={isAccepting || isSwitchingAccount}
         >

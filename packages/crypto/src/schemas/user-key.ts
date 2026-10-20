@@ -41,14 +41,16 @@ export const recoveryWrapSchema = z
 
 export const unlockKeyWrapsSchema = z
   .array(z.discriminatedUnion('method', [passwordWrapSchema, recoveryWrapSchema]))
-  .length(2)
-  .refine(
-    (wraps) =>
-      wraps.length === 2 &&
-      wraps.filter((wrap) => wrap.method === 'password').length === 1 &&
-      wraps[0].id !== wraps[1].id,
-    'Expected one password wrapper and one recovery-code wrapper with distinct IDs',
-  );
+  .min(1)
+  .max(2)
+  .refine((wraps) => {
+    const passwordWraps = wraps.filter((wrap) => wrap.method === 'password');
+    const wrapIds = wraps.map((wrap) => wrap.id);
+    const hasSinglePasswordWrap = passwordWraps.length === 1;
+    const hasUniqueIds = new Set(wrapIds).size === wrapIds.length;
+
+    return hasSinglePasswordWrap && hasUniqueIds;
+  }, 'Expected one password wrapper and at most one recovery-code wrapper with distinct IDs');
 
 export const wrappedUserKeySchema = z
   .object({
@@ -60,15 +62,9 @@ export const wrappedUserKeySchema = z
   .strict();
 
 export type PasswordWrap = z.infer<typeof passwordWrapSchema>;
-
 export type RecoveryWrap = z.infer<typeof recoveryWrapSchema>;
-
 export type UnlockKeyWrap = PasswordWrap | RecoveryWrap;
-
 export type WrappedUserKey = z.infer<typeof wrappedUserKeySchema>;
-
 export const userKeyContextSchema = z.object({ userId: z.uuid(), keyVersion: storedKeyVersionSchema });
-
 export type UserKeyContext = z.infer<typeof userKeyContextSchema>;
-
 export type UnlockedUserKey = { userPrivateKey: Uint8Array; unlockKey: Uint8Array };

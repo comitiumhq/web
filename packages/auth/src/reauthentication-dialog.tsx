@@ -122,7 +122,7 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
           >
             Use a passkey
           </Button>
-          <Button variant="ghost" onClick={onCancel}>
+          <Button variant="text" onClick={onCancel}>
             Cancel
           </Button>
         </DialogFooter>

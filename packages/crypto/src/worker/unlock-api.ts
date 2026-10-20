@@ -25,15 +25,16 @@ export class UnlockApi {
 
   constructor(baseUrl: string) {
     const url = new URL(baseUrl);
+    const isLocalHttp = url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
 
-    if (
-      url.protocol !== 'https:' &&
-      !(url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))
-    ) {
+    if (url.protocol !== 'https:' && !isLocalHttp) {
       throw new Error('Encryption API requires HTTPS');
     }
 
-    if (url.username || url.password || url.search || url.hash) {
+    const hasCredentials = Boolean(url.username || url.password);
+    const hasQueryOrHash = Boolean(url.search || url.hash);
+
+    if (hasCredentials || hasQueryOrHash) {
       throw new Error('Invalid encryption API URL');
     }
 

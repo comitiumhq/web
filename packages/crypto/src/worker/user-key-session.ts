@@ -176,7 +176,7 @@ export class UserKeySession {
     userId: string,
     password: string,
     rememberDevice: boolean,
-    onRecoveryCode: RecoveryCodeHandler,
+    onRecoveryCode?: RecoveryCodeHandler,
   ) {
     this.clear();
 
@@ -262,15 +262,21 @@ export class UserKeySession {
           keyShare = share.keyShare;
         }
 
-        const index = wraps.findIndex((wrap) => wrap.method === 'password');
+        const passwordWrapIndex = wraps.findIndex((wrap) => wrap.method === 'password');
 
-        wraps[index] = await createPasswordWrap(unlockKey, identity, options.password, keyShare);
+        wraps[passwordWrapIndex] = await createPasswordWrap(unlockKey, identity, options.password, keyShare);
       }
 
       if (recoveryCode) {
-        const index = wraps.findIndex((wrap) => wrap.method === 'recovery_code');
+        const recoveryWrapIndex = wraps.findIndex((wrap) => wrap.method === 'recovery_code');
+        const hasRecoveryWrap = recoveryWrapIndex !== -1;
+        const wrapper = await createRecoveryWrap(unlockKey, identity, recoveryCode);
 
-        wraps[index] = await createRecoveryWrap(unlockKey, identity, recoveryCode);
+        if (hasRecoveryWrap) {
+          wraps[recoveryWrapIndex] = wrapper;
+        } else {
+          wraps.push(wrapper);
+        }
 
         await this.confirmRecoveryCode(recoveryCode, onRecoveryCode, generation);
       }
@@ -293,11 +299,11 @@ export class UserKeySession {
 
       this.keys.assertGeneration(generation);
 
-      if (
-        saved.id !== identity.userId ||
-        !isSameCryptoSession(identity, createCryptoSessionIdentity(saved.encryptedUserKey, saved.id)) ||
-        userKeyWrapsFingerprint(saved.encryptedUserKey.wraps) !== userKeyWrapsFingerprint(wraps)
-      ) {
+      const savedIdentity = createCryptoSessionIdentity(saved.encryptedUserKey, saved.id);
+      const matchesIdentity = isSameCryptoSession(identity, savedIdentity);
+      const matchesWraps = userKeyWrapsFingerprint(saved.encryptedUserKey.wraps) === userKeyWrapsFingerprint(wraps);
+
+      if (!matchesIdentity || !matchesWraps) {
         throw new Error('Saved user key wrappers do not match the requested update');
       }
 
@@ -586,12 +592,12 @@ export class UserKeySession {
     keyShare: string,
     generation: number,
     rememberDevice: boolean,
-    onRecoveryCode: RecoveryCodeHandler,
+    onRecoveryCode?: RecoveryCodeHandler,
     reset?: { previous: WrappedUserKey; confirmFreshAuth: FreshAuthenticationHandler },
   ) {
     const { privateKey, publicKey } = generateUserKeyPair();
     const unlockKey = randomBytes(32);
-    const recoveryCode = generateRecoveryCode();
+    const recoveryCode = onRecoveryCode ? generateRecoveryCode() : undefined;
     const context = { userId, keyVersion };
 
     try {
@@ -604,7 +610,9 @@ export class UserKeySession {
         keyAuthSecret: encodeKeyAuthSecret(unlockKey, context),
       };
 
-      await this.confirmRecoveryCode(recoveryCode, onRecoveryCode, generation);
+      if (recoveryCode && onRecoveryCode) {
+        await this.confirmRecoveryCode(recoveryCode, onRecoveryCode, generation);
+      }
 
       this.keys.assertGeneration(generation);
 
@@ -629,16 +637,15 @@ export class UserKeySession {
 
       this.assertShareBinding(share, saved.encryptedUserKey);
 
-      if (
-        saved.id !== userId ||
-        saved.userKeyVersion !== keyVersion ||
-        !isSamePublicEncryptionKey(saved.publicKey, publicKey) ||
-        !isSameCryptoSession(
-          createCryptoSessionIdentity(encryptedUserKey, userId),
-          createCryptoSessionIdentity(saved.encryptedUserKey, saved.id),
-        ) ||
-        userKeyWrapsFingerprint(saved.encryptedUserKey.wraps) !== userKeyWrapsFingerprint(encryptedUserKey.wraps)
-      ) {
+      const expectedIdentity = createCryptoSessionIdentity(encryptedUserKey, userId);
+      const savedIdentity = createCryptoSessionIdentity(saved.encryptedUserKey, saved.id);
+      const matchesIdentity = isSameCryptoSession(expectedIdentity, savedIdentity);
+      const matchesVersion = saved.userKeyVersion === keyVersion;
+      const matchesPublicKey = isSamePublicEncryptionKey(saved.publicKey, publicKey);
+      const matchesWraps =
+        userKeyWrapsFingerprint(saved.encryptedUserKey.wraps) === userKeyWrapsFingerprint(encryptedUserKey.wraps);
+
+      if (!matchesIdentity || !matchesVersion || !matchesPublicKey || !matchesWraps) {
         throw new Error('Saved user key bundle does not match the requested identity');
       }
 

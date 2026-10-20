@@ -89,7 +89,7 @@ export async function wrapUserKey(
   context: UserKeyContext,
   password: string,
   keyShare: string,
-  recoveryCode: string,
+  recoveryCode?: string,
 ): Promise<WrappedUserKey> {
   assertContext(context);
 
@@ -98,13 +98,17 @@ export async function wrapUserKey(
   try {
     const encrypted = await encryptPayloadBytes(serialized, unlockKey, userKeyAad(context));
     const passwordWrap = await createPasswordWrap(unlockKey, context, password, keyShare);
-    const recoveryWrap = await createRecoveryWrap(unlockKey, context, recoveryCode);
+    const wraps: UnlockKeyWrap[] = [passwordWrap];
+
+    if (recoveryCode !== undefined) {
+      wraps.push(await createRecoveryWrap(unlockKey, context, recoveryCode));
+    }
 
     return {
       v: 1,
       keyVersion: context.keyVersion,
       pk: { ek: encrypted.ct, iv: encrypted.iv },
-      wraps: [passwordWrap, recoveryWrap],
+      wraps,
     };
   } finally {
     serialized.fill(0);

@@ -35,7 +35,13 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: ['@radix-ui/react-focus-scope', '@radix-ui/react-compose-refs', '@radix-ui/react-slot', 'idb-keyval'],
+    include: [
+      '@radix-ui/react-focus-scope',
+      '@radix-ui/react-compose-refs',
+      '@radix-ui/react-slot',
+      'idb-keyval',
+      'pdf-lib',
+    ],
   },
   plugins: [
     cryptoWorkerHeaders(),

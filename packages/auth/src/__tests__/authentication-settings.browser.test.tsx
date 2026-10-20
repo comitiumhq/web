@@ -188,7 +188,7 @@ describe('native Authentication settings', () => {
     await screen.getByLabelText('Verification code').fill('111111');
     await expect.element(screen.getByRole('alert')).toHaveTextContent('We could not verify this email. Try again.');
 
-    await screen.getByRole('button', { name: 'Change email', exact: true }).click();
+    await screen.getByRole('button', { name: 'Back', exact: true }).click();
     await expect.element(screen.getByRole('alert')).not.toBeInTheDocument();
     await screen.getByRole('button', { name: 'Send code', exact: true }).click();
     await expect.element(screen.getByLabelText('Verification code')).toHaveValue('');

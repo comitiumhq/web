@@ -583,6 +583,36 @@ describe('Worker unlock and recovery flows', () => {
     expect(storage.size).toBe(1);
   }, 15000);
 
+  it('initializes without recovery and adds the first recovery kit to the same identity later', async () => {
+    keyless = true;
+    const initial = await api.initializeUserKey(USER_ID, PASSWORD, true);
+
+    expect(initial.recoveryCode).toBeUndefined();
+    expect(initial.encryptedUserKey.wraps.map((wrap) => wrap.method)).toEqual(['password']);
+    expect(api.isActive()).toBe(true);
+
+    const confirmRecovery = vi.fn(async () => {});
+    const updated = await api.rewrapUserKey(
+      initial.encryptedUserKey,
+      { rotateRecoveryCode: true, repairShare: false },
+      confirmRecovery,
+      confirmFreshAuth,
+    );
+
+    expect(confirmRecovery).toHaveBeenCalledOnce();
+    expect(updated.encryptedUserKey.pk).toEqual(initial.encryptedUserKey.pk);
+    expect(updated.encryptedUserKey.wraps.map((wrap) => wrap.method)).toEqual(['password', 'recovery_code']);
+    api.clear();
+    await api.unlockWithRecoveryCode(
+      updated.encryptedUserKey,
+      USER_ID,
+      initial.publicKey,
+      updated.recoveryCode ?? '',
+      false,
+    );
+    expect(api.isActive()).toBe(true);
+  }, 15000);
+
   it('rejects another keyless account’s share before deriving or saving setup keys', async () => {
     keyless = true;
     shareUserId = OTHER_USER_ID;

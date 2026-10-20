@@ -83,7 +83,9 @@ export function AuthLoginSurface({
 
       return { ok: true };
     } catch (error) {
-      if ((!(error instanceof ApiError) || error.status >= 500) && (await recoverSignIn(emailAddress.current))) {
+      const signInMayHaveSucceeded = !(error instanceof ApiError) || error.status >= 500;
+
+      if (signInMayHaveSucceeded && (await recoverSignIn(emailAddress.current))) {
         return { ok: true };
       }
 

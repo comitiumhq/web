@@ -22,11 +22,4 @@ describe('crypto Worker connection', () => {
     expect(JSON.stringify(result)).not.toContain('private application text');
     expect(CryptoProxy.isActive()).toBe(false);
   });
-
-  it('generates a storage passphrase without opening user keys', async () => {
-    CryptoProxy.init('https://api.comitium.test/v1');
-    const phrase = await CryptoProxy.generateStoragePassword();
-    expect(phrase.split(' ')).toHaveLength(6);
-    expect(CryptoProxy.isActive()).toBe(false);
-  });
 });

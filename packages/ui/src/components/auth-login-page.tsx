@@ -1,5 +1,6 @@
 import { KeyIcon } from 'lucide-react';
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useState } from 'react';
+import { BackButton } from './back-button';
 import { Button } from './button';
 import { ComitiumMark } from './comitium-mark';
 import { GoogleIcon } from './google';
@@ -34,18 +35,7 @@ interface AuthLoginPageProps extends LoginFormProps {
   termsHref: string;
 }
 
-export function AuthLoginPage({
-  authError,
-  homeHref,
-  homeLabel,
-  privacyHref,
-  termsHref,
-  onSendCode,
-  onVerifyCode,
-  onGoogleLogin,
-  onPasskeyLogin,
-  passkeyUnavailableReason,
-}: AuthLoginPageProps) {
+export function AuthLoginPage({ homeHref, homeLabel, privacyHref, termsHref, ...props }: AuthLoginPageProps) {
   return (
     <div className="flex min-h-full items-center justify-center bg-background px-5 py-12 sm:px-8 sm:py-16">
       <section aria-label="Log in" className="w-full max-w-88">
@@ -56,14 +46,7 @@ export function AuthLoginPage({
         >
           <ComitiumMark className="h-10 w-auto" />
         </a>
-        <LoginForm
-          authError={authError}
-          passkeyUnavailableReason={passkeyUnavailableReason}
-          onSendCode={onSendCode}
-          onVerifyCode={onVerifyCode}
-          onGoogleLogin={onGoogleLogin}
-          onPasskeyLogin={onPasskeyLogin}
-        />
+        <LoginForm {...props} />
         <p className="mt-5 text-center text-copy-12 text-muted-foreground sm:whitespace-nowrap">
           By continuing, you agree to our{' '}
           <a
@@ -238,6 +221,11 @@ function LoginForm({
 
   return (
     <div className="mt-10">
+      {step === 'code' ? (
+        <div className="mb-3">
+          <BackButton onClick={handleChangeEmail} disabled={pendingAction !== null} />
+        </div>
+      ) : null}
       <div className="text-center">
         <h1 className="text-heading-24 font-medium tracking-normal">{title}</h1>
         {step === 'code' ? (
@@ -303,32 +291,21 @@ function LoginForm({
 
           <AuthError message={error?.message ?? null} />
 
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full"
-            disabled={pendingAction !== null || code.length !== VERIFICATION_CODE_LENGTH}
-          >
-            {pendingAction === 'code' && <Spinner data-icon="inline-start" />}
-            {codeSubmitLabel}
-          </Button>
-
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="grid gap-3">
             <Button
-              type="button"
-              variant="ghost"
-              size="xs"
-              className="text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
-              onClick={handleChangeEmail}
-              disabled={pendingAction !== null}
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={pendingAction !== null || code.length !== VERIFICATION_CODE_LENGTH}
             >
-              Use another email
+              {pendingAction === 'code' && <Spinner data-icon="inline-start" />}
+              {codeSubmitLabel}
             </Button>
             <Button
               type="button"
-              variant="ghost"
-              size="xs"
-              className="text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
+              variant="text"
+              size="sm"
+              className="mx-auto px-0 text-copy-13"
               onClick={sendCode}
               disabled={pendingAction !== null}
             >

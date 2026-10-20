@@ -181,10 +181,6 @@ export const CryptoProxy = {
     return runOnWorker((api) => api.verifyPassword(wrapped, userId, publicKey, password));
   },
 
-  generateStoragePassword(): Promise<string> {
-    return runOnWorker((api) => api.generateStoragePassword());
-  },
-
   unlockWithRecoveryCode(
     wrapped: WrappedUserKey,
     userId: string,
@@ -397,13 +393,18 @@ export const CryptoProxy = {
     userId: string,
     password: string,
     rememberDevice: boolean,
-    onRecoveryCode: RecoveryCodeHandler,
+    onRecoveryCode?: RecoveryCodeHandler,
   ) {
     await this.clear();
 
     const generation = lifecycle;
     const result = await runOnWorker((api) =>
-      api.initializeUserKey(userId, password, rememberDevice, Comlink.proxy(onRecoveryCode)),
+      api.initializeUserKey(
+        userId,
+        password,
+        rememberDevice,
+        onRecoveryCode ? Comlink.proxy(onRecoveryCode) : undefined,
+      ),
     );
 
     assertLifecycle(generation);

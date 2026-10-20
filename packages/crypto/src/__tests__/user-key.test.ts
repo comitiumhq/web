@@ -2,7 +2,7 @@ import { base64 } from '@scure/base';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { keyContextBytes } from '../key-context';
-import { assertNewStoragePassword, encodePassword } from '../password';
+import { encodePassword } from '../password';
 import { publicEncryptionKeySchema } from '../schemas';
 import { passwordWrapSchema, wrappedUserKeySchema } from '../schemas/user-key';
 import { createCryptoSessionIdentity } from '../session';
@@ -129,7 +129,15 @@ describe('password and recovery key wrappers', () => {
     ).rejects.toThrow();
   });
 
-  it('requires exactly one wrapper of each method, canonical lengths and no unknown fields', () => {
+  it('requires a password and permits one optional recovery wrapper with a distinct ID', () => {
+    const password = fixture.bundle.wraps.find((wrap) => wrap.method === 'password');
+    const recovery = fixture.bundle.wraps.find((wrap) => wrap.method === 'recovery_code');
+
+    expect(wrappedUserKeySchema.safeParse({ ...fixture.bundle, wraps: [password] }).success).toBe(true);
+    expect(wrappedUserKeySchema.safeParse({ ...fixture.bundle, wraps: [recovery] }).success).toBe(false);
+    expect(wrappedUserKeySchema.safeParse({ ...fixture.bundle, wraps: [password, recovery, recovery] }).success).toBe(
+      false,
+    );
     expect(wrappedUserKeySchema.safeParse({ ...fixture.bundle, wraps: [] }).success).toBe(false);
     expect(
       wrappedUserKeySchema.safeParse({
@@ -165,8 +173,6 @@ describe('password and recovery key wrappers', () => {
     expect(encodePassword(' a\u0301 ')).toEqual(new TextEncoder().encode(' a\u0301 '));
     expect(encodePassword('a\u0301')).not.toEqual(encodePassword('á'));
     expect(() => encodePassword('é'.repeat(513))).toThrow('1024');
-    expect(() => assertNewStoragePassword('password123456')).toThrow('easy');
-    expect(() => assertNewStoragePassword('short')).toThrow('12');
   });
 
   it('freezes canonical AAD ordering and binds the mutation verifier to user/generation', () => {

@@ -10,6 +10,7 @@
     "./envelope-key": "./src/envelope-key.ts",
     "./jitless": "./src/jitless.ts",
     "./key-bundle": "./src/key-bundle.ts",
+    "./password": "./src/password.ts",
     "./user-key": "./src/user-key.ts",
     "./schemas": "./src/schemas/index.ts",
     "./vault-key": "./src/vault-key.ts",

@@ -1,32 +1,23 @@
 import { ZxcvbnFactory } from '@zxcvbn-ts/core';
 import * as common from '@zxcvbn-ts/language-common';
 import * as english from '@zxcvbn-ts/language-en';
-import { PASSPHRASE_WORD_REGEX } from './patterns';
 
 const MAX_PASSWORD_BYTES = 1024;
 const MIN_PASSWORD_LENGTH = 12;
 const MIN_PASSWORD_SCORE = 3;
-const PASSPHRASE_LENGTH = 6;
-const PASSPHRASE_DICTIONARY_SIZE = 8192;
 
-const eligibleWords = english.dictionary['wikipedia-en'].filter((word) => PASSPHRASE_WORD_REGEX.test(word));
-const passphraseWords = Array.from(new Set(eligibleWords)).slice(0, PASSPHRASE_DICTIONARY_SIZE);
+const PASSWORD_ERRORS = {
+  'too-long': `Storage password exceeds ${MAX_PASSWORD_BYTES} UTF-8 bytes`,
+  'too-short': `Storage password must contain at least ${MIN_PASSWORD_LENGTH} characters`,
+  'too-weak': 'Storage password is too easy to guess',
+};
 
-/**
- * Six uniform selections from 8192 words provide 78 bits of entropy.
- */
-export function generateStoragePassword(): string {
-  if (passphraseWords.length !== PASSPHRASE_DICTIONARY_SIZE) {
-    throw new Error('Passphrase vocabulary is incomplete');
-  }
-
-  const randomValues = crypto.getRandomValues(new Uint16Array(PASSPHRASE_LENGTH));
-  const words = Array.from(randomValues, (value) => passphraseWords[value % PASSPHRASE_DICTIONARY_SIZE]);
-
-  randomValues.fill(0);
-
-  return words.join(' ');
+interface PasswordStrength {
+  score: number;
+  error: keyof typeof PASSWORD_ERRORS | null;
 }
+
+let estimator: ZxcvbnFactory | undefined;
 
 /**
  * Deliberately no trim, case-folding or Unicode normalization.
@@ -37,28 +28,40 @@ export function encodePassword(password: string): Uint8Array {
   if (bytes.length > MAX_PASSWORD_BYTES) {
     bytes.fill(0);
 
-    throw new Error(`Storage password exceeds ${MAX_PASSWORD_BYTES} UTF-8 bytes`);
+    throw new Error(PASSWORD_ERRORS['too-long']);
   }
 
   return bytes;
 }
 
-export function assertNewStoragePassword(password: string): void {
-  const bytes = encodePassword(password);
-
+export function getPasswordStrength(password: string): PasswordStrength {
+  const bytes = new TextEncoder().encode(password);
+  const tooLong = bytes.length > MAX_PASSWORD_BYTES;
   bytes.fill(0);
 
-  if (Array.from(password).length < MIN_PASSWORD_LENGTH) {
-    throw new Error(`Storage password must contain at least ${MIN_PASSWORD_LENGTH} characters`);
+  if (tooLong) {
+    return { score: 0, error: 'too-long' };
   }
 
-  const estimator = new ZxcvbnFactory({
+  estimator ??= new ZxcvbnFactory({
     dictionary: { ...common.dictionary, ...english.dictionary },
     graphs: common.adjacencyGraphs,
     translations: english.translations,
   });
 
-  if (estimator.check(password).score < MIN_PASSWORD_SCORE) {
-    throw new Error('Storage password is too easy to guess');
+  const score = estimator.check(password).score;
+
+  if (Array.from(password).length < MIN_PASSWORD_LENGTH) {
+    return { score, error: 'too-short' };
+  }
+
+  return { score, error: score < MIN_PASSWORD_SCORE ? 'too-weak' : null };
+}
+
+export function assertNewStoragePassword(password: string): void {
+  const { error } = getPasswordStrength(password);
+
+  if (error) {
+    throw new Error(PASSWORD_ERRORS[error]);
   }
 }
