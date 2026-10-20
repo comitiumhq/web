@@ -94,15 +94,22 @@ export class UserKeySession {
       throw new Error('User key bundle does not match the unlocked identity');
     }
 
-    const generation = this.keys.captureGeneration();
-    const verified = await this.decryptWithPassword(wrapped, userId, publicKey, password);
+    await this.verifyWithoutUnlocking(() => this.decryptWithPassword(wrapped, userId, publicKey, password));
+  }
 
-    try {
-      this.keys.assertGeneration(generation);
-    } finally {
-      verified.userPrivateKey.fill(0);
-      verified.unlockKey.fill(0);
-    }
+  async verifyRecoveryCode(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+    recoveryCode: string,
+  ): Promise<void> {
+    await this.verifyWithoutUnlocking(async () => {
+      try {
+        return await unlockUserKey(wrapped, userId, publicKey, { method: 'recovery_code', recoveryCode });
+      } catch {
+        throw new Error('Recovery code is invalid');
+      }
+    });
   }
 
   async tryUnlockWithRememberedDevice(
@@ -426,6 +433,18 @@ export class UserKeySession {
   private assertShareBinding(share: KeyShareResponse, wrapped: WrappedUserKey): void {
     if (share.keyVersion !== wrapped.keyVersion || share.wrapsFingerprint !== userKeyWrapsFingerprint(wrapped.wraps)) {
       throw new Error('Key share snapshot does not match the user key wrappers');
+    }
+  }
+
+  private async verifyWithoutUnlocking(decrypt: () => Promise<UnlockedUserKey>): Promise<void> {
+    const generation = this.keys.captureGeneration();
+    const verified = await decrypt();
+
+    try {
+      this.keys.assertGeneration(generation);
+    } finally {
+      verified.userPrivateKey.fill(0);
+      verified.unlockKey.fill(0);
     }
   }
 

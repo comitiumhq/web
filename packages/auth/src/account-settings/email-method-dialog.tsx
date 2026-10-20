@@ -11,6 +11,8 @@ import { useAuthClient } from '../auth-context';
 import { AuthFormError } from '../auth-form-error';
 import { unwrapAuthResult } from '../auth-result';
 import { useFreshAuthentication } from '../fresh-authentication';
+import { ResendCodeButton } from '../resend-code-button';
+import { useResendCooldown } from '../use-resend-cooldown';
 import { getAccountMethodError } from './account-method-error';
 import type { RefreshMethods } from './types';
 
@@ -22,23 +24,27 @@ interface EmailMethodDialogProps {
 }
 
 export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshMethods }: EmailMethodDialogProps) {
+  const client = useAuthClient();
+  const runWithFreshAuth = useFreshAuthentication();
+  const cooldown = useResendCooldown();
+
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
-  const [isPending, setIsPending] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'send' | 'verify' | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const client = useAuthClient();
-  const runWithFreshAuth = useFreshAuthentication();
+
+  const isPending = pendingAction !== null;
 
   async function sendCode() {
     const normalizedEmail = email.trim();
 
-    if (!normalizedEmail || isPending) {
+    if (!normalizedEmail || isPending || (step === 'code' && cooldown.isActive)) {
       return;
     }
 
     setError(null);
-    setIsPending(true);
+    setPendingAction('send');
 
     try {
       await runWithFreshAuth(async () =>
@@ -46,11 +52,14 @@ export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshM
       );
 
       setEmail(normalizedEmail);
+      setCode('');
       setStep('code');
+
+      cooldown.start();
     } catch (sendError) {
       setError(getAccountMethodError(sendError, 'send-email-code'));
     } finally {
-      setIsPending(false);
+      setPendingAction(null);
     }
   }
 
@@ -60,7 +69,7 @@ export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshM
     }
 
     setError(null);
-    setIsPending(true);
+    setPendingAction('verify');
 
     try {
       await runWithFreshAuth(async () =>
@@ -68,21 +77,24 @@ export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshM
       );
 
       await refreshMethods();
+
       onComplete();
     } catch (verifyError) {
       setError(getAccountMethodError(verifyError, 'verify-email'));
     } finally {
-      setIsPending(false);
+      setPendingAction(null);
     }
   }
 
   async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     await sendCode();
   }
 
   async function handleCodeSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     await verifyCode(code);
   }
 
@@ -97,6 +109,7 @@ export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshM
   }
 
   function handleChangeEmail() {
+    cooldown.reset();
     setCode('');
     setError(null);
     setStep('email');
@@ -155,12 +168,18 @@ export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshM
               autoFocus
             />
             <AuthFormError message={error} />
-            <DialogFooter>
+            <div className="grid gap-3">
               <Button type="submit" disabled={isPending || code.length !== VERIFICATION_CODE_LENGTH}>
-                {isPending && <Spinner data-icon="inline-start" />}
-                {isPending ? 'Verifying...' : 'Verify email'}
+                {pendingAction === 'verify' && <Spinner data-icon="inline-start" />}
+                {pendingAction === 'verify' ? 'Verifying...' : 'Verify email'}
               </Button>
-            </DialogFooter>
+              <ResendCodeButton
+                remaining={cooldown.remaining}
+                disabled={isPending}
+                sending={pendingAction === 'send'}
+                onClick={sendCode}
+              />
+            </div>
           </form>
         )}
       </DialogContent>

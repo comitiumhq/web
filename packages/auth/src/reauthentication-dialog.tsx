@@ -1,12 +1,15 @@
 import { Button } from '@comitium/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@comitium/ui/dialog';
 import { VERIFICATION_CODE_LENGTH, VerificationCodeInput } from '@comitium/ui/verification-code-input';
 import { type FormEvent, useState } from 'react';
+
 import { getAuthActionError } from './auth-action-error';
 import { sendSignInCode, verifySignInCode } from './auth-actions';
 import { useAuthClient } from './auth-context';
 import { AuthFormError } from './auth-form-error';
 import { unwrapAuthResult } from './auth-result';
+import { ResendCodeButton } from './resend-code-button';
+import { useResendCooldown } from './use-resend-cooldown';
 
 interface ReauthenticationDialogProps {
   email: string;
@@ -17,10 +20,17 @@ interface ReauthenticationDialogProps {
 
 export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }: ReauthenticationDialogProps) {
   const client = useAuthClient();
+  const passkeys = client.useListPasskeys();
+  const cooldown = useResendCooldown();
+
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState('');
-  const [isPending, setIsPending] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'send' | 'verify' | 'passkey' | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const isPending = pendingAction !== null;
+  const canUsePasskey =
+    !passkeys.error && (passkeys.data?.length ?? 0) > 0 && typeof PublicKeyCredential !== 'undefined';
 
   function confirmUser(authUserId: string | undefined) {
     if (authUserId !== userId) {
@@ -31,17 +41,24 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
   }
 
   async function sendCode() {
-    setIsPending(true);
+    if (isPending || (codeSent && cooldown.isActive)) {
+      return;
+    }
+
+    setPendingAction('send');
     setError(null);
 
     try {
       await sendSignInCode(client, email);
 
+      setCode('');
       setCodeSent(true);
+
+      cooldown.start();
     } catch (error) {
       setError(getAuthActionError(error, 'send-code'));
     } finally {
-      setIsPending(false);
+      setPendingAction(null);
     }
   }
 
@@ -50,7 +67,7 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
       return;
     }
 
-    setIsPending(true);
+    setPendingAction('verify');
     setError(null);
 
     try {
@@ -60,12 +77,12 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
     } catch (error) {
       setError(getAuthActionError(error, 'verify-code'));
     } finally {
-      setIsPending(false);
+      setPendingAction(null);
     }
   }
 
   async function confirmWithPasskey() {
-    setIsPending(true);
+    setPendingAction('passkey');
     setError(null);
 
     try {
@@ -75,24 +92,24 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
     } catch (error) {
       setError(getAuthActionError(error, 'passkey'));
     } finally {
-      setIsPending(false);
+      setPendingAction(null);
     }
   }
 
   async function submitCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     await confirmWithCode(code);
   }
 
   return (
     <Dialog open onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent>
+      <DialogContent className="w-[calc(100%-2rem)] max-w-sm p-6 sm:max-w-sm sm:p-8">
         <DialogHeader>
-          <DialogTitle>Confirm your sign-in</DialogTitle>
+          <DialogTitle className="text-heading-20">Verify It’s You</DialogTitle>
           <DialogDescription>
-            {codeSent
-              ? `Enter the 6-digit code sent to ${email}.`
-              : 'Confirm your identity before changing account security.'}
+            {codeSent ? 'Enter the 6-digit code sent to:' : 'We’ll send a verification code to:'}
+            <span className="mt-2 block break-words font-medium text-foreground">{email}</span>
           </DialogDescription>
         </DialogHeader>
         {codeSent ? (
@@ -104,28 +121,29 @@ export function ReauthenticationDialog({ email, userId, onCancel, onConfirmed }:
               disabled={isPending}
               autoFocus
             />
-            <Button type="submit" disabled={isPending || code.length !== VERIFICATION_CODE_LENGTH}>
-              Confirm
-            </Button>
+            <div className="grid gap-3">
+              <Button type="submit" size="lg" disabled={isPending || code.length !== VERIFICATION_CODE_LENGTH}>
+                {pendingAction === 'verify' ? 'Verifying…' : 'Verify'}
+              </Button>
+              <ResendCodeButton
+                remaining={cooldown.remaining}
+                disabled={isPending}
+                sending={pendingAction === 'send'}
+                onClick={sendCode}
+              />
+            </div>
           </form>
         ) : (
-          <Button disabled={isPending} onClick={sendCode}>
-            Send code to {email}
+          <Button size="lg" disabled={isPending} onClick={sendCode}>
+            {pendingAction === 'send' ? 'Sending…' : 'Send code'}
           </Button>
         )}
         <AuthFormError message={error} />
-        <DialogFooter>
-          <Button
-            variant="outline"
-            disabled={isPending || typeof PublicKeyCredential === 'undefined'}
-            onClick={confirmWithPasskey}
-          >
+        {!codeSent && canUsePasskey ? (
+          <Button variant="text" className="mx-auto" disabled={isPending} onClick={confirmWithPasskey}>
             Use a passkey
           </Button>
-          <Button variant="text" onClick={onCancel}>
-            Cancel
-          </Button>
-        </DialogFooter>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

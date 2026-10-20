@@ -3,7 +3,7 @@ import { Button } from '@comitium/ui/button';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Spinner } from '@comitium/ui/spinner';
-import { type FormEvent, useCallback, useId, useState } from 'react';
+import { type FormEvent, useId, useState } from 'react';
 
 import { AuthFormError } from '../auth-form-error';
 import { PasswordField } from './password/password-field';
@@ -12,7 +12,8 @@ import type { StorageFormValues, StorageMode } from './types';
 const TITLES: Record<StorageMode, string> = {
   setup: 'Create a password',
   unlock: 'Enter your password',
-  recovery: 'Recover with your recovery code',
+  'recovery-code': 'Enter your recovery code',
+  recovery: 'Create a new password',
   change: 'Change your password',
   'recovery-kit': 'Create a recovery kit',
 };
@@ -23,7 +24,6 @@ interface StorageFormProps {
   error: string | null;
   onSubmit: (values: StorageFormValues) => Promise<void>;
   onBack?: () => void;
-  recoveryCodeRequired?: boolean;
   hasRecoveryKit?: boolean;
   onRecover?: () => void;
 }
@@ -34,7 +34,6 @@ export function StorageForm({
   error,
   onSubmit,
   onBack,
-  recoveryCodeRequired = true,
   hasRecoveryKit = false,
   onRecover,
 }: StorageFormProps) {
@@ -44,7 +43,10 @@ export function StorageForm({
   const [currentPassword, setCurrentPassword] = useState('');
   const [recoveryCode, setRecoveryCode] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
-  const isNewPassword = mode !== 'unlock' && mode !== 'recovery-kit';
+
+  const isRecoveryCode = mode === 'recovery-code';
+  const isChangingPassword = mode === 'change';
+  const isNewPassword = mode === 'setup' || mode === 'change' || mode === 'recovery';
 
   let title = TITLES[mode];
   let submitLabel = 'Continue';
@@ -52,7 +54,7 @@ export function StorageForm({
 
   if (mode === 'unlock') {
     submitLabel = 'Unlock';
-  } else if (mode === 'change') {
+  } else if (isChangingPassword || mode === 'recovery') {
     submitLabel = 'Change password';
   }
 
@@ -60,51 +62,27 @@ export function StorageForm({
     passwordLabel = 'Current password';
   }
 
-  if (mode === 'recovery' && !recoveryCodeRequired) {
-    title = 'Create a new password';
-    submitLabel = 'Change password';
-  } else if (mode === 'recovery-kit' && hasRecoveryKit) {
+  if (mode === 'recovery-kit' && hasRecoveryKit) {
     title = 'Replace recovery kit';
   }
 
-  const submit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
-      if (pending) {
-        return;
-      }
+    if (pending) {
+      return;
+    }
 
-      if (isNewPassword && password !== confirmation) {
-        setValidationError('Passwords do not match.');
-        return;
-      }
+    if (isNewPassword && password !== confirmation) {
+      setValidationError('Passwords do not match.');
 
-      setValidationError(null);
-      await onSubmit({ password, currentPassword, recoveryCode });
-    },
-    [confirmation, currentPassword, isNewPassword, onSubmit, password, pending, recoveryCode],
-  );
+      return;
+    }
 
-  const changePassword = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.currentTarget.value),
-    [],
-  );
+    setValidationError(null);
 
-  const changeConfirmation = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => setConfirmation(event.currentTarget.value),
-    [],
-  );
-
-  const changeCurrentPassword = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => setCurrentPassword(event.currentTarget.value),
-    [],
-  );
-
-  const changeRecoveryCode = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => setRecoveryCode(event.currentTarget.value),
-    [],
-  );
+    await onSubmit({ password, currentPassword, recoveryCode });
+  }
 
   return (
     <div className="grid gap-4">
@@ -116,24 +94,28 @@ export function StorageForm({
             {mode === 'setup' ? (
               <p className="mt-2 text-copy-14 text-muted-foreground">This password protects your encrypted data.</p>
             ) : null}
+            {isRecoveryCode ? (
+              <p className="mt-2 text-copy-14 text-muted-foreground">You’ll find it in your recovery kit.</p>
+            ) : null}
             {mode === 'recovery-kit' ? (
               <p className="mt-2 text-copy-14 text-muted-foreground">Enter your current password to continue.</p>
             ) : null}
           </div>
         </header>
-        {mode === 'change' ? (
+        {isChangingPassword ? (
           <PasswordField
             id={`${id}-current`}
             label="Current password"
             name="current-password"
             autoComplete="current-password"
             value={currentPassword}
-            onChange={changeCurrentPassword}
+            onChange={(event) => setCurrentPassword(event.currentTarget.value)}
             disabled={pending}
             required
+            autoFocus
           />
         ) : null}
-        {mode === 'recovery' && recoveryCodeRequired ? (
+        {isRecoveryCode ? (
           <div className="grid gap-2">
             <Label htmlFor={`${id}-recovery`}>Recovery code</Label>
             <Input
@@ -142,25 +124,28 @@ export function StorageForm({
               spellCheck={false}
               autoCapitalize="none"
               value={recoveryCode}
-              onChange={changeRecoveryCode}
+              onChange={(event) => setRecoveryCode(event.currentTarget.value)}
               disabled={pending}
               required
+              autoFocus
             />
           </div>
         ) : null}
-        <PasswordField
-          id={`${id}-password`}
-          label={passwordLabel}
-          name="password"
-          autoComplete={isNewPassword ? 'new-password' : 'current-password'}
-          value={password}
-          onChange={changePassword}
-          disabled={pending}
-          showStrength={isNewPassword}
-          minLength={isNewPassword ? 12 : undefined}
-          required
-          autoFocus
-        />
+        {!isRecoveryCode ? (
+          <PasswordField
+            id={`${id}-password`}
+            label={passwordLabel}
+            name="password"
+            autoComplete={isNewPassword ? 'new-password' : 'current-password'}
+            value={password}
+            onChange={(event) => setPassword(event.currentTarget.value)}
+            disabled={pending}
+            showStrength={isNewPassword}
+            minLength={isNewPassword ? 12 : undefined}
+            required
+            autoFocus={!isChangingPassword}
+          />
+        ) : null}
         {isNewPassword ? (
           <PasswordField
             id={`${id}-confirmation`}
@@ -168,7 +153,7 @@ export function StorageForm({
             name="password-confirmation"
             autoComplete="new-password"
             value={confirmation}
-            onChange={changeConfirmation}
+            onChange={(event) => setConfirmation(event.currentTarget.value)}
             disabled={pending}
             required
           />
@@ -179,16 +164,15 @@ export function StorageForm({
           {pending ? 'Please wait…' : submitLabel}
         </Button>
       </form>
-      {mode === 'unlock' ? (
-        onRecover ? (
-          <Button variant="text" className="mx-auto text-copy-13" disabled={pending} onClick={onRecover}>
-            Forgot password?
-          </Button>
-        ) : (
-          <p className="text-copy-13 text-muted-foreground">
-            Forgot your password? Use a device where your data is still unlocked.
-          </p>
-        )
+      {mode === 'unlock' && onRecover ? (
+        <Button variant="text" className="mx-auto text-copy-13" disabled={pending} onClick={onRecover}>
+          Forgot password?
+        </Button>
+      ) : null}
+      {mode === 'unlock' && !onRecover ? (
+        <p className="text-copy-13 text-muted-foreground">
+          Forgot your password? Use a device where your data is still unlocked.
+        </p>
       ) : null}
     </div>
   );

@@ -1,3 +1,5 @@
+import { ResendCodeButton } from '@comitium/auth/resend-code-button';
+import { useResendCooldown } from '@comitium/auth/use-resend-cooldown';
 import { getErrorMessage } from '@comitium/schemas/error';
 import { BackButton } from '@comitium/ui/back-button';
 import { Button } from '@comitium/ui/button';
@@ -7,12 +9,11 @@ import { PageHeader } from '@comitium/ui/page-header';
 import { Spinner } from '@comitium/ui/spinner';
 import { VERIFICATION_CODE_LENGTH, VerificationCodeInput } from '@comitium/ui/verification-code-input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useSendVerification } from '@/hooks/mutations/use-send-verification';
 import { useVerifyCode } from '@/hooks/mutations/use-verify-code';
-import { useResendCooldown } from '@/hooks/use-resend-cooldown';
 
 const organizationEmailSchema = z.object({
   email: z.email('Invalid email address').min(1, 'Email is required'),
@@ -34,23 +35,21 @@ export function EmailVerificationStep() {
 
   const emailValue = form.watch('email');
 
-  const handleSendCode = useCallback(
-    (data: OrganizationEmailValues) => {
-      sendMutation.mutate(data.email, {
-        onSuccess: (result) => {
-          if (result.status === 'verified') {
-            return;
-          }
+  function handleSendCode(data: OrganizationEmailValues) {
+    sendMutation.mutate(data.email, {
+      onSuccess: (result) => {
+        if (result.status === 'verified') {
+          return;
+        }
 
-          setCodeSent(true);
-          cooldown.start();
-        },
-      });
-    },
-    [sendMutation, cooldown],
-  );
+        setCodeSent(true);
 
-  const handleResendCode = useCallback(() => {
+        cooldown.start();
+      },
+    });
+  }
+
+  function handleResendCode() {
     sendMutation.mutate(emailValue.trim(), {
       onSuccess: (result) => {
         if (result.status === 'verified') {
@@ -58,37 +57,34 @@ export function EmailVerificationStep() {
         }
 
         setCode('');
+
         cooldown.start();
       },
     });
-  }, [sendMutation, emailValue, cooldown]);
+  }
 
-  const handleVerifyCode = useCallback(
-    (verificationCode: string) => {
-      if (verificationCode.length !== VERIFICATION_CODE_LENGTH || verifyMutation.isPending) {
-        return;
-      }
+  function handleVerifyCode(verificationCode: string) {
+    if (verificationCode.length !== VERIFICATION_CODE_LENGTH || verifyMutation.isPending) {
+      return;
+    }
 
-      verifyMutation.mutate({ email: emailValue.trim(), code: verificationCode });
-    },
-    [emailValue, verifyMutation],
-  );
+    verifyMutation.mutate({ email: emailValue.trim(), code: verificationCode });
+  }
 
-  const handleChangeEmail = useCallback(() => {
+  function handleChangeEmail() {
     setCodeSent(false);
     setCode('');
+
     cooldown.reset();
     sendMutation.reset();
     verifyMutation.reset();
-  }, [cooldown, sendMutation, verifyMutation]);
+  }
 
-  const handleCodeChange = useCallback(
-    (value: string) => {
-      setCode(value);
-      verifyMutation.reset();
-    },
-    [verifyMutation],
-  );
+  function handleCodeChange(value: string) {
+    setCode(value);
+
+    verifyMutation.reset();
+  }
 
   const sendError = sendMutation.error
     ? getErrorMessage(sendMutation.error, 'Could not send the verification code.')
@@ -98,7 +94,6 @@ export function EmailVerificationStep() {
     : null;
 
   const codeError = verifyError ?? sendError;
-  const resendSeconds = cooldown.isActive ? cooldown.remaining : 0;
   const handleCurrentCode = () => handleVerifyCode(code);
 
   if (codeSent) {
@@ -143,16 +138,11 @@ export function EmailVerificationStep() {
               {verifyMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
               {verifyMutation.isPending ? 'Verifying...' : 'Verify email'}
             </Button>
-            <Button
-              type="button"
-              variant="text"
-              size="sm"
-              className="mx-auto px-0 text-copy-13"
+            <ResendCodeButton
+              remaining={cooldown.remaining}
               onClick={handleResendCode}
-              disabled={resendSeconds > 0 || sendMutation.isPending || verifyMutation.isPending}
-            >
-              {resendSeconds > 0 ? `Resend in ${resendSeconds}s` : 'Resend code'}
-            </Button>
+              disabled={sendMutation.isPending || verifyMutation.isPending}
+            />
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { flushSync } from 'react-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { AuthenticationSettingsPage } from '../account-settings/authentication-settings-page';
@@ -101,7 +102,10 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
+
   window.history.replaceState(null, '', originalURL);
+
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -125,6 +129,43 @@ async function renderSettings() {
 }
 
 describe('native Authentication settings', () => {
+  it('resends a new-email code after cooldown, preserving input on failure and clearing it on success', async () => {
+    const screen = await renderSettings();
+
+    await screen.getByRole('button', { name: 'Change', exact: true }).click();
+    await screen.getByLabelText('Email address', { exact: true }).fill('next@example.com');
+
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+
+    await screen.getByRole('button', { name: 'Send code', exact: true }).click();
+
+    await expect.element(screen.getByRole('button', { name: 'Resend in 60s' })).toBeDisabled();
+
+    await screen.getByLabelText('Verification code').fill('123');
+
+    flushSync(() => vi.advanceTimersByTime(60_000));
+
+    failure = { path: '/email-otp/request-email-change', status: 400, code: 'INVALID_EMAIL' };
+
+    await screen.getByRole('button', { name: 'Resend code', exact: true }).click();
+
+    await expect.element(screen.getByRole('alert')).toBeVisible();
+    await expect.element(screen.getByLabelText('Verification code')).toHaveValue('123');
+
+    failure = null;
+
+    await screen.getByRole('button', { name: 'Resend code', exact: true }).click();
+
+    await expect.element(screen.getByLabelText('Verification code')).toHaveValue('');
+    await expect.element(screen.getByRole('alert')).not.toBeInTheDocument();
+
+    const sends = requests.filter((request) => request.path === '/email-otp/request-email-change');
+
+    expect(sends).toHaveLength(3);
+    expect(sends.every((request) => request.body?.newEmail === 'next@example.com')).toBe(true);
+    expect(requests.some((request) => request.path === '/email-otp/change-email')).toBe(false);
+  });
+
   it('renders verified email, connected Google and multiple passkeys', async () => {
     const screen = await renderSettings();
 
@@ -297,11 +338,11 @@ describe('native Authentication settings', () => {
     await screen.getByRole('button', { name: 'Remove', exact: true }).click();
     await screen.getByRole('button', { name: 'Remove Google', exact: true }).click();
 
-    const confirmation = screen.getByRole('dialog', { name: 'Confirm your sign-in' });
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
 
     await expect.element(confirmation).toBeInTheDocument();
     expect(requests.filter((request) => request.path === '/unlink-account')).toHaveLength(1);
-    await confirmation.getByRole('button', { name: 'Send code to person@example.com' }).click();
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
     await confirmation.getByLabelText('Verification code').fill('123456');
 
     await expect.element(screen.getByRole('button', { name: 'Add Google', exact: true })).toBeInTheDocument();
@@ -319,8 +360,8 @@ describe('native Authentication settings', () => {
     await screen.getByRole('button', { name: 'Remove', exact: true }).click();
     await screen.getByRole('button', { name: 'Remove Google', exact: true }).click();
     await screen
-      .getByRole('dialog', { name: 'Confirm your sign-in' })
-      .getByRole('button', { name: 'Cancel', exact: true })
+      .getByRole('dialog', { name: 'Verify It’s You' })
+      .getByRole('button', { name: 'Close', exact: true })
       .click();
 
     await expect.element(screen.getByRole('button', { name: 'Remove Google', exact: true })).toBeEnabled();
@@ -341,12 +382,12 @@ describe('native Authentication settings', () => {
     await screen.getByRole('button', { name: 'Remove', exact: true }).click();
     await screen.getByRole('button', { name: 'Remove Google', exact: true }).click();
 
-    const confirmation = screen.getByRole('dialog', { name: 'Confirm your sign-in' });
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
 
-    await confirmation.getByRole('button', { name: 'Send code to person@example.com' }).click();
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
     await confirmation.getByLabelText('Verification code').fill('123456');
     await vi.waitFor(() => expect(requests.some((request) => request.path === '/sign-in/email-otp')).toBe(true));
-    await confirmation.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await confirmation.getByRole('button', { name: 'Close', exact: true }).click();
 
     finishVerification(Response.json({ user: current.user }));
 
@@ -360,13 +401,13 @@ describe('native Authentication settings', () => {
 
     await screen.getByRole('button', { name: 'Remove', exact: true }).click();
     await screen.getByRole('button', { name: 'Remove Google', exact: true }).click();
-    await expect.element(screen.getByRole('dialog', { name: 'Confirm your sign-in' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('dialog', { name: 'Verify It’s You' })).toBeInTheDocument();
 
     current = identitySession(OTHER_AUTH_USER_ID);
 
     client.$store.notify('$sessionSignal');
 
-    await expect.element(screen.getByRole('dialog', { name: 'Confirm your sign-in' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('dialog', { name: 'Verify It’s You' })).not.toBeInTheDocument();
     expect(requests.filter((request) => request.path === '/unlink-account')).toHaveLength(1);
   });
 });

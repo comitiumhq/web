@@ -193,6 +193,15 @@ export const CryptoProxy = {
     );
   },
 
+  verifyRecoveryCode(
+    wrapped: WrappedUserKey,
+    userId: string,
+    publicKey: PublicEncryptionKey,
+    recoveryCode: string,
+  ): Promise<void> {
+    return runOnWorker((api) => api.verifyRecoveryCode(wrapped, userId, publicKey, recoveryCode));
+  },
+
   async tryUnlockWithRememberedDevice(
     wrapped: WrappedUserKey,
     userId: string,

@@ -196,6 +196,29 @@ async function rememberFixture() {
 }
 
 describe('Worker unlock and recovery flows', () => {
+  it('verifies recovery without unlocking, remembering a device or writing data', async () => {
+    await api.verifyRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode);
+
+    expect(api.isActive()).toBe(false);
+    expect(storage.size).toBe(0);
+    expect(requests).toEqual([]);
+
+    await expect(api.verifyRecoveryCode(bundle, USER_ID, fixture.publicKey, 'bad code')).rejects.toThrow(
+      'Recovery code is invalid',
+    );
+    await expect(
+      api.verifyRecoveryCode(bundle, OTHER_USER_ID, fixture.publicKey, fixture.recoveryCode),
+    ).rejects.toThrow();
+
+    expect(api.isActive()).toBe(false);
+
+    await recoveryUnlock();
+
+    await expect(api.verifyRecoveryCode(bundle, USER_ID, fixture.publicKey, 'bad code')).rejects.toThrow();
+
+    expect(api.isActive()).toBe(true);
+  });
+
   it.each(['password', 'network', 'share'] as const)(
     'keeps an unlocked session after %s verification fails',
     async (failure) => {

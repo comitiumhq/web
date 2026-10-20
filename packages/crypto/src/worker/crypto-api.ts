@@ -41,6 +41,7 @@ export class CryptoWorkerApi {
   readonly configure = this.#userSession.configure.bind(this.#userSession);
   readonly unlockWithPassword = this.#userSession.unlockWithPassword.bind(this.#userSession);
   readonly verifyPassword = this.#userSession.verifyPassword.bind(this.#userSession);
+  readonly verifyRecoveryCode = this.#userSession.verifyRecoveryCode.bind(this.#userSession);
   readonly unlockWithRecoveryCode = this.#userSession.unlockWithRecoveryCode.bind(this.#userSession);
   readonly tryUnlockWithRememberedDevice = this.#userSession.tryUnlockWithRememberedDevice.bind(this.#userSession);
   readonly initializeUserKey = this.#userSession.initializeUserKey.bind(this.#userSession);

@@ -238,6 +238,9 @@ describe('storage access', () => {
       .mockResolvedValue({ encryptedUserKey: encryptedProductUser().encryptedUserKey, recoveryCode: null });
     const complete = vi.fn();
     const screen = await render(<StorageAccess initialMode="change" onSuccess={complete} />);
+
+    await expect.element(screen.getByLabelText('Current password', { exact: true })).toHaveFocus();
+
     await screen.getByLabelText('Current password', { exact: true }).fill('old storage password');
     await fillNewPassword(screen);
     await screen.getByRole('button', { name: 'Change password', exact: true }).click();
@@ -252,7 +255,10 @@ describe('storage access', () => {
   });
 
   it('recovers with an independent code and confirms its replacement before rewrapping', async () => {
+    const verify = vi.spyOn(CryptoProxy, 'verifyRecoveryCode').mockResolvedValue(undefined);
+
     vi.spyOn(CryptoProxy, 'unlockWithRecoveryCode').mockResolvedValue({ rememberedDevice: 'remembered' });
+
     const saved = vi.fn();
     const rewrap = vi.spyOn(CryptoProxy, 'rewrapUserKey').mockImplementation(async (wrapped, _options, showCode) => {
       await showCode?.(CODE);
@@ -261,11 +267,30 @@ describe('storage access', () => {
     });
     const complete = vi.fn();
     const screen = await render(<StorageAccess initialMode="recovery" onSuccess={complete} />);
+
+    await expect.element(screen.getByLabelText('Recovery code', { exact: true })).toHaveFocus();
+    await expect.element(screen.getByLabelText('New password', { exact: true })).not.toBeInTheDocument();
+
     await screen.getByLabelText('Recovery code', { exact: true }).fill('previous recovery code');
-    await fillNewPassword(screen);
     await screen.getByRole('button', { name: 'Continue', exact: true }).click();
+
+    await expect.element(screen.getByRole('heading', { name: 'Create a new password' })).toBeVisible();
+    await expect.element(screen.getByLabelText('New password', { exact: true })).toHaveFocus();
+    expect(verify).toHaveBeenCalledWith(
+      mocks.user?.encryptedUserKey,
+      mocks.user?.id,
+      mocks.user?.publicKey,
+      'previous recovery code',
+    );
+    expect(complete).not.toHaveBeenCalled();
+    expect(rewrap).not.toHaveBeenCalled();
+
+    await fillNewPassword(screen);
+    await screen.getByRole('button', { name: 'Change password', exact: true }).click();
+
     await expect.element(screen.getByRole('heading', { name: 'Save your recovery kit' })).toBeVisible();
     expect(saved).not.toHaveBeenCalled();
+
     await confirmCode(screen);
     await vi.waitFor(() => expect(complete).toHaveBeenCalledOnce());
     expect(rewrap).toHaveBeenCalledWith(
@@ -274,6 +299,35 @@ describe('storage access', () => {
       expect.any(Function),
       expect.any(Function),
     );
+  });
+
+  it('keeps an invalid recovery code on the first step and lets Back discard verification', async () => {
+    const verify = vi
+      .spyOn(CryptoProxy, 'verifyRecoveryCode')
+      .mockRejectedValueOnce(new Error('Recovery code is invalid'))
+      .mockResolvedValue(undefined);
+    const unlock = vi.spyOn(CryptoProxy, 'unlockWithRecoveryCode');
+    const complete = vi.fn();
+    const screen = await render(<StorageAccess initialMode="recovery" onSuccess={complete} />);
+
+    await screen.getByLabelText('Recovery code', { exact: true }).fill(CODE);
+    await screen.getByRole('button', { name: 'Continue', exact: true }).click();
+
+    await expect.element(screen.getByRole('alert')).toHaveTextContent('Check your recovery code and try again.');
+    await expect.element(screen.getByLabelText('Recovery code', { exact: true })).toHaveValue(CODE);
+    await expect.element(screen.getByLabelText('New password', { exact: true })).not.toBeInTheDocument();
+
+    await screen.getByRole('button', { name: 'Continue', exact: true }).click();
+
+    await expect.element(screen.getByRole('heading', { name: 'Create a new password' })).toBeVisible();
+
+    await screen.getByRole('button', { name: 'Back', exact: true }).click();
+
+    await expect.element(screen.getByLabelText('Recovery code', { exact: true })).toHaveFocus();
+    await expect.element(screen.getByRole('alert')).not.toBeInTheDocument();
+    expect(verify).toHaveBeenCalledTimes(2);
+    expect(unlock).not.toHaveBeenCalled();
+    expect(complete).not.toHaveBeenCalled();
   });
 
   it('verifies the storage password before rotating recovery without repairing its share', async () => {

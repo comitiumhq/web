@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/api/orgs-verification', () => mocks);
-vi.mock('@/hooks/use-resend-cooldown', () => ({
+vi.mock('@comitium/auth/use-resend-cooldown', () => ({
   useResendCooldown: () => ({ remaining: 0, isActive: false, start: () => {}, reset: () => {} }),
 }));
 

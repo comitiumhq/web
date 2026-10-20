@@ -22,15 +22,19 @@ export function useStorageKeyAction() {
   const mounted = useRef(true);
   const confirmation = useRef<RecoveryConfirmation | null>(null);
 
+  const clearError = useCallback(() => setError(null), []);
+
   const onRecoveryCode = useCallback<RecoveryCodeHandler>(
     (code) =>
       new Promise<void>((resolve, reject) => {
         if (!mounted.current) {
           reject(new DOMException('Storage action was closed', 'AbortError'));
+
           return;
         }
 
         confirmation.current = { resolve, reject };
+
         setRecoveryCode(code);
       }),
     [],
@@ -38,6 +42,7 @@ export function useStorageKeyAction() {
 
   const confirmRecovery = useCallback(() => {
     setRecoveryConfirmed(true);
+
     confirmation.current?.resolve();
     confirmation.current = null;
   }, []);
@@ -45,6 +50,7 @@ export function useStorageKeyAction() {
   const cancelRecovery = useCallback(() => {
     confirmation.current?.reject(new DOMException('Recovery confirmation cancelled', 'AbortError'));
     confirmation.current = null;
+
     setRecoveryCode(null);
     setRecoveryConfirmed(false);
   }, []);
@@ -54,6 +60,7 @@ export function useStorageKeyAction() {
 
     return () => {
       mounted.current = false;
+
       confirmation.current?.reject(new DOMException('Storage action was closed', 'AbortError'));
       confirmation.current = null;
     };
@@ -108,5 +115,5 @@ export function useStorageKeyAction() {
     [confirmFreshAuth, onRecoveryCode, refreshSession],
   );
 
-  return { run, pending, error, recoveryCode, recoveryConfirmed, confirmRecovery, cancelRecovery };
+  return { run, pending, error, clearError, recoveryCode, recoveryConfirmed, confirmRecovery, cancelRecovery };
 }

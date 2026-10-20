@@ -2,7 +2,7 @@ import { UnlockApiError } from '@comitium/crypto';
 import type { IdentityClient } from './auth-client';
 import { freshAuthSessionSchema } from './schemas/identity';
 
-const FRESH_AUTH_MAX_AGE_MS = 5 * 60 * 1000;
+const FRESH_AUTH_MAX_AGE_MS = 2 * 60 * 60 * 1000;
 
 /**
  * Read identity synchronously, including SDK changes before React renders again.

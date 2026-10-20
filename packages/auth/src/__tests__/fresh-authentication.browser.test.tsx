@@ -1,6 +1,8 @@
 import { UnlockApiError } from '@comitium/crypto';
 import { useState } from 'react';
+import { flushSync } from 'react-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
 
 import { createIdentityClient } from '../auth-client';
@@ -9,9 +11,15 @@ import { FreshAuthentication, useConfirmFreshAuthentication, useFreshAuthenticat
 import { API_URL, identitySession } from './identity-fixtures';
 
 let fresh: boolean;
+let confirmationAge: number;
+let passkeys: { id: string }[];
+let passkeyReadFails: boolean;
 
 beforeEach(() => {
   fresh = false;
+  confirmationAge = 0;
+  passkeys = [];
+  passkeyReadFails = false;
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: RequestInfo | URL) => {
@@ -21,12 +29,19 @@ beforeEach(() => {
         const session = identitySession();
         return Response.json({
           ...session,
-          session: { ...session.session, interactiveAuthenticatedAt: fresh ? new Date().toISOString() : null },
+          session: {
+            ...session.session,
+            interactiveAuthenticatedAt: fresh ? new Date(Date.now() - confirmationAge).toISOString() : null,
+          },
         });
       }
 
       if (path.endsWith('/sign-in/email-otp')) {
         return Response.json({ user: identitySession().user });
+      }
+
+      if (path.endsWith('/passkey/list-user-passkeys')) {
+        return passkeyReadFails ? new Response(null, { status: 503 }) : Response.json(passkeys);
       }
 
       return Response.json({ success: true });
@@ -35,6 +50,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
@@ -99,6 +116,84 @@ async function renderOperation(operation: () => Promise<void>, preflight = false
 }
 
 describe('fresh authentication for Worker operations', () => {
+  it('keeps email confirmation available when passkey metadata cannot be loaded', async () => {
+    passkeyReadFails = true;
+
+    const operation = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+    const screen = await renderOperation(operation, true);
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
+
+    await vi.waitFor(() => {
+      expect(vi.mocked(fetch).mock.calls.some(([input]) => String(input).endsWith('/passkey/list-user-passkeys'))).toBe(
+        true,
+      );
+    });
+
+    await expect.element(confirmation.getByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
+
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
+    await confirmation.getByLabelText('Verification code').fill('123456');
+
+    await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('saved');
+    expect(operation).toHaveBeenCalledOnce();
+  });
+
+  it('offers a linked passkey only before choosing email confirmation', async () => {
+    passkeys = [{ id: 'linked-passkey' }];
+
+    const operation = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+    const screen = await renderOperation(operation, true);
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
+
+    await expect.element(confirmation.getByRole('button', { name: 'Use a passkey' })).toBeEnabled();
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
+
+    await expect.element(confirmation.getByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
+    await expect.element(confirmation.getByRole('button', { name: 'Cancel', exact: true })).not.toBeInTheDocument();
+    await expect.element(confirmation.getByRole('button', { name: 'Resend in 60s' })).toBeDisabled();
+    await confirmation.getByRole('button', { name: 'Close', exact: true }).click();
+
+    await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('failed');
+    expect(operation).not.toHaveBeenCalled();
+  });
+
+  it('resends to the same account after cooldown and clears the previous code', async () => {
+    const operation = vi
+      .fn<() => Promise<void>>()
+      .mockRejectedValueOnce(new UnlockApiError(403, 'FRESH_AUTHENTICATION_REQUIRED'));
+    const screen = await renderOperation(operation);
+
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+
+    await screen.getByRole('button', { name: 'Send code' }).click();
+
+    await expect.element(screen.getByRole('button', { name: 'Resend in 60s' })).toBeDisabled();
+
+    await screen.getByLabelText('Verification code').fill('123');
+
+    flushSync(() => vi.advanceTimersByTime(60_000));
+
+    await screen.getByRole('button', { name: 'Resend code', exact: true }).click();
+
+    await expect.element(screen.getByLabelText('Verification code')).toHaveValue('');
+
+    const sends = vi
+      .mocked(fetch)
+      .mock.calls.filter(([input]) => String(input).endsWith('/email-otp/send-verification-otp'));
+
+    expect(sends).toHaveLength(2);
+
+    for (const [, options] of sends) {
+      expect(JSON.parse(String(options?.body))).toEqual({ email: 'person@example.com', type: 'sign-in' });
+    }
+
+    expect(operation).toHaveBeenCalledTimes(1);
+
+    await screen.getByRole('button', { name: 'Close', exact: true }).click();
+
+    await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('failed');
+  });
+
   it('shares one confirmation between concurrent operations', async () => {
     const operation = vi
       .fn<() => Promise<void>>()
@@ -118,9 +213,9 @@ describe('fresh authentication for Worker operations', () => {
     await expect.element(button).toBeEnabled();
     await button.click();
 
-    const confirmation = screen.getByRole('dialog', { name: 'Confirm your sign-in' });
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
     expect(confirmation.elements()).toHaveLength(1);
-    await confirmation.getByRole('button', { name: 'Send code to person@example.com' }).click();
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
     await confirmation.getByLabelText('Verification code').fill('123456');
 
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('saved');
@@ -135,12 +230,12 @@ describe('fresh authentication for Worker operations', () => {
       .mockResolvedValue(undefined);
     const screen = await renderOperation(operation);
 
-    await screen.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await screen.getByRole('button', { name: 'Close', exact: true }).click();
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('failed');
     await screen.getByRole('button', { name: 'Update key wrappers' }).click();
 
-    const confirmation = screen.getByRole('dialog', { name: 'Confirm your sign-in' });
-    await confirmation.getByRole('button', { name: 'Send code to person@example.com' }).click();
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
     await confirmation.getByLabelText('Verification code').fill('123456');
 
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('saved');
@@ -150,19 +245,25 @@ describe('fresh authentication for Worker operations', () => {
   it('checks sign-in before starting a prepared storage mutation', async () => {
     const operation = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
     const screen = await renderOperation(operation, true);
-    const confirmation = screen.getByRole('dialog', { name: 'Confirm your sign-in' });
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
 
     await expect.element(confirmation).toBeVisible();
+    await expect.element(confirmation.getByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
     expect(operation).not.toHaveBeenCalled();
-    await confirmation.getByRole('button', { name: 'Send code to person@example.com' }).click();
+
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
     await confirmation.getByLabelText('Verification code').fill('123456');
 
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('saved');
     expect(operation).toHaveBeenCalledOnce();
   });
 
-  it('uses an authoritative recent confirmation without asking again', async () => {
+  it('reuses confirmation at the two-hour boundary without asking again', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-10-20T12:00:00Z'));
+
     fresh = true;
+    confirmationAge = 2 * 60 * 60 * 1000;
+
     const operation = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
     const screen = await renderOperation(operation, true);
 
@@ -171,14 +272,30 @@ describe('fresh authentication for Worker operations', () => {
     await expect.element(screen.getByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it.each([2 * 60 * 60 * 1000 + 1, -1])(
+    'requests confirmation for expired or future evidence (age: %s ms)',
+    async (age) => {
+      vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-10-20T12:00:00Z'));
+
+      fresh = true;
+      confirmationAge = age;
+
+      const operation = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+      const screen = await renderOperation(operation, true);
+
+      await expect.element(screen.getByRole('dialog', { name: 'Verify It’s You' })).toBeVisible();
+      expect(operation).not.toHaveBeenCalled();
+      await screen.getByRole('button', { name: 'Close', exact: true }).click();
+      await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('failed');
+    },
+  );
+
   it('does not begin a storage mutation when preflight confirmation is cancelled', async () => {
     const operation = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
     const screen = await renderOperation(operation, true);
 
-    await screen
-      .getByRole('dialog', { name: 'Confirm your sign-in' })
-      .getByRole('button', { name: 'Cancel', exact: true })
-      .click();
+    await expect.element(screen.getByRole('dialog', { name: 'Verify It’s You' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
 
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('failed');
     expect(operation).not.toHaveBeenCalled();
@@ -190,11 +307,11 @@ describe('fresh authentication for Worker operations', () => {
       .mockRejectedValueOnce(new UnlockApiError(403, 'FRESH_AUTHENTICATION_REQUIRED'))
       .mockResolvedValue(undefined);
     const screen = await renderOperation(operation);
-    const confirmation = screen.getByRole('dialog', { name: 'Confirm your sign-in' });
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
 
     await expect.element(confirmation).toBeInTheDocument();
     expect(operation).toHaveBeenCalledOnce();
-    await confirmation.getByRole('button', { name: 'Send code to person@example.com' }).click();
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
     await confirmation.getByLabelText('Verification code').fill('123456');
 
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('saved');
@@ -208,8 +325,8 @@ describe('fresh authentication for Worker operations', () => {
     const screen = await renderOperation(operation);
 
     await screen
-      .getByRole('dialog', { name: 'Confirm your sign-in' })
-      .getByRole('button', { name: 'Cancel', exact: true })
+      .getByRole('dialog', { name: 'Verify It’s You' })
+      .getByRole('button', { name: 'Close', exact: true })
       .click();
 
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('failed');
@@ -221,9 +338,9 @@ describe('fresh authentication for Worker operations', () => {
       .fn<() => Promise<void>>()
       .mockRejectedValue(new UnlockApiError(403, 'FRESH_AUTHENTICATION_REQUIRED'));
     const screen = await renderOperation(operation);
-    const confirmation = screen.getByRole('dialog', { name: 'Confirm your sign-in' });
+    const confirmation = screen.getByRole('dialog', { name: 'Verify It’s You' });
 
-    await confirmation.getByRole('button', { name: 'Send code to person@example.com' }).click();
+    await confirmation.getByRole('button', { name: 'Send code' }).click();
     await confirmation.getByLabelText('Verification code').fill('123456');
 
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('failed');
@@ -240,7 +357,7 @@ describe('fresh authentication for Worker operations', () => {
     const screen = await renderOperation(operation);
 
     await expect.element(screen.getByLabelText('Operation result')).toHaveTextContent('failed');
-    await expect.element(screen.getByRole('dialog', { name: 'Confirm your sign-in' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('dialog', { name: 'Verify It’s You' })).not.toBeInTheDocument();
     expect(operation).toHaveBeenCalledOnce();
   });
 });

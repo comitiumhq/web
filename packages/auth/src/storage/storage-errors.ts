@@ -1,10 +1,15 @@
 import { UnlockApiError } from '@comitium/crypto';
 import { ApiError } from '@comitium/schemas/api-errors';
 
-const PASSWORD_ERRORS = new Map([
+const STORAGE_ERROR_MESSAGES = new Map([
   ['Storage password exceeds 1024 UTF-8 bytes', 'Password is too long. Choose a shorter password.'],
   ['Storage password must contain at least 12 characters', 'Use at least 12 characters.'],
   ['Storage password is too easy to guess', 'Choose a stronger password. Avoid common words and patterns.'],
+  ['Recovery code is invalid', 'Check your recovery code and try again.'],
+  [
+    'Remembered device is unavailable',
+    'This device cannot open your encrypted data. Use your recovery code or another unlocked device.',
+  ],
 ]);
 
 export function storageErrorMessage(error: unknown): string | null {
@@ -39,15 +44,11 @@ export function storageErrorMessage(error: unknown): string | null {
   }
 
   if (error instanceof Error) {
-    const passwordError = PASSWORD_ERRORS.get(error.message);
+    const message = STORAGE_ERROR_MESSAGES.get(error.message);
 
-    if (passwordError) {
-      return passwordError;
+    if (message) {
+      return message;
     }
-  }
-
-  if (error instanceof Error && error.message === 'Remembered device is unavailable') {
-    return 'This device cannot open your encrypted data. Use your recovery code or another unlocked device.';
   }
 
   return 'Could not complete the operation. Please try again.';

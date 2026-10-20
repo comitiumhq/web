@@ -28,22 +28,29 @@ export async function runStorageAction(
   const wrapped = user.encryptedUserKey;
 
   switch (mode) {
+    case 'recovery-code':
+      await CryptoProxy.verifyRecoveryCode(wrapped, user.id, user.publicKey, recoveryCode);
+
+      return;
+
     case 'unlock':
       return CryptoProxy.unlockWithPassword(wrapped, user.id, user.publicKey, password, true);
 
     case 'recovery-kit': {
       const result = await verifyCurrentPassword(user, password);
+
       await CryptoProxy.rewrapUserKey(
         wrapped,
         { rotateRecoveryCode: true, repairShare: false },
         onRecoveryCode,
         confirmFreshAuth,
       );
+
       return result;
     }
 
     case 'recovery': {
-      if (CryptoProxy.isActiveFor(wrapped, user.id)) {
+      if (!recoveryCode) {
         await CryptoProxy.rewrapUserKey(
           wrapped,
           { password, rotateRecoveryCode: false, repairShare: true },
@@ -62,6 +69,7 @@ export async function runStorageAction(
         onRecoveryCode,
         confirmFreshAuth,
       );
+
       return result;
     }
 
@@ -74,6 +82,7 @@ export async function runStorageAction(
         onRecoveryCode,
         confirmFreshAuth,
       );
+
       return result;
     }
   }
