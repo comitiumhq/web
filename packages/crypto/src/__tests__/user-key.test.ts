@@ -20,9 +20,14 @@ import { KEY_SHARE, OTHER_USER_ID, PASSWORD, UNLOCK_KEY, USER_ID, userKeyFixture
 const fixture = userKeyFixture();
 
 describe('password and recovery key wrappers', () => {
-  it('opens fixed v1 ciphertext with recovery and preserves its ownership proof and fingerprints', async () => {
+  it('opens fixed v1 ciphertext with password and recovery and preserves its ownership proof and fingerprints', async () => {
     const wrapped = wrappedUserKeySchema.parse(vector.encryptedUserKey);
     const publicKey = publicEncryptionKeySchema.parse(vector.userPublicKey);
+    const password = await unlockUserKey(wrapped, vector.userId, publicKey, {
+      method: 'password',
+      password: vector.password,
+      keyShare: vector.keyShare,
+    });
     const recovery = await unlockUserKey(wrapped, vector.userId, publicKey, {
       method: 'recovery_code',
       recoveryCode: vector.recoveryCode.toLowerCase().replaceAll('-', ' '),
@@ -31,13 +36,14 @@ describe('password and recovery key wrappers', () => {
 
     expect(base64.encode(recovery.userPrivateKey)).toBe(vector.userPrivateKey);
     expect(base64.encode(recovery.unlockKey)).toBe(vector.unlockKey);
+    expect(password).toEqual(recovery);
     expect(encodeKeyAuthSecret(recovery.unlockKey, context)).toBe(vector.keyAuthSecret);
     expect(deriveKeyAuthHash(recovery.unlockKey, context)).toBe(vector.keyAuthHash);
     expect(userKeyWrapsFingerprint(wrapped.wraps)).toBe(vector.wrapsFingerprint);
     expect(createCryptoSessionIdentity(wrapped, vector.userId).encryptedKeyFingerprint).toBe(
       vector.encryptedKeyFingerprint,
     );
-  });
+  }, 30000);
 
   it('binds recovery and private-key ciphertext to the user, generation and public key', async () => {
     const credential = { method: 'recovery_code' as const, recoveryCode: fixture.recoveryCode };

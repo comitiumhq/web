@@ -1,6 +1,6 @@
 import { base64 } from '@scure/base';
 import { expose, releaseProxy, wrap } from 'comlink';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { hashCandidateProfileSearchValue } from '../candidate-profile-search-hash';
 import { hashCustomFieldValue } from '../custom-field-hash';
 import { encryptEmailContent } from '../email-encryption';
@@ -11,7 +11,7 @@ import type { PublicEncryptionKey } from '../schemas';
 import type { WrappedUserKey } from '../schemas/user-key';
 import { createCryptoSessionIdentity } from '../session';
 import { hashTagLabel } from '../tag-hash';
-import { userKeyWrapsFingerprint } from '../user-key';
+import { userKeyWrapsFingerprint, wrapUserKey } from '../user-key';
 import { CryptoWorkerApi } from '../worker/crypto-api';
 import { TEST_KEYS } from './crypto-helpers';
 import {
@@ -29,6 +29,15 @@ import {
 
 const storage = vi.hoisted(() => new Map<string, unknown>());
 const storageHooks = vi.hoisted(() => ({ beforeWrite: undefined as (() => Promise<void>) | undefined }));
+
+vi.mock('@noble/hashes/argon2.js', async () => {
+  const { sha256 } = await import('@noble/hashes/sha2.js');
+  const { concatBytes } = await import('@noble/hashes/utils.js');
+
+  return {
+    argon2idAsync: async (password: Uint8Array, salt: Uint8Array) => sha256(concatBytes(password, salt)),
+  };
+});
 
 vi.mock('idb-keyval', () => ({
   createStore: () => 'worker-test-store',
@@ -65,6 +74,17 @@ let lostWriteResponse: boolean;
 let readBackStatus: number;
 let staleWrites: number;
 let requests: { path: string; method: string; body: Record<string, unknown> | null }[];
+
+beforeAll(async () => {
+  fixture.bundle = await wrapUserKey(
+    TEST_KEYS.alice.privateKey,
+    UNLOCK_KEY,
+    { userId: USER_ID, keyVersion: 1 },
+    PASSWORD,
+    KEY_SHARE,
+    fixture.recoveryCode,
+  );
+});
 
 beforeEach(() => {
   confirmFreshAuth.mockClear();
