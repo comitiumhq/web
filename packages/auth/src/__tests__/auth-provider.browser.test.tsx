@@ -88,7 +88,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
-function tree(getSession = vi.fn(async () => productUser()), children: ReactNode = <Probe />) {
+function tree(bootstrapAccount = vi.fn(async () => productUser()), children: ReactNode = <Probe />) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
 
   return {
@@ -98,8 +98,8 @@ function tree(getSession = vi.fn(async () => productUser()), children: ReactNode
         <ErrorBoundary>
           <AuthProvider
             client={client}
-            getSession={getSession}
-            sessionQueryKey={(id) => ['session', id]}
+            bootstrapAccount={bootstrapAccount}
+            accountQueryKey={(id) => ['account', id]}
             staleTime={60000}
           >
             {children}
@@ -112,22 +112,22 @@ function tree(getSession = vi.fn(async () => productUser()), children: ReactNode
 
 describe('native auth readiness and identity lifecycle', () => {
   it('bootstraps the authenticated product account', async () => {
-    const getSession = vi.fn(async () => productUser());
-    const { ui } = tree(getSession);
+    const bootstrapAccount = vi.fn(async () => productUser());
+    const { ui } = tree(bootstrapAccount);
     const screen = await render(ui);
 
     await expect.element(screen.getByLabelText('Account state')).toHaveTextContent(`ready:${AUTH_USER_ID}`);
-    expect(getSession).toHaveBeenCalledOnce();
+    expect(bootstrapAccount).toHaveBeenCalledOnce();
     expect(CryptoProxy.clear).toHaveBeenCalledOnce();
   });
 
   it('does not bootstrap an anonymous visitor', async () => {
     nativeSession = null;
-    const getSession = vi.fn(async () => productUser());
-    const screen = await render(tree(getSession).ui);
+    const bootstrapAccount = vi.fn(async () => productUser());
+    const screen = await render(tree(bootstrapAccount).ui);
 
     await expect.element(screen.getByLabelText('Account state')).toHaveTextContent('anonymous:');
-    expect(getSession).not.toHaveBeenCalled();
+    expect(bootstrapAccount).not.toHaveBeenCalled();
   });
 
   it.each([200, 503])('preserves OTP input across a session refresh on return (status: %s)', async (status) => {
@@ -170,20 +170,20 @@ describe('native auth readiness and identity lifecycle', () => {
 
   it('reports an initial native outage without entering automatic session recovery', async () => {
     responseStatus = 503;
-    const getSession = vi.fn(async () => productUser());
-    const screen = await render(tree(getSession).ui);
+    const bootstrapAccount = vi.fn(async () => productUser());
+    const screen = await render(tree(bootstrapAccount).ui);
 
     await expect.element(screen.getByRole('alert')).toHaveTextContent('Could not check your sign-in. Try again.');
-    expect(getSession).not.toHaveBeenCalled();
+    expect(bootstrapAccount).not.toHaveBeenCalled();
     expect(CryptoProxy.clear).not.toHaveBeenCalled();
     await expect.element(screen.getByLabelText('Account state')).not.toBeInTheDocument();
   });
 
   it('reports a bootstrap outage without entering automatic session recovery', async () => {
-    const getSession = vi.fn(async () => {
+    const bootstrapAccount = vi.fn(async () => {
       throw new Error('Private infrastructure details');
     });
-    const screen = await render(tree(getSession).ui);
+    const screen = await render(tree(bootstrapAccount).ui);
 
     await expect.element(screen.getByRole('alert')).toHaveTextContent('Could not load your account. Try again.');
     await expect.element(screen.getByLabelText('Account state')).not.toBeInTheDocument();
@@ -191,8 +191,8 @@ describe('native auth readiness and identity lifecycle', () => {
   });
 
   it('clears the previous identity before publishing a switched account', async () => {
-    const getSession = vi.fn(async () => productUser(nativeSession?.user.id));
-    const { ui, queryClient } = tree(getSession);
+    const bootstrapAccount = vi.fn(async () => productUser(nativeSession?.user.id));
+    const { ui, queryClient } = tree(bootstrapAccount);
     const screen = await render(ui);
 
     await expect.element(screen.getByLabelText('Account state')).toHaveTextContent(`ready:${AUTH_USER_ID}`);
@@ -212,7 +212,7 @@ describe('native auth readiness and identity lifecycle', () => {
     client.$store.notify('$sessionSignal');
 
     await expect.element(screen.getByLabelText('Account state')).toHaveTextContent('authenticating:');
-    expect(getSession).toHaveBeenCalledTimes(1);
+    expect(bootstrapAccount).toHaveBeenCalledTimes(1);
 
     finishClear();
 
@@ -225,7 +225,7 @@ describe('native auth readiness and identity lifecycle', () => {
 
     await expect.element(screen.getByLabelText('Account state')).toHaveTextContent(`ready:${AUTH_USER_ID}`);
 
-    nativeSession = { ...identitySession(), session: { ...identitySession().session, id: 'new-session-id' } };
+    nativeSession = { ...identitySession(), session: { expiresAt: '2099-01-02T00:00:00.000Z' } };
 
     client.$store.notify('$sessionSignal');
 

@@ -202,7 +202,7 @@ describe('crypto facade lifecycle', () => {
     await expect(proxy.logout(true)).rejects.toThrow('(503)');
     expect(proxy.isActive()).toBe(false);
     expect(dispose).toHaveBeenCalled();
-    expect(fetch).toHaveBeenCalledWith('https://api.comitium.test/v1/users/devices/revoke-all', expect.any(Object));
+    expect(fetch).toHaveBeenCalledWith('https://api.comitium.test/v1/auth/logout-all', expect.any(Object));
     expect(deviceStore.forgetAll).toHaveBeenCalledOnce();
   });
 });

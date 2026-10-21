@@ -2,7 +2,7 @@ import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
 import { CryptoProxy } from '@comitium/crypto';
 import { useCallback } from 'react';
 import { getOrgVaultAccess } from '@/lib/api/orgs-vault';
-import { getPublicKey } from '@/lib/api/users';
+import { getUserPublicKeyDescriptor } from '@/lib/api/users';
 import type { VaultGrant } from '@/lib/schemas/org-structure';
 
 export function useEnsureMemberVaultGrant() {
@@ -14,24 +14,24 @@ export function useEnsureMemberVaultGrant() {
         return undefined;
       }
 
-      const memberKey = await getPublicKey(userId);
+      const memberKeyDescriptor = await getUserPublicKeyDescriptor(userId);
 
-      if (!memberKey) {
+      if (!memberKeyDescriptor) {
         throw new Error("This member's encryption setup must finish before they can be granted access.");
       }
 
       await ensureUnlocked();
 
       const ownAccess = await getOrgVaultAccess(orgId);
-      const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownAccess, memberKey.publicKey, {
+      const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownAccess, memberKeyDescriptor.publicKey, {
         recipientUserId: userId,
-        recipientKeyVersion: memberKey.userKeyVersion,
+        recipientKeyVersion: memberKeyDescriptor.userKeyVersion,
       });
 
       return {
         wrappedVaultKey,
         vaultKeyVersion: ownAccess.vaultKeyVersion,
-        recipientKeyVersion: memberKey.userKeyVersion,
+        recipientKeyVersion: memberKeyDescriptor.userKeyVersion,
       };
     },
     [ensureUnlocked],

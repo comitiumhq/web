@@ -48,7 +48,13 @@ export function EmailMethodDialog({ hasEmail, onComplete, onOpenChange, refreshM
 
     try {
       await runWithFreshAuth(async () =>
-        unwrapAuthResult(await client.emailOtp.requestEmailChange({ newEmail: normalizedEmail })),
+        unwrapAuthResult(
+          await client.emailOtp.requestEmailChange({
+            newEmail: normalizedEmail,
+            // Sending the code does not change the current session.
+            fetchOptions: { disableSignal: true },
+          }),
+        ),
       );
 
       setEmail(normalizedEmail);

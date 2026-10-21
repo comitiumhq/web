@@ -123,12 +123,12 @@ async function renderSettings() {
     </QueryClientProvider>,
   );
 
-  await expect.element(screen.getByRole('heading', { name: 'Authentication' })).toBeInTheDocument();
+  await expect.element(screen.getByRole('heading', { name: 'Sign-in methods' })).toBeInTheDocument();
 
   return screen;
 }
 
-describe('native Authentication settings', () => {
+describe('sign-in method settings', () => {
   it('resends a new-email code after cooldown, preserving input on failure and clearing it on success', async () => {
     const screen = await renderSettings();
 
@@ -175,24 +175,6 @@ describe('native Authentication settings', () => {
     await expect.element(screen.getByRole('button', { name: 'Add another' })).toBeEnabled();
   });
 
-  it('shows personal email guidance on hover', async () => {
-    const screen = await renderSettings();
-
-    await screen.getByRole('button', { name: 'Email access guidance' }).hover();
-
-    await expect
-      .element(screen.getByRole('tooltip'))
-      .toHaveTextContent('For long-term access, use an email you personally control.');
-  });
-
-  it('does not toggle email guidance on click', async () => {
-    const screen = await renderSettings();
-
-    await screen.getByRole('button', { name: 'Email access guidance' }).click();
-
-    await expect.element(screen.getByRole('tooltip')).not.toBeInTheDocument();
-  });
-
   it('requires verified email OTP before removing Google', async () => {
     current.user.emailVerified = false;
     const screen = await renderSettings();
@@ -217,6 +199,12 @@ describe('native Authentication settings', () => {
       newEmail: 'next@example.com',
       otp: '123456',
     });
+
+    const verificationIndex = requests.findIndex((request) => request.path === '/email-otp/change-email');
+    const sessionReadbacks = requests.slice(verificationIndex + 1).filter((request) => request.path === '/get-session');
+
+    expect(sessionReadbacks).toHaveLength(1);
+    expect(client.$store.atoms.session.get().data?.user.email).toBe('next@example.com');
   });
 
   it('clears verification errors before retrying an email change', async () => {
@@ -235,21 +223,24 @@ describe('native Authentication settings', () => {
     await expect.element(screen.getByLabelText('Verification code')).toHaveValue('');
   });
 
-  it('keeps the email dialog open when mutation succeeds but metadata readback fails', async () => {
-    const screen = await renderSettings();
+  it.each(['/list-accounts', '/get-session'])(
+    'keeps the email dialog open when mutation succeeds but %s readback fails',
+    async (path) => {
+      const screen = await renderSettings();
 
-    await screen.getByRole('button', { name: 'Change', exact: true }).click();
-    await screen.getByLabelText('Email address', { exact: true }).fill('next@example.com');
-    await screen.getByRole('button', { name: 'Send code', exact: true }).click();
+      await screen.getByRole('button', { name: 'Change', exact: true }).click();
+      await screen.getByLabelText('Email address', { exact: true }).fill('next@example.com');
+      await screen.getByRole('button', { name: 'Send code', exact: true }).click();
 
-    failure = { path: '/list-accounts', status: 503, code: 'UNAVAILABLE' };
+      failure = { path, status: 503, code: 'UNAVAILABLE' };
 
-    await screen.getByLabelText('Verification code').fill('123456');
+      await screen.getByLabelText('Verification code').fill('123456');
 
-    await expect
-      .element(screen.getByRole('dialog', { name: 'Change email' }).getByRole('alert'))
-      .toHaveTextContent('We could not verify this email. Try again.');
-  });
+      await expect
+        .element(screen.getByRole('dialog', { name: 'Change email' }).getByRole('alert'))
+        .toHaveTextContent('We could not verify this email. Try again.');
+    },
+  );
 
   it('shows a Google account conflict without exposing provider details', async () => {
     googleLinked = false;

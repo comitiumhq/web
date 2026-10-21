@@ -14,7 +14,7 @@ interface AuthApiTransport {
 }
 
 export interface AuthAccountApi extends ZkIdentityApi {
-  getSession(): Promise<User | null>;
+  bootstrapAccount(): Promise<User | null>;
 }
 
 export function createAuthAccountApi(transport: AuthApiTransport): AuthAccountApi {
@@ -22,7 +22,7 @@ export function createAuthAccountApi(transport: AuthApiTransport): AuthAccountAp
     completeZkIdentityAttempt: (attemptId, input) =>
       transport.post(`/users/zk-identity/attempts/${attemptId}/complete`, input, zkIdentityCompletionResultSchema),
     createZkIdentityAttempt: () => transport.post('/users/zk-identity/attempts', undefined, zkIdentityAttemptSchema),
-    getSession: () => transport.post('/auth/session', undefined, userSchema),
+    bootstrapAccount: () => transport.post('/auth/bootstrap', undefined, userSchema),
     getZkIdentityStatus: () => transport.get('/users/zk-identity', zkIdentityStatusSchema),
   };
 }

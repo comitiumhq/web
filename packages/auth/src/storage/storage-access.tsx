@@ -1,4 +1,5 @@
 import { hasEncryptionKeyBundle, hasRecoveryCodeWrap } from '@comitium/crypto/key-bundle';
+import { Dialog, DialogContent } from '@comitium/ui/dialog';
 import { useEffect, useRef, useState } from 'react';
 
 import { useCryptoUnlock } from '../use-crypto-unlock';
@@ -15,6 +16,7 @@ interface StorageAccessProps {
   onStart?: () => void;
   onBack?: () => void;
   requireRecovery?: boolean;
+  dialog?: boolean;
 }
 
 export function StorageAccess({
@@ -23,6 +25,7 @@ export function StorageAccess({
   onStart,
   onBack,
   requireRecovery = false,
+  dialog = false,
 }: StorageAccessProps) {
   const { user } = useSession();
   const { isCryptoActive } = useCryptoUnlock();
@@ -36,14 +39,17 @@ export function StorageAccess({
     return initial;
   });
   const [verifiedRecoveryCode, setVerifiedRecoveryCode] = useState('');
+  const [dialogTrigger] = useState(() => (dialog && typeof document !== 'undefined' ? document.activeElement : null));
   const initialVersion = useRef(user?.userKeyVersion);
   const action = useStorageKeyAction();
 
-  const hasRecoveryKit = hasRecoveryCodeWrap(user?.encryptedUserKey);
-  const canRecover = isCryptoActive || hasRecoveryKit;
+  const hasRecoveryCode = hasRecoveryCodeWrap(user?.encryptedUserKey);
+  const canRecover = isCryptoActive || hasRecoveryCode;
   const isRecovery = selectedMode === 'recovery' || selectedMode === 'recovery-code';
   const mode = isRecovery && !canRecover ? 'unlock' : selectedMode;
-  const canGoBack = Boolean(onBack) || isRecovery;
+  const canGoBack = isRecovery || (!dialog && Boolean(onBack));
+  const awaitingRecoveryConfirmation = Boolean(action.recoveryCode) && !action.recoveryConfirmed;
+  const canDismiss = !action.pending || awaitingRecoveryConfirmation;
 
   useEffect(() => {
     const hasNewKeyBundle = hasEncryptionKeyBundle(user) && user.userKeyVersion !== initialVersion.current;
@@ -71,10 +77,10 @@ export function StorageAccess({
       return;
     }
 
-    const shouldReturnToUnlock = isRecovery && (!onBack || initialMode !== 'recovery');
+    const shouldReturnToPassword = isRecovery && (!onBack || initialMode !== 'recovery');
 
-    if (shouldReturnToUnlock) {
-      changeMode('unlock');
+    if (shouldReturnToPassword) {
+      changeMode(initialMode === 'change' ? 'change' : 'unlock');
 
       return;
     }
@@ -112,22 +118,34 @@ export function StorageAccess({
     onSuccess?.();
   }
 
+  function handleOpenChange(open: boolean) {
+    if (!open && canDismiss) {
+      onBack?.();
+    }
+  }
+
+  function restoreDialogFocus(event: Event) {
+    if (dialogTrigger instanceof HTMLElement) {
+      event.preventDefault();
+
+      dialogTrigger.focus();
+    }
+  }
+
   if (!user) {
     return null;
   }
 
-  if (action.recoveryCode) {
-    return (
-      <RecoveryCodeStep
-        code={action.recoveryCode}
-        saving={action.recoveryConfirmed}
-        onConfirm={action.confirmRecovery}
-        onCancel={action.cancelRecovery}
-      />
-    );
-  }
-
-  return (
+  const content = action.recoveryCode ? (
+    <RecoveryCodeStep
+      code={action.recoveryCode}
+      saving={action.recoveryConfirmed}
+      replacing={hasRecoveryCode}
+      onConfirm={action.confirmRecovery}
+      onCancel={action.cancelRecovery}
+      dialog={dialog}
+    />
+  ) : (
     <StorageForm
       key={mode}
       mode={mode}
@@ -136,7 +154,25 @@ export function StorageAccess({
       onSubmit={submit}
       onBack={canGoBack ? goBack : undefined}
       onRecover={canRecover ? recover : undefined}
-      hasRecoveryKit={hasRecoveryKit}
+      hasRecoveryCode={hasRecoveryCode}
+      dialog={dialog}
     />
+  );
+
+  if (!dialog) {
+    return content;
+  }
+
+  return (
+    <Dialog open onOpenChange={handleOpenChange}>
+      <DialogContent
+        className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:p-8"
+        aria-describedby={undefined}
+        showCloseButton={canDismiss}
+        onCloseAutoFocus={restoreDialogFocus}
+      >
+        {content}
+      </DialogContent>
+    </Dialog>
   );
 }

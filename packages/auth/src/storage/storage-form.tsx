@@ -1,4 +1,3 @@
-import { BackButton } from '@comitium/ui/back-button';
 import { Button } from '@comitium/ui/button';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
@@ -7,6 +6,7 @@ import { type FormEvent, useId, useState } from 'react';
 
 import { AuthFormError } from '../auth-form-error';
 import { PasswordField } from './password/password-field';
+import { StorageFormHeader } from './storage-form-header';
 import type { StorageFormValues, StorageMode } from './types';
 
 const TITLES: Record<StorageMode, string> = {
@@ -15,7 +15,7 @@ const TITLES: Record<StorageMode, string> = {
   'recovery-code': 'Enter your recovery code',
   recovery: 'Create a new password',
   change: 'Change your password',
-  'recovery-kit': 'Create a recovery kit',
+  'create-recovery-code': 'Create a recovery code',
 };
 
 interface StorageFormProps {
@@ -24,8 +24,9 @@ interface StorageFormProps {
   error: string | null;
   onSubmit: (values: StorageFormValues) => Promise<void>;
   onBack?: () => void;
-  hasRecoveryKit?: boolean;
+  hasRecoveryCode?: boolean;
   onRecover?: () => void;
+  dialog?: boolean;
 }
 
 export function StorageForm({
@@ -34,8 +35,9 @@ export function StorageForm({
   error,
   onSubmit,
   onBack,
-  hasRecoveryKit = false,
+  hasRecoveryCode = false,
   onRecover,
+  dialog = false,
 }: StorageFormProps) {
   const id = useId();
   const [password, setPassword] = useState('');
@@ -51,6 +53,17 @@ export function StorageForm({
   let title = TITLES[mode];
   let submitLabel = 'Continue';
   let passwordLabel = isNewPassword && mode !== 'setup' ? 'New password' : 'Password';
+  let description: string | undefined;
+
+  if (mode === 'setup') {
+    description = 'This password protects your encrypted data.';
+  } else if (isRecoveryCode) {
+    description = 'You’ll find it in your recovery kit.';
+  } else if (mode === 'create-recovery-code') {
+    description = hasRecoveryCode
+      ? 'The new recovery code will replace your current code.'
+      : 'Enter your current password to continue.';
+  }
 
   if (mode === 'unlock') {
     submitLabel = 'Unlock';
@@ -58,12 +71,12 @@ export function StorageForm({
     submitLabel = 'Change password';
   }
 
-  if (mode === 'recovery-kit') {
+  if (mode === 'create-recovery-code') {
     passwordLabel = 'Current password';
   }
 
-  if (mode === 'recovery-kit' && hasRecoveryKit) {
-    title = 'Replace recovery kit';
+  if (mode === 'create-recovery-code' && hasRecoveryCode) {
+    title = 'Replace recovery code';
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -87,33 +100,33 @@ export function StorageForm({
   return (
     <div className="grid gap-4">
       <form onSubmit={submit} className="grid gap-5" aria-label={title}>
-        <header className="grid gap-3">
-          {onBack ? <BackButton disabled={pending} onClick={onBack} /> : null}
-          <div>
-            <h2 className="text-heading-24">{title}</h2>
-            {mode === 'setup' ? (
-              <p className="mt-2 text-copy-14 text-muted-foreground">This password protects your encrypted data.</p>
-            ) : null}
-            {isRecoveryCode ? (
-              <p className="mt-2 text-copy-14 text-muted-foreground">You’ll find it in your recovery kit.</p>
-            ) : null}
-            {mode === 'recovery-kit' ? (
-              <p className="mt-2 text-copy-14 text-muted-foreground">Enter your current password to continue.</p>
+        <StorageFormHeader title={title} description={description} dialog={dialog} pending={pending} onBack={onBack} />
+        {isChangingPassword ? (
+          <div className="grid gap-1">
+            <PasswordField
+              id={`${id}-current`}
+              label="Current password"
+              name="current-password"
+              autoComplete="current-password"
+              value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.currentTarget.value)}
+              disabled={pending}
+              required
+              autoFocus
+            />
+            {onRecover ? (
+              <Button
+                type="button"
+                variant="text"
+                size="sm"
+                className="w-fit px-0 text-copy-13"
+                disabled={pending}
+                onClick={onRecover}
+              >
+                Forgot password?
+              </Button>
             ) : null}
           </div>
-        </header>
-        {isChangingPassword ? (
-          <PasswordField
-            id={`${id}-current`}
-            label="Current password"
-            name="current-password"
-            autoComplete="current-password"
-            value={currentPassword}
-            onChange={(event) => setCurrentPassword(event.currentTarget.value)}
-            disabled={pending}
-            required
-            autoFocus
-          />
         ) : null}
         {isRecoveryCode ? (
           <div className="grid gap-2">

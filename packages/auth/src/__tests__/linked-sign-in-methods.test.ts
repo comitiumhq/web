@@ -8,9 +8,6 @@ const user: IdentityUser = {
   id: AUTH_USER_ID,
   email: 'person@example.com',
   emailVerified: true,
-  name: '',
-  createdAt: new Date('2026-10-19T10:00:00Z'),
-  updatedAt: new Date('2026-10-19T10:00:00Z'),
 };
 const google = { id: 'local-google-account-id', providerId: 'google' };
 const passkeys = [{ id: 'first' }, { id: 'second' }];

@@ -1,7 +1,7 @@
 export const qk = {
   auth: {
-    sessionRoot: () => ['auth', 'session'] as const,
-    session: (authUserId: string | null) => ['auth', 'session', authUserId] as const,
+    accountRoot: () => ['auth', 'account'] as const,
+    account: (authUserId: string | null) => ['auth', 'account', authUserId] as const,
     methods: (authUserId: string) => ['auth', 'methods', authUserId] as const,
   },
   account: {

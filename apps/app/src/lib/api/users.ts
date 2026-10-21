@@ -1,13 +1,13 @@
-import { publicKeyMapSchema } from '@comitium/schemas/auth';
+import { userPublicKeyDescriptorMapSchema } from '@comitium/schemas/auth';
 
 import { api } from './client';
 
-function getPublicKeys(userIds: string[]) {
-  return api.post('/users/public-keys', { userIds }, publicKeyMapSchema);
+function getUserPublicKeyDescriptors(userIds: string[]) {
+  return api.post('/users/public-keys', { userIds }, userPublicKeyDescriptorMapSchema);
 }
 
-export async function getPublicKey(userId: string) {
-  const publicKeys = await getPublicKeys([userId]);
+export async function getUserPublicKeyDescriptor(userId: string) {
+  const descriptors = await getUserPublicKeyDescriptors([userId]);
 
-  return publicKeys[userId] ?? null;
+  return descriptors[userId] ?? null;
 }

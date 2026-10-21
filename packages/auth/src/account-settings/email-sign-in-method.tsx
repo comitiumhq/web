@@ -4,8 +4,8 @@ import { InfoIcon, MailIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import type { LinkedSignInMethods } from '../linked-sign-in-methods';
+import { AccountSettingRow } from './account-setting-row';
 import { EmailMethodDialog } from './email-method-dialog';
-import { SignInMethodRow } from './sign-in-method-row';
 import type { RefreshMethods } from './types';
 
 interface EmailSignInMethodProps {
@@ -26,7 +26,7 @@ export function EmailSignInMethod({ email, refreshMethods }: EmailSignInMethodPr
 
   return (
     <>
-      <SignInMethodRow
+      <AccountSettingRow
         icon={<MailIcon />}
         label={<EmailLabel />}
         value={email?.address ?? 'Not added'}

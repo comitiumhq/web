@@ -1,4 +1,3 @@
-import { BackButton } from '@comitium/ui/back-button';
 import { Button } from '@comitium/ui/button';
 import { Checkbox } from '@comitium/ui/checkbox';
 import { triggerFileDownload } from '@comitium/ui/download';
@@ -7,15 +6,25 @@ import { Spinner } from '@comitium/ui/spinner';
 import { CheckIcon, DownloadIcon, FileTextIcon } from 'lucide-react';
 import { useCallback, useId, useState } from 'react';
 import { AuthFormError } from '../../auth-form-error';
+import { StorageFormHeader } from '../storage-form-header';
 
 interface RecoveryCodeStepProps {
   code: string;
   saving?: boolean;
+  replacing?: boolean;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
+  dialog?: boolean;
 }
 
-export function RecoveryCodeStep({ code, saving = false, onConfirm, onCancel }: RecoveryCodeStepProps) {
+export function RecoveryCodeStep({
+  code,
+  saving = false,
+  replacing = false,
+  onConfirm,
+  onCancel,
+  dialog = false,
+}: RecoveryCodeStepProps) {
   const id = useId();
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,15 +76,17 @@ export function RecoveryCodeStep({ code, saving = false, onConfirm, onCancel }: 
 
   return (
     <section aria-label="Save your recovery kit" className="grid gap-6">
-      <header className="grid gap-3">
-        <BackButton disabled={busy} onClick={onCancel} />
-        <div>
-          <h2 className="text-heading-24">Save your recovery kit</h2>
-          <p className="mt-2 text-copy-14 text-muted-foreground">
-            Use it to recover your encrypted data if you forget your password.
-          </p>
-        </div>
-      </header>
+      <StorageFormHeader
+        title="Save your recovery kit"
+        description={
+          replacing
+            ? 'Saving this code will replace your current recovery code.'
+            : 'Use it to recover your encrypted data if you forget your password.'
+        }
+        dialog={dialog}
+        pending={busy}
+        onBack={onCancel}
+      />
       <div className="grid gap-2">
         <Button
           variant="outline"

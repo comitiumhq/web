@@ -15,7 +15,7 @@ vi.mock('../use-crypto-unlock', () => ({ useCryptoUnlock: () => mocks.crypto }))
 vi.mock('../use-logout', () => ({ useAccountLogout: () => vi.fn() }));
 vi.mock('../storage/storage-access', () => ({
   StorageAccess: ({ requireRecovery, initialMode }: { requireRecovery: boolean; initialMode?: string }) => {
-    if (initialMode === 'recovery-kit') {
+    if (initialMode === 'create-recovery-code') {
       return <p>Create recovery kit</p>;
     }
 

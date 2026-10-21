@@ -8,17 +8,11 @@ const PRODUCT_USER_ID = '01996340-fb00-7000-8000-000000000003';
 export const API_URL = 'https://identity.comitium.test/v1';
 
 export function identitySession(userId = AUTH_USER_ID, email = 'person@example.com') {
-  const timestamp = '2026-10-19T10:00:00.000Z';
-
   return {
     session: {
-      id: '01996340-fb00-7000-8000-000000000004',
-      userId,
-      createdAt: timestamp,
-      updatedAt: timestamp,
       expiresAt: '2099-01-01T00:00:00.000Z',
     },
-    user: { id: userId, email, emailVerified: true, name: '', createdAt: timestamp, updatedAt: timestamp },
+    user: { id: userId, email, emailVerified: true },
   };
 }
 

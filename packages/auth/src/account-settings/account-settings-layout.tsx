@@ -1,9 +1,16 @@
+import { hasEncryptionKeyBundle } from '@comitium/crypto/key-bundle';
 import { PageContainer } from '@comitium/ui/page-container';
 import { SettingsNavLink } from '@comitium/ui/settings-nav-link';
-import { BadgeCheckIcon, KeyIcon, ShieldCheckIcon } from 'lucide-react';
+import { BadgeCheckIcon, KeyRoundIcon, UserLockIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-export function AccountSettingsLayout({ children }: { children: ReactNode }) {
+import { useSession } from '../use-session';
+
+interface AccountSettingsLayoutProps {
+  children: ReactNode;
+}
+
+export function AccountSettingsLayout({ children }: AccountSettingsLayoutProps) {
   return (
     <PageContainer size="settings" className="h-full sm:px-4 lg:px-4">
       <div className="flex h-full min-h-0 gap-8 overflow-hidden">
@@ -23,11 +30,19 @@ export function AccountSettingsLayout({ children }: { children: ReactNode }) {
   );
 }
 
-function AccountNavigation({ className }: { className: string }) {
+interface AccountNavigationProps {
+  className: string;
+}
+
+function AccountNavigation({ className }: AccountNavigationProps) {
+  const { user } = useSession();
+
   return (
-    <nav aria-label="Account" className={`flex gap-1 ${className}`}>
-      <SettingsNavLink icon={KeyIcon} label="Authentication" to="/account" />
-      <SettingsNavLink icon={ShieldCheckIcon} label="Security" to="/account/security" />
+    <nav aria-label="Account" className={`flex flex-wrap gap-1 ${className}`}>
+      <SettingsNavLink icon={UserLockIcon} label="Authentication" to="/account" />
+      {hasEncryptionKeyBundle(user) ? (
+        <SettingsNavLink icon={KeyRoundIcon} label="Recovery" to="/account/recovery" />
+      ) : null}
       <SettingsNavLink icon={BadgeCheckIcon} label="ZK Identity" to="/account/zk-identity" />
     </nav>
   );

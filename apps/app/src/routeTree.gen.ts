@@ -17,7 +17,7 @@ import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as OrgCreateRouteImport } from './routes/org/create'
 import { Route as OrgOrgIdRouteImport } from './routes/org/$orgId'
 import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
-import { Route as AccountSecurityRouteImport } from './routes/account/security'
+import { Route as AccountRecoveryRouteImport } from './routes/account/recovery'
 import { Route as OrgOrgIdIndexRouteImport } from './routes/org/$orgId/index'
 import { Route as OrgOrgIdSettingsRouteImport } from './routes/org/$orgId/settings'
 import { Route as OrgOrgIdPipelineRouteImport } from './routes/org/$orgId/pipeline'
@@ -92,9 +92,9 @@ const AccountZkIdentityRoute = AccountZkIdentityRouteImport.update({
   path: '/zk-identity',
   getParentRoute: () => AccountRoute,
 } as any)
-const AccountSecurityRoute = AccountSecurityRouteImport.update({
-  id: '/security',
-  path: '/security',
+const AccountRecoveryRoute = AccountRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
   getParentRoute: () => AccountRoute,
 } as any)
 const OrgOrgIdIndexRoute = OrgOrgIdIndexRouteImport.update({
@@ -294,7 +294,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRouteWithChildren
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
-  '/account/security': typeof AccountSecurityRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
   '/org/create': typeof OrgCreateRoute
@@ -337,7 +337,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
-  '/account/security': typeof AccountSecurityRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/create': typeof OrgCreateRoute
   '/account': typeof AccountIndexRoute
@@ -376,7 +376,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRouteWithChildren
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
-  '/account/security': typeof AccountSecurityRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
   '/org/create': typeof OrgCreateRoute
@@ -422,7 +422,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/invite'
     | '/login'
-    | '/account/security'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/org/$orgId'
     | '/org/create'
@@ -465,7 +465,7 @@ export interface FileRouteTypes {
     | '/'
     | '/invite'
     | '/login'
-    | '/account/security'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/org/create'
     | '/account'
@@ -503,7 +503,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/invite'
     | '/login'
-    | '/account/security'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/org/$orgId'
     | '/org/create'
@@ -610,11 +610,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountZkIdentityRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/account/security': {
-      id: '/account/security'
-      path: '/security'
-      fullPath: '/account/security'
-      preLoaderRoute: typeof AccountSecurityRouteImport
+    '/account/recovery': {
+      id: '/account/recovery'
+      path: '/recovery'
+      fullPath: '/account/recovery'
+      preLoaderRoute: typeof AccountRecoveryRouteImport
       parentRoute: typeof AccountRoute
     }
     '/org/$orgId/': {
@@ -852,13 +852,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
-  AccountSecurityRoute: typeof AccountSecurityRoute
+  AccountRecoveryRoute: typeof AccountRecoveryRoute
   AccountZkIdentityRoute: typeof AccountZkIdentityRoute
   AccountIndexRoute: typeof AccountIndexRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
-  AccountSecurityRoute: AccountSecurityRoute,
+  AccountRecoveryRoute: AccountRecoveryRoute,
   AccountZkIdentityRoute: AccountZkIdentityRoute,
   AccountIndexRoute: AccountIndexRoute,
 }

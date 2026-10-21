@@ -536,7 +536,7 @@ export const CryptoProxy = {
       const signal = AbortSignal.timeout(30_000);
 
       if (allDevices) {
-        await api.revokeAll(signal);
+        await api.logoutEverywhere(signal);
       } else {
         await api.logout(deviceId, signal);
       }

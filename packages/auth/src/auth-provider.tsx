@@ -13,12 +13,12 @@ import { type AccountReadiness, AccountReadinessContext } from './use-account-re
 interface AuthProviderProps {
   children: ReactNode;
   client: IdentityClient;
-  getSession: () => Promise<User | null>;
-  sessionQueryKey: (authUserId: string | null) => readonly unknown[];
+  bootstrapAccount: () => Promise<User | null>;
+  accountQueryKey: (authUserId: string | null) => readonly unknown[];
   staleTime: number;
 }
 
-export function AuthProvider({ children, client, getSession, sessionQueryKey, staleTime }: AuthProviderProps) {
+export function AuthProvider({ children, client, bootstrapAccount, accountQueryKey, staleTime }: AuthProviderProps) {
   const auth = client.useSession();
   const authUserId = auth.data?.user.id ?? null;
   const queryClient = useQueryClient();
@@ -67,9 +67,9 @@ export function AuthProvider({ children, client, getSession, sessionQueryKey, st
   const identityReady = authUserId === resolvedIdentity && identityError === null;
 
   const query = useQuery<User | null>({
-    queryKey: sessionQueryKey(authUserId),
+    queryKey: accountQueryKey(authUserId),
     queryFn: async () => {
-      const user = await getSession();
+      const user = await bootstrapAccount();
 
       if (user && user.authUserId !== authUserId) {
         await auth.refetch();
@@ -93,7 +93,7 @@ export function AuthProvider({ children, client, getSession, sessionQueryKey, st
   } else if (!authUserId) {
     stage = 'anonymous';
   } else if (!query.isSuccess) {
-    stage = 'resolving-session';
+    stage = 'resolving-account';
   } else {
     stage = 'ready';
   }

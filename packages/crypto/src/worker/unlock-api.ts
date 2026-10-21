@@ -52,7 +52,7 @@ export class UnlockApi {
   }
 
   getBundle(signal: AbortSignal): Promise<KeyBundleResponse> {
-    return this.request('POST', '/auth/session', undefined, keyBundleResponseSchema, signal);
+    return this.request('POST', '/auth/bootstrap', undefined, keyBundleResponseSchema, signal);
   }
 
   initialize(body: KeyBundleWrite & { userId: string }, signal: AbortSignal) {
@@ -95,8 +95,8 @@ export class UnlockApi {
     return this.request('POST', '/auth/logout', { deviceId }, successSchema, signal);
   }
 
-  revokeAll(signal: AbortSignal) {
-    return this.request('POST', '/users/devices/revoke-all', undefined, successSchema, signal);
+  logoutEverywhere(signal: AbortSignal) {
+    return this.request('POST', '/auth/logout-all', undefined, successSchema, signal);
   }
 
   /**

@@ -115,7 +115,7 @@ beforeEach(() => {
         });
       }
 
-      if (path.endsWith('/auth/session')) {
+      if (path.endsWith('/auth/bootstrap')) {
         if (readBackStatus !== 200) {
           return new Response(null, { status: readBackStatus });
         }
@@ -592,7 +592,7 @@ describe('Worker unlock and recovery flows', () => {
     expect(requests.map((request) => request.path)).toEqual([
       '/v1/users/key-share',
       '/v1/users/encryption-key-bundle',
-      '/v1/auth/session',
+      '/v1/auth/bootstrap',
       '/v1/users/key-share',
       '/v1/users/devices',
     ]);

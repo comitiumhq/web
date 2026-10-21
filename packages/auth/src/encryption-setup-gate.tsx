@@ -51,7 +51,7 @@ export function EncryptionSetupGate({
         ) : null}
         <StorageAccess
           key={user?.id}
-          initialMode={needsRecovery ? 'recovery-kit' : undefined}
+          initialMode={needsRecovery ? 'create-recovery-code' : undefined}
           requireRecovery={requireRecovery}
           onStart={start}
           onSuccess={complete}

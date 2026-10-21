@@ -8,7 +8,7 @@
     "./account-api": "./src/account-api.ts",
     "./account-settings-layout": "./src/account-settings/account-settings-layout.tsx",
     "./authentication-settings-page": "./src/account-settings/authentication-settings-page.tsx",
-    "./security-settings-page": "./src/account-settings/security/security-settings-page.tsx",
+    "./recovery-settings-page": "./src/account-settings/recovery/recovery-settings-page.tsx",
     "./zk-identity-settings-page": "./src/account-settings/zk-identity/zk-identity-settings-page.tsx",
     "./zk-identity": "./src/zk-identity.ts",
     "./account-stage": "./src/account-stage.ts",

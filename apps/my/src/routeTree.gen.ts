@@ -19,7 +19,7 @@ import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ScheduleTokenRouteImport } from './routes/schedule/$token'
 import { Route as CareersOrgSlugRouteImport } from './routes/careers/$orgSlug'
 import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
-import { Route as AccountSecurityRouteImport } from './routes/account/security'
+import { Route as AccountRecoveryRouteImport } from './routes/account/recovery'
 import { Route as CareersOrgSlugIndexRouteImport } from './routes/careers/$orgSlug/index'
 import { Route as CareersOrgSlugJobsPostingSlugRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug'
 import { Route as CareersOrgSlugJobsPostingSlugIndexRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/index'
@@ -75,9 +75,9 @@ const AccountZkIdentityRoute = AccountZkIdentityRouteImport.update({
   path: '/zk-identity',
   getParentRoute: () => AccountRoute,
 } as any)
-const AccountSecurityRoute = AccountSecurityRouteImport.update({
-  id: '/security',
-  path: '/security',
+const AccountRecoveryRoute = AccountRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
   getParentRoute: () => AccountRoute,
 } as any)
 const CareersOrgSlugIndexRoute = CareersOrgSlugIndexRouteImport.update({
@@ -110,7 +110,7 @@ export interface FileRoutesByFullPath {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/account/security': typeof AccountSecurityRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
   '/schedule/$token': typeof ScheduleTokenRoute
@@ -126,7 +126,7 @@ export interface FileRoutesByTo {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/account/security': typeof AccountSecurityRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/schedule/$token': typeof ScheduleTokenRoute
   '/account': typeof AccountIndexRoute
@@ -142,7 +142,7 @@ export interface FileRoutesById {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/account/security': typeof AccountSecurityRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
   '/schedule/$token': typeof ScheduleTokenRoute
@@ -161,7 +161,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/account/security'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/careers/$orgSlug'
     | '/schedule/$token'
@@ -177,7 +177,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/account/security'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/schedule/$token'
     | '/account'
@@ -192,7 +192,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/account/security'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/careers/$orgSlug'
     | '/schedule/$token'
@@ -287,11 +287,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountZkIdentityRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/account/security': {
-      id: '/account/security'
-      path: '/security'
-      fullPath: '/account/security'
-      preLoaderRoute: typeof AccountSecurityRouteImport
+    '/account/recovery': {
+      id: '/account/recovery'
+      path: '/recovery'
+      fullPath: '/account/recovery'
+      preLoaderRoute: typeof AccountRecoveryRouteImport
       parentRoute: typeof AccountRoute
     }
     '/careers/$orgSlug/': {
@@ -326,13 +326,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
-  AccountSecurityRoute: typeof AccountSecurityRoute
+  AccountRecoveryRoute: typeof AccountRecoveryRoute
   AccountZkIdentityRoute: typeof AccountZkIdentityRoute
   AccountIndexRoute: typeof AccountIndexRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
-  AccountSecurityRoute: AccountSecurityRoute,
+  AccountRecoveryRoute: AccountRecoveryRoute,
   AccountZkIdentityRoute: AccountZkIdentityRoute,
   AccountIndexRoute: AccountIndexRoute,
 }

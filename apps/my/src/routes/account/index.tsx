@@ -7,7 +7,7 @@ export const Route = createFileRoute('/account/')({
   head: () => ({
     meta: [
       { title: 'Authentication | Comitium' },
-      { name: 'description', content: 'Manage your Comitium sign-in methods.' },
+      { name: 'description', content: 'Manage your Comitium authentication settings.' },
       { name: 'robots', content: 'noindex,nofollow' },
     ],
   }),

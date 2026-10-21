@@ -2,6 +2,7 @@ import { ApiError } from '@comitium/schemas/api-errors';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthClient } from './auth-context';
 import { unwrapAuthResult } from './auth-result';
+import { refreshIdentitySession } from './fresh-auth-session';
 import { getLinkedSignInMethods } from './linked-sign-in-methods';
 import { linkedAuthAccountsSchema, linkedPasskeysSchema } from './schemas/identity';
 
@@ -14,13 +15,11 @@ export function useSignInMethods(queryKey: (userId: string) => readonly unknown[
     queryKey: queryKey(userId ?? ''),
     enabled: userId !== null,
     queryFn: async () => {
-      const [session, accounts, passkeys] = await Promise.all([
-        client.getSession(),
+      const [current, accounts, passkeys] = await Promise.all([
+        refreshIdentitySession(client),
         client.listAccounts(),
         client.passkey.listUserPasskeys(),
       ]);
-
-      const current = unwrapAuthResult(session);
 
       if (!current || current.user.id !== userId) {
         throw new ApiError(401, 'Authentication identity changed');
@@ -35,7 +34,6 @@ export function useSignInMethods(queryKey: (userId: string) => readonly unknown[
   });
 
   async function refreshMethods() {
-    await auth.refetch();
     await query.refetch({ throwOnError: true });
   }
 

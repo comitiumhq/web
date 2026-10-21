@@ -20,5 +20,4 @@ export function createIdentityClient(apiUrl: string) {
 }
 
 export type IdentityClient = ReturnType<typeof createIdentityClient>;
-export type IdentitySession = IdentityClient['$Infer']['Session'];
-export type IdentityUser = IdentitySession['user'];
+export type { IdentityUser } from './schemas/identity';

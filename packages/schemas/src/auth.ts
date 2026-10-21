@@ -16,7 +16,7 @@ export const userSchema = z.object({
 
 export type User = z.infer<typeof userSchema>;
 
-export const publicKeyMapSchema = z.record(
+export const userPublicKeyDescriptorMapSchema = z.record(
   z.string(),
   z.object({ publicKey: publicEncryptionKeySchema, userKeyVersion: z.number().int().positive() }),
 );

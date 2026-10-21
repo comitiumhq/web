@@ -65,7 +65,7 @@ function Probe() {
 function tree(queryClient: QueryClient) {
   return (
     <QueryClientProvider client={queryClient}>
-      <CryptoProvider apiUrl={API_URL} sessionQueryKey={['session']}>
+      <CryptoProvider apiUrl={API_URL} accountQueryKey={['account']}>
         <Probe />
         <p>Candidate application list</p>
       </CryptoProvider>

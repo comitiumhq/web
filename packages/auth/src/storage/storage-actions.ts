@@ -36,7 +36,7 @@ export async function runStorageAction(
     case 'unlock':
       return CryptoProxy.unlockWithPassword(wrapped, user.id, user.publicKey, password, true);
 
-    case 'recovery-kit': {
+    case 'create-recovery-code': {
       const result = await verifyCurrentPassword(user, password);
 
       await CryptoProxy.rewrapUserKey(

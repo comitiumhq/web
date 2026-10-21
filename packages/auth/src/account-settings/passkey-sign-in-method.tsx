@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useAuthClient } from '../auth-context';
 import { unwrapAuthResult } from '../auth-result';
 import { useFreshAuthentication } from '../fresh-authentication';
-import { SignInMethodRow } from './sign-in-method-row';
+import { AccountSettingRow } from './account-setting-row';
 import type { RefreshMethods } from './types';
 
 interface PasskeySignInMethodProps {
@@ -53,7 +53,7 @@ export function PasskeySignInMethod({ passkeyCount, refreshMethods }: PasskeySig
   const actionLabel = passkeyCount > 0 ? 'Add another' : 'Add passkey';
 
   return (
-    <SignInMethodRow
+    <AccountSettingRow
       icon={<KeyIcon />}
       label="Passkey"
       value={getPasskeySummary(passkeyCount)}

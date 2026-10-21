@@ -13,7 +13,7 @@ export function useAccountReadiness(): AccountReadiness {
   const context = useContext(AccountReadinessContext);
 
   if (!context) {
-    throw new Error('useAccountReadiness must be used within AccountReadinessProvider');
+    throw new Error('useAccountReadiness must be used within AuthProvider');
   }
 
   return context;

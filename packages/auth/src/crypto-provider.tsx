@@ -13,7 +13,7 @@ import { useSession } from './use-session';
 
 interface CryptoProviderProps {
   apiUrl: string;
-  sessionQueryKey: readonly unknown[];
+  accountQueryKey: readonly unknown[];
   children: ReactNode;
 }
 
@@ -34,7 +34,7 @@ interface RestoreState {
   error: string | null;
 }
 
-export function CryptoProvider({ apiUrl, sessionQueryKey, children }: CryptoProviderProps) {
+export function CryptoProvider({ apiUrl, accountQueryKey, children }: CryptoProviderProps) {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const active = useIsCryptoActive();
@@ -167,11 +167,11 @@ export function CryptoProvider({ apiUrl, sessionQueryKey, children }: CryptoProv
     [cancelPrompt],
   );
 
-  const refreshSession = useCallback(
+  const refreshAccount = useCallback(
     async (keysChanged = false) => {
-      await queryClient.refetchQueries({ queryKey: sessionQueryKey }, { throwOnError: true });
+      await queryClient.refetchQueries({ queryKey: accountQueryKey }, { throwOnError: true });
       const generationChanged = queryClient
-        .getQueriesData<User | null>({ queryKey: sessionQueryKey })
+        .getQueriesData<User | null>({ queryKey: accountQueryKey })
         .some(([, latest]) => latest?.id === user?.id && latest?.userKeyVersion !== user?.userKeyVersion);
 
       if (generationChanged) {
@@ -182,7 +182,7 @@ export function CryptoProvider({ apiUrl, sessionQueryKey, children }: CryptoProv
         publishSessionEvent('keys-changed', user.id);
       }
     },
-    [queryClient, sessionQueryKey, user],
+    [queryClient, accountQueryKey, user],
   );
 
   useEffect(
@@ -205,10 +205,10 @@ export function CryptoProvider({ apiUrl, sessionQueryKey, children }: CryptoProv
         } else if (event.type === 'logout-complete') {
           window.location.reload();
         } else if (event.type === 'keys-changed') {
-          void refreshSession().catch(() => {});
+          void refreshAccount().catch(() => {});
         }
       }),
-    [cancelPrompt, queryClient, refreshSession, user?.id],
+    [cancelPrompt, queryClient, refreshAccount, user?.id],
   );
 
   return (
@@ -220,7 +220,7 @@ export function CryptoProvider({ apiUrl, sessionQueryKey, children }: CryptoProv
         restoreError: restoration.error,
         ensureUnlocked,
         requestUnlock: ensureUnlocked,
-        refreshSession,
+        refreshAccount,
       }}
     >
       {children}

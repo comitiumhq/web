@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-interface SignInMethodRowProps {
+interface AccountSettingRowProps {
   action: ReactNode;
   error?: string | null;
   icon: ReactNode;
@@ -9,7 +9,7 @@ interface SignInMethodRowProps {
   value: string;
 }
 
-export function SignInMethodRow({ action, error, icon, label, note, value }: SignInMethodRowProps) {
+export function AccountSettingRow({ action, error, icon, label, note, value }: AccountSettingRowProps) {
   return (
     <div className="flex items-center gap-3 px-4 py-4 last:pb-0">
       <div className="flex min-w-0 flex-1 gap-3">
@@ -18,7 +18,7 @@ export function SignInMethodRow({ action, error, icon, label, note, value }: Sig
         </div>
         <div className="min-w-0">
           <div className="text-copy-14 font-medium">{label}</div>
-          <p className="mt-0.5 truncate text-copy-13 text-muted-foreground">{value}</p>
+          <p className="mt-0.5 break-words text-copy-13 text-muted-foreground">{value}</p>
           {note ? <p className="mt-1 text-copy-12 text-muted-foreground">{note}</p> : null}
           {error ? (
             <p role="alert" className="mt-1 text-copy-12 text-destructive-text">

@@ -13,7 +13,7 @@ interface RecoveryConfirmation {
 
 export function useStorageKeyAction() {
   const confirmFreshAuth = useConfirmFreshAuthentication();
-  const { refreshSession } = useCryptoUnlock();
+  const { refreshAccount } = useCryptoUnlock();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null);
@@ -85,7 +85,7 @@ export function useStorageKeyAction() {
       try {
         const result = await operation(onRecoveryCode, confirmFreshAuth);
 
-        await refreshSession(keysChanged);
+        await refreshAccount(keysChanged);
 
         if (result?.rememberedDevice === 'unavailable' || result?.rememberedDevice === 'cleanup_failed') {
           toast.warning('Your data is unlocked, but this device could not be remembered. Keep your password handy.');
@@ -94,7 +94,7 @@ export function useStorageKeyAction() {
         return mounted.current;
       } catch (failure) {
         if (keysChanged) {
-          await refreshSession().catch(() => {});
+          await refreshAccount().catch(() => {});
         }
 
         if (mounted.current) {
@@ -112,7 +112,7 @@ export function useStorageKeyAction() {
         }
       }
     },
-    [confirmFreshAuth, onRecoveryCode, refreshSession],
+    [confirmFreshAuth, onRecoveryCode, refreshAccount],
   );
 
   return { run, pending, error, clearError, recoveryCode, recoveryConfirmed, confirmRecovery, cancelRecovery };

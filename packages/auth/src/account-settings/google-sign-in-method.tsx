@@ -10,7 +10,7 @@ import { unwrapAuthResult } from '../auth-result';
 import { useFreshAuthentication } from '../fresh-authentication';
 import { canUnlinkGoogle, type LinkedSignInMethods } from '../linked-sign-in-methods';
 import { getAccountMethodError } from './account-method-error';
-import { SignInMethodRow } from './sign-in-method-row';
+import { AccountSettingRow } from './account-setting-row';
 import type { RefreshMethods } from './types';
 
 interface GoogleSignInMethodProps {
@@ -89,7 +89,7 @@ export function GoogleSignInMethod({ methods, refreshMethods }: GoogleSignInMeth
 
   return (
     <>
-      <SignInMethodRow
+      <AccountSettingRow
         icon={<GoogleIcon />}
         label="Google"
         value={methods.google ? 'Connected' : 'Not added'}

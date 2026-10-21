@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { sendSignInCode, signInWithGoogle, verifySignInCode } from '../auth-actions';
 import { createIdentityClient } from '../auth-client';
 import { unwrapAuthResult } from '../auth-result';
+import { refreshIdentitySession } from '../fresh-auth-session';
 import { API_URL, identitySession } from './identity-fixtures';
 
 const fetchMock = vi.fn<typeof fetch>();
@@ -89,6 +90,31 @@ describe('native auth client transport', () => {
 
     expect(request.url.pathname).toBe('/v1/auth/identity/get-session');
     expect(request.url.searchParams.has('disableRefresh')).toBe(false);
+  });
+
+  it('settles concurrent session readers when the SDK replaces an in-flight refresh', async () => {
+    const client = createIdentityClient(API_URL);
+    let finishFirst!: (response: Response) => void;
+
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          finishFirst = resolve;
+        }),
+    );
+
+    const first = refreshIdentitySession(client);
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+
+    fetchMock.mockResolvedValueOnce(Response.json(identitySession()));
+
+    const second = refreshIdentitySession(client);
+
+    await expect(first).resolves.toMatchObject({ user: identitySession().user });
+    await expect(second).resolves.toMatchObject({ user: identitySession().user });
+
+    finishFirst(Response.json(null));
   });
 
   it('preserves safe native error metadata without exposing provider messages', async () => {

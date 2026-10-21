@@ -23,11 +23,11 @@ export const Providers = ({ queryClient, children }: { queryClient: QueryClient;
       <QueryClientProvider client={queryClient}>
         <AuthProvider
           client={authClient}
-          getSession={authAccountApi.getSession}
-          sessionQueryKey={qk.auth.session}
+          bootstrapAccount={authAccountApi.bootstrapAccount}
+          accountQueryKey={qk.auth.account}
           staleTime={STALE_TIME_DEFAULT}
         >
-          <CryptoProvider apiUrl={import.meta.env.VITE_API} sessionQueryKey={qk.auth.sessionRoot()}>
+          <CryptoProvider apiUrl={import.meta.env.VITE_API} accountQueryKey={qk.auth.accountRoot()}>
             <LucideProvider strokeWidth={1.5}>
               <TooltipProvider>{children}</TooltipProvider>
             </LucideProvider>

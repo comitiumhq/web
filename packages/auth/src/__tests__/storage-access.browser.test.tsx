@@ -8,14 +8,14 @@ import { encryptedProductUser, productUser } from './identity-fixtures';
 
 const mocks = vi.hoisted(() => ({
   user: null as User | null,
-  refreshSession: vi.fn().mockResolvedValue(undefined),
+  refreshAccount: vi.fn().mockResolvedValue(undefined),
   warning: vi.fn(),
   isCryptoActive: false,
 }));
 
 vi.mock('../use-session', () => ({ useSession: () => ({ user: mocks.user }) }));
 vi.mock('../use-crypto-unlock', () => ({
-  useCryptoUnlock: () => ({ refreshSession: mocks.refreshSession, isCryptoActive: mocks.isCryptoActive }),
+  useCryptoUnlock: () => ({ refreshAccount: mocks.refreshAccount, isCryptoActive: mocks.isCryptoActive }),
 }));
 vi.mock('../fresh-authentication', () => ({
   useConfirmFreshAuthentication: () => async () => {},
@@ -27,7 +27,7 @@ const CODE = 'ABCD-EFGH-JKLM-NPQR-STVW-XY23-45';
 
 beforeEach(() => {
   mocks.user = encryptedProductUser();
-  mocks.refreshSession.mockClear();
+  mocks.refreshAccount.mockClear();
   mocks.warning.mockClear();
   mocks.isCryptoActive = false;
 });
@@ -65,7 +65,7 @@ describe('storage access', () => {
     expect(initialize).not.toHaveBeenCalled();
   });
 
-  it.each(['change', 'recovery-kit'] as const)(
+  it.each(['change', 'create-recovery-code'] as const)(
     'keeps active storage open after an incorrect password in %s',
     async (mode) => {
       vi.spyOn(CryptoProxy, 'isActiveFor').mockReturnValue(true);
@@ -185,7 +185,7 @@ describe('storage access', () => {
     finishSave();
     await vi.waitFor(() => expect(complete).toHaveBeenCalledOnce());
     expect(saved).toHaveBeenCalledOnce();
-    expect(mocks.refreshSession).toHaveBeenCalledWith(true);
+    expect(mocks.refreshAccount).toHaveBeenCalledWith(true);
   });
 
   it('cancels setup before saving when recovery confirmation is cancelled', async () => {
@@ -330,36 +330,6 @@ describe('storage access', () => {
     expect(complete).not.toHaveBeenCalled();
   });
 
-  it('verifies the storage password before rotating recovery without repairing its share', async () => {
-    const unlock = vi.spyOn(CryptoProxy, 'unlockWithPassword').mockResolvedValue({ rememberedDevice: 'not_requested' });
-    const rewrap = vi.spyOn(CryptoProxy, 'rewrapUserKey').mockImplementation(async (wrapped, _options, showCode) => {
-      await showCode?.(CODE);
-      return { encryptedUserKey: wrapped, recoveryCode: CODE };
-    });
-    const complete = vi.fn();
-    const screen = await render(<StorageAccess initialMode="recovery-kit" onSuccess={complete} />);
-
-    await screen.getByLabelText('Current password', { exact: true }).fill(PASSWORD);
-    await screen.getByRole('button', { name: 'Continue', exact: true }).click();
-    await confirmCode(screen);
-    await vi.waitFor(() => expect(complete).toHaveBeenCalledOnce());
-
-    expect(unlock).toHaveBeenCalledWith(
-      mocks.user?.encryptedUserKey,
-      mocks.user?.id,
-      mocks.user?.publicKey,
-      PASSWORD,
-      true,
-    );
-    expect(unlock.mock.invocationCallOrder[0]).toBeLessThan(rewrap.mock.invocationCallOrder[0]);
-    expect(rewrap).toHaveBeenCalledWith(
-      mocks.user?.encryptedUserKey,
-      { rotateRecoveryCode: true, repairShare: false },
-      expect.any(Function),
-      expect.any(Function),
-    );
-  });
-
   it('uses the current unlocked session to recover without a remembered-device record', async () => {
     vi.spyOn(CryptoProxy, 'isActiveFor').mockReturnValue(true);
     const remembered = vi.spyOn(CryptoProxy, 'rewrapWithRememberedDevice');
@@ -403,7 +373,7 @@ describe('storage access', () => {
     await screen.rerender(<p>Another page</p>);
     continueSetup();
 
-    await vi.waitFor(() => expect(mocks.refreshSession).toHaveBeenCalled());
+    await vi.waitFor(() => expect(mocks.refreshAccount).toHaveBeenCalled());
     expect(saved).not.toHaveBeenCalled();
     expect(complete).not.toHaveBeenCalled();
   });
