@@ -66,6 +66,7 @@ async function prepareArchiveNotice(params: ArchiveApplicationWithNotice) {
     vaultPublicKey: params.vaultPublicKey,
     vaultKeyVersion: params.vaultKeyVersion,
     applicantPublicKey: recipient.publicKey,
+    applicantKeyVersion: recipient.userKeyVersion,
     applicantEmail: params.applicantEmail,
     subject: params.notice.subject,
     messageDoc: params.notice.messageDoc,

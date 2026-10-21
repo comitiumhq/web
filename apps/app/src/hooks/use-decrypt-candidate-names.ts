@@ -1,12 +1,13 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateProfileContext } from '@comitium/crypto/context';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
-import type { EncryptedEnvelope, WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope } from '@comitium/schemas/common';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { parseDecryptedCandidateProfile } from '@/lib/crypto/decrypted-payloads';
 
-import { useQueryWrappedVaultKey } from './queries/use-query-wrapped-vault-key';
+import { useQueryOrgVaultAccess } from './queries/use-query-org-vault-access';
 
 const decryptedProfileCache = new Map<string, CandidateProfile>();
 
@@ -49,7 +50,7 @@ export function useDecryptCandidateNames(
   applications: HasCandidateProfile[],
   orgId: string,
 ): Map<string, CandidateProfile> {
-  const { data: wrappedVaultKey } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess } = useQueryOrgVaultAccess(orgId);
   const isCryptoActive = useIsCryptoActive();
   const [names, setNames] = useState<Map<string, CandidateProfile>>(() =>
     CryptoProxy.isActive() ? getCachedNames(applications, orgId) : new Map(),
@@ -131,7 +132,7 @@ export function useDecryptCandidateNames(
   }, [cachedNames]);
 
   useEffect(() => {
-    if (!isCryptoActive || !wrappedVaultKey || profilesToDecrypt.size === 0) {
+    if (!isCryptoActive || !vaultAccess || profilesToDecrypt.size === 0) {
       return;
     }
 
@@ -150,7 +151,7 @@ export function useDecryptCandidateNames(
           const data = await CryptoProxy.decryptApplication(
             profile,
             orgId,
-            wrappedVaultKey as WrappedKey,
+            vaultAccess as VaultKeyAccess,
             candidateProfileContext(orgId, candidateId),
           );
 
@@ -194,7 +195,7 @@ export function useDecryptCandidateNames(
         });
       }
     });
-  }, [isCryptoActive, wrappedVaultKey, profilesToDecrypt, orgId]);
+  }, [isCryptoActive, vaultAccess, profilesToDecrypt, orgId]);
 
   return names;
 }

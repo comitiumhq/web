@@ -1,98 +1,153 @@
+import { keyMetadataFingerprint } from '../key-context';
+import type { UnlockedUserKey } from '../schemas/user-key';
+import type { VaultKeyAccess } from '../schemas/vault-key';
+
 /**
- * Isolated Web Worker key store — private key material never reaches the main thread.
+ * Owns current user/U material and version/context-bound organization caches.
  */
 export class KeyStore {
-  private personalKey: Uint8Array | null = null;
-  private vaultKeys = new Map<string, Uint8Array>();
-  private vaultKeyPromises = new Map<string, Promise<Uint8Array>>();
+  private userKey: UnlockedUserKey | null = null;
+  private readonly vaultKeys = new Map<string, Uint8Array>();
+  private readonly searchKeys = new Map<string, Uint8Array>();
+  private readonly pending = new Map<string, Promise<Uint8Array>>();
   private generation = 0;
 
-  storePersonalKey(key: Uint8Array): void {
-    this.personalKey = key;
+  captureGeneration(): number {
+    return this.generation;
   }
 
-  getPersonalKey(): Uint8Array {
-    if (!this.personalKey) {
+  assertGeneration(generation: number): void {
+    if (this.generation !== generation) {
+      throw new Error('Crypto session was cleared during the operation');
+    }
+  }
+
+  storeUserKey(userKey: UnlockedUserKey, generation: number): void {
+    try {
+      this.assertGeneration(generation);
+    } catch (error) {
+      userKey.userPrivateKey.fill(0);
+      userKey.unlockKey.fill(0);
+
+      throw error;
+    }
+
+    if (this.userKey) {
+      throw new Error('Clear the previous crypto identity before unlocking');
+    }
+
+    this.userKey = userKey;
+  }
+
+  getUserPrivateKey(): Uint8Array {
+    return this.requireUserKey().userPrivateKey;
+  }
+
+  getUnlockKey(): Uint8Array {
+    return this.requireUserKey().unlockKey;
+  }
+
+  getOrUnwrapVaultKey(access: VaultKeyAccess, unwrap: () => Promise<Uint8Array>): Promise<Uint8Array> {
+    /**
+     * Includes expected public key and the exact grant/recipient generation, even on cache hits.
+     */
+    const identity = keyMetadataFingerprint({
+      orgId: access.orgId,
+      vaultKeyVersion: access.vaultKeyVersion,
+      vaultPublicKey: access.vaultPublicKey,
+      recipientUserId: access.recipientUserId,
+      recipientKeyVersion: access.recipientKeyVersion,
+      wrappedVaultKey: access.wrappedVaultKey,
+    });
+
+    return this.getOrLoad(`vault:${access.orgId}:${access.vaultKeyVersion}:${identity}`, this.vaultKeys, unwrap);
+  }
+
+  getOrUnwrapSearchKey(access: VaultKeyAccess, unwrap: () => Promise<Uint8Array>): Promise<Uint8Array> {
+    const identity = keyMetadataFingerprint({ searchKey: access.searchKey, vaultPublicKey: access.vaultPublicKey });
+
+    return this.getOrLoad(
+      `search:${access.orgId}:${access.searchKey.searchKeyVersion}:${identity}`,
+      this.searchKeys,
+      unwrap,
+    );
+  }
+
+  isActive(): boolean {
+    return this.userKey !== null;
+  }
+
+  clear(): void {
+    this.generation += 1;
+
+    this.userKey?.userPrivateKey.fill(0);
+    this.userKey?.unlockKey.fill(0);
+
+    this.userKey = null;
+
+    for (const keys of [this.vaultKeys, this.searchKeys]) {
+      for (const key of keys.values()) {
+        key.fill(0);
+      }
+
+      keys.clear();
+    }
+
+    this.pending.clear();
+  }
+
+  private requireUserKey(): UnlockedUserKey {
+    if (!this.userKey) {
       throw new Error('Crypto session not unlocked');
     }
 
-    return this.personalKey;
+    return this.userKey;
   }
 
-  storeVaultKey(orgId: string, key: Uint8Array): void {
-    this.vaultKeys.set(orgId, key);
-  }
-
-  getVaultKey(orgId: string): Uint8Array | null {
-    return this.vaultKeys.get(orgId) ?? null;
-  }
-
-  /**
-   * Cached vault key for `orgId`, else unwrap once (concurrent callers share one promise).
-   * `generation` guards it: a key unwrapped during `clear()` is zeroed, not cached.
-   */
-  async getOrUnwrapVaultKey(
-    orgId: string,
-    wrappedVaultKey: unknown,
-    unwrapFn: (wrapped: unknown, personalKey: Uint8Array) => Promise<Uint8Array>,
+  private async getOrLoad(
+    identity: string,
+    cache: Map<string, Uint8Array>,
+    load: () => Promise<Uint8Array>,
   ): Promise<Uint8Array> {
-    const cached = this.vaultKeys.get(orgId);
+    this.requireUserKey();
+
+    const cached = cache.get(identity);
 
     if (cached) {
       return cached;
     }
 
-    const pending = this.vaultKeyPromises.get(orgId);
+    const pending = this.pending.get(identity);
 
     if (pending) {
       return pending;
     }
 
     const generation = this.generation;
-    const personalKey = this.getPersonalKey();
-
     const promise = (async () => {
-      const vaultKey = await unwrapFn(wrappedVaultKey, personalKey);
+      const key = await load();
 
-      if (this.generation !== generation) {
-        vaultKey.fill(0);
+      try {
+        this.assertGeneration(generation);
+      } catch (error) {
+        key.fill(0);
 
-        throw new Error('Crypto session cleared while unwrapping vault key');
+        throw error;
       }
 
-      this.vaultKeys.set(orgId, vaultKey);
+      cache.set(identity, key);
 
-      return vaultKey;
+      return key;
     })();
 
-    this.vaultKeyPromises.set(orgId, promise);
+    this.pending.set(identity, promise);
 
     try {
       return await promise;
     } finally {
-      if (this.vaultKeyPromises.get(orgId) === promise) {
-        this.vaultKeyPromises.delete(orgId);
+      if (this.pending.get(identity) === promise) {
+        this.pending.delete(identity);
       }
     }
-  }
-
-  isActive(): boolean {
-    return this.personalKey !== null;
-  }
-
-  clear(): void {
-    this.generation += 1;
-
-    if (this.personalKey) {
-      this.personalKey.fill(0);
-      this.personalKey = null;
-    }
-
-    for (const key of this.vaultKeys.values()) {
-      key.fill(0);
-    }
-
-    this.vaultKeys.clear();
-    this.vaultKeyPromises.clear();
   }
 }

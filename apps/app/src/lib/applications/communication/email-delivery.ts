@@ -27,6 +27,7 @@ export async function prepareEncryptedEmailDelivery(params: {
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
   applicantPublicKey: PublicEncryptionKey | null;
+  applicantKeyVersion: number | null;
   applicantEmail: string;
   subject: string;
   messageDoc: TipTapDoc;
@@ -41,6 +42,10 @@ export async function prepareEncryptedEmailDeliveryWithGrant(
   params: Parameters<typeof prepareEncryptedEmailDelivery>[0],
   grant: EmailDeliveryGrantDraft,
 ): Promise<EncryptedEmailDelivery> {
+  if ((params.applicantPublicKey !== null) !== (params.applicantKeyVersion !== null)) {
+    throw new Error('Applicant key and generation must be supplied together');
+  }
+
   const encrypted = await CryptoProxy.encryptEmailContentWithOverlays(
     {
       subject: params.subject,
@@ -51,7 +56,9 @@ export async function prepareEncryptedEmailDeliveryWithGrant(
     emailContentContext(params.orgId, params.applicationId),
     [
       orgVaultRecipient(params.vaultPublicKey, params.vaultKeyVersion),
-      ...(params.applicantPublicKey ? [applicantRecipient(params.applicantPublicKey)] : []),
+      ...(params.applicantPublicKey && params.applicantKeyVersion !== null
+        ? [applicantRecipient(params.applicantPublicKey, params.applicantKeyVersion)]
+        : []),
     ],
     [processorRecipient(grant.id, grant.processorPublicKey)],
   );

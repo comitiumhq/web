@@ -19,8 +19,8 @@ import { ResumePreview } from '@/components/features/resume/resume-preview';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
 import { MemberAvatar } from '@/components/user/member-avatar';
 import { useQueryInterviewBriefing } from '@/hooks/queries/use-query-interviews';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { useQueryOrgVaultKey } from '@/hooks/queries/use-query-org-vault-key';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
 import { qk } from '@/hooks/query-keys';
 import { useDecryptCandidateProfileInput } from '@/hooks/use-decrypt-candidate-profile-input';
 import { useDecryptResume } from '@/hooks/use-decrypt-resume';
@@ -71,7 +71,7 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
   const briefing = briefingResponse?.data;
 
   const { data: vaultKey } = useQueryOrgVaultKey(open ? orgId : undefined);
-  const { data: wrappedVaultKey } = useQueryWrappedVaultKey(open ? orgId : undefined);
+  const { data: vaultAccess } = useQueryOrgVaultAccess(open ? orgId : undefined);
 
   const {
     error: resumeError,
@@ -83,7 +83,7 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
     briefing?.applicationId ?? null,
     briefing?.hasResume ?? false,
     briefing?.resumeFileId ?? null,
-    wrappedVaultKey,
+    vaultAccess,
     interview.eventId,
   );
 
@@ -92,7 +92,7 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
     enabled: open,
     envelope: briefing?.candidateProfileInput ?? null,
     orgId,
-    wrappedVaultKey,
+    vaultAccess,
   });
 
   const applicationForm = useInterviewBriefingApplication({
@@ -101,7 +101,7 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
     interviewEventId: interview.eventId,
     orgId,
     submission: briefing?.applicationSubmission ?? null,
-    wrappedVaultKey,
+    vaultAccess,
   });
 
   const hasCandidateProfileInput =
@@ -237,7 +237,7 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
                   currentUserId={user?.id}
                   vaultPublicKey={vaultKey?.vaultPublicKey ?? null}
                   vaultKeyVersion={vaultKey?.keyVersion ?? null}
-                  wrappedVaultKey={wrappedVaultKey}
+                  vaultAccess={vaultAccess}
                   onComplete={handleFeedbackComplete}
                 />
               </FeatureSheetBody>

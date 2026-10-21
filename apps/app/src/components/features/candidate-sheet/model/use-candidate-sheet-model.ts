@@ -43,7 +43,7 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     decryptionError: profileDecryptionError,
     searchProjectionVersion,
     retryQuery: retryProfileQuery,
-  } = useDecryptProfile(application?.candidateId, orgId, detail.wrappedVaultKey);
+  } = useDecryptProfile(application?.candidateId, orgId, detail.vaultAccess);
 
   const { canOnJob } = useJobPermissions(effectiveJobId);
   const canReadCandidateIdentityInputs = canOnJob(Permission.APPLICATION_READ);
@@ -51,7 +51,7 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
   const candidateIdentityInputsQuery = useCandidateIdentityInputs({
     candidateIdentityInputs: detail.formSubmission?.candidateIdentityInputs ?? [],
     orgId,
-    wrappedVaultKey: detail.wrappedVaultKey,
+    vaultAccess: detail.vaultAccess,
     enabled: open && canReadCandidateIdentityInputs,
   });
 
@@ -100,7 +100,7 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     orgId,
     profile: decryptedProfile,
     storedVersion: searchProjectionVersion,
-    wrappedVaultKey: detail.wrappedVaultKey,
+    vaultAccess: detail.vaultAccess,
     enabled: canEditCandidate,
   });
 
@@ -110,7 +110,7 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     form: detail.formSubmission?.formSnapshot ?? null,
     answers: decryptedData,
     storedVersion: detail.formSubmission?.fieldProjectionVersion ?? null,
-    wrappedVaultKey: detail.wrappedVaultKey,
+    vaultAccess: detail.vaultAccess,
     enabled: canEditCandidate && detail.formSubmission?.canReadPrivate === true,
   });
 

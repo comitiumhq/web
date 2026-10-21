@@ -1,6 +1,4 @@
 import { useIsAuthenticated } from '@comitium/auth/use-is-authenticated';
-import { useSession } from '@comitium/auth/use-session';
-import { assertEncryptionKeyBundle } from '@comitium/crypto/key-bundle';
 import { API_ERROR_CODES, hasApiErrorCode } from '@comitium/schemas/api-errors';
 import { getErrorMessage } from '@comitium/schemas/error';
 import type { CandidateProfileInputValue } from '@comitium/schemas/forms/application-required-fields';
@@ -64,15 +62,12 @@ export function useApplyJob(params: { onCompleted: () => void; onZkIdentityRequi
   const queryClient = useQueryClient();
   const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
-  const { user } = useSession();
 
   const mutation = useMutation({
     mutationFn: async (input: SubmitApplicationParams) => {
       if (!isAuthenticated) {
         throw new Error('Sign in to apply');
       }
-
-      assertEncryptionKeyBundle(user);
 
       const result = await applyJobWorkflow({
         ...input,

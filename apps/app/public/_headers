@@ -1,5 +1,5 @@
 /assets/crypto.worker-*.js
-  Content-Security-Policy: default-src 'none'; script-src 'self'
+  Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src __COMITIUM_API_ORIGIN__
   X-Content-Type-Options: nosniff
 
 /assets/pdf.worker.min-*.mjs

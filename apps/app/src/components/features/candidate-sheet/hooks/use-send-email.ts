@@ -70,10 +70,12 @@ export function useSendEmail({
       setIsProcessing(true);
 
       let applicantPublicKey: PublicEncryptionKey | null;
+      let applicantKeyVersion: number | null;
 
       try {
         const result = await getRecipientKey(application.id);
         applicantPublicKey = result.publicKey;
+        applicantKeyVersion = result.userKeyVersion;
       } catch {
         toast.error('Failed to fetch recipient key');
         isProcessingRef.current = false;
@@ -104,6 +106,7 @@ export function useSendEmail({
           vaultPublicKey,
           vaultKeyVersion,
           applicantPublicKey,
+          applicantKeyVersion,
           messageDoc: data.messageDoc,
           messageHtml: data.messageHtml,
           applicantEmail,

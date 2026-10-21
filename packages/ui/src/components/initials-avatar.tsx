@@ -6,7 +6,6 @@ import { getNameInitials } from '../lib/get-name-initials';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
 
 interface AvatarIdentity {
-  walletAddress?: string | null;
   name?: string | null;
   email?: string | null;
 }

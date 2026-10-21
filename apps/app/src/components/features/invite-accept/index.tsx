@@ -1,9 +1,8 @@
-import { getPrivyAccountEmail } from '@comitium/auth/privy-account';
+import { useAuthClient } from '@comitium/auth/auth-context';
 import { useAccountReadiness } from '@comitium/auth/use-account-readiness';
 import { getErrorMessage } from '@comitium/schemas/error';
 import { Button } from '@comitium/ui/button';
 import { Spinner } from '@comitium/ui/spinner';
-import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from '@tanstack/react-router';
 import { CircleAlertIcon, CircleXIcon, ClockIcon, LinkIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -22,7 +21,7 @@ interface InviteAcceptPageProps {
 
 export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
   const navigate = useNavigate();
-  const { user: privyUser } = usePrivy();
+  const { data: auth } = useAuthClient().useSession();
   const { stage: accountStage } = useAccountReadiness();
   const logout = useLogout();
   const { data: invite, isLoading, error } = useQueryInvite(token);
@@ -31,7 +30,7 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
   const [logoutError, setLogoutError] = useState(false);
   const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
   const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  const accountEmail = getPrivyAccountEmail(privyUser);
+  const accountEmail = auth?.user.email ?? null;
   const pageState = resolveInvitePageState({
     token,
     isLoading,
@@ -60,10 +59,6 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
 
   const handleSignIn = useCallback(() => {
     navigate({ to: '/login', search: { returnTo } });
-  }, [navigate, returnTo]);
-
-  const handleCreateAccount = useCallback(() => {
-    navigate({ to: '/signup', search: { returnTo } });
   }, [navigate, returnTo]);
 
   const submitInvite = useCallback(() => {
@@ -147,18 +142,6 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
     );
   }
 
-  if (pageState === 'account_recovery') {
-    return (
-      <InviteCard invite={invite} title="We couldn't continue" description="Sign in again to join this workspace.">
-        <ErrorMessage message={logoutError ? "We couldn't finish signing out. Try again." : null} />
-        <Button size="lg" className="mt-3 w-full font-semibold" onClick={switchAccount} disabled={isSwitchingAccount}>
-          {isSwitchingAccount && <Spinner data-icon="inline-start" />}
-          Sign in again
-        </Button>
-      </InviteCard>
-    );
-  }
-
   if (pageState === 'login') {
     return (
       <InviteCard
@@ -172,13 +155,8 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
       >
         <div className="grid gap-3">
           <Button size="lg" className="w-full font-semibold" onClick={handleSignIn}>
-            Sign in
+            Continue
           </Button>
-          {!invite.isAccepted ? (
-            <Button variant="outline" size="lg" className="w-full font-semibold" onClick={handleCreateAccount}>
-              Create account
-            </Button>
-          ) : null}
         </div>
       </InviteCard>
     );
@@ -228,9 +206,9 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
 
         <Button
           type="button"
-          variant="ghost"
+          variant="text"
           size="sm"
-          className="w-full text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
+          className="w-full"
           onClick={switchAccount}
           disabled={isAccepting || isSwitchingAccount}
         >

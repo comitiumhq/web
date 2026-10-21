@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { unwrapDek, type WrappedKey, wrapDek } from '../envelope-key';
+import { unwrapDek, wrapDek } from '../envelope-key';
+import type { WrappedKey } from '../schemas/keys';
 import { generateVaultKeyPair } from '../vault-key';
 import { BASE64_RE } from './constants';
 import { mockWrappedKey, randomDek } from './crypto-helpers';

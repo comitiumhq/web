@@ -1,8 +1,9 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { criterionEvidenceContext } from '@comitium/crypto/context';
 import { type CriterionEvidence, criterionEvidenceSchema } from '@comitium/schemas/applications';
-import type { EncryptedEnvelope, WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope } from '@comitium/schemas/common';
 import { useEffect, useState } from 'react';
 
 export type CriterionEvidenceState =
@@ -16,7 +17,7 @@ interface UseCriterionEvidenceParams {
   criterionId: string;
   encryptedEvidence: EncryptedEnvelope | null;
   orgId: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   enabled: boolean;
 }
 
@@ -25,7 +26,7 @@ export function useCriterionEvidence({
   criterionId,
   encryptedEvidence,
   orgId,
-  wrappedVaultKey,
+  vaultAccess,
   enabled,
 }: UseCriterionEvidenceParams): CriterionEvidenceState {
   const [state, setState] = useState<CriterionEvidenceState>({ status: 'idle' });
@@ -36,7 +37,7 @@ export function useCriterionEvidence({
   }, [applicationId, criterionId, encryptedEvidence]);
 
   useEffect(() => {
-    if (!enabled || !encryptedEvidence || !wrappedVaultKey || !isCryptoActive) {
+    if (!enabled || !encryptedEvidence || !vaultAccess || !isCryptoActive) {
       return;
     }
 
@@ -47,7 +48,7 @@ export function useCriterionEvidence({
     CryptoProxy.decryptApplication(
       encryptedEvidence,
       orgId,
-      wrappedVaultKey,
+      vaultAccess,
       criterionEvidenceContext(orgId, applicationId, criterionId),
     )
       .then((payload) => criterionEvidenceSchema.parse(payload))
@@ -65,7 +66,7 @@ export function useCriterionEvidence({
     return () => {
       cancelled = true;
     };
-  }, [applicationId, criterionId, enabled, encryptedEvidence, isCryptoActive, orgId, wrappedVaultKey]);
+  }, [applicationId, criterionId, enabled, encryptedEvidence, isCryptoActive, orgId, vaultAccess]);
 
   return state;
 }

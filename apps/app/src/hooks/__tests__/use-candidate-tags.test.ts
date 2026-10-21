@@ -1,9 +1,10 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
-import type { EncryptedEnvelope, WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope } from '@comitium/schemas/common';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCandidateTags } from '@/lib/api/candidate-tags';
 import type { CandidateTag } from '@/lib/schemas/candidate-tags';
-import { mockWrappedKey } from '@/test/crypto-helpers';
+import { mockVaultAccess, mockWrappedKey } from '@/test/crypto-helpers';
 
 import { decryptTag, fetchDecryptedTags } from '../use-candidate-tags';
 
@@ -30,7 +31,7 @@ const TAG_CONTEXT = {
   fieldId: 'label',
 };
 
-const wrappedKey: WrappedKey = mockWrappedKey();
+const wrappedKey: VaultKeyAccess = mockVaultAccess();
 
 function envelope(suffix: string): EncryptedEnvelope {
   return {

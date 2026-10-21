@@ -1,8 +1,8 @@
-import type { EncryptedEnvelope } from '@comitium/crypto';
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope, VaultKeyAccess } from '@comitium/crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook } from 'vitest-browser-react';
 import type { ActivityFeedRow } from '@/lib/schemas/emails';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 import { useDecryptedNotes } from './use-decrypted-notes';
 
 interface Deferred<T> {
@@ -17,7 +17,7 @@ const mocks = vi.hoisted(() => ({
   isVaultKeyError: false,
   isVaultKeyLoading: false,
   notes: [] as Array<{ id: string; content: EncryptedEnvelope }>,
-  wrappedVaultKey: { ek: 'wrapped-vault-key' } as WrappedKey | undefined,
+  vaultAccess: undefined as VaultKeyAccess | undefined,
 }));
 
 vi.mock('@comitium/auth/use-is-crypto-active', () => ({
@@ -40,9 +40,9 @@ vi.mock('@/hooks/queries/use-query-candidate-notes', () => ({
   useQueryCandidateNotes: () => ({ notes: mocks.notes, total: mocks.notes.length }),
 }));
 
-vi.mock('@/hooks/queries/use-query-wrapped-vault-key', () => ({
-  useQueryWrappedVaultKey: () => ({
-    data: mocks.wrappedVaultKey,
+vi.mock('@/hooks/queries/use-query-org-vault-access', () => ({
+  useQueryOrgVaultAccess: () => ({
+    data: mocks.vaultAccess,
     isError: mocks.isVaultKeyError,
     isLoading: mocks.isVaultKeyLoading,
   }),
@@ -89,7 +89,7 @@ beforeEach(() => {
   mocks.isVaultKeyError = false;
   mocks.isVaultKeyLoading = false;
   mocks.notes = [];
-  mocks.wrappedVaultKey = { ek: 'wrapped-vault-key' } as WrappedKey;
+  mocks.vaultAccess = mockVaultAccess();
 });
 
 describe('useDecryptedNotes', () => {
@@ -132,7 +132,7 @@ describe('useDecryptedNotes', () => {
     expect(mocks.decryptApplication).toHaveBeenCalledExactlyOnceWith(
       content,
       'org-1',
-      mocks.wrappedVaultKey,
+      mocks.vaultAccess,
       expect.objectContaining({ orgId: 'org-1', subjectId: 'candidate-1' }),
     );
   });

@@ -12,7 +12,7 @@ interface Deferred<T> {
 const mocks = vi.hoisted(() => ({
   decryptApplication: vi.fn(),
   isCryptoActive: true,
-  wrappedVaultKey: { ek: 'wrapped-vault-key' },
+  vaultAccess: { ek: 'wrapped-vault-key' },
 }));
 
 vi.mock('@comitium/auth/use-is-crypto-active', () => ({
@@ -26,8 +26,8 @@ vi.mock('@comitium/crypto', () => ({
   },
 }));
 
-vi.mock('./queries/use-query-wrapped-vault-key', () => ({
-  useQueryWrappedVaultKey: () => ({ data: mocks.wrappedVaultKey }),
+vi.mock('./queries/use-query-org-vault-access', () => ({
+  useQueryOrgVaultAccess: () => ({ data: mocks.vaultAccess }),
 }));
 
 function deferred<T>(): Deferred<T> {
@@ -65,7 +65,7 @@ function application(candidateId: string, ciphertext: string) {
 beforeEach(() => {
   mocks.decryptApplication.mockReset();
   mocks.isCryptoActive = true;
-  mocks.wrappedVaultKey = { ek: 'wrapped-vault-key' };
+  mocks.vaultAccess = { ek: 'wrapped-vault-key' };
 });
 
 describe('useDecryptCandidateNames', () => {

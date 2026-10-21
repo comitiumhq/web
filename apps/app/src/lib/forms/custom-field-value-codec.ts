@@ -1,6 +1,6 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy, isSearchableCustomFieldType, type PublicEncryptionKey } from '@comitium/crypto';
 import { customFieldValueContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import type { FieldTypeId } from '@comitium/schemas/forms';
 
 interface EncodeCandidateCustomFieldValueParams {
@@ -11,7 +11,7 @@ interface EncodeCandidateCustomFieldValueParams {
   value: unknown;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: WrappedKey;
+  vaultAccess: VaultKeyAccess;
 }
 
 export async function encodeCandidateCustomFieldValue({
@@ -22,7 +22,7 @@ export async function encodeCandidateCustomFieldValue({
   value,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
 }: EncodeCandidateCustomFieldValueParams) {
   const encryptedValue = await CryptoProxy.encryptApplication(
     vaultPublicKey,
@@ -32,7 +32,7 @@ export async function encodeCandidateCustomFieldValue({
   );
 
   const valueHash = isSearchableCustomFieldType(fieldType)
-    ? await CryptoProxy.hashCustomFieldValue(orgId, wrappedVaultKey, fieldId, fieldType, value)
+    ? await CryptoProxy.hashCustomFieldValue(orgId, vaultAccess, fieldId, fieldType, value)
     : undefined;
 
   return { encryptedValue, valueHash };

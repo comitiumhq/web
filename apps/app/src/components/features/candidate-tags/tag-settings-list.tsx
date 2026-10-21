@@ -17,7 +17,7 @@ import { TableSkeleton, type TableSkeletonColumn } from '@comitium/ui/table-skel
 import { ArchiveIcon, CircleAlertIcon, InfoIcon, LockIcon, type LucideIcon, TagIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EntitySettingsPage } from '@/components/features/settings-library/entity-settings-page';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { useCandidateTags } from '@/hooks/use-candidate-tags';
 import type { DecryptedCandidateTag } from '@/lib/schemas/candidate-tags';
 import { isDefined } from '@/lib/utils';
@@ -49,7 +49,7 @@ interface TagSettingsListProps {
 export function TagSettingsList({ orgId }: TagSettingsListProps) {
   const { tags, isLoading: isTagsLoading, error } = useCandidateTags(orgId);
   const { isCryptoActive, ensureUnlocked } = useCryptoUnlock();
-  const wrappedVaultKeyQuery = useQueryWrappedVaultKey(orgId);
+  const vaultAccessQuery = useQueryOrgVaultAccess(orgId);
   const [tab, setTab] = useState<TabValue>('active');
   const [page, setPage] = useState(1);
   const [editTag, setEditTag] = useState<DecryptedCandidateTag | null>(null);
@@ -64,10 +64,10 @@ export function TagSettingsList({ orgId }: TagSettingsListProps) {
   const pageRows = visibleTags.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const pageCount = Math.max(1, Math.ceil(visibleTags.length / PAGE_SIZE));
   const totalCount = tags.length;
-  const isPreparingKeys = isCryptoActive && wrappedVaultKeyQuery.isLoading;
+  const isPreparingKeys = isCryptoActive && vaultAccessQuery.isLoading;
   const isLoading = isTagsLoading || isPreparingKeys;
-  const hasWrappedVaultKey = isDefined(wrappedVaultKeyQuery.data);
-  const canCreateTag = isCryptoActive && hasWrappedVaultKey && !isLoading && !error && totalCount < MAX_TAGS;
+  const hasVaultAccess = isDefined(vaultAccessQuery.data);
+  const canCreateTag = isCryptoActive && hasVaultAccess && !isLoading && !error && totalCount < MAX_TAGS;
 
   useEffect(() => {
     if (page > pageCount) {

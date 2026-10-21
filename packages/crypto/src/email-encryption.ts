@@ -35,10 +35,10 @@ export async function decryptEmailContentWithVaultKey<T = unknown>(
   return decryptEnvelope<T>(envelope, context, { recipient: 'org_vault', privateKey: vaultPrivateKey });
 }
 
-export async function decryptEmailContentWithPersonalKey<T = unknown>(
+export async function decryptEmailContentWithUserKey<T = unknown>(
   envelope: EncryptedEnvelope,
-  personalPrivateKey: Uint8Array,
+  userPrivateKey: Uint8Array,
   context: CryptoContextInput,
 ): Promise<T> {
-  return decryptEnvelope<T>(envelope, context, { recipient: 'applicant', privateKey: personalPrivateKey });
+  return decryptEnvelope<T>(envelope, context, { recipient: 'applicant', privateKey: userPrivateKey });
 }

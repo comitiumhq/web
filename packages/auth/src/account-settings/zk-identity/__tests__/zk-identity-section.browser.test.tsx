@@ -90,7 +90,7 @@ function renderSection(api: ZkIdentityApi) {
 
   return render(
     <QueryClientProvider client={client}>
-      <ZkIdentitySection api={api} queryKey={['account', 'zk-identity', 'privy-user-1']} />
+      <ZkIdentitySection api={api} queryKey={['account', 'zk-identity', 'product-user-1']} />
     </QueryClientProvider>,
   );
 }

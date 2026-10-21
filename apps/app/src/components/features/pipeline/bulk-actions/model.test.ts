@@ -17,6 +17,7 @@ describe('getTargetLabel', () => {
         requiresEmail: false,
         childOperationId: null,
         recipientPublicKey: null,
+        recipientKeyVersion: null,
         deliveryGrant: null,
       },
       pipelineApplication: null,

@@ -16,20 +16,18 @@ describe('authSearchSchema', () => {
 });
 
 describe('isAuthRoutePath', () => {
-  it.each(['/login', '/login/help', '/signup', '/signup/help'])('recognizes auth route %s', (value) => {
+  it.each(['/login', '/login/help'])('recognizes auth route %s', (value) => {
     expect(isAuthRoutePath(value)).toBe(true);
   });
 
-  it.each(['/', '/login-help', '/signup-complete'])('rejects non-auth route %s', (value) => {
+  it.each(['/', '/login-help'])('rejects non-auth route %s', (value) => {
     expect(isAuthRoutePath(value)).toBe(false);
   });
 });
 
 describe('buildAuthRoute', () => {
   it('preserves a complete internal destination as one encoded search value', () => {
-    expect(buildAuthRoute('/login', '/account?source=menu#methods')).toBe(
-      '/login?returnTo=%2Faccount%3Fsource%3Dmenu%23methods',
-    );
+    expect(buildAuthRoute('/account?source=menu#methods')).toBe('/login?returnTo=%2Faccount%3Fsource%3Dmenu%23methods');
   });
 });
 
@@ -57,12 +55,9 @@ describe('resolveInternalReturnTo', () => {
 });
 
 describe('resolveNonAuthReturnTo', () => {
-  it.each(['/login', '/login?returnTo=%2F', '/login/help', '/signup', '/signup?returnTo=%2F', '/signup/help'])(
-    'rejects an auth route target %s',
-    (value) => {
-      expect(resolveNonAuthReturnTo(value, '/')).toBe('/');
-    },
-  );
+  it.each(['/login', '/login?returnTo=%2F', '/login/help'])('rejects an auth route target %s', (value) => {
+    expect(resolveNonAuthReturnTo(value, '/')).toBe('/');
+  });
 
   it('preserves a non-auth internal target', () => {
     expect(resolveNonAuthReturnTo('/org/123/jobs', '/')).toBe('/org/123/jobs');

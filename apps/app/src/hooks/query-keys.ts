@@ -2,8 +2,9 @@ import type { QueryKey } from '@tanstack/react-query';
 
 export const qk = {
   auth: {
-    sessionRoot: () => ['auth', 'session'] as const,
-    session: (privyUserId: string | null) => ['auth', 'session', privyUserId] as const,
+    accountRoot: () => ['auth', 'account'] as const,
+    account: (authUserId: string | null) => ['auth', 'account', authUserId] as const,
+    methods: (authUserId: string) => ['auth', 'methods', authUserId] as const,
   },
   account: {
     zkIdentity: (userId: string) => ['account', 'zk-identity', userId] as const,

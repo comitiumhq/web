@@ -8,7 +8,7 @@ import type { EmailListResponse, EmailResponse } from '@/lib/schemas/emails';
 
 /**
  * Fetch encrypted emails for an application.
- * Returns encrypted content — caller must decrypt via vault key or personal key.
+ * Returns encrypted content — caller must decrypt via vault key or user key.
  */
 export function useQueryEmails(applicationId: string | null) {
   const query = useInfiniteQuery<EmailListResponse>({

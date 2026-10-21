@@ -49,6 +49,7 @@ function target(
         requiresEmail: true,
         childOperationId: null,
         recipientPublicKey,
+        recipientKeyVersion: recipientPublicKey ? 1 : null,
         deliveryGrant: {
           id: `grant-${id}`,
           recipient: `processor:grant-${id}`,
@@ -66,6 +67,7 @@ function target(
       requiresEmail: true,
       childOperationId: null,
       recipientPublicKey,
+      recipientKeyVersion: recipientPublicKey ? 1 : null,
       deliveryGrant: {
         id: `grant-${id}`,
         recipient: `processor:grant-${id}`,

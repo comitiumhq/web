@@ -5,7 +5,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-
+import { cryptoWorkerHeaders } from '../../tooling/vite/crypto-worker-headers';
 import { ssrExclude } from '../../tooling/vite/ssr-exclude';
 
 export default defineConfig({
@@ -35,9 +35,10 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: ['@radix-ui/react-focus-scope', '@radix-ui/react-compose-refs', '@radix-ui/react-slot'],
+    include: ['@radix-ui/react-focus-scope', '@radix-ui/react-compose-refs', '@radix-ui/react-slot', 'pdf-lib'],
   },
   plugins: [
+    cryptoWorkerHeaders(),
     ssrExclude(),
     tsconfigPaths(),
     tailwindcss(),

@@ -1,6 +1,5 @@
-import type { PublicEncryptionKey } from '@comitium/crypto';
+import type { PublicEncryptionKey, VaultKeyAccess } from '@comitium/crypto';
 import { type CandidateProfile, formatCandidateLocation } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { httpsUrlSchema } from '@comitium/schemas/common';
 import { candidateLocationValueSchema } from '@comitium/schemas/forms/field-types/candidate-location';
 import { Button } from '@comitium/ui/button';
@@ -98,7 +97,7 @@ interface CandidateProfileEditSheetProps {
   profile: CandidateProfile | null;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: WrappedKey;
+  vaultAccess: VaultKeyAccess;
 }
 
 const FORM_ID = 'candidate-profile-edit-form';
@@ -111,7 +110,7 @@ export function CandidateProfileEditSheet({
   profile,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
 }: CandidateProfileEditSheetProps) {
   const { mutateAsync: updateProfile, isPending } = useUpdateCandidateProfile();
   const form = useForm<CandidateProfileFormValues>({
@@ -145,12 +144,12 @@ export function CandidateProfileEditSheet({
         profile: toCandidateProfile(values),
         vaultPublicKey,
         vaultKeyVersion,
-        wrappedVaultKey,
+        vaultAccess,
       });
 
       onOpenChange(false);
     },
-    [candidateId, onOpenChange, orgId, updateProfile, vaultKeyVersion, vaultPublicKey, wrappedVaultKey],
+    [candidateId, onOpenChange, orgId, updateProfile, vaultKeyVersion, vaultPublicKey, vaultAccess],
   );
 
   return (

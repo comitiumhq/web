@@ -1,3 +1,4 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type {
   ApplicationProcessingStatus,
   CandidateSheetStageActivity,
@@ -5,7 +6,6 @@ import type {
   CriterionSummary,
   ReviewStatus,
 } from '@comitium/schemas/applications';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
@@ -41,7 +41,7 @@ interface FeedbackTabProps {
   processing: ApplicationProcessingStatus | null;
   reviewStatus: ReviewStatus;
   access: FeedbackTabAccess;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   onReviewActivity: ((activity: ApplicationReviewActivity) => void) | null;
   onSubmitInterviewFeedback: ((event: InterviewEventRef) => void) | null;
 }
@@ -57,7 +57,7 @@ export function FeedbackTab({
   processing,
   reviewStatus,
   access,
-  wrappedVaultKey,
+  vaultAccess,
   onReviewActivity,
   onSubmitInterviewFeedback,
 }: FeedbackTabProps) {
@@ -124,7 +124,7 @@ export function FeedbackTab({
           assessment={criterionAssessments}
           summary={criterionSummary}
           orgId={orgId}
-          wrappedVaultKey={wrappedVaultKey}
+          vaultAccess={vaultAccess}
         />
       )}
       {feedbackState}
@@ -135,7 +135,7 @@ export function FeedbackTab({
             applicationId={applicationId}
             candidateId={candidateId}
             orgId={orgId}
-            wrappedVaultKey={wrappedVaultKey}
+            vaultAccess={vaultAccess}
             canProjectFormFields={access.canProjectFormFields}
             currentUserId={currentUserId}
             onReviewActivity={onReviewActivity}
@@ -187,7 +187,7 @@ interface GroupsListProps {
   applicationId: string | null;
   candidateId: string | null;
   orgId: string;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   canProjectFormFields: boolean;
   currentUserId: string;
   onReviewActivity: ((activity: ApplicationReviewActivity) => void) | null;
@@ -199,7 +199,7 @@ function GroupsList({
   applicationId,
   candidateId,
   orgId,
-  wrappedVaultKey,
+  vaultAccess,
   canProjectFormFields,
   currentUserId,
   onReviewActivity,
@@ -214,7 +214,7 @@ function GroupsList({
       ),
     [groups],
   );
-  const decryptedMap = useDecryptedSubmissions(allSubmissions, orgId, wrappedVaultKey);
+  const decryptedMap = useDecryptedSubmissions(allSubmissions, orgId, vaultAccess);
   const projectableSubmissions = useMemo<ProjectableFormSubmission[]>(
     () =>
       allSubmissions.flatMap((submission) => {

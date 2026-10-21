@@ -4,7 +4,6 @@ import { ALGORITHM_SUITE_VERSION } from '@comitium/crypto/version';
 import type { JSONContent } from '@tiptap/core';
 import { z } from 'zod';
 import { HMAC_SHA256_HEX_REGEX } from './patterns';
-import { walletAddressSchema } from './public';
 
 const PUBLIC_HTTPS_HOSTNAME_REGEX =
   /^(?!localhost$)(?!.*\.localhost$)(?!127(?:\.\d{1,3}){3}$)(?!0\.0\.0\.0$)(?!\[::1\]$).+$/i;
@@ -38,7 +37,6 @@ export const tipTapDocSchema = z.record(z.string(), z.unknown()) as z.ZodType<Ti
 // --- Display identity ---
 
 const displayIdentitySchema = z.object({
-  walletAddress: walletAddressSchema,
   name: z.string().nullable().optional(),
   email: z.string().nullable().optional(),
   avatarUrl: z.string().nullable().optional(),

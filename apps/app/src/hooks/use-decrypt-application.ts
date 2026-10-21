@@ -1,5 +1,5 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type AnswerBucket, decryptAnswerBuckets } from '@/lib/forms/decrypt-answers';
 
@@ -16,14 +16,14 @@ export function useDecryptApplication(
   submissionId: string | null,
   formId: string | null,
   answerEnvelopes: AnswerBucket[] | null,
-  wrappedVaultKey?: WrappedKey,
+  vaultAccess?: VaultKeyAccess,
 ) {
   const [state, setState] = useState<DecryptState>(INITIAL_STATE);
   const generationRef = useRef(0);
   const { canUnlock, ensureUnlocked, isCryptoActive } = useCryptoUnlock();
 
   const hasAnswers = !!answerEnvelopes && answerEnvelopes.length > 0;
-  const canDecrypt = hasAnswers && !!formId && canUnlock && !!wrappedVaultKey;
+  const canDecrypt = hasAnswers && !!formId && canUnlock && !!vaultAccess;
   const answerSetKey = `${orgId}:${submissionId ?? 'none'}`;
 
   const reset = useCallback(() => {
@@ -34,7 +34,7 @@ export function useDecryptApplication(
   useEffect(reset, [answerSetKey, reset]);
 
   const decrypt = useCallback(async () => {
-    if (!canDecrypt || !answerEnvelopes || !formId || !wrappedVaultKey) {
+    if (!canDecrypt || !answerEnvelopes || !formId || !vaultAccess) {
       return;
     }
 
@@ -45,7 +45,7 @@ export function useDecryptApplication(
     try {
       await ensureUnlocked();
 
-      const data = await decryptAnswerBuckets(orgId, formId, answerEnvelopes, wrappedVaultKey);
+      const data = await decryptAnswerBuckets(orgId, formId, answerEnvelopes, vaultAccess);
 
       if (generationRef.current === generation) {
         setState({ data, error: null, isDecrypting: false });
@@ -55,7 +55,7 @@ export function useDecryptApplication(
         setState({ ...INITIAL_STATE, error: 'Failed to decrypt data. Please try again.' });
       }
     }
-  }, [canDecrypt, answerEnvelopes, formId, wrappedVaultKey, orgId, ensureUnlocked]);
+  }, [canDecrypt, answerEnvelopes, formId, vaultAccess, orgId, ensureUnlocked]);
 
   useEffect(() => {
     if (hasAnswers && isCryptoActive && !state.data && !state.error && !state.isDecrypting) {

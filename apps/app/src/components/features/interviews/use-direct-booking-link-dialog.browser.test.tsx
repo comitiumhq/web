@@ -26,7 +26,6 @@ const MEMBER_ID = '44444444-4444-4444-8444-444444444444';
 const vaultPublicKey = { v: 1, xwing: 'vault-key' } as PublicEncryptionKey;
 const member = {
   userId: MEMBER_ID,
-  walletAddress: '0x0000000000000000000000000000000000000001',
   email: 'interviewer@example.com',
   name: 'Interviewer',
   jobTitle: null,

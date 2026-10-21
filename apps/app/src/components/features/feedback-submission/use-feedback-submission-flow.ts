@@ -1,5 +1,5 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { getErrorMessage } from '@comitium/schemas/error';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { useEffect, useMemo, useState } from 'react';
@@ -31,7 +31,7 @@ interface UseFeedbackSubmissionFlowParams {
   orgId: string;
   source: FeedbackSubmissionSource | null;
   currentUserId: string | undefined;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }
 
 export interface FeedbackSubmissionFlowResult {
@@ -78,7 +78,7 @@ async function buildEditState(
   previous: FeedbackSubmission,
   applicationId: string,
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  vaultAccess: VaultKeyAccess,
   ensureUnlocked: () => Promise<void>,
 ): Promise<ReadyState> {
   await ensureUnlocked();
@@ -88,7 +88,7 @@ async function buildEditState(
     applicationId,
     previous.formId,
     previous.answerEnvelopes,
-    wrappedVaultKey,
+    vaultAccess,
   );
 
   return {
@@ -126,7 +126,7 @@ export function useFeedbackSubmissionFlow({
   orgId,
   source,
   currentUserId,
-  wrappedVaultKey,
+  vaultAccess,
 }: UseFeedbackSubmissionFlowParams): FeedbackSubmissionFlowResult {
   const { data: submissions, isLoading: isLoadingSubmissions } = useQueryFeedbackSubmissions(
     open ? applicationId : undefined,
@@ -140,7 +140,7 @@ export function useFeedbackSubmissionFlow({
     [submissions, currentUserId, source],
   );
 
-  const editVaultKey = ownPrevious ? wrappedVaultKey : undefined;
+  const editVaultAccess = ownPrevious ? vaultAccess : undefined;
 
   const [state, setState] = useState<FormState>({ status: 'idle' });
 
@@ -158,11 +158,11 @@ export function useFeedbackSubmissionFlow({
     let ready: Promise<ReadyState>;
 
     if (ownPrevious) {
-      if (!editVaultKey) {
+      if (!editVaultAccess) {
         return;
       }
 
-      ready = buildEditState(ownPrevious, applicationId, orgId, editVaultKey, ensureUnlocked);
+      ready = buildEditState(ownPrevious, applicationId, orgId, editVaultAccess, ensureUnlocked);
     } else {
       ready = buildCreateState(resolveForm, applicationId, source);
     }
@@ -193,14 +193,14 @@ export function useFeedbackSubmissionFlow({
     isLoadingSubmissions,
     ownPrevious,
     orgId,
-    editVaultKey,
+    editVaultAccess,
     resolveForm,
     applicationId,
     ensureUnlocked,
   ]);
 
   const isWaitingForPrerequisites =
-    open && source !== null && (!currentUserId || (ownPrevious !== null && !editVaultKey));
+    open && source !== null && (!currentUserId || (ownPrevious !== null && !editVaultAccess));
 
   if (state.status === 'ready') {
     return {

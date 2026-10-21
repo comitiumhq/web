@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { useQueryApplication } from '@/hooks/queries/use-query-application';
 import { useQueryApplicationFormSubmission } from '@/hooks/queries/use-query-application-form-submission';
 import { useQueryEmails } from '@/hooks/queries/use-query-emails';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { useQueryOrgVaultKey } from '@/hooks/queries/use-query-org-vault-key';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
 import { useDecryptApplication } from '@/hooks/use-decrypt-application';
 import { useDecryptEmails } from '@/hooks/use-decrypt-emails';
 import { useDecryptFileMetadata } from '@/hooks/use-decrypt-file-metadata';
@@ -21,11 +21,11 @@ export function useApplicationDetail({ applicationId, orgId, open }: UseApplicat
   const { data: application, isLoading: isLoadingApplication } = useQueryApplication(open ? applicationId : null);
   const { data: vaultKeyData } = useQueryOrgVaultKey(open ? orgId : undefined);
   const {
-    data: wrappedVaultKey,
-    isLoading: isLoadingWrappedVaultKey,
-    isError: isWrappedVaultKeyError,
-    refetch: refetchWrappedVaultKey,
-  } = useQueryWrappedVaultKey(open ? orgId : undefined);
+    data: vaultAccess,
+    isLoading: isLoadingVaultAccess,
+    isError: isVaultAccessError,
+    refetch: refetchVaultAccess,
+  } = useQueryOrgVaultAccess(open ? orgId : undefined);
   const emailsQuery = useQueryEmails(open && application ? application.id : null);
   const encryptedEmails = emailsQuery.data;
   const hasEncryptedEmails = Boolean(encryptedEmails?.length);
@@ -36,7 +36,7 @@ export function useApplicationDetail({ applicationId, orgId, open }: UseApplicat
     isDecrypting: isDecryptingEmails,
     reset: resetEmails,
     retry: retryEmailDecryption,
-  } = useDecryptEmails(orgId, application?.id ?? null, encryptedEmails, true, wrappedVaultKey);
+  } = useDecryptEmails(orgId, application?.id ?? null, encryptedEmails, true, vaultAccess);
 
   const formSubmissionQuery = useQueryApplicationFormSubmission(open && application ? application.id : null);
   const formSubmission = formSubmissionQuery.data;
@@ -52,7 +52,7 @@ export function useApplicationDetail({ applicationId, orgId, open }: UseApplicat
     formSubmission?.id ?? null,
     formSubmission?.formId ?? null,
     formSubmission?.answerEnvelopes ?? null,
-    wrappedVaultKey,
+    vaultAccess,
   );
 
   const {
@@ -66,7 +66,7 @@ export function useApplicationDetail({ applicationId, orgId, open }: UseApplicat
     application?.id ?? null,
     !!application?.hasResume,
     application?.resumeFileId ?? null,
-    wrappedVaultKey,
+    vaultAccess,
   );
 
   const {
@@ -78,13 +78,13 @@ export function useApplicationDetail({ applicationId, orgId, open }: UseApplicat
   } = useDecryptFileMetadata(
     orgId,
     formSubmission?.files.map((file) => ({ ...file, kind: 'attachment' })) ?? null,
-    wrappedVaultKey,
+    vaultAccess,
   );
 
   const { download: downloadApplicationFile, downloadingQuestionId } = useDownloadApplicationFile({
     orgId,
     applicationId: application?.id ?? null,
-    wrappedVaultKey,
+    vaultAccess,
   });
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export function useApplicationDetail({ applicationId, orgId, open }: UseApplicat
     application: application ?? null,
     isLoadingApplication,
     vaultKeyData,
-    wrappedVaultKey,
+    vaultAccess,
     formSubmission,
     decryptedData,
     formDecryptionError,
@@ -119,9 +119,9 @@ export function useApplicationDetail({ applicationId, orgId, open }: UseApplicat
     isLoadingEmails: emailsQuery.isLoading,
     isEmailsError: emailsQuery.isError && encryptedEmails === undefined,
     refetchEmails: emailsQuery.refetch,
-    isLoadingEmailDecryptionKey: hasEncryptedEmails && isLoadingWrappedVaultKey && !wrappedVaultKey,
-    isEmailDecryptionKeyError: hasEncryptedEmails && isWrappedVaultKeyError && !wrappedVaultKey,
-    refetchEmailDecryptionKey: refetchWrappedVaultKey,
+    isLoadingEmailDecryptionKey: hasEncryptedEmails && isLoadingVaultAccess && !vaultAccess,
+    isEmailDecryptionKeyError: hasEncryptedEmails && isVaultAccessError && !vaultAccess,
+    refetchEmailDecryptionKey: refetchVaultAccess,
     fetchNextEmailsPage: emailsQuery.fetchNextPage,
     hasNextEmailsPage: Boolean(emailsQuery.hasNextPage),
     isFetchingNextEmailsPage: emailsQuery.isFetchingNextPage,

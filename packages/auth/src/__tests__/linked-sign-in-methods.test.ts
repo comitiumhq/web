@@ -1,69 +1,41 @@
-import type { LinkedAccountWithMetadata, User } from '@privy-io/react-auth';
 import { describe, expect, it } from 'vitest';
+import type { IdentityUser } from '../auth-client';
+import { canUnlinkGoogle, getLinkedSignInMethods } from '../linked-sign-in-methods';
+import { linkedAuthAccountsSchema } from '../schemas/identity';
+import { AUTH_USER_ID } from './identity-fixtures';
 
-import {
-  canUnlinkGoogle,
-  getLinkedSignInMethods,
-  hasLinkedEmailSignIn,
-  hasLinkedPasskey,
-  isRampAccountReady,
-} from '../linked-sign-in-methods';
+const user: IdentityUser = {
+  id: AUTH_USER_ID,
+  email: 'person@example.com',
+  emailVerified: true,
+};
+const google = { id: 'local-google-account-id', providerId: 'google' };
+const passkeys = [{ id: 'first' }, { id: 'second' }];
 
-function account(value: Partial<LinkedAccountWithMetadata> & Pick<LinkedAccountWithMetadata, 'type'>) {
-  return value as LinkedAccountWithMetadata;
-}
+describe('native linked sign-in methods', () => {
+  it('uses the verified login email and preserves multiple passkeys', () => {
+    const methods = getLinkedSignInMethods(user, [google], passkeys);
 
-function user(...linkedAccounts: LinkedAccountWithMetadata[]) {
-  return { linkedAccounts } as User;
-}
-
-const email = account({ type: 'email', address: 'person@example.com' });
-const google = account({ type: 'google_oauth', email: 'person@gmail.com', subject: 'google-subject' });
-const passkey = account({ type: 'passkey', credentialId: 'credential', enrolledInMfa: false });
-const wallet = account({ type: 'wallet', address: '0x1234' });
-
-describe('getLinkedSignInMethods', () => {
-  it('selects only supported sign-in methods and preserves multiple passkeys', () => {
-    const secondPasskey = account({ type: 'passkey', credentialId: 'second', enrolledInMfa: false });
-    const methods = getLinkedSignInMethods(user(wallet, email, passkey, google, secondPasskey));
-
-    expect(methods.email).toBe(email);
-    expect(methods.google).toBe(google);
-    expect(methods.passkeys).toEqual([passkey, secondPasskey]);
+    expect(methods.email).toEqual({ address: user.email });
+    expect(methods.google).toEqual({ accountId: google.id });
+    expect(methods.passkeys).toEqual(passkeys);
   });
 
-  it('returns an empty method set without a user', () => {
-    expect(getLinkedSignInMethods(null)).toEqual({ email: null, google: null, passkeys: [] });
-  });
-});
+  it('uses the local account row ID for unlink rather than the external Google subject', () => {
+    const accounts = linkedAuthAccountsSchema.parse([{ ...google, accountId: 'external-google-subject' }]);
 
-describe('sign-in readiness policies', () => {
-  it('counts email OTP or Google as an email-based sign-in method', () => {
-    expect(hasLinkedEmailSignIn(user(email))).toBe(true);
-    expect(hasLinkedEmailSignIn(user(google))).toBe(true);
-    expect(hasLinkedEmailSignIn(user(wallet))).toBe(false);
+    expect(getLinkedSignInMethods(user, accounts, []).google?.accountId).toBe(google.id);
   });
 
-  it('derives passkey presence from linked accounts rather than MFA enrollment', () => {
-    const mfaPasskey = account({ type: 'passkey', credentialId: 'mfa-passkey', enrolledInMfa: true });
+  it('never offers an unverified email as the remaining OTP sign-in method', () => {
+    const methods = getLinkedSignInMethods({ ...user, emailVerified: false }, [google], passkeys);
 
-    expect(hasLinkedPasskey(user(passkey))).toBe(true);
-    expect(hasLinkedPasskey(user(mfaPasskey))).toBe(true);
-    expect(hasLinkedPasskey(user(wallet))).toBe(false);
+    expect(methods.email).toBeNull();
+    expect(canUnlinkGoogle(methods)).toBe(false);
   });
 
-  it('requires a passkey and an email-based method for a future ramp action', () => {
-    expect(isRampAccountReady(user(passkey, email))).toBe(true);
-    expect(isRampAccountReady(user(passkey, google))).toBe(true);
-    expect(isRampAccountReady(user(passkey))).toBe(false);
-    expect(isRampAccountReady(user(email))).toBe(false);
-    expect(isRampAccountReady(user(wallet))).toBe(false);
-  });
-
-  it('allows Google removal only when email OTP remains', () => {
-    expect(canUnlinkGoogle(getLinkedSignInMethods(user(google, email)))).toBe(true);
-    expect(canUnlinkGoogle(getLinkedSignInMethods(user(google, passkey)))).toBe(false);
-    expect(canUnlinkGoogle(getLinkedSignInMethods(user(google, wallet)))).toBe(false);
-    expect(canUnlinkGoogle(getLinkedSignInMethods(user(email, passkey)))).toBe(false);
+  it('allows removing Google only while verified email OTP remains', () => {
+    expect(canUnlinkGoogle(getLinkedSignInMethods(user, [google], []))).toBe(true);
+    expect(canUnlinkGoogle(getLinkedSignInMethods(user, [], passkeys))).toBe(false);
   });
 });

@@ -1,7 +1,7 @@
+import { AuthGuard } from '@comitium/auth/auth-guard';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { AuthGuard } from '@/components/auth/auth-guard';
 import { OrganizationAccessUnavailable } from '@/components/auth/organization-access-unavailable';
 import { useQueryMyOrgs } from '@/hooks/queries/use-query-my-orgs';
 import { useQueryOrgCreation } from '@/hooks/queries/use-query-org-creation';

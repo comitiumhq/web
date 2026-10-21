@@ -1,10 +1,14 @@
 import { wrappedKeySchema } from '@comitium/schemas/common';
 import { jobAccessRoleSchema } from '@comitium/schemas/jobs';
-import { uuidSchema, walletAddressSchema } from '@comitium/schemas/public';
+import { uuidSchema } from '@comitium/schemas/public';
 import { z } from 'zod';
 import { orgRoleSchema } from './org';
 
-const vaultGrantSchema = z.object({ wrappedVaultKey: wrappedKeySchema });
+const vaultGrantSchema = z.object({
+  wrappedVaultKey: wrappedKeySchema,
+  vaultKeyVersion: z.number().int().positive(),
+  recipientKeyVersion: z.number().int().positive(),
+});
 export type VaultGrant = z.infer<typeof vaultGrantSchema>;
 
 export const orgLocationTypeSchema = z.enum(['remote', 'hybrid', 'on_site']);
@@ -66,7 +70,6 @@ const departmentGrantSchema = z.object({
   departmentName: z.string(),
   memberId: uuidSchema,
   userId: uuidSchema,
-  walletAddress: walletAddressSchema,
   memberName: nullableText,
   memberEmail: nullableText,
   role: jobAccessRoleSchema,
@@ -91,7 +94,6 @@ const memberDirectJobAssignmentSchema = z.object({
   jobStatus: directJobAssignmentStatusSchema,
   memberId: uuidSchema,
   userId: uuidSchema,
-  walletAddress: walletAddressSchema,
   memberName: nullableText,
   memberEmail: nullableText,
   role: jobAccessRoleSchema,
@@ -110,7 +112,6 @@ export type MemberDirectJobAssignment = z.infer<typeof memberDirectJobAssignment
 export const memberAccessResponseSchema = z.object({
   memberId: uuidSchema,
   userId: uuidSchema,
-  walletAddress: walletAddressSchema,
   memberName: nullableText,
   memberEmail: nullableText,
   isActive: z.boolean(),

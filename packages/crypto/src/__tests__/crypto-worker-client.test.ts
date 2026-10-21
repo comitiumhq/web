@@ -10,8 +10,8 @@ interface MockRemote {
   [Comlink.releaseProxy]: MockFunction;
 }
 
-vi.mock('comlink', () => ({
-  releaseProxy: Symbol('releaseProxy'),
+vi.mock('comlink', async (importOriginal) => ({
+  ...(await importOriginal<typeof Comlink>()),
   wrap: vi.fn(),
 }));
 

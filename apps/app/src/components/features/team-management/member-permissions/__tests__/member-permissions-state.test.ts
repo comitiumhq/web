@@ -4,14 +4,12 @@ import type { OrgTeamMember } from '@/lib/schemas/org';
 
 import { getMemberPermissionsState } from '../member-permissions-state';
 
-const MEMBER_ADDRESS = '0x1111111111111111111111111111111111111111';
 const MEMBER_USER_ID = '11111111-1111-4111-8111-111111111111';
 const CALLER_USER_ID = '22222222-2222-4222-8222-222222222222';
 
 function makeMember(overrides: Partial<OrgTeamMember> = {}): OrgTeamMember {
   return {
     userId: MEMBER_USER_ID,
-    walletAddress: MEMBER_ADDRESS,
     email: 'member@example.com',
     name: 'Member',
     jobTitle: null,

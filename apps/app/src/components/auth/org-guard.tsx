@@ -20,15 +20,11 @@ interface OrgGuardProps {
 }
 
 export function OrgGuard({ orgId, loadingFallback, children }: OrgGuardProps) {
-  const { isSignedIn, isSessionLoading, needsSessionRecovery } = useSession();
+  const { isSignedIn, isSessionLoading } = useSession();
   const { org, hasSessionExpired, isWaitingForOrganization } = useOrgGuardState(orgId, isSignedIn);
 
   if (isSessionLoading && !org) {
     return loadingFallback ?? <PageLoader />;
-  }
-
-  if (needsSessionRecovery) {
-    return <AuthSessionRecovery />;
   }
 
   if (!isSessionLoading && !isSignedIn) {

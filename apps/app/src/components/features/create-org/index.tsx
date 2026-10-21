@@ -1,15 +1,11 @@
-import { Button } from '@comitium/ui/button';
-import { PageHeader } from '@comitium/ui/page-header';
 import { PageLoader } from '@comitium/ui/page-loader';
 import { RouteNotFound } from '@comitium/ui/route-not-found';
-import { Skeleton } from '@comitium/ui/skeleton';
-import { Spinner } from '@comitium/ui/spinner';
-import { CircleAlertIcon } from 'lucide-react';
 import { type ReactNode, useCallback } from 'react';
 import { useQueryOrgCreation } from '@/hooks/queries/use-query-org-creation';
 
-import { CreateOrgStep } from './create-org-step';
+import { CreateOrgError, CreateOrgLoading } from './creation-states';
 import { EmailVerificationStep } from './email-verification-step';
+import { OrganizationCreation } from './organization-creation';
 
 export function CreateOrg() {
   const { data: creation, error: creationError, isFetching: isCreationFetching, refetch } = useQueryOrgCreation();
@@ -45,7 +41,7 @@ export function CreateOrg() {
   if (creation.status === 'ready') {
     return (
       <CreateOrgLayout>
-        <CreateOrgStep domain={creation.domain} email={creation.email} />
+        <OrganizationCreation />
       </CreateOrgLayout>
     );
   }
@@ -57,44 +53,14 @@ export function CreateOrg() {
   );
 }
 
-function CreateOrgLayout({ children }: { children: ReactNode }) {
+interface CreateOrgLayoutProps {
+  children: ReactNode;
+}
+
+function CreateOrgLayout({ children }: CreateOrgLayoutProps) {
   return (
     <div className="mx-auto w-full max-w-sm">
       <section aria-label="Organization setup">{children}</section>
-    </div>
-  );
-}
-
-function CreateOrgError({ isRetrying, onRetry }: { isRetrying: boolean; onRetry: () => void }) {
-  return (
-    <div className="space-y-6 text-center">
-      <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive-text">
-        <CircleAlertIcon className="size-5" />
-      </div>
-      <PageHeader
-        title="Couldn’t load organization setup"
-        description="Check your connection and try again."
-        className="justify-center text-center [&>div]:w-full"
-      />
-      <Button type="button" variant="outline" size="lg" className="w-full" onClick={onRetry} disabled={isRetrying}>
-        {isRetrying && <Spinner data-icon="inline-start" />}
-        {isRetrying ? 'Retrying...' : 'Try again'}
-      </Button>
-    </div>
-  );
-}
-
-function CreateOrgLoading() {
-  return (
-    <div className="space-y-8">
-      <div className="space-y-3">
-        <Skeleton className="mx-auto h-7 w-56" />
-        <Skeleton className="mx-auto h-4 w-72 max-w-full" />
-      </div>
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full rounded-xl" />
-        <Skeleton className="h-10 w-full rounded-full" />
-      </div>
     </div>
   );
 }

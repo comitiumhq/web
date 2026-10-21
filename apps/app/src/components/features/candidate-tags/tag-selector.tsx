@@ -9,8 +9,8 @@ import {
   useCreateCandidateTag,
   useUnassignTagFromCandidate,
 } from '@/hooks/mutations/use-candidate-tag';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { useQueryOrgVaultKey } from '@/hooks/queries/use-query-org-vault-key';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
 import { useCandidateTags } from '@/hooks/use-candidate-tags';
 import { usePermissions } from '@/hooks/use-permissions';
 import { type DecryptedCandidateTag, tagLabelFieldSchema } from '@/lib/schemas/candidate-tags';
@@ -39,7 +39,7 @@ export function TagSelector({
 
   const { tags, tagMap } = useCandidateTags(orgId);
   const { data: vaultKey } = useQueryOrgVaultKey(orgId);
-  const { data: wrappedVaultKey } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess } = useQueryOrgVaultAccess(orgId);
 
   const { mutateAsync: createTagAsync, isPending: isCreating } = useCreateCandidateTag();
   const { mutate: assign, mutateAsync: assignAsync, isPending: isAssigning } = useAssignTagToCandidate();
@@ -137,7 +137,7 @@ export function TagSelector({
   };
 
   const handleCreateAndAssign = useCallback(async () => {
-    if (!vaultKey?.vaultPublicKey || !wrappedVaultKey || !candidateId) {
+    if (!vaultKey?.vaultPublicKey || !vaultAccess || !candidateId) {
       return;
     }
 
@@ -155,7 +155,7 @@ export function TagSelector({
         label: trimmed,
         vaultPublicKey: vaultKey.vaultPublicKey,
         vaultKeyVersion: vaultKey.keyVersion,
-        wrappedVaultKey,
+        vaultAccess,
       });
 
       await assignAsync({ candidateId, tagId: created.data.id, orgId });
@@ -171,7 +171,7 @@ export function TagSelector({
     inputValue,
     orgId,
     vaultKey?.vaultPublicKey,
-    wrappedVaultKey,
+    vaultAccess,
   ]);
 
   if (!canAssign && assignedTags.length === 0) {

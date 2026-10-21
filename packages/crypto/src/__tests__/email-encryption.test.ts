@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CryptoContextInput } from '../context';
 import {
-  decryptEmailContentWithPersonalKey,
+  decryptEmailContentWithUserKey,
   decryptEmailContentWithVaultKey,
   type EncryptedEnvelope,
   encryptEmailContent,
@@ -41,7 +41,7 @@ describe('email-encryption', () => {
   function encryptTestEmail(keys: ReturnType<typeof setupKeys>, data: unknown): Promise<EncryptedEnvelope> {
     return encryptEmailContent(data, emailContext, [
       orgVaultRecipient(keys.vaultPublicKey, 1),
-      applicantRecipient(keys.applicantPublicKey),
+      applicantRecipient(keys.applicantPublicKey, 1),
     ]);
   }
 
@@ -83,7 +83,7 @@ describe('email-encryption', () => {
 
       const encrypted = await encryptTestEmail(keys, data);
       const vaultDecrypted = await decryptEmailContentWithVaultKey(encrypted, keys.vaultPrivateKey, emailContext);
-      const applicantDecrypted = await decryptEmailContentWithPersonalKey(
+      const applicantDecrypted = await decryptEmailContentWithUserKey(
         encrypted,
         keys.applicantPrivateKey,
         emailContext,
@@ -95,7 +95,7 @@ describe('email-encryption', () => {
         decryptEmailContentWithVaultKey(encrypted, keys.vaultPrivateKey, wrongEmailContext),
       ).rejects.toThrow();
       await expect(
-        decryptEmailContentWithPersonalKey(encrypted, keys.applicantPrivateKey, wrongEmailContext),
+        decryptEmailContentWithUserKey(encrypted, keys.applicantPrivateKey, wrongEmailContext),
       ).rejects.toThrow();
     });
 
@@ -106,7 +106,7 @@ describe('email-encryption', () => {
       const encrypted = await encryptEmailContentWithOverlays(
         data,
         emailContext,
-        [orgVaultRecipient(keys.vaultPublicKey, 1), applicantRecipient(keys.applicantPublicKey)],
+        [orgVaultRecipient(keys.vaultPublicKey, 1), applicantRecipient(keys.applicantPublicKey, 1)],
         [processorRecipient('grant-1', processor.publicKey)],
       );
 
@@ -125,9 +125,9 @@ describe('email-encryption', () => {
       expect(await decryptEmailContentWithVaultKey(encrypted.envelope, keys.vaultPrivateKey, emailContext)).toEqual(
         data,
       );
-      expect(
-        await decryptEmailContentWithPersonalKey(encrypted.envelope, keys.applicantPrivateKey, emailContext),
-      ).toEqual(data);
+      expect(await decryptEmailContentWithUserKey(encrypted.envelope, keys.applicantPrivateKey, emailContext)).toEqual(
+        data,
+      );
       expect(processorDecrypted).toEqual(data);
     });
   });
@@ -154,26 +154,24 @@ describe('email-encryption', () => {
     });
   });
 
-  describe('decrypt with personal key', () => {
+  describe('decrypt with user key', () => {
     it('decrypts email content correctly', async () => {
       const keys = setupKeys();
       const data = { text: 'Response from employer', rating: 5 };
 
       const encrypted = await encryptTestEmail(keys, data);
 
-      const decrypted = await decryptEmailContentWithPersonalKey(encrypted, keys.applicantPrivateKey, emailContext);
+      const decrypted = await decryptEmailContentWithUserKey(encrypted, keys.applicantPrivateKey, emailContext);
 
       expect(decrypted).toEqual(data);
     });
 
-    it('fails with wrong personal key', async () => {
+    it('fails with wrong user key', async () => {
       const keys = setupKeys();
 
       const encrypted = await encryptTestEmail(keys, { secret: true });
 
-      await expect(
-        decryptEmailContentWithPersonalKey(encrypted, TEST_KEYS.bob.privateKey, emailContext),
-      ).rejects.toThrow();
+      await expect(decryptEmailContentWithUserKey(encrypted, TEST_KEYS.bob.privateKey, emailContext)).rejects.toThrow();
     });
   });
 
@@ -189,7 +187,7 @@ describe('email-encryption', () => {
       const encrypted = await encryptTestEmail(keys, data);
 
       const vaultDecrypted = await decryptEmailContentWithVaultKey(encrypted, keys.vaultPrivateKey, emailContext);
-      const applicantDecrypted = await decryptEmailContentWithPersonalKey(
+      const applicantDecrypted = await decryptEmailContentWithUserKey(
         encrypted,
         keys.applicantPrivateKey,
         emailContext,
@@ -212,9 +210,7 @@ describe('email-encryption', () => {
       };
 
       await expect(decryptEmailContentWithVaultKey(tampered, keys.vaultPrivateKey, emailContext)).rejects.toThrow();
-      await expect(
-        decryptEmailContentWithPersonalKey(tampered, keys.applicantPrivateKey, emailContext),
-      ).rejects.toThrow();
+      await expect(decryptEmailContentWithUserKey(tampered, keys.applicantPrivateKey, emailContext)).rejects.toThrow();
     });
 
     it('fails on tampered vault DEK wrapper', async () => {
@@ -229,11 +225,7 @@ describe('email-encryption', () => {
       await expect(decryptEmailContentWithVaultKey(tampered, keys.vaultPrivateKey, emailContext)).rejects.toThrow();
 
       // Applicant side should still work (its DEK wrapper is untouched)
-      const applicantDecrypted = await decryptEmailContentWithPersonalKey(
-        tampered,
-        keys.applicantPrivateKey,
-        emailContext,
-      );
+      const applicantDecrypted = await decryptEmailContentWithUserKey(tampered, keys.applicantPrivateKey, emailContext);
 
       expect(applicantDecrypted).toEqual({ text: 'original' });
     });
@@ -251,7 +243,7 @@ describe('email-encryption', () => {
 
       await expect(decryptEmailContentWithVaultKey(tampered, keys.vaultPrivateKey, emailContext)).rejects.toThrow();
       // Applicant DEK wrapper is untouched, so its ML-KEM half still decapsulates.
-      expect(await decryptEmailContentWithPersonalKey(tampered, keys.applicantPrivateKey, emailContext)).toEqual({
+      expect(await decryptEmailContentWithUserKey(tampered, keys.applicantPrivateKey, emailContext)).toEqual({
         text: 'original',
       });
     });
@@ -267,7 +259,7 @@ describe('email-encryption', () => {
 
       await expect(decryptEmailContentWithVaultKey(tampered, keys.vaultPrivateKey, emailContext)).rejects.toThrow();
       // Applicant DEK wrapper is untouched, so its X25519 half still decapsulates.
-      expect(await decryptEmailContentWithPersonalKey(tampered, keys.applicantPrivateKey, emailContext)).toEqual({
+      expect(await decryptEmailContentWithUserKey(tampered, keys.applicantPrivateKey, emailContext)).toEqual({
         text: 'original',
       });
     });
@@ -282,9 +274,7 @@ describe('email-encryption', () => {
       };
 
       await expect(decryptEmailContentWithVaultKey(tampered, keys.vaultPrivateKey, emailContext)).rejects.toThrow();
-      await expect(
-        decryptEmailContentWithPersonalKey(tampered, keys.applicantPrivateKey, emailContext),
-      ).rejects.toThrow();
+      await expect(decryptEmailContentWithUserKey(tampered, keys.applicantPrivateKey, emailContext)).rejects.toThrow();
     });
   });
 });

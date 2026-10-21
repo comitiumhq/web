@@ -1,6 +1,6 @@
 import { AccountSettingsLayout } from '@comitium/auth/account-settings-layout';
+import { AuthGuard } from '@comitium/auth/auth-guard';
 import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { AuthGuard } from '@/components/auth/auth-guard';
 
 export const Route = createFileRoute('/account')({
   ssr: false,

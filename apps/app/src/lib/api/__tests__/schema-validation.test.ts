@@ -34,14 +34,15 @@ describe('API wrapper response validation', () => {
   it('accepts the session user shape returned by the API', async () => {
     mockJsonResponse({
       id: 'user-id',
-      walletAddress: '0x0000000000000000000000000000000000000001',
+      authUserId: 'auth-user-id',
+      userKeyVersion: null,
       publicKey: null,
-      encryptedPersonalKey: null,
+      encryptedUserKey: null,
       createdAt: '2026-08-01T00:00:00.000Z',
       updatedAt: '2026-08-01T00:00:00.000Z',
     });
 
-    await expect(authAccountApi.getSession()).resolves.toMatchObject({ id: 'user-id' });
+    await expect(authAccountApi.bootstrapAccount()).resolves.toMatchObject({ id: 'user-id' });
   });
 
   it('rejects malformed success mutations', async () => {

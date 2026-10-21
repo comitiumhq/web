@@ -105,7 +105,7 @@ export function useMemberPermissionsModel({ org, userId }: UseMemberPermissionsM
 
       if (role === 'org_admin') {
         try {
-          vaultGrant = await ensureVaultGrant(org.id, member.walletAddress, hasVaultAccess);
+          vaultGrant = await ensureVaultGrant(org.id, member.userId, hasVaultAccess);
         } catch (error) {
           toast.error(getErrorMessage(error, 'Could not prepare Vault Access'));
 
@@ -127,7 +127,7 @@ export function useMemberPermissionsModel({ org, userId }: UseMemberPermissionsM
       }
 
       try {
-        vaultGrant = await ensureVaultGrant(org.id, member.walletAddress, hasVaultAccess);
+        vaultGrant = await ensureVaultGrant(org.id, member.userId, hasVaultAccess);
       } catch (error) {
         toast.error(getErrorMessage(error, 'Could not prepare Vault Access'));
 

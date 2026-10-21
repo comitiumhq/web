@@ -45,7 +45,6 @@
   "dependencies": {
     "@comitium/crypto": "workspace:*",
     "@tiptap/core": "3.22.3",
-    "viem": "2.47.10",
     "zod": "4.4.3"
   },
   "devDependencies": {

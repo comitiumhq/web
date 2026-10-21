@@ -1,5 +1,5 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { getErrorMessage } from '@comitium/schemas/error';
 import { useEffect, useRef, useState } from 'react';
 import { decryptFeedbackBuckets } from '@/lib/forms/decrypt-answers';
@@ -10,14 +10,14 @@ import type { DecryptedEntry } from './types';
 export function useDecryptedSubmissions(
   submissions: FeedbackSubmission[],
   orgId: string,
-  wrappedVaultKey?: WrappedKey,
+  vaultAccess?: VaultKeyAccess,
 ) {
   const [entries, setEntries] = useState<Map<string, DecryptedEntry>>(new Map());
   const startedRef = useRef<Set<string>>(new Set());
   const isCryptoActive = useIsCryptoActive();
 
   useEffect(() => {
-    if (!wrappedVaultKey || !isCryptoActive) {
+    if (!vaultAccess || !isCryptoActive) {
       return;
     }
 
@@ -41,7 +41,7 @@ export function useDecryptedSubmissions(
       return next;
     });
 
-    Promise.all(newSubmissions.map((s) => decryptOne(s, orgId, wrappedVaultKey))).then((results) => {
+    Promise.all(newSubmissions.map((s) => decryptOne(s, orgId, vaultAccess))).then((results) => {
       setEntries((prev) => {
         const next = new Map(prev);
 
@@ -52,7 +52,7 @@ export function useDecryptedSubmissions(
         return next;
       });
     });
-  }, [submissions, orgId, wrappedVaultKey, isCryptoActive]);
+  }, [submissions, orgId, vaultAccess, isCryptoActive]);
 
   return entries;
 }
@@ -60,7 +60,7 @@ export function useDecryptedSubmissions(
 async function decryptOne(
   submission: FeedbackSubmission,
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  vaultAccess: VaultKeyAccess,
 ): Promise<[string, DecryptedEntry]> {
   try {
     if (!submission.applicationId) {
@@ -72,7 +72,7 @@ async function decryptOne(
       submission.applicationId,
       submission.formId,
       submission.answerEnvelopes,
-      wrappedVaultKey,
+      vaultAccess,
     );
 
     return [submission.id, { status: 'ready', values }];

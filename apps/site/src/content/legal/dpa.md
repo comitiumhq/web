@@ -121,7 +121,6 @@ These measures may evolve as technology and risk change, provided the overall pr
 
 - **Cloudflare, Inc.**: edge hosting, security, API runtime, object storage, queues, email routing, and AI infrastructure.
 - **Hetzner Online GmbH**: database, application, and self-hosted scheduling infrastructure.
-- **Horkos, LLC d/b/a Privy**: authentication and infrastructure for access to encryption keys.
 - **Plus Five Five, Inc. d/b/a Resend**: outbound email delivery and delivery status.
 
 Customer-authorized integrations, including Google Calendar and Google Meet, are used at Customer's direction and may also be governed by Customer's or the user's separate relationship with the provider.

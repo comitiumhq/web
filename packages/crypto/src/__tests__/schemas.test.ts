@@ -1,8 +1,6 @@
 import { base64 } from '@scure/base';
 import { describe, expect, it } from 'vitest';
 import { dataAad, keyWrapAad, serializeDataAadContext, serializeKeyWrapAadContext } from '../context';
-import { wrappedKeySchema } from '../envelope-key';
-import { wrappedPersonalKeySchema } from '../personal-key';
 import { assertAllowedRecipients, getRecipientPolicyViolation } from '../recipient-policy';
 import { isEnvelopeRecipient } from '../recipients';
 import {
@@ -17,6 +15,7 @@ import {
   XWING_PUBLIC_KEY_BYTES,
   XWING_SECRET_KEY_BYTES,
 } from '../schemas';
+import { wrappedKeySchema } from '../schemas/keys';
 
 const testPublicKey = 'a'.repeat(64);
 const testIv = base64.encode(new Uint8Array(12));
@@ -148,36 +147,6 @@ describe('crypto schemas', () => {
     expect(wrappedKeySchema.safeParse({ ...wrappedKey, epk: 'abc' }).success).toBe(false);
     expect(wrappedKeySchema.safeParse({ ...wrappedKey, kemCt: testCiphertext }).success).toBe(false);
     expect(wrappedKeySchema.safeParse({ ...wrappedKey, extra: true }).success).toBe(false);
-  });
-
-  it('requires signature+share personal-key wrappers', () => {
-    const walletWrapper = {
-      method: 'wallet_signature',
-      kdf: 'signature+share',
-      id: 'evm:0x1111111111111111111111111111111111111111',
-      ek: testCiphertext,
-      iv: testIv,
-      salt: base64.encode(new Uint8Array(32)),
-    };
-    const wrappedPersonalKey = {
-      v: 1,
-      pk: { ek: testCiphertext, iv: testIv },
-      wraps: [walletWrapper],
-    };
-
-    expect(wrappedPersonalKeySchema.safeParse(wrappedPersonalKey).success).toBe(true);
-    expect(
-      wrappedPersonalKeySchema.safeParse({
-        ...wrappedPersonalKey,
-        wraps: [{ ...walletWrapper, kdf: 'signature' }],
-      }).success,
-    ).toBe(false);
-    expect(
-      wrappedPersonalKeySchema.safeParse({
-        ...wrappedPersonalKey,
-        wraps: [{ ...walletWrapper, kdf: undefined }],
-      }).success,
-    ).toBe(false);
   });
 
   it('validates post-quantum public key bundles', () => {

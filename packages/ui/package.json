@@ -19,6 +19,7 @@
     "./attachment": "./src/components/attachment.tsx",
     "./auth-login-page": "./src/components/auth-login-page.tsx",
     "./avatar": "./src/components/avatar.tsx",
+    "./back-button": "./src/components/back-button.tsx",
     "./badge": "./src/components/badge.tsx",
     "./button": "./src/components/button.tsx",
     "./browser": "./src/lib/browser.ts",

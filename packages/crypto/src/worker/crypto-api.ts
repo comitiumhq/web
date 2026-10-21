@@ -1,5 +1,4 @@
 import * as Comlink from 'comlink';
-import type { Address, Hex } from 'viem';
 import {
   decryptApplicationWithVaultKey,
   encryptApplicationWithVaultKey,
@@ -11,162 +10,53 @@ import { keyWrapAad } from '../context';
 import { hashCustomFieldValue } from '../custom-field-hash';
 import type { SearchableCustomFieldType } from '../custom-field-search';
 import {
-  decryptEmailContentWithPersonalKey,
+  decryptEmailContentWithUserKey,
   decryptEmailContentWithVaultKey,
   encryptEmailContent,
   encryptEmailContentWithOverlays,
 } from '../email-encryption';
-import { envelopeKeyToWrappedKey, unwrapDek, type WrappedKey, wrapRecipientKey } from '../envelope-key';
+import { envelopeKeyToWrappedKey, unwrapDek, wrapRecipientKey } from '../envelope-key';
 import {
   decryptFileWithVaultKey,
   type EncryptedFileWithOverlays,
   encryptFileWithVaultKey,
   encryptFileWithVaultKeyAndOverlays,
+  unpackEncryptedBlob,
 } from '../file-encryption';
 import { type CategoricalFormFieldKind, hashCategoricalFormFieldValue } from '../form-field-search-hash';
-import {
-  decryptPersonalKeyWithWrappingKey,
-  generatePersonalKeyPair,
-  unwrapPersonalKeyWithWrappingKey,
-  type WrappedPersonalKey,
-  wrapPersonalKey,
-} from '../personal-key';
 import type { RecipientDescriptor } from '../recipients';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from '../schemas';
-import { type CryptoSessionIdentity, createCryptoSessionIdentity, isSameCryptoSession } from '../session';
+import type { VaultKeyAccess } from '../schemas/vault-key';
 import { hashTagLabel } from '../tag-hash';
-import {
-  generateVaultKeyPair,
-  grantVaultAccess as grantVaultAccessFn,
-  unwrapVaultKey,
-  wrapVaultKey,
-} from '../vault-key';
-import { KeyStore } from './key-store';
-import { RememberedDeviceStore } from './remembered-device-store';
+import { OrgVault } from './org-vault';
+import { UserKeySession } from './user-key-session';
 
 /**
- * Crypto Worker API — all cryptographic operations run here.
- * Unwrapped private key material never leaves this Worker's heap.
+ * Exposes concrete crypto operations through Comlink; raw keys remain internal.
  */
 export class CryptoWorkerApi {
-  private keyStore = new KeyStore();
-  private rememberedDeviceStore = new RememberedDeviceStore();
-  private activeSession: CryptoSessionIdentity | null = null;
+  readonly #userSession = new UserKeySession();
+  readonly #orgVault = new OrgVault(this.#userSession);
 
-  // --- Lifecycle ---
+  readonly configure = this.#userSession.configure.bind(this.#userSession);
+  readonly unlockWithPassword = this.#userSession.unlockWithPassword.bind(this.#userSession);
+  readonly verifyPassword = this.#userSession.verifyPassword.bind(this.#userSession);
+  readonly verifyRecoveryCode = this.#userSession.verifyRecoveryCode.bind(this.#userSession);
+  readonly unlockWithRecoveryCode = this.#userSession.unlockWithRecoveryCode.bind(this.#userSession);
+  readonly tryUnlockWithRememberedDevice = this.#userSession.tryUnlockWithRememberedDevice.bind(this.#userSession);
+  readonly initializeUserKey = this.#userSession.initializeUserKey.bind(this.#userSession);
+  readonly resetUserKey = this.#userSession.resetUserKey.bind(this.#userSession);
+  readonly rewrapUserKey = this.#userSession.rewrapUserKey.bind(this.#userSession);
+  readonly rewrapWithRememberedDevice = this.#userSession.rewrapWithRememberedDevice.bind(this.#userSession);
+  readonly forgetRememberedDevice = this.#userSession.forgetRememberedDevice.bind(this.#userSession);
+  readonly isActive = this.#userSession.isActive.bind(this.#userSession);
+  readonly clear = this.#userSession.clear.bind(this.#userSession);
+  readonly generateAndWrapVaultKey = this.#orgVault.generateAndWrapVaultKey.bind(this.#orgVault);
+  readonly grantVaultAccess = this.#orgVault.grantVaultAccess.bind(this.#orgVault);
 
   ready(): true {
     return true;
   }
-
-  async unlock(
-    signature: Hex,
-    wrappedPersonalKey: WrappedPersonalKey,
-    address: Address,
-    personalPublicKey: PublicEncryptionKey,
-    keyShare: string,
-  ): Promise<void> {
-    const targetSession = createCryptoSessionIdentity(wrappedPersonalKey, address);
-
-    if (this.keyStore.isActive() && isSameCryptoSession(this.activeSession, targetSession)) {
-      return;
-    }
-
-    if (this.keyStore.isActive()) {
-      this.clear();
-    }
-
-    const { personalKey, personalKeyWrappingKey } = await unwrapPersonalKeyWithWrappingKey(
-      wrappedPersonalKey,
-      signature,
-      address,
-      keyShare,
-    );
-
-    try {
-      this.keyStore.storePersonalKey(personalKey);
-      this.activeSession = targetSession;
-
-      await this.rememberedDeviceStore
-        .save(
-          {
-            identity: targetSession,
-            personalPublicKey,
-          },
-          personalKeyWrappingKey,
-        )
-        .catch(() => undefined);
-    } finally {
-      personalKeyWrappingKey.fill(0);
-    }
-  }
-
-  async tryUnlockWithRememberedDevice(
-    wrappedPersonalKey: WrappedPersonalKey,
-    address: Address,
-    personalPublicKey: PublicEncryptionKey,
-  ): Promise<boolean> {
-    const targetSession = createCryptoSessionIdentity(wrappedPersonalKey, address);
-
-    if (this.keyStore.isActive() && isSameCryptoSession(this.activeSession, targetSession)) {
-      return true;
-    }
-
-    if (this.keyStore.isActive()) {
-      this.clear();
-    }
-
-    const record = await this.rememberedDeviceStore
-      .load({
-        identity: targetSession,
-        personalPublicKey,
-      })
-      .catch(() => null);
-
-    if (!record) {
-      return false;
-    }
-
-    const personalKeyWrappingKey = await this.rememberedDeviceStore.decrypt(record).catch(async () => {
-      await this.rememberedDeviceStore.delete(targetSession);
-
-      return null;
-    });
-
-    if (!personalKeyWrappingKey) {
-      return false;
-    }
-
-    const personalKey = await decryptPersonalKeyWithWrappingKey(wrappedPersonalKey, personalKeyWrappingKey).catch(
-      async () => {
-        personalKeyWrappingKey.fill(0);
-        await this.rememberedDeviceStore.delete(targetSession);
-
-        return null;
-      },
-    );
-
-    if (!personalKey) {
-      return false;
-    }
-
-    personalKeyWrappingKey.fill(0);
-    this.keyStore.storePersonalKey(personalKey);
-    this.activeSession = targetSession;
-
-    return true;
-  }
-
-  isActive(): boolean {
-    return this.keyStore.isActive();
-  }
-
-  clear(): void {
-    this.activeSession = null;
-    this.keyStore.clear();
-  }
-
-  // --- Application Encryption ---
 
   async encryptApplication(
     vaultPublicKey: PublicEncryptionKey,
@@ -190,26 +80,28 @@ export class CryptoWorkerApi {
   async decryptApplication(
     envelope: EncryptedEnvelope,
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<Record<string, unknown>> {
-    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+    this.assertVaultRecipient(envelope.keys, vaultAccess);
+
+    const vaultKey = await this.#orgVault.getVaultKey(orgId, vaultAccess);
 
     return decryptApplicationWithVaultKey<Record<string, unknown>>(envelope, vaultKey, context);
   }
 
   async rewrapEnvelopeKey(
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    vaultAccess: VaultKeyAccess,
     sourceKey: EnvelopeKey,
     context: CryptoContextInput,
     recipient: RecipientDescriptor,
   ): Promise<EnvelopeKey> {
-    if (sourceKey.recipient !== 'org_vault') {
+    if (sourceKey.recipient !== 'org_vault' || sourceKey.rkv !== vaultAccess.vaultKeyVersion) {
       throw new Error('Processing regrant source key must target org_vault');
     }
 
-    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+    const vaultKey = await this.#orgVault.getVaultKey(orgId, vaultAccess);
     const dek = await unwrapDek(envelopeKeyToWrappedKey(sourceKey), vaultKey, keyWrapAad(context, sourceKey.recipient));
 
     try {
@@ -218,8 +110,6 @@ export class CryptoWorkerApi {
       dek.fill(0);
     }
   }
-
-  // --- File Encryption (Resume PDF) ---
 
   async encryptFile(
     vaultPublicKey: PublicEncryptionKey,
@@ -253,16 +143,16 @@ export class CryptoWorkerApi {
   async decryptFile(
     blob: Uint8Array,
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<Uint8Array> {
-    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+    this.assertVaultRecipient(unpackEncryptedBlob(blob).metadata.keys, vaultAccess);
+
+    const vaultKey = await this.#orgVault.getVaultKey(orgId, vaultAccess);
     const result = await decryptFileWithVaultKey(blob, vaultKey, context);
 
     return Comlink.transfer(result, [result.buffer]);
   }
-
-  // --- Email Content Encryption ---
 
   async encryptEmailContent(
     data: unknown,
@@ -284,110 +174,72 @@ export class CryptoWorkerApi {
   async decryptEmailContentForOrganization(
     envelope: EncryptedEnvelope,
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    vaultAccess: VaultKeyAccess,
     context: CryptoContextInput,
   ): Promise<unknown> {
-    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+    this.assertVaultRecipient(envelope.keys, vaultAccess);
+
+    const vaultKey = await this.#orgVault.getVaultKey(orgId, vaultAccess);
 
     return decryptEmailContentWithVaultKey(envelope, vaultKey, context);
   }
 
   async decryptEmailContentForApplicant(envelope: EncryptedEnvelope, context: CryptoContextInput): Promise<unknown> {
-    const personalKey = this.keyStore.getPersonalKey();
+    const identity = this.#userSession.requireIdentity();
 
-    return decryptEmailContentWithPersonalKey(envelope, personalKey, context);
-  }
-
-  // --- Key Generation ---
-
-  async generateAndWrapPersonalKey(
-    signature: Hex,
-    address: Address,
-    keyShare: string,
-  ): Promise<{ publicKey: PublicEncryptionKey; encryptedPersonalKey: WrappedPersonalKey }> {
-    const { privateKey, publicKey } = generatePersonalKeyPair();
-
-    try {
-      const encryptedPersonalKey = await wrapPersonalKey(privateKey, signature, address, keyShare);
-
-      return { publicKey, encryptedPersonalKey };
-    } finally {
-      privateKey.fill(0);
+    if (envelope.keys.find((key) => key.recipient === 'applicant')?.rkv !== identity.keyVersion) {
+      throw new Error('User key generation is unavailable');
     }
+
+    const userPrivateKey = this.#userSession.keys.getUserPrivateKey();
+
+    return decryptEmailContentWithUserKey(envelope, userPrivateKey, context);
   }
 
-  async generateAndWrapVaultKey(
-    ownerPublicKey: PublicEncryptionKey,
-  ): Promise<{ vaultPublicKey: PublicEncryptionKey; wrappedVaultKey: WrappedKey }> {
-    const { privateKey, publicKey } = generateVaultKeyPair();
+  async hashTagLabel(orgId: string, vaultAccess: VaultKeyAccess, label: string): Promise<string> {
+    const searchKey = await this.#orgVault.getSearchKey(orgId, vaultAccess);
 
-    try {
-      const wrappedVaultKey = await wrapVaultKey(privateKey, ownerPublicKey);
-
-      return { vaultPublicKey: publicKey, wrappedVaultKey };
-    } finally {
-      privateKey.fill(0);
-    }
+    return hashTagLabel(searchKey, label);
   }
-
-  // --- Vault Access ---
-
-  async grantVaultAccess(ownWrappedVaultKey: WrappedKey, memberPublicKey: PublicEncryptionKey): Promise<WrappedKey> {
-    const personalKey = this.keyStore.getPersonalKey();
-
-    return grantVaultAccessFn(ownWrappedVaultKey, personalKey, memberPublicKey);
-  }
-
-  // --- Tag Hash ---
-
-  async hashTagLabel(orgId: string, wrappedVaultKey: WrappedKey, label: string): Promise<string> {
-    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
-
-    return hashTagLabel(vaultKey, label);
-  }
-
-  // --- Custom Field Hash ---
 
   async hashCustomFieldValue(
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    vaultAccess: VaultKeyAccess,
     fieldId: string,
     fieldType: SearchableCustomFieldType,
     plaintext: unknown,
   ): Promise<string> {
-    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+    const searchKey = await this.#orgVault.getSearchKey(orgId, vaultAccess);
 
-    return hashCustomFieldValue(vaultKey, orgId, fieldId, fieldType, plaintext);
+    return hashCustomFieldValue(searchKey, orgId, fieldId, fieldType, plaintext);
   }
 
   async hashCandidateProfileSearchValue(
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    vaultAccess: VaultKeyAccess,
     field: CandidateProfileSearchField,
     value: string | number,
   ): Promise<string> {
-    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+    const searchKey = await this.#orgVault.getSearchKey(orgId, vaultAccess);
 
-    return hashCandidateProfileSearchValue(vaultKey, orgId, field, value);
+    return hashCandidateProfileSearchValue(searchKey, orgId, field, value);
   }
 
   async hashCategoricalFormFieldValue(
     orgId: string,
-    wrappedVaultKey: WrappedKey,
+    vaultAccess: VaultKeyAccess,
     fieldId: string,
     kind: CategoricalFormFieldKind,
     value: boolean | string,
   ): Promise<string> {
-    const vaultKey = await this.ensureVaultKey(orgId, wrappedVaultKey);
+    const searchKey = await this.#orgVault.getSearchKey(orgId, vaultAccess);
 
-    return hashCategoricalFormFieldValue(vaultKey, orgId, fieldId, kind, value);
+    return hashCategoricalFormFieldValue(searchKey, orgId, fieldId, kind, value);
   }
 
-  // --- Internal ---
-
-  private async ensureVaultKey(orgId: string, wrappedVaultKey: WrappedKey): Promise<Uint8Array> {
-    return this.keyStore.getOrUnwrapVaultKey(orgId, wrappedVaultKey, (wrapped, personalKey) =>
-      unwrapVaultKey(wrapped as WrappedKey, personalKey),
-    );
+  private assertVaultRecipient(keys: EnvelopeKey[], access: VaultKeyAccess): void {
+    if (keys.find((key) => key.recipient === 'org_vault')?.rkv !== access.vaultKeyVersion) {
+      throw new Error('Vault key generation is unavailable');
+    }
   }
 }

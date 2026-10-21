@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy, type EncryptedEnvelope } from '@comitium/crypto';
 import { encryptedFileMetadataContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { type FileDisplayMetadata, fileDisplayMetadataSchema } from '@comitium/schemas/forms/form-submission';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -19,13 +19,13 @@ interface DecryptState {
 
 const INITIAL_STATE: DecryptState = { data: null, error: null, isDecrypting: false };
 
-export function useDecryptFileMetadata(orgId: string, files: FileMetadataInput[] | null, wrappedVaultKey?: WrappedKey) {
+export function useDecryptFileMetadata(orgId: string, files: FileMetadataInput[] | null, vaultAccess?: VaultKeyAccess) {
   const [state, setState] = useState<DecryptState>(INITIAL_STATE);
   const generationRef = useRef(0);
   const { canUnlock, ensureUnlocked, isCryptoActive } = useCryptoUnlock();
 
   const hasFiles = !!files && files.length > 0;
-  const canDecrypt = hasFiles && canUnlock && !!wrappedVaultKey;
+  const canDecrypt = hasFiles && canUnlock && !!vaultAccess;
   const fileSetKey = useMemo(() => {
     if (!files) {
       return `${orgId}:none`;
@@ -42,7 +42,7 @@ export function useDecryptFileMetadata(orgId: string, files: FileMetadataInput[]
   useEffect(reset, [fileSetKey, reset]);
 
   const decrypt = useCallback(async () => {
-    if (!canDecrypt || !files || !wrappedVaultKey) {
+    if (!canDecrypt || !files || !vaultAccess) {
       return;
     }
 
@@ -58,7 +58,7 @@ export function useDecryptFileMetadata(orgId: string, files: FileMetadataInput[]
           const payload = await CryptoProxy.decryptApplication(
             file.metadata,
             orgId,
-            wrappedVaultKey,
+            vaultAccess,
             encryptedFileMetadataContext(orgId, file.fileId, file.kind),
           );
 
@@ -74,7 +74,7 @@ export function useDecryptFileMetadata(orgId: string, files: FileMetadataInput[]
         setState({ ...INITIAL_STATE, error: 'Failed to decrypt file details. Please try again.' });
       }
     }
-  }, [canDecrypt, files, wrappedVaultKey, orgId, ensureUnlocked]);
+  }, [canDecrypt, files, vaultAccess, orgId, ensureUnlocked]);
 
   useEffect(() => {
     if (hasFiles && isCryptoActive && !state.data && !state.isDecrypting && !state.error) {

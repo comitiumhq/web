@@ -1,7 +1,8 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
-import type { EncryptedEnvelope, WrappedKey } from '@comitium/schemas/common';
+import type { EncryptedEnvelope } from '@comitium/schemas/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockPublicEncryptionKey, mockWrappedKey } from '@/test/crypto-helpers';
+import { mockPublicEncryptionKey, mockVaultAccess, mockWrappedKey } from '@/test/crypto-helpers';
 
 import { buildEncryptedLabel } from '../use-candidate-tag';
 
@@ -23,7 +24,7 @@ const TAG_CONTEXT = {
   fieldId: 'label',
 };
 const VAULT_PUB = mockPublicEncryptionKey();
-const WRAPPED: WrappedKey = mockWrappedKey();
+const WRAPPED: VaultKeyAccess = mockVaultAccess();
 
 const fakeEnvelope: EncryptedEnvelope = {
   v: 1,

@@ -1,5 +1,5 @@
 import { tipTapDocSchema } from '@comitium/schemas/common';
-import { uuidSchema, walletAddressSchema } from '@comitium/schemas/public';
+import { uuidSchema } from '@comitium/schemas/public';
 import { z } from 'zod';
 
 // --- Org roles & permissions ---
@@ -197,7 +197,6 @@ const teamMemberAccessSummarySchema = z.object({
 
 export const orgTeamMemberSchema = z.object({
   userId: uuidSchema,
-  walletAddress: walletAddressSchema,
   email: z.string().nullable(),
   name: z.string().nullable(),
   jobTitle: z.string().nullable(),

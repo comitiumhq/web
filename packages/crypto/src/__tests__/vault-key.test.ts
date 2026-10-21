@@ -1,173 +1,88 @@
-import { bytesToHex } from '@noble/hashes/utils.js';
+import { base64 } from '@scure/base';
 import { describe, expect, it } from 'vitest';
-import type { WrappedKey } from '../envelope-key';
-import type { PublicEncryptionKey } from '../index';
-import { generateVaultKeyPair, grantVaultAccess, unwrapVaultKey, wrapVaultKey } from '../vault-key';
-import { BASE64_RE } from './constants';
-import { TEST_KEYS, tamperBase64, tamperHex } from './crypto-helpers';
+import { vaultKeyAccessSchema } from '../schemas/vault-key';
+import { grantVaultAccess, unwrapSearchKey, unwrapVaultKey, wrapSearchKey } from '../vault-key';
+import { TEST_KEYS, tamperBase64 } from './crypto-helpers';
+import vector from './fixtures/key-protocol-v1.json';
+import { ORG_ID, OTHER_USER_ID, SEARCH_KEY, vaultFixture } from './unlock-fixtures';
 
-describe('vault-key', () => {
-  describe('generateVaultKeyPair', () => {
-    it('returns byte private key and X-Wing public key bundle', () => {
-      const { privateKey, publicKey } = generateVaultKeyPair();
+describe('context-bound vault and search keys', () => {
+  it('opens fixed v1 vault and search wrappers without changing their authenticated contexts', async () => {
+    const access = vaultKeyAccessSchema.parse(vector.vault);
+    const privateKey = await unwrapVaultKey(access, base64.decode(vector.userPrivateKey));
 
-      expect(privateKey).toBeInstanceOf(Uint8Array);
-      expect(privateKey).toHaveLength(32);
-      expect(publicKey.v).toBe(1);
-      expect(publicKey.xwing).toMatch(BASE64_RE);
-    });
-
-    it('generates unique keypairs', () => {
-      const kp1 = generateVaultKeyPair();
-      const kp2 = generateVaultKeyPair();
-
-      expect(bytesToHex(kp1.privateKey)).not.toBe(bytesToHex(kp2.privateKey));
-      expect(kp1.publicKey.xwing).not.toBe(kp2.publicKey.xwing);
-    });
+    expect(base64.encode(privateKey)).toBe(vector.vaultPrivateKey);
+    expect(base64.encode(await unwrapSearchKey(access.searchKey, privateKey))).toBe(vector.searchKey);
   });
 
-  describe('wrapVaultKey / unwrapVaultKey', () => {
-    it('round-trips vault private key', async () => {
-      const vault = generateVaultKeyPair();
+  it('decrypts a grant and the independently generated search root', async () => {
+    const access = await vaultFixture();
+    const privateKey = await unwrapVaultKey(access, TEST_KEYS.alice.privateKey);
 
-      const wrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const unwrapped = await unwrapVaultKey(wrapped, TEST_KEYS.alice.privateKey);
-
-      expect(unwrapped).toEqual(vault.privateKey);
-    });
-
-    it('returns correct WrappedKey structure', async () => {
-      const vault = generateVaultKeyPair();
-
-      const wrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-
-      expect(wrapped.v).toBe(1);
-      expect(wrapped.ek).toMatch(BASE64_RE);
-      expect(wrapped.epk).toMatch(/^[0-9a-f]{64}$/);
-      expect(wrapped.kemCt).toMatch(BASE64_RE);
-      expect(wrapped.iv).toMatch(BASE64_RE);
-      expect(wrapped.iv).toHaveLength(16); // 12 bytes base64
-    });
-
-    it('uses unique ephemeral key each time', async () => {
-      const vault = generateVaultKeyPair();
-
-      const w1 = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const w2 = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-
-      expect(w1.epk).not.toBe(w2.epk);
-      expect(w1.ek).not.toBe(w2.ek);
-    });
-
-    it('fails to unwrap with wrong personal key', async () => {
-      const vault = generateVaultKeyPair();
-
-      const wrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-
-      await expect(unwrapVaultKey(wrapped, TEST_KEYS.bob.privateKey)).rejects.toThrow();
-    });
-
-    it('fails to unwrap with tampered ciphertext', async () => {
-      const vault = generateVaultKeyPair();
-
-      const wrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const tampered: WrappedKey = {
-        ...wrapped,
-        ek: tamperBase64(wrapped.ek),
-      };
-
-      await expect(unwrapVaultKey(tampered, TEST_KEYS.alice.privateKey)).rejects.toThrow();
-    });
-
-    it('fails to unwrap with tampered kemCt (ML-KEM half)', async () => {
-      const vault = generateVaultKeyPair();
-
-      const wrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const tampered: WrappedKey = {
-        ...wrapped,
-        kemCt: tamperBase64(wrapped.kemCt),
-      };
-
-      await expect(unwrapVaultKey(tampered, TEST_KEYS.alice.privateKey)).rejects.toThrow();
-    });
-
-    it('fails to unwrap with tampered epk (X25519 half)', async () => {
-      const vault = generateVaultKeyPair();
-
-      const wrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const tampered: WrappedKey = {
-        ...wrapped,
-        epk: tamperHex(wrapped.epk),
-      };
-
-      await expect(unwrapVaultKey(tampered, TEST_KEYS.alice.privateKey)).rejects.toThrow();
-    });
-
-    it('fails to unwrap with tampered iv', async () => {
-      const vault = generateVaultKeyPair();
-
-      const wrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const tampered: WrappedKey = {
-        ...wrapped,
-        iv: tamperBase64(wrapped.iv),
-      };
-
-      await expect(unwrapVaultKey(tampered, TEST_KEYS.alice.privateKey)).rejects.toThrow();
-    });
-
-    it('rejects unsupported wrapped vault key versions before decrypt', async () => {
-      const vault = generateVaultKeyPair();
-      const wrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-
-      await expect(
-        unwrapVaultKey({ ...wrapped, v: 2 } as unknown as WrappedKey, TEST_KEYS.alice.privateKey),
-      ).rejects.toThrow('Unsupported crypto suite version: 2');
-    });
-
-    it('rejects non-32-byte vault private key', async () => {
-      await expect(wrapVaultKey(new Uint8Array([0xaa, 0xbb]), TEST_KEYS.alice.publicKey)).rejects.toThrow(
-        'VaultPrivateKey must be 32 bytes',
-      );
-    });
-
-    it('rejects bare X25519 recipient public keys', async () => {
-      const vault = generateVaultKeyPair();
-
-      await expect(
-        wrapVaultKey(vault.privateKey, `0x${'a'.repeat(64)}` as unknown as PublicEncryptionKey),
-      ).rejects.toThrow();
-    });
+    expect(privateKey).toEqual(TEST_KEYS.bob.privateKey);
+    expect(await unwrapSearchKey(access.searchKey, privateKey)).toEqual(SEARCH_KEY);
+    expect(SEARCH_KEY).not.toEqual(privateKey);
   });
 
-  describe('grantVaultAccess', () => {
-    it('re-wraps vault key for new member', async () => {
-      const vault = generateVaultKeyPair();
+  it('rejects a grant moved to a different recipient, generation or organization', async () => {
+    const access = await vaultFixture();
 
-      const aliceWrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const bobWrapped = await grantVaultAccess(aliceWrapped, TEST_KEYS.alice.privateKey, TEST_KEYS.bob.publicKey);
-      const unwrapped = await unwrapVaultKey(bobWrapped, TEST_KEYS.bob.privateKey);
+    await expect(
+      unwrapVaultKey({ ...access, recipientUserId: OTHER_USER_ID }, TEST_KEYS.alice.privateKey),
+    ).rejects.toThrow();
+    await expect(unwrapVaultKey({ ...access, recipientKeyVersion: 2 }, TEST_KEYS.alice.privateKey)).rejects.toThrow();
+    await expect(
+      unwrapVaultKey(
+        { ...access, orgId: OTHER_USER_ID, searchKey: { ...access.searchKey, orgId: OTHER_USER_ID } },
+        TEST_KEYS.alice.privateKey,
+      ),
+    ).rejects.toThrow();
+    await expect(
+      unwrapVaultKey({ ...access, vaultPublicKey: TEST_KEYS.charlie.publicKey }, TEST_KEYS.alice.privateKey),
+    ).rejects.toThrow('does not match');
+  });
 
-      expect(unwrapped).toEqual(vault.privateKey);
+  it('grants the same vault to a different user generation with a new AAD', async () => {
+    const access = await vaultFixture();
+    const recipient = { recipientUserId: OTHER_USER_ID, recipientKeyVersion: 2 };
+    const wrappedVaultKey = await grantVaultAccess(
+      access,
+      TEST_KEYS.alice.privateKey,
+      TEST_KEYS.charlie.publicKey,
+      recipient,
+    );
+
+    expect(await unwrapVaultKey({ ...access, ...recipient, wrappedVaultKey }, TEST_KEYS.charlie.privateKey)).toEqual(
+      TEST_KEYS.bob.privateKey,
+    );
+    await expect(unwrapVaultKey({ ...access, wrappedVaultKey }, TEST_KEYS.charlie.privateKey)).rejects.toThrow();
+  });
+
+  it('authenticates search descriptors, ciphertext and the secret-derived wrapping key', async () => {
+    const { searchKey } = await vaultFixture();
+
+    await expect(unwrapSearchKey(searchKey, TEST_KEYS.charlie.privateKey)).rejects.toThrow();
+    await expect(unwrapSearchKey({ ...searchKey, searchKeyVersion: 2 }, TEST_KEYS.bob.privateKey)).rejects.toThrow();
+    await expect(unwrapSearchKey({ ...searchKey, orgId: OTHER_USER_ID }, TEST_KEYS.bob.privateKey)).rejects.toThrow();
+    await expect(
+      unwrapSearchKey(
+        {
+          ...searchKey,
+          encryptedSearchKey: { ...searchKey.encryptedSearchKey, ek: tamperBase64(searchKey.encryptedSearchKey.ek) },
+        },
+        TEST_KEYS.bob.privateKey,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it('rewraps an unchanged search root for a new vault without changing any digest input', async () => {
+    const descriptor = await wrapSearchKey(SEARCH_KEY, TEST_KEYS.charlie.privateKey, {
+      orgId: ORG_ID,
+      vaultKeyVersion: 2,
+      searchKeyVersion: 1,
     });
 
-    it('chain grant: Alice -> Bob -> Charlie', async () => {
-      const vault = generateVaultKeyPair();
-
-      const aliceWrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const bobWrapped = await grantVaultAccess(aliceWrapped, TEST_KEYS.alice.privateKey, TEST_KEYS.bob.publicKey);
-      const charlieWrapped = await grantVaultAccess(bobWrapped, TEST_KEYS.bob.privateKey, TEST_KEYS.charlie.publicKey);
-      const unwrapped = await unwrapVaultKey(charlieWrapped, TEST_KEYS.charlie.privateKey);
-
-      expect(unwrapped).toEqual(vault.privateKey);
-    });
-
-    it('original member cannot use re-wrapped key', async () => {
-      const vault = generateVaultKeyPair();
-
-      const aliceWrapped = await wrapVaultKey(vault.privateKey, TEST_KEYS.alice.publicKey);
-      const bobWrapped = await grantVaultAccess(aliceWrapped, TEST_KEYS.alice.privateKey, TEST_KEYS.bob.publicKey);
-
-      await expect(unwrapVaultKey(bobWrapped, TEST_KEYS.alice.privateKey)).rejects.toThrow();
-    });
+    expect(await unwrapSearchKey(descriptor, TEST_KEYS.charlie.privateKey)).toEqual(SEARCH_KEY);
+    await expect(unwrapSearchKey(descriptor, TEST_KEYS.bob.privateKey)).rejects.toThrow();
   });
 });

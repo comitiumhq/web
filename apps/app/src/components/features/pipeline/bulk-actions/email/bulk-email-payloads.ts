@@ -59,6 +59,7 @@ export async function prepareBulkEmailPayloads(params: {
         vaultPublicKey: params.vaultKey.vaultPublicKey,
         vaultKeyVersion: params.vaultKey.keyVersion,
         applicantPublicKey: recipient.application.recipientPublicKey,
+        applicantKeyVersion: recipient.application.recipientKeyVersion,
         applicantEmail: recipient.profile.email,
         subject: rendered.subject,
         messageDoc: rendered.body,
@@ -98,6 +99,7 @@ function resolveRecipient(target: PipelineBulkTarget) {
   return {
     application: {
       recipientPublicKey: application.recipientPublicKey,
+      recipientKeyVersion: application.recipientKeyVersion,
       deliveryGrant,
     },
     pipelineApplication,

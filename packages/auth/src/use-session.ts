@@ -9,6 +9,5 @@ export function useSession() {
     isSignedIn: user !== null,
     isSessionReady: isAccountSettled(stage),
     isSessionLoading: isAccountLoading(stage),
-    needsSessionRecovery: stage === 'unrecoverable',
   };
 }

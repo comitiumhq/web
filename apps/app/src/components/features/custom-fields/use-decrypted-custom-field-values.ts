@@ -4,7 +4,7 @@ import { customFieldValueContext } from '@comitium/crypto/context';
 import { logger } from '@comitium/ui/logger';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryCandidateCustomFieldValues } from '@/hooks/queries/use-query-candidate-custom-field-values';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 
 type DecryptedMap = Record<string, unknown>;
 const EMPTY_VALUE_IDS: ReadonlySet<string> = new Set();
@@ -25,11 +25,7 @@ export function useDecryptedCustomFieldValues(
   orgId: string,
 ): UseDecryptedCustomFieldValuesResult {
   const { data: values, isLoading, isError: isQueryError, refetch } = useQueryCandidateCustomFieldValues(candidateId);
-  const {
-    data: wrappedVaultKey,
-    isLoading: isVaultKeyLoading,
-    isError: isVaultKeyError,
-  } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess, isLoading: isVaultKeyLoading, isError: isVaultKeyError } = useQueryOrgVaultAccess(orgId);
   const isCryptoActive = useIsCryptoActive();
 
   const [decrypted, setDecrypted] = useState<DecryptedMap>({});
@@ -44,14 +40,14 @@ export function useDecryptedCustomFieldValues(
   failedValueIdsRef.current = failedValueIds;
 
   const decryptingValueIds = useMemo<ReadonlySet<string>>(() => {
-    if (!isCryptoActive || !candidateId || (!wrappedVaultKey && !isVaultKeyLoading)) {
+    if (!isCryptoActive || !candidateId || (!vaultAccess && !isVaultKeyLoading)) {
       return EMPTY_VALUE_IDS;
     }
 
     return new Set(
       (values?.data ?? []).flatMap((row) => (row.id in decrypted || failedValueIds.has(row.id) ? [] : [row.id])),
     );
-  }, [candidateId, decrypted, failedValueIds, isCryptoActive, isVaultKeyLoading, values?.data, wrappedVaultKey]);
+  }, [candidateId, decrypted, failedValueIds, isCryptoActive, isVaultKeyLoading, values?.data, vaultAccess]);
 
   useEffect(() => {
     setDecrypted({});
@@ -62,7 +58,7 @@ export function useDecryptedCustomFieldValues(
   }, [candidateId]);
 
   useEffect(() => {
-    if (!values?.data || !wrappedVaultKey || !isCryptoActive || !candidateId) {
+    if (!values?.data || !vaultAccess || !isCryptoActive || !candidateId) {
       return;
     }
 
@@ -81,7 +77,7 @@ export function useDecryptedCustomFieldValues(
       CryptoProxy.decryptApplication(
         row.value,
         orgId,
-        wrappedVaultKey,
+        vaultAccess,
         customFieldValueContext(orgId, candidateId, row.fieldId),
       )
         .then((plain) => {
@@ -106,14 +102,14 @@ export function useDecryptedCustomFieldValues(
           decryptingRef.current.delete(row.id);
         });
     }
-  }, [values, wrappedVaultKey, isCryptoActive, orgId, candidateId]);
+  }, [values, vaultAccess, isCryptoActive, orgId, candidateId]);
 
   return {
     values,
     decrypted,
     decryptingValueIds: isCryptoActive ? decryptingValueIds : EMPTY_VALUE_IDS,
     failedValueIds: isCryptoActive ? failedValueIds : EMPTY_VALUE_IDS,
-    isVaultKeyError: isVaultKeyError && !wrappedVaultKey,
+    isVaultKeyError: isVaultKeyError && !vaultAccess,
     isLoading,
     isQueryError: isQueryError && values === undefined,
     refetch,

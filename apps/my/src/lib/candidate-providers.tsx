@@ -1,31 +1,26 @@
 import { createAuthAccountApi } from '@comitium/auth/account-api';
-import { PrivyAppProvider } from '@comitium/auth/privy-app-provider';
+import { createIdentityClient } from '@comitium/auth/auth-client';
+import { AuthProvider } from '@comitium/auth/auth-provider';
+import { CryptoProvider } from '@comitium/auth/crypto-provider';
 import { STALE_TIME_DEFAULT } from '@comitium/schemas/api-query-policy';
-import { logger } from '@comitium/ui/logger';
 import type { ReactNode } from 'react';
-import { CryptoUnlockProvider } from '@/components/auth/crypto-unlock-provider';
-import { EncryptionSetup } from '@/components/auth/encryption-setup';
 import { qk } from '@/hooks/query-keys';
-import { api, registerApiAuthTokenProvider } from '@/lib/api/client';
+import { api } from '@/lib/api/client';
 
 const authAccountApi = createAuthAccountApi(api);
-
-function logWalletProvisioningError(message: string) {
-  logger.warn('Canonical embedded wallet creation failed', { error: message });
-}
+const authClient = createIdentityClient(import.meta.env.VITE_API);
 
 export function CandidateProviders({ children }: { children: ReactNode }) {
   return (
-    <PrivyAppProvider
-      getSession={authAccountApi.getSession}
-      sessionQueryKey={qk.auth.session}
+    <AuthProvider
+      client={authClient}
+      bootstrapAccount={authAccountApi.bootstrapAccount}
+      accountQueryKey={qk.auth.account}
       staleTime={STALE_TIME_DEFAULT}
-      onWalletProvisioningError={logWalletProvisioningError}
-      registerApiAuthTokenProvider={registerApiAuthTokenProvider}
     >
-      <EncryptionSetup>
-        <CryptoUnlockProvider>{children}</CryptoUnlockProvider>
-      </EncryptionSetup>
-    </PrivyAppProvider>
+      <CryptoProvider apiUrl={import.meta.env.VITE_API} accountQueryKey={qk.auth.accountRoot()}>
+        {children}
+      </CryptoProvider>
+    </AuthProvider>
   );
 }

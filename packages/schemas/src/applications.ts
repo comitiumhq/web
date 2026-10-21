@@ -524,6 +524,7 @@ export const emailDeliveryGrantSchema = z.object({
 
 export const recipientKeySchema = z.object({
   publicKey: publicEncryptionKeySchema.nullable(),
+  userKeyVersion: z.number().int().positive().nullable(),
 });
 
 // --- Decrypted application (client-side, after vault decryption) ---

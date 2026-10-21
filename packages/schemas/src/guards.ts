@@ -1,4 +1,3 @@
-import type { Hex } from 'viem';
 import { z } from 'zod';
 import { BYTES32_HEX_REGEX } from './patterns';
 
@@ -12,7 +11,7 @@ export function isNonEmptyString(value: unknown): value is string {
   return nonEmptyStringSchema.safeParse(value).success;
 }
 
-export function isBytes32Hex(value: unknown): value is Hex {
+export function isBytes32Hex(value: unknown): value is `0x${string}` {
   const parsedValue = z.string().safeParse(value);
 
   return parsedValue.success && BYTES32_HEX_REGEX.test(parsedValue.data);

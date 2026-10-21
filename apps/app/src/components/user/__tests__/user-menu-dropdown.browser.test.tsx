@@ -20,7 +20,6 @@ vi.mock('@tanstack/react-router', () => ({
 vi.mock('@comitium/ui/theme-menu', () => ({ ThemeMenuSub: () => null }));
 
 const identity: DisplayIdentity = {
-  walletAddress: '0x1234567890abcdef1234567890abcdef12345678',
   name: 'Alex Morgan',
   email: 'alex@example.com',
 };
@@ -47,6 +46,5 @@ describe('UserMenuDropdown personal destinations', () => {
 
     await expect.element(page.getByRole('link', { name: 'Account' })).toHaveAttribute('href', '/account');
     await expect.element(page.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/org/org-1/settings');
-    await expect.element(page.getByText('Wallet', { exact: true })).not.toBeInTheDocument();
   });
 });

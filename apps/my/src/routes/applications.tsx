@@ -1,5 +1,5 @@
+import { AuthGuard } from '@comitium/auth/auth-guard';
 import { createFileRoute } from '@tanstack/react-router';
-import { AuthGuard } from '@/components/auth/auth-guard';
 import { MyApplicationsDashboard } from '@/components/features/my-applications';
 
 export const Route = createFileRoute('/applications')({

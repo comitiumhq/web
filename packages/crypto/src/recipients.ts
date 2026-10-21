@@ -1,18 +1,9 @@
-import { z } from 'zod';
-
+import { PROCESSOR_RECIPIENT_REGEX } from './patterns';
 import type { PublicEncryptionKey } from './schemas';
+import { type EnvelopeRecipient, isEnvelopeRecipient } from './schemas/recipients';
 
-const PROCESSOR_RECIPIENT_REGEX = /^processor:[^\s:]+$/;
-
-const STATIC_ENVELOPE_RECIPIENTS = ['org_vault', 'applicant'] as const;
-const DYNAMIC_ENVELOPE_RECIPIENT_PREFIXES = ['processor'] as const;
-const staticEnvelopeRecipients = new Set<string>(STATIC_ENVELOPE_RECIPIENTS);
-const stringSchema = z.string();
-
-type StaticEnvelopeRecipient = (typeof STATIC_ENVELOPE_RECIPIENTS)[number];
-type DynamicEnvelopeRecipientPrefix = (typeof DYNAMIC_ENVELOPE_RECIPIENT_PREFIXES)[number];
-type DynamicEnvelopeRecipient = `${DynamicEnvelopeRecipientPrefix}:${string}`;
-export type EnvelopeRecipient = StaticEnvelopeRecipient | DynamicEnvelopeRecipient;
+export type { EnvelopeRecipient } from './schemas/recipients';
+export { isEnvelopeRecipient } from './schemas/recipients';
 
 const DEFAULT_KEY_VERSION = 1;
 
@@ -22,29 +13,11 @@ export type RecipientDescriptor = {
   keyVersion: number;
 };
 
-export function isEnvelopeRecipient(value: unknown): value is EnvelopeRecipient {
-  const recipient = stringSchema.safeParse(value);
-
-  if (!recipient.success) {
-    return false;
-  }
-
-  return staticEnvelopeRecipients.has(recipient.data) || PROCESSOR_RECIPIENT_REGEX.test(recipient.data);
-}
-
-export const envelopeRecipientSchema = z.custom<EnvelopeRecipient>(
-  isEnvelopeRecipient,
-  'Invalid encrypted-envelope recipient',
-);
-
 export function orgVaultRecipient(publicKey: PublicEncryptionKey, keyVersion: number): RecipientDescriptor {
   return { recipient: 'org_vault', publicKey, keyVersion };
 }
 
-export function applicantRecipient(
-  publicKey: PublicEncryptionKey,
-  keyVersion: number = DEFAULT_KEY_VERSION,
-): RecipientDescriptor {
+export function applicantRecipient(publicKey: PublicEncryptionKey, keyVersion: number): RecipientDescriptor {
   return { recipient: 'applicant', publicKey, keyVersion };
 }
 

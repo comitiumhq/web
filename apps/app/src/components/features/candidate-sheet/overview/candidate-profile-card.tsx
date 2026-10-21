@@ -1,6 +1,5 @@
-import type { PublicEncryptionKey } from '@comitium/crypto';
+import type { PublicEncryptionKey, VaultKeyAccess } from '@comitium/crypto';
 import { type CandidateProfile, formatCandidateLocation } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { Button } from '@comitium/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
@@ -32,7 +31,7 @@ interface CandidateProfileCardProps {
   canEdit: boolean;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
 }
 
 export function CandidateProfileCard(props: CandidateProfileCardProps) {
@@ -92,7 +91,7 @@ interface CandidateProfileEditorProps {
   candidateId: string;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: WrappedKey;
+  vaultAccess: VaultKeyAccess;
 }
 
 function getCandidateProfileEditorProps({
@@ -100,7 +99,7 @@ function getCandidateProfileEditorProps({
   candidateId,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
 }: CandidateProfileCardProps): CandidateProfileEditorProps | null {
   if (!canEdit) {
     return null;
@@ -118,11 +117,11 @@ function getCandidateProfileEditorProps({
     return null;
   }
 
-  if (!isDefined(wrappedVaultKey)) {
+  if (!isDefined(vaultAccess)) {
     return null;
   }
 
-  return { candidateId, vaultPublicKey, vaultKeyVersion, wrappedVaultKey };
+  return { candidateId, vaultPublicKey, vaultKeyVersion, vaultAccess };
 }
 
 interface CandidateProfileContentProps {

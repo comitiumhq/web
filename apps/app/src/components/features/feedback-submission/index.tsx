@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy, type PublicEncryptionKey } from '@comitium/crypto';
 import { feedbackAnswerBucketContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { splitAnswersByVisibility } from '@comitium/schemas/forms/visibility';
 import { Badge } from '@comitium/ui/badge';
@@ -39,7 +39,7 @@ interface FeedbackSubmissionSheetProps {
   currentUserId: string | undefined;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   candidateName: string | null;
 }
 
@@ -51,7 +51,7 @@ interface FeedbackSubmissionPanelProps {
   currentUserId: string | undefined;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   onComplete: () => void;
   onCancel?: () => void;
 }
@@ -65,7 +65,7 @@ export function FeedbackSubmissionSheet({
   currentUserId,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
   candidateName,
 }: FeedbackSubmissionSheetProps) {
   const flow = useFeedbackSubmissionFlow({
@@ -74,7 +74,7 @@ export function FeedbackSubmissionSheet({
     orgId,
     source,
     currentUserId,
-    wrappedVaultKey,
+    vaultAccess,
   });
 
   const handleClose = useCallback(() => onOpenChange(false), [onOpenChange]);
@@ -105,7 +105,7 @@ export function FeedbackSubmissionSheet({
           source={source}
           vaultPublicKey={vaultPublicKey}
           vaultKeyVersion={vaultKeyVersion}
-          wrappedVaultKey={wrappedVaultKey}
+          vaultAccess={vaultAccess}
           onComplete={handleClose}
           onCancel={handleClose}
         />
@@ -122,7 +122,7 @@ export function FeedbackSubmissionPanel({
   currentUserId,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
   onComplete,
   onCancel,
 }: FeedbackSubmissionPanelProps) {
@@ -132,7 +132,7 @@ export function FeedbackSubmissionPanel({
     orgId,
     source,
     currentUserId,
-    wrappedVaultKey,
+    vaultAccess,
   });
 
   return (
@@ -143,7 +143,7 @@ export function FeedbackSubmissionPanel({
       source={source}
       vaultPublicKey={vaultPublicKey}
       vaultKeyVersion={vaultKeyVersion}
-      wrappedVaultKey={wrappedVaultKey}
+      vaultAccess={vaultAccess}
       onComplete={onComplete}
       onCancel={onCancel}
       showFormContext
@@ -158,7 +158,7 @@ interface FeedbackSubmissionViewProps {
   source: FeedbackSubmissionSource | null;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   onComplete: () => void;
   onCancel?: () => void;
   showFormContext?: boolean;
@@ -171,7 +171,7 @@ function FeedbackSubmissionView({
   source,
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
   onComplete,
   onCancel,
   showFormContext = false,
@@ -206,7 +206,7 @@ function FeedbackSubmissionView({
       previousSubmissionId={flow.previousSubmissionId}
       vaultPublicKey={vaultPublicKey}
       vaultKeyVersion={vaultKeyVersion}
-      wrappedVaultKey={wrappedVaultKey}
+      vaultAccess={vaultAccess}
       onComplete={onComplete}
       onCancel={onCancel}
       contained={showFormContext}
@@ -284,7 +284,7 @@ interface FeedbackFormProps {
   previousSubmissionId: string | null;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   onComplete: () => void;
   onCancel?: () => void;
   contained?: boolean;
@@ -324,7 +324,7 @@ function FeedbackForm(props: FeedbackFormProps) {
       return;
     }
 
-    const { vaultPublicKey, vaultKeyVersion, wrappedVaultKey } = encryptionContext;
+    const { vaultPublicKey, vaultKeyVersion, vaultAccess } = encryptionContext;
 
     setIsEncrypting(true);
 
@@ -332,7 +332,7 @@ function FeedbackForm(props: FeedbackFormProps) {
       await ensureUnlocked();
 
       const [fieldValues, answerEnvelopes] = await Promise.all([
-        projectSubmissionFieldValues(orgId, wrappedVaultKey, snapshot, values),
+        projectSubmissionFieldValues(orgId, vaultAccess, snapshot, values),
         Promise.all(
           splitAnswersByVisibility(snapshot.sections, values).map(async (bucket) => ({
             visibility: bucket.visibility,
@@ -408,13 +408,13 @@ function FeedbackForm(props: FeedbackFormProps) {
 interface FeedbackEncryptionContext {
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
-  wrappedVaultKey: WrappedKey;
+  vaultAccess: VaultKeyAccess;
 }
 
 function getFeedbackEncryptionContext({
   vaultPublicKey,
   vaultKeyVersion,
-  wrappedVaultKey,
+  vaultAccess,
 }: FeedbackFormProps): FeedbackEncryptionContext | null {
   if (!isDefined(vaultPublicKey)) {
     return null;
@@ -424,9 +424,9 @@ function getFeedbackEncryptionContext({
     return null;
   }
 
-  if (!isDefined(wrappedVaultKey)) {
+  if (!isDefined(vaultAccess)) {
     return null;
   }
 
-  return { vaultPublicKey, vaultKeyVersion, wrappedVaultKey };
+  return { vaultPublicKey, vaultKeyVersion, vaultAccess };
 }

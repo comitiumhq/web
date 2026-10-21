@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ApplicationsRouteImport } from './routes/applications'
@@ -20,16 +19,12 @@ import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ScheduleTokenRouteImport } from './routes/schedule/$token'
 import { Route as CareersOrgSlugRouteImport } from './routes/careers/$orgSlug'
 import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
+import { Route as AccountRecoveryRouteImport } from './routes/account/recovery'
 import { Route as CareersOrgSlugIndexRouteImport } from './routes/careers/$orgSlug/index'
 import { Route as CareersOrgSlugJobsPostingSlugRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug'
 import { Route as CareersOrgSlugJobsPostingSlugIndexRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/index'
 import { Route as CareersOrgSlugJobsPostingSlugApplyRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/apply'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
@@ -80,6 +75,11 @@ const AccountZkIdentityRoute = AccountZkIdentityRouteImport.update({
   path: '/zk-identity',
   getParentRoute: () => AccountRoute,
 } as any)
+const AccountRecoveryRoute = AccountRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
+  getParentRoute: () => AccountRoute,
+} as any)
 const CareersOrgSlugIndexRoute = CareersOrgSlugIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -110,7 +110,7 @@ export interface FileRoutesByFullPath {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/signup': typeof SignupRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
   '/schedule/$token': typeof ScheduleTokenRoute
@@ -126,7 +126,7 @@ export interface FileRoutesByTo {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/signup': typeof SignupRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/schedule/$token': typeof ScheduleTokenRoute
   '/account': typeof AccountIndexRoute
@@ -142,7 +142,7 @@ export interface FileRoutesById {
   '/applications': typeof ApplicationsRoute
   '/login': typeof LoginRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/signup': typeof SignupRoute
+  '/account/recovery': typeof AccountRecoveryRoute
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
   '/schedule/$token': typeof ScheduleTokenRoute
@@ -161,7 +161,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/signup'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/careers/$orgSlug'
     | '/schedule/$token'
@@ -177,7 +177,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/signup'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/schedule/$token'
     | '/account'
@@ -192,7 +192,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/login'
     | '/robots.txt'
-    | '/signup'
+    | '/account/recovery'
     | '/account/zk-identity'
     | '/careers/$orgSlug'
     | '/schedule/$token'
@@ -210,7 +210,6 @@ export interface RootRouteChildren {
   ApplicationsRoute: typeof ApplicationsRoute
   LoginRoute: typeof LoginRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
-  SignupRoute: typeof SignupRoute
   CareersOrgSlugRoute: typeof CareersOrgSlugRouteWithChildren
   ScheduleTokenRoute: typeof ScheduleTokenRoute
   JobsIndexRoute: typeof JobsIndexRoute
@@ -218,13 +217,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/robots.txt': {
       id: '/robots.txt'
       path: '/robots.txt'
@@ -295,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountZkIdentityRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/account/recovery': {
+      id: '/account/recovery'
+      path: '/recovery'
+      fullPath: '/account/recovery'
+      preLoaderRoute: typeof AccountRecoveryRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/careers/$orgSlug/': {
       id: '/careers/$orgSlug/'
       path: '/'
@@ -327,11 +326,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
+  AccountRecoveryRoute: typeof AccountRecoveryRoute
   AccountZkIdentityRoute: typeof AccountZkIdentityRoute
   AccountIndexRoute: typeof AccountIndexRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
+  AccountRecoveryRoute: AccountRecoveryRoute,
   AccountZkIdentityRoute: AccountZkIdentityRoute,
   AccountIndexRoute: AccountIndexRoute,
 }
@@ -378,7 +379,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApplicationsRoute: ApplicationsRoute,
   LoginRoute: LoginRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
-  SignupRoute: SignupRoute,
   CareersOrgSlugRoute: CareersOrgSlugRouteWithChildren,
   ScheduleTokenRoute: ScheduleTokenRoute,
   JobsIndexRoute: JobsIndexRoute,

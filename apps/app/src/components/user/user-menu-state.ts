@@ -1,11 +1,9 @@
 import { isAccountLoading } from '@comitium/auth/account-stage';
-import { getPrivyAccountEmail } from '@comitium/auth/privy-account';
+import { useAuthClient } from '@comitium/auth/auth-context';
 import { useAccountReadiness } from '@comitium/auth/use-account-readiness';
-import { useAccount } from '@comitium/auth/use-wallet';
 import { isUnauthorizedError } from '@comitium/schemas/api-query-policy';
 import type { DisplayIdentity } from '@comitium/schemas/common';
 import { createDisplayIdentity } from '@comitium/ui/display-name';
-import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate, useParams, useRouterState } from '@tanstack/react-router';
 import { useCallback } from 'react';
 import { useAccountSession } from '@/hooks/queries/use-account-session';
@@ -41,8 +39,7 @@ export interface ReadyUserMenuState {
 export type UserMenuState = ConnectUserMenuState | HiddenUserMenuState | ReadyUserMenuState | RecoverUserMenuState;
 
 export function useUserMenuState(): UserMenuState {
-  const { user: privyUser } = usePrivy();
-  const { address } = useAccount();
+  const { data: auth } = useAuthClient().useSession();
   const logout = useLogout();
   const { stage } = useAccountReadiness();
   const { location } = useRouterState();
@@ -61,10 +58,8 @@ export function useUserMenuState(): UserMenuState {
   const publicOrgMember = currentOrgId && accountSession.org?.id === currentOrgId ? accountSession.orgMember : null;
   const isPreparingAccount = isAccountLoading(stage);
   const profileName = currentOrgId ? (orgMe?.name ?? publicOrgMember?.name ?? null) : null;
-  const walletAddress = address ?? accountSession.user?.walletAddress ?? null;
-  const accountEmail = getPrivyAccountEmail(privyUser);
+  const accountEmail = auth?.user.email ?? null;
   const identity = createDisplayIdentity({
-    walletAddress,
     name: profileName ?? publicOrgMember?.name ?? null,
     email: accountEmail,
     avatarUrl: orgMe?.avatarUrl ?? null,
@@ -85,10 +80,6 @@ export function useUserMenuState(): UserMenuState {
 
   if (isPreparingAccount && !hasSwitchableContexts) {
     return { status: 'hidden' };
-  }
-
-  if (stage === 'unrecoverable') {
-    return { status: 'recover' };
   }
 
   if (stage !== 'ready') {

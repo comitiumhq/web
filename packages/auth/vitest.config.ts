@@ -8,9 +8,11 @@ export default defineConfig({
 	plugins: [react()],
 	optimizeDeps: {
 		include: [
+			'@zxcvbn-ts/core',
+			'@zxcvbn-ts/language-common',
+			'@zxcvbn-ts/language-en',
 			'react/jsx-dev-runtime',
 			'vitest-browser-react',
-			'@privy-io/react-auth',
 			'@tanstack/react-query',
 			'@zkpassport/sdk/query',
 			'@date-fns/tz',

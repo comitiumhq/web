@@ -1,4 +1,7 @@
+import { ResendCodeButton } from '@comitium/auth/resend-code-button';
+import { useResendCooldown } from '@comitium/auth/use-resend-cooldown';
 import { getErrorMessage } from '@comitium/schemas/error';
+import { BackButton } from '@comitium/ui/back-button';
 import { Button } from '@comitium/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
@@ -6,30 +9,17 @@ import { PageHeader } from '@comitium/ui/page-header';
 import { Spinner } from '@comitium/ui/spinner';
 import { VERIFICATION_CODE_LENGTH, VerificationCodeInput } from '@comitium/ui/verification-code-input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useSendVerification } from '@/hooks/mutations/use-send-verification';
 import { useVerifyCode } from '@/hooks/mutations/use-verify-code';
-import { useResendCooldown } from '@/hooks/use-resend-cooldown';
 
-const emailSchema = z.object({
+const organizationEmailSchema = z.object({
   email: z.email('Invalid email address').min(1, 'Email is required'),
 });
 
-type EmailFormData = z.infer<typeof emailSchema>;
-
-function MutationError({ error, fallback }: { error: Error | null; fallback: string }) {
-  if (!error) {
-    return null;
-  }
-
-  return (
-    <p role="alert" className="text-copy-13 text-destructive-text">
-      {getErrorMessage(error, fallback)}
-    </p>
-  );
-}
+type OrganizationEmailValues = z.infer<typeof organizationEmailSchema>;
 
 export function EmailVerificationStep() {
   const [codeSent, setCodeSent] = useState(false);
@@ -38,30 +28,28 @@ export function EmailVerificationStep() {
   const sendMutation = useSendVerification();
   const verifyMutation = useVerifyCode();
 
-  const form = useForm<EmailFormData>({
-    resolver: zodResolver(emailSchema),
+  const form = useForm<OrganizationEmailValues>({
+    resolver: zodResolver(organizationEmailSchema),
     defaultValues: { email: '' },
   });
 
   const emailValue = form.watch('email');
 
-  const handleSendCode = useCallback(
-    (data: EmailFormData) => {
-      sendMutation.mutate(data.email, {
-        onSuccess: (result) => {
-          if (result.status === 'verified') {
-            return;
-          }
+  function handleSendCode(data: OrganizationEmailValues) {
+    sendMutation.mutate(data.email, {
+      onSuccess: (result) => {
+        if (result.status === 'verified') {
+          return;
+        }
 
-          setCodeSent(true);
-          cooldown.start();
-        },
-      });
-    },
-    [sendMutation, cooldown],
-  );
+        setCodeSent(true);
 
-  const handleResendCode = useCallback(() => {
+        cooldown.start();
+      },
+    });
+  }
+
+  function handleResendCode() {
     sendMutation.mutate(emailValue.trim(), {
       onSuccess: (result) => {
         if (result.status === 'verified') {
@@ -69,51 +57,60 @@ export function EmailVerificationStep() {
         }
 
         setCode('');
+
         cooldown.start();
       },
     });
-  }, [sendMutation, emailValue, cooldown]);
+  }
 
-  const handleVerifyCode = useCallback(
-    (verificationCode: string) => {
-      if (verificationCode.length !== VERIFICATION_CODE_LENGTH || verifyMutation.isPending) {
-        return;
-      }
+  function handleVerifyCode(verificationCode: string) {
+    if (verificationCode.length !== VERIFICATION_CODE_LENGTH || verifyMutation.isPending) {
+      return;
+    }
 
-      verifyMutation.mutate({ email: emailValue.trim(), code: verificationCode });
-    },
-    [emailValue, verifyMutation],
-  );
+    verifyMutation.mutate({ email: emailValue.trim(), code: verificationCode });
+  }
 
-  const handleChangeEmail = useCallback(() => {
+  function handleChangeEmail() {
     setCodeSent(false);
     setCode('');
+
     cooldown.reset();
     sendMutation.reset();
     verifyMutation.reset();
-  }, [cooldown, sendMutation, verifyMutation]);
+  }
 
-  const handleCodeChange = useCallback(
-    (value: string) => {
-      setCode(value);
-      verifyMutation.reset();
-    },
-    [verifyMutation],
-  );
+  function handleCodeChange(value: string) {
+    setCode(value);
+
+    verifyMutation.reset();
+  }
+
+  const sendError = sendMutation.error
+    ? getErrorMessage(sendMutation.error, 'Could not send the verification code.')
+    : null;
+  const verifyError = verifyMutation.error
+    ? getErrorMessage(verifyMutation.error, 'The verification code is invalid or expired.')
+    : null;
+
+  const codeError = verifyError ?? sendError;
+  const handleCurrentCode = () => handleVerifyCode(code);
 
   if (codeSent) {
     return (
       <div className="space-y-8">
-        <PageHeader
-          title="Check your inbox"
-          description={
-            <>
-              Enter the 6-digit code sent to <span className="text-foreground">{emailValue}</span>.
-            </>
-          }
-          className="justify-center text-center [&>div]:w-full"
-        />
-
+        <header className="grid gap-3">
+          <BackButton onClick={handleChangeEmail} disabled={sendMutation.isPending || verifyMutation.isPending} />
+          <PageHeader
+            title="Check your inbox"
+            description={
+              <>
+                Enter the 6-digit code sent to <span className="text-foreground">{emailValue}</span>.
+              </>
+            }
+            className="justify-center text-center [&>div]:w-full"
+          />
+        </header>
         <div className="space-y-5">
           <div className="space-y-3">
             <p className="text-label-14">Verification code</p>
@@ -125,41 +122,27 @@ export function EmailVerificationStep() {
               autoFocus
             />
           </div>
-
-          <MutationError error={verifyMutation.error} fallback="The verification code is invalid or expired." />
-
-          <Button
-            type="button"
-            size="lg"
-            className="w-full"
-            onClick={() => handleVerifyCode(code)}
-            disabled={verifyMutation.isPending || code.length !== VERIFICATION_CODE_LENGTH}
-          >
-            {verifyMutation.isPending && <Spinner data-icon="inline-start" />}
-            {verifyMutation.isPending ? 'Verifying...' : 'Verify email'}
-          </Button>
-
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          {codeError ? (
+            <p role="alert" className="text-copy-13 text-destructive-text">
+              {codeError}
+            </p>
+          ) : null}
+          <div className="grid gap-3">
             <Button
               type="button"
-              variant="ghost"
-              size="xs"
-              className="-ml-2 text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
-              onClick={handleChangeEmail}
-              disabled={sendMutation.isPending || verifyMutation.isPending}
+              size="lg"
+              className="w-full"
+              onClick={handleCurrentCode}
+              disabled={verifyMutation.isPending || code.length !== VERIFICATION_CODE_LENGTH}
             >
-              Use another email
+              {verifyMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+              {verifyMutation.isPending ? 'Verifying...' : 'Verify email'}
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="xs"
-              className="-mr-2 text-muted-foreground hover:bg-transparent dark:hover:bg-transparent"
+            <ResendCodeButton
+              remaining={cooldown.remaining}
               onClick={handleResendCode}
-              disabled={cooldown.isActive || sendMutation.isPending || verifyMutation.isPending}
-            >
-              {cooldown.isActive ? `Resend in ${cooldown.remaining}s` : 'Resend code'}
-            </Button>
+              disabled={sendMutation.isPending || verifyMutation.isPending}
+            />
           </div>
         </div>
       </div>
@@ -173,7 +156,6 @@ export function EmailVerificationStep() {
         description="Use your work email to create an organization."
         className="justify-center text-center [&>div]:w-full"
       />
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSendCode)} className="space-y-5">
           <FormField
@@ -202,11 +184,13 @@ export function EmailVerificationStep() {
               </FormItem>
             )}
           />
-
-          <MutationError error={sendMutation.error} fallback="Could not send the verification code." />
-
+          {sendError ? (
+            <p role="alert" className="text-copy-13 text-destructive-text">
+              {sendError}
+            </p>
+          ) : null}
           <Button type="submit" size="lg" className="w-full" disabled={sendMutation.isPending}>
-            {sendMutation.isPending && <Spinner data-icon="inline-start" />}
+            {sendMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
             {sendMutation.isPending ? 'Sending code...' : 'Send verification code'}
           </Button>
         </form>

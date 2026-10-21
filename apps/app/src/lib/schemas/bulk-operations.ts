@@ -28,6 +28,7 @@ const applicationItemSchema = z.object({
   requiresEmail: z.boolean(),
   childOperationId: z.string().nullable(),
   recipientPublicKey: publicEncryptionKeySchema.nullable(),
+  recipientKeyVersion: z.number().int().positive().nullable(),
   deliveryGrant: z
     .object({
       id: z.string(),

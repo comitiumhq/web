@@ -1,10 +1,9 @@
 import type { PublicEncryptionKey } from '@comitium/crypto';
-import type { WrappedKey } from '@comitium/schemas/common';
 import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-
 import type { ApplicationReviewActivity } from '@/lib/schemas/stage-activities';
+import { mockVaultAccess } from '@/test/crypto-helpers';
 
 const mocks = vi.hoisted(() => ({
   createSubmission: vi.fn(),
@@ -51,7 +50,7 @@ const SUBMISSION_ID = '77777777-7777-4777-8777-777777777777';
 const ACTIVITY_ID = '88888888-8888-4888-8888-888888888888';
 
 const vaultPublicKey = { v: 1, xwing: 'vault-key' } as PublicEncryptionKey;
-const wrappedVaultKey = { ek: 'wrapped-vault-key' } as WrappedKey;
+const vaultAccess = mockVaultAccess();
 
 const snapshot: FormDefinitionSnapshot = {
   v: 1,
@@ -131,7 +130,7 @@ function Harness({ publicKey = vaultPublicKey }: { publicKey?: PublicEncryptionK
       currentUserId="user-1"
       vaultPublicKey={publicKey}
       vaultKeyVersion={3}
-      wrappedVaultKey={wrappedVaultKey}
+      vaultAccess={vaultAccess}
       onComplete={() => undefined}
     />
   );

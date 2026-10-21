@@ -1,20 +1,20 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { type CandidateProfileSearchField, CryptoProxy } from '@comitium/crypto';
 import {
   CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION,
   type CandidateProfile,
   type CandidateProfileSearchProjection,
 } from '@comitium/schemas/candidates';
-import type { WrappedKey } from '@comitium/schemas/common';
 
 export async function projectCandidateProfileSearch(
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  vaultAccess: VaultKeyAccess,
   profile: CandidateProfile,
 ): Promise<CandidateProfileSearchProjection> {
   const [contactEmailDigest, locationCityDigest, locationCountryDigest] = await Promise.all([
-    hashOptionalProfileValue(orgId, wrappedVaultKey, 'email', profile.email),
-    hashOptionalProfileValue(orgId, wrappedVaultKey, 'cityId', profile.location?.cityId ?? null),
-    hashOptionalProfileValue(orgId, wrappedVaultKey, 'country', profile.location?.country ?? null),
+    hashOptionalProfileValue(orgId, vaultAccess, 'email', profile.email),
+    hashOptionalProfileValue(orgId, vaultAccess, 'cityId', profile.location?.cityId ?? null),
+    hashOptionalProfileValue(orgId, vaultAccess, 'country', profile.location?.country ?? null),
   ]);
 
   return {
@@ -27,7 +27,7 @@ export async function projectCandidateProfileSearch(
 
 function hashOptionalProfileValue(
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  vaultAccess: VaultKeyAccess,
   field: CandidateProfileSearchField,
   value: string | number | null,
 ): Promise<string | null> {
@@ -35,5 +35,5 @@ function hashOptionalProfileValue(
     return Promise.resolve(null);
   }
 
-  return CryptoProxy.hashCandidateProfileSearchValue(orgId, wrappedVaultKey, field, value);
+  return CryptoProxy.hashCandidateProfileSearchValue(orgId, vaultAccess, field, value);
 }

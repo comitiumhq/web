@@ -10,7 +10,7 @@ export interface EncryptedData {
   iv: string;
 }
 
-export function aesGcmParams(iv: Uint8Array, aad?: Uint8Array): AesGcmParams {
+export function aesGcmParams(iv: Uint8Array, aad?: Uint8Array) {
   if (!aad) {
     return { name: 'AES-GCM', iv: iv as BufferSource };
   }

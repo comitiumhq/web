@@ -20,7 +20,6 @@ export default defineConfig({
 			'react/jsx-dev-runtime',
 			'vitest-browser-react',
 			'@hookform/resolvers/zod',
-			'@privy-io/react-auth',
 			'@tanstack/react-router',
 			'neverthrow',
 			'react-hook-form',

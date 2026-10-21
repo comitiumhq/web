@@ -1,22 +1,39 @@
+import { AuthLoginSurface } from '@comitium/auth/login-surface';
 import { authSearchSchema } from '@comitium/auth/navigation';
-import { createFileRoute } from '@tanstack/react-router';
-import { CandidateLoginPage } from '@/components/auth/candidate-login-page';
+import { useSession } from '@comitium/auth/use-session';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useCallback } from 'react';
+import { getPublicSiteUrl } from '@/config/site';
 
 export const Route = createFileRoute('/login')({
   ssr: false,
   validateSearch: authSearchSchema,
   head: () => ({
     meta: [
-      { title: 'Sign in | Comitium' },
-      { name: 'description', content: 'Sign in to your Comitium account.' },
+      { title: 'Log In to Comitium' },
+      { name: 'description', content: 'Log In to Comitium' },
       { name: 'robots', content: 'noindex,follow' },
     ],
   }),
-  component: CandidateLoginRoute,
+  component: LoginRoute,
 });
 
-function CandidateLoginRoute() {
+function LoginRoute() {
   const { returnTo } = Route.useSearch();
+  const navigate = useNavigate();
+  const session = useSession();
+  const replace = useCallback((destination: string) => navigate({ to: destination, replace: true }), [navigate]);
 
-  return <CandidateLoginPage mode="sign-in" returnTo={returnTo} />;
+  return (
+    <AuthLoginSurface
+      defaultReturnTo="/applications"
+      homeHref="/jobs"
+      homeLabel="Back to jobs"
+      navigate={replace}
+      privacyHref={getPublicSiteUrl('/privacy')}
+      returnTo={returnTo}
+      session={session}
+      termsHref={getPublicSiteUrl('/terms')}
+    />
+  );
 }

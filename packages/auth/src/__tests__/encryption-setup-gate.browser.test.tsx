@@ -2,86 +2,112 @@ import type { User } from '@comitium/schemas/auth';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { EncryptionSetupGate } from '../encryption-setup-gate';
+import { encryptedProductUser, productUser } from './identity-fixtures';
 
 const mocks = vi.hoisted(() => ({
-  session: {
-    isSessionLoading: false,
-    user: null as User | null,
+  user: null as User | null,
+  loading: false,
+  crypto: { isCryptoActive: false, isRestoring: false, restoreError: null as string | null },
+}));
+
+vi.mock('../use-session', () => ({ useSession: () => ({ user: mocks.user, isSessionLoading: mocks.loading }) }));
+vi.mock('../use-crypto-unlock', () => ({ useCryptoUnlock: () => mocks.crypto }));
+vi.mock('../use-logout', () => ({ useAccountLogout: () => vi.fn() }));
+vi.mock('../storage/storage-access', () => ({
+  StorageAccess: ({ requireRecovery, initialMode }: { requireRecovery: boolean; initialMode?: string }) => {
+    if (initialMode === 'create-recovery-code') {
+      return <p>Create recovery kit</p>;
+    }
+
+    return <p>{requireRecovery ? 'Password and kit' : 'Password only'}</p>;
   },
-  wallet: { id: 'wallet-id' } as object | null,
 }));
 
-vi.mock('@comitium/auth/use-session', () => ({
-  useSession: () => mocks.session,
-}));
-
-vi.mock('@comitium/auth/use-wallet', () => ({
-  useActiveWallet: () => mocks.wallet,
-}));
-
-function user(id: string, ready: boolean): User {
-  return {
-    id,
-    walletAddress: '0x1111111111111111111111111111111111111111',
-    publicKey: ready ? ({ v: 1, xwing: 'public-key' } as User['publicKey']) : null,
-    encryptedPersonalKey: ready ? ({ wrapped: true } as unknown as User['encryptedPersonalKey']) : null,
-    createdAt: '2026-08-28T00:00:00.000Z',
-    updatedAt: '2026-08-28T00:00:00.000Z',
-  };
-}
-
-function gate(initializeEncryptionKeyBundle: () => Promise<unknown>, isSuppressed = false) {
+function gate(suppressed = false, requireRecovery = false) {
   return (
-    <EncryptionSetupGate
-      error={null}
-      initializeEncryptionKeyBundle={initializeEncryptionKeyBundle}
-      isSuppressed={isSuppressed}
-    >
+    <EncryptionSetupGate isSuppressed={suppressed} requireRecovery={requireRecovery}>
       <main>Protected application</main>
     </EncryptionSetupGate>
   );
 }
 
 beforeEach(() => {
-  mocks.session = {
-    isSessionLoading: false,
-    user: user('user-1', false),
-  };
-  mocks.wallet = { id: 'wallet-id' };
+  mocks.user = productUser();
+  mocks.loading = false;
+  mocks.crypto = { isCryptoActive: false, isRestoring: false, restoreError: null };
 });
 
-describe('EncryptionSetupGate', () => {
-  it('starts setup once per user and keeps protected children hidden until the complete bundle exists', async () => {
-    const initialize = vi.fn().mockResolvedValue(undefined);
-    const screen = await render(gate(initialize));
-
+describe('ATS storage boundary', () => {
+  it('blocks working data for a keyless account and offers explicit setup', async () => {
+    const screen = await render(gate());
+    await expect.element(screen.getByText('Password only')).toBeVisible();
     await expect.element(screen.getByText('Protected application')).not.toBeInTheDocument();
-    await vi.waitFor(() => expect(initialize).toHaveBeenCalledTimes(1));
-
-    await screen.rerender(gate(initialize));
-    expect(initialize).toHaveBeenCalledTimes(1);
-
-    mocks.session = { isSessionLoading: false, user: user('user-1', true) };
-    await screen.rerender(gate(initialize));
-    await expect.element(screen.getByText('Protected application')).toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Sign out' })).toBeVisible();
+    await expect.element(screen.getByRole('link', { name: 'Account settings' })).not.toBeInTheDocument();
   });
 
-  it('allows a different user to start its own setup', async () => {
-    const initialize = vi.fn().mockResolvedValue(undefined);
-    const screen = await render(gate(initialize));
+  it('keeps account settings available while an existing user key is locked', async () => {
+    mocks.user = encryptedProductUser();
+    const screen = await render(gate());
 
-    await vi.waitFor(() => expect(initialize).toHaveBeenCalledTimes(1));
-
-    mocks.session = { isSessionLoading: false, user: user('user-2', false) };
-    await screen.rerender(gate(initialize));
-    await vi.waitFor(() => expect(initialize).toHaveBeenCalledTimes(2));
+    await expect.element(screen.getByRole('link', { name: 'Account settings' })).toHaveAttribute('href', '/account');
+    await expect.element(screen.getByRole('button', { name: 'Sign out' })).toBeVisible();
+    await expect.element(screen.getByText('Protected application')).not.toBeInTheDocument();
   });
 
-  it('does not start setup on intentionally suppressed routes', async () => {
-    const initialize = vi.fn().mockResolvedValue(undefined);
-    const screen = await render(gate(initialize, true));
+  it('waits for remembered-device restoration before asking for a password', async () => {
+    mocks.crypto.isRestoring = true;
+    const screen = await render(gate());
+    await expect.element(screen.getByText('Password only')).not.toBeInTheDocument();
+    await expect.element(screen.getByText('Protected application')).not.toBeInTheDocument();
+  });
 
-    await expect.element(screen.getByText('Protected application')).toBeInTheDocument();
-    expect(initialize).not.toHaveBeenCalled();
+  it('opens working data when the current user key is active', async () => {
+    mocks.crypto.isCryptoActive = true;
+    const screen = await render(gate());
+    await expect.element(screen.getByText('Protected application')).toBeVisible();
+    await expect.element(screen.getByText('Password only')).not.toBeInTheDocument();
+  });
+
+  it('keeps Account, invite and auth routes accessible while locked', async () => {
+    const screen = await render(gate(true));
+    await expect.element(screen.getByText('Protected application')).toBeVisible();
+    await expect.element(screen.getByText('Password only')).not.toBeInTheDocument();
+  });
+
+  it('leaves anonymous route authorization to the auth guard', async () => {
+    mocks.user = null;
+    const screen = await render(gate());
+    await expect.element(screen.getByText('Protected application')).toBeVisible();
+  });
+
+  it('requires password and recovery kit when creating an organization', async () => {
+    const screen = await render(gate(false, true));
+    await expect.element(screen.getByText('Password and kit')).toBeVisible();
+    await expect.element(screen.getByText('Protected application')).not.toBeInTheDocument();
+  });
+
+  it('requires a kit when an unlocked password-only user creates an organization', async () => {
+    const user = encryptedProductUser();
+    mocks.user = {
+      ...user,
+      encryptedUserKey: {
+        ...user.encryptedUserKey,
+        wraps: user.encryptedUserKey.wraps.filter((wrap) => wrap.method === 'password'),
+      },
+    };
+    mocks.crypto.isCryptoActive = true;
+    const screen = await render(gate(false, true));
+    await expect.element(screen.getByText('Create recovery kit')).toBeVisible();
+    await expect.element(screen.getByText('Protected application')).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('link', { name: 'Account settings' })).not.toBeInTheDocument();
+  });
+
+  it('does not ask an unlocked creator to save an existing recovery kit again', async () => {
+    mocks.user = encryptedProductUser();
+    mocks.crypto.isCryptoActive = true;
+    const screen = await render(gate(false, true));
+    await expect.element(screen.getByText('Protected application')).toBeVisible();
+    await expect.element(screen.getByText('Create recovery kit')).not.toBeInTheDocument();
   });
 });

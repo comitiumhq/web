@@ -1,12 +1,12 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateTagContext } from '@comitium/crypto/context';
 import { STALE_TIME_DEFAULT } from '@comitium/schemas/api-query-policy';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { logger } from '@comitium/ui/logger';
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { qk } from '@/hooks/query-keys';
 import { getCandidateTags } from '@/lib/api/candidate-tags';
 import { type CandidateTag, type DecryptedCandidateTag, decryptedTagPayloadSchema } from '@/lib/schemas/candidate-tags';
@@ -17,10 +17,10 @@ const EMPTY_TAGS: readonly DecryptedCandidateTag[] = [];
 export async function decryptTag(
   raw: CandidateTag,
   orgId: string,
-  wrappedVaultKey: WrappedKey,
+  vaultAccess: VaultKeyAccess,
 ): Promise<DecryptedCandidateTag | null> {
   try {
-    const payload = await CryptoProxy.decryptApplication(raw.label, orgId, wrappedVaultKey, candidateTagContext(orgId));
+    const payload = await CryptoProxy.decryptApplication(raw.label, orgId, vaultAccess, candidateTagContext(orgId));
     const parsed = decryptedTagPayloadSchema.safeParse(payload);
 
     if (!parsed.success) {
@@ -37,9 +37,9 @@ export async function decryptTag(
   }
 }
 
-export async function fetchDecryptedTags(orgId: string, wrappedVaultKey: WrappedKey): Promise<DecryptedCandidateTag[]> {
+export async function fetchDecryptedTags(orgId: string, vaultAccess: VaultKeyAccess): Promise<DecryptedCandidateTag[]> {
   const res = await getCandidateTags(orgId, true);
-  const results = await Promise.all(res.data.map((raw) => decryptTag(raw, orgId, wrappedVaultKey)));
+  const results = await Promise.all(res.data.map((raw) => decryptTag(raw, orgId, vaultAccess)));
 
   return results.filter((t): t is DecryptedCandidateTag => t !== null);
 }
@@ -52,13 +52,12 @@ export interface UseCandidateTagsResult {
 }
 
 export function useCandidateTags(orgId: string): UseCandidateTagsResult {
-  const { data: wrappedVaultKey } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess } = useQueryOrgVaultAccess(orgId);
   const isCryptoActive = useIsCryptoActive();
 
   const { data, isLoading, error } = useQuery({
     queryKey: qk.candidate.tags(orgId),
-    queryFn:
-      isCryptoActive && isDefined(wrappedVaultKey) ? () => fetchDecryptedTags(orgId, wrappedVaultKey) : skipToken,
+    queryFn: isCryptoActive && isDefined(vaultAccess) ? () => fetchDecryptedTags(orgId, vaultAccess) : skipToken,
     staleTime: STALE_TIME_DEFAULT,
   });
 

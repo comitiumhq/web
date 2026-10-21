@@ -1,47 +1,87 @@
-import { hasEncryptionKeyBundle } from '@comitium/crypto/key-bundle';
+import { hasEncryptionKeyBundle, hasRecoveryCodeWrap } from '@comitium/crypto/key-bundle';
+import { Button } from '@comitium/ui/button';
 import { PageLoader } from '@comitium/ui/page-loader';
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
 
+import { StorageAccess } from './storage/storage-access';
+import { useCryptoUnlock } from './use-crypto-unlock';
+import { useAccountLogout } from './use-logout';
 import { useSession } from './use-session';
-import { useActiveWallet } from './use-wallet';
 
 interface EncryptionSetupGateProps {
   children: ReactNode;
-  error: Error | null;
-  initializeEncryptionKeyBundle: () => Promise<unknown>;
   isSuppressed?: boolean;
+  requireRecovery?: boolean;
 }
 
 export function EncryptionSetupGate({
   children,
-  error,
-  initializeEncryptionKeyBundle,
   isSuppressed = false,
+  requireRecovery = false,
 }: EncryptionSetupGateProps) {
   const { user, isSessionLoading } = useSession();
-  const wallet = useActiveWallet();
-  const setupStartedForUser = useRef<string | null>(null);
+  const { isCryptoActive, isRestoring, restoreError } = useCryptoUnlock();
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const start = useCallback(() => setEditingUserId(user?.id ?? null), [user?.id]);
+  const complete = useCallback(() => setEditingUserId(null), []);
 
-  const isEncryptionReady = hasEncryptionKeyBundle(user);
-  const needsEncryptionSetup = !isSessionLoading && user !== null && !isEncryptionReady;
-  const isWalletReady = wallet !== null;
-
-  useEffect(() => {
-    if (isSuppressed || !needsEncryptionSetup || !isWalletReady || setupStartedForUser.current === user?.id) {
-      return;
-    }
-
-    setupStartedForUser.current = user.id;
-    initializeEncryptionKeyBundle().catch(() => undefined);
-  }, [initializeEncryptionKeyBundle, isSuppressed, isWalletReady, needsEncryptionSetup, user?.id]);
-
-  if (isSuppressed || !needsEncryptionSetup) {
+  if (isSuppressed || (!isSessionLoading && !user)) {
     return children;
   }
 
-  if (error) {
-    throw error;
+  if (isSessionLoading || isRestoring) {
+    return <PageLoader />;
   }
 
-  return <PageLoader />;
+  const hasUserKey = hasEncryptionKeyBundle(user);
+  const needsRecovery = requireRecovery && hasUserKey && !hasRecoveryCodeWrap(user.encryptedUserKey);
+  const showAccountSettings = hasUserKey && !needsRecovery;
+
+  if (isCryptoActive && !needsRecovery && editingUserId !== user?.id) {
+    return children;
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center px-5 py-12">
+      <section className="w-full max-w-120">
+        {restoreError ? (
+          <p role="alert" className="mb-4 text-copy-13 text-muted-foreground">
+            {restoreError}
+          </p>
+        ) : null}
+        <StorageAccess
+          key={user?.id}
+          initialMode={needsRecovery ? 'create-recovery-code' : undefined}
+          requireRecovery={requireRecovery}
+          onStart={start}
+          onSuccess={complete}
+        />
+        <div className="mt-5 flex items-center justify-center">
+          {showAccountSettings ? (
+            <Button variant="text" className="text-copy-13" asChild>
+              <a href="/account">Account settings</a>
+            </Button>
+          ) : null}
+          <SignOutButton />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SignOutButton() {
+  const logout = useAccountLogout('/login');
+  const [pending, setPending] = useState(false);
+
+  const signOut = useCallback(async () => {
+    setPending(true);
+    await logout();
+    setPending(false);
+  }, [logout]);
+
+  return (
+    <Button type="button" variant="text" className="text-copy-13" disabled={pending} onClick={signOut}>
+      {pending ? 'Signing out…' : 'Sign out'}
+    </Button>
+  );
 }

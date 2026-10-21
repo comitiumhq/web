@@ -1,12 +1,12 @@
-import type { WrappedKey } from '@comitium/schemas/common';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { VaultKeyResponse } from '@comitium/schemas/vault';
 import { logger } from '@comitium/ui/logger';
 import { useQueries } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { useProjectCandidateCustomFieldValue } from '@/hooks/mutations/use-project-candidate-custom-field-value';
 import { candidateFormConnectorsQueryOptions } from '@/hooks/queries/candidate-form-connectors-query-options';
+import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { useQueryOrgVaultKey } from '@/hooks/queries/use-query-org-vault-key';
-import { useQueryWrappedVaultKey } from '@/hooks/queries/use-query-wrapped-vault-key';
 import { collectProjections, type ProjectionOp } from '@/lib/forms/connectors/project';
 import { encodeCandidateCustomFieldValue } from '@/lib/forms/custom-field-value-codec';
 import type { ProjectCandidateCustomFieldValueBody } from '@/lib/schemas/candidate-custom-field-values';
@@ -61,7 +61,7 @@ export function useProjectFormSubmissions({
   enabled,
 }: UseProjectFormSubmissionsParams) {
   const { data: vaultKey } = useQueryOrgVaultKey(orgId);
-  const { data: wrappedVaultKey } = useQueryWrappedVaultKey(orgId);
+  const { data: vaultAccess } = useQueryOrgVaultAccess(orgId);
   const { mutateAsync: projectValue } = useProjectCandidateCustomFieldValue();
   const formIds = useMemo(() => [...new Set(submissions.map((submission) => submission.formId))].sort(), [submissions]);
   const connectorPlans = useQueries({
@@ -80,13 +80,13 @@ export function useProjectFormSubmissions({
   }, [candidateId]);
 
   useEffect(() => {
-    if (!enabled || !candidateId || !vaultKey || !wrappedVaultKey) {
+    if (!enabled || !candidateId || !vaultKey || !vaultAccess) {
       return;
     }
 
     const projectionCandidateId = candidateId;
     const projectionVaultKey = vaultKey;
-    const projectionWrappedVaultKey = wrappedVaultKey;
+    const projectionVaultAccess = vaultAccess;
     let cancelled = false;
 
     async function projectPendingSubmissions() {
@@ -119,7 +119,7 @@ export function useProjectFormSubmissions({
               submissionId: submission.id,
               op,
               vaultKey: projectionVaultKey,
-              wrappedVaultKey: projectionWrappedVaultKey,
+              vaultAccess: projectionVaultAccess,
               projectValue,
             });
           } catch (error) {
@@ -136,7 +136,7 @@ export function useProjectFormSubmissions({
     return () => {
       cancelled = true;
     };
-  }, [candidateId, connectorsByFormId, enabled, orgId, projectValue, submissions, vaultKey, wrappedVaultKey]);
+  }, [candidateId, connectorsByFormId, enabled, orgId, projectValue, submissions, vaultKey, vaultAccess]);
 }
 
 interface ProjectSubmissionValueParams {
@@ -145,7 +145,7 @@ interface ProjectSubmissionValueParams {
   submissionId: string;
   op: ProjectionOp;
   vaultKey: VaultKeyResponse;
-  wrappedVaultKey: WrappedKey;
+  vaultAccess: VaultKeyAccess;
   projectValue: (params: {
     candidateId: string;
     body: ProjectCandidateCustomFieldValueBody;
@@ -158,7 +158,7 @@ async function projectSubmissionValue({
   submissionId,
   op,
   vaultKey,
-  wrappedVaultKey,
+  vaultAccess,
   projectValue,
 }: ProjectSubmissionValueParams) {
   const { encryptedValue, valueHash } = await encodeCandidateCustomFieldValue({
@@ -169,7 +169,7 @@ async function projectSubmissionValue({
     value: op.value,
     vaultPublicKey: vaultKey.vaultPublicKey,
     vaultKeyVersion: vaultKey.keyVersion,
-    wrappedVaultKey,
+    vaultAccess,
   });
 
   await projectValue({

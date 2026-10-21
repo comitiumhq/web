@@ -1,7 +1,7 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
+import type { VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { encryptedFileContext } from '@comitium/crypto/context';
-import type { WrappedKey } from '@comitium/schemas/common';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchEncryptedResume } from '@/lib/api/resume';
 import { triggerFileDownload } from '@/lib/utils';
@@ -19,7 +19,7 @@ export function useDecryptResume(
   applicationId: string | null,
   hasResume: boolean,
   resumeFileId: string | null,
-  wrappedVaultKey?: WrappedKey,
+  vaultAccess?: VaultKeyAccess,
   interviewEventId?: string,
 ) {
   const [state, setState] = useState<ResumeState>(INITIAL_STATE);
@@ -27,7 +27,7 @@ export function useDecryptResume(
   const isLoadingRef = useRef(false);
   const { canUnlock, ensureUnlocked, isCryptoActive } = useCryptoUnlock();
 
-  const canDecrypt = hasResume && !!applicationId && !!resumeFileId && canUnlock && !!wrappedVaultKey;
+  const canDecrypt = hasResume && !!applicationId && !!resumeFileId && canUnlock && !!vaultAccess;
 
   const reset = useCallback(() => {
     pdfDataRef.current = null;
@@ -41,7 +41,7 @@ export function useDecryptResume(
       return true;
     }
 
-    if (!canDecrypt || !applicationId || !resumeFileId || !wrappedVaultKey) {
+    if (!canDecrypt || !applicationId || !resumeFileId || !vaultAccess) {
       return false;
     }
 
@@ -60,7 +60,7 @@ export function useDecryptResume(
       const data = await CryptoProxy.decryptFile(
         new Uint8Array(encryptedBuffer),
         orgId,
-        wrappedVaultKey,
+        vaultAccess,
         encryptedFileContext(orgId, resumeFileId, 'resume'),
       );
 
@@ -75,7 +75,7 @@ export function useDecryptResume(
 
       return false;
     }
-  }, [canDecrypt, applicationId, resumeFileId, wrappedVaultKey, interviewEventId, orgId, ensureUnlocked]);
+  }, [canDecrypt, applicationId, resumeFileId, vaultAccess, interviewEventId, orgId, ensureUnlocked]);
 
   // Decrypt (if needed) + trigger file download
   const downloadResume = useCallback(async () => {

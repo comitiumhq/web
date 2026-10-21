@@ -20,12 +20,8 @@ vi.mock('@comitium/auth/use-account-readiness', () => ({
   useAccountReadiness: () => ({ stage: mocks.accountStage }),
 }));
 
-vi.mock('@comitium/auth/privy-account', () => ({
-  getPrivyAccountEmail: () => mocks.accountEmail,
-}));
-
-vi.mock('@privy-io/react-auth', () => ({
-  usePrivy: () => ({ user: {} }),
+vi.mock('@comitium/auth/auth-context', () => ({
+  useAuthClient: () => ({ useSession: () => ({ data: { user: { email: mocks.accountEmail } } }) }),
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -95,20 +91,20 @@ describe('InviteAcceptPage global account actions', () => {
     expect(mocks.acceptInvite.mock.calls[0]?.[0]).toBe('invite-token');
   });
 
-  it('offers ordinary Sign in and Create account actions without work-email warnings', async () => {
+  it('uses the shared Log in action and preserves the invite destination', async () => {
     mocks.accountStage = 'anonymous';
     const screen = await renderPage();
 
     await expect
       .element(screen.getByText('Sign in or create your Comitium account to join this workspace.'))
       .toBeInTheDocument();
-    await expect.element(screen.getByText(/wallet|mailbox|merge/i)).not.toBeInTheDocument();
 
-    await screen.getByRole('button', { name: 'Create account' }).click();
+    await screen.getByRole('button', { name: 'Continue', exact: true }).click();
     expect(mocks.navigate).toHaveBeenCalledWith({
       search: { returnTo: '/invite?token=invite-token' },
-      to: '/signup',
+      to: '/login',
     });
+    await expect.element(screen.getByRole('button', { name: 'Create account' })).not.toBeInTheDocument();
   });
 
   it('switches accounts only after an explicit action and preserves the invite URL', async () => {

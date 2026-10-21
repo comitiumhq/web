@@ -1,10 +1,6 @@
-export const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 export const DECIMAL_INTEGER_REGEX = /^\d+$/;
 export const BYTES32_HEX_REGEX = /^0x[a-fA-F0-9]{64}$/;
-export const EVM_HEX_DATA_REGEX = /^0x[a-fA-F0-9]*$/;
-export const ECDSA_SIGNATURE_HEX_REGEX = /^0x[a-fA-F0-9]{130}$/;
 export const HEX_REGEX = /^[a-fA-F0-9]+$/;
-export const PERSONAL_KEY_WRAPPER_ID_REGEX = /^evm:0x[a-f0-9]{40}$/;
 export const X25519_PUBLIC_KEY_HEX_REGEX = /^[a-fA-F0-9]{64}$/;
 export const HMAC_SHA256_HEX_REGEX = /^[a-fA-F0-9]{64}$/;
 export const PROCESSOR_RECIPIENT_REGEX = /^processor:[^\s:]+$/;

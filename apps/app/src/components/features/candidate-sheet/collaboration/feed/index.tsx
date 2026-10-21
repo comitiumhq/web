@@ -1,5 +1,6 @@
+import type { VaultKeyAccess } from '@comitium/crypto';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
-import type { TipTapDoc, WrappedKey } from '@comitium/schemas/common';
+import type { TipTapDoc } from '@comitium/schemas/common';
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { BROWSER_TZ } from '@comitium/ui/date';
@@ -18,7 +19,7 @@ interface FeedTabProps {
   candidateId: string | null;
   orgId: string;
   candidateProfile: CandidateProfile | null;
-  wrappedVaultKey: WrappedKey | undefined;
+  vaultAccess: VaultKeyAccess | undefined;
   isVaultKeyLoading: boolean;
   isVaultKeyError: boolean;
   decryptedNotes: Record<string, TipTapDoc>;
@@ -35,7 +36,7 @@ export function FeedTab({
   candidateId,
   orgId,
   candidateProfile,
-  wrappedVaultKey,
+  vaultAccess,
   isVaultKeyLoading,
   isVaultKeyError,
   decryptedNotes,
@@ -68,7 +69,7 @@ export function FeedTab({
     candidateId,
     orgId,
     activityEvents,
-    wrappedVaultKey,
+    vaultAccess,
   );
   const isInitialLoading = isLoading && !activityData;
   const isInitialError = isError && !activityData;

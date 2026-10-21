@@ -2,7 +2,6 @@
 /// <reference types="@tanstack/react-start" />
 
 interface ImportMetaEnv {
-  readonly VITE_PRIVY_APP_ID: string;
   readonly VITE_ENVIRONMENT: string;
   readonly VITE_API: string;
   readonly VITE_MY_ORIGIN?: string;

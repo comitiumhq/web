@@ -1,31 +1,38 @@
 import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
 import { CryptoProxy } from '@comitium/crypto';
 import { useCallback } from 'react';
-import { getWrappedVaultKey } from '@/lib/api/orgs-vault';
-import { getPublicKey } from '@/lib/api/users';
+import { getOrgVaultAccess } from '@/lib/api/orgs-vault';
+import { getUserPublicKeyDescriptor } from '@/lib/api/users';
 import type { VaultGrant } from '@/lib/schemas/org-structure';
 
 export function useEnsureMemberVaultGrant() {
   const { ensureUnlocked } = useCryptoUnlock();
 
   return useCallback(
-    async (orgId: string, walletAddress: string, memberHasVaultAccess: boolean): Promise<VaultGrant | undefined> => {
+    async (orgId: string, userId: string, memberHasVaultAccess: boolean): Promise<VaultGrant | undefined> => {
       if (memberHasVaultAccess) {
         return undefined;
       }
 
-      const memberPublicKey = await getPublicKey(walletAddress);
+      const memberKeyDescriptor = await getUserPublicKeyDescriptor(userId);
 
-      if (!memberPublicKey) {
+      if (!memberKeyDescriptor) {
         throw new Error("This member's encryption setup must finish before they can be granted access.");
       }
 
       await ensureUnlocked();
 
-      const ownWrappedKey = await getWrappedVaultKey(orgId);
-      const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownWrappedKey, memberPublicKey);
+      const ownAccess = await getOrgVaultAccess(orgId);
+      const wrappedVaultKey = await CryptoProxy.grantVaultAccess(ownAccess, memberKeyDescriptor.publicKey, {
+        recipientUserId: userId,
+        recipientKeyVersion: memberKeyDescriptor.userKeyVersion,
+      });
 
-      return { wrappedVaultKey };
+      return {
+        wrappedVaultKey,
+        vaultKeyVersion: ownAccess.vaultKeyVersion,
+        recipientKeyVersion: memberKeyDescriptor.userKeyVersion,
+      };
     },
     [ensureUnlocked],
   );

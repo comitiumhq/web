@@ -65,7 +65,7 @@ interface CandidateProfileMutationParams {
   profile: CandidateProfile;
   vaultPublicKey: { v: 1; xwing: string };
   vaultKeyVersion: number;
-  wrappedVaultKey: { ek: string };
+  vaultAccess: { ek: string };
 }
 
 interface CandidateProfileMutationOptions {
@@ -93,7 +93,7 @@ describe('candidate profile update', () => {
       profile: PROFILE,
       vaultPublicKey: { v: 1, xwing: 'public-key' },
       vaultKeyVersion: 3,
-      wrappedVaultKey: { ek: 'wrapped-vault-key' },
+      vaultAccess: { ek: 'wrapped-vault-key' },
     });
 
     expect(mocks.ensureUnlocked).toHaveBeenCalledOnce();

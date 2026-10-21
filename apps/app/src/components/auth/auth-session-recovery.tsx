@@ -1,6 +1,5 @@
-import { SessionRecovery } from '@comitium/auth/session-recovery';
+import { SessionRecovery, useRecoverSession } from '@comitium/auth/session-recovery';
 import type { ReactNode } from 'react';
-import { useLogout } from '@/hooks/use-logout';
 
 interface AuthSessionRecoveryProps {
   fallback?: ReactNode;
@@ -8,7 +7,7 @@ interface AuthSessionRecoveryProps {
 }
 
 export function AuthSessionRecovery({ fallback, returnTo = '/' }: AuthSessionRecoveryProps) {
-  const recoverSession = useLogout();
+  const recoverSession = useRecoverSession();
 
   return <SessionRecovery fallback={fallback} recoverSession={recoverSession} returnTo={returnTo} />;
 }
