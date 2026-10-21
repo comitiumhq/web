@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 
 import { StorageAccess } from '../storage/storage-access';
-import { encryptedProductUser, productUser } from './identity-fixtures';
+import { encryptedProductUser, identitySession, productUser } from './identity-fixtures';
 
 const mocks = vi.hoisted(() => ({
   user: null as User | null,
@@ -14,6 +14,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../use-session', () => ({ useSession: () => ({ user: mocks.user }) }));
+vi.mock('../auth-context', () => ({
+  useAuthClient: () => ({ useSession: () => ({ data: identitySession() }) }),
+}));
 vi.mock('../use-crypto-unlock', () => ({
   useCryptoUnlock: () => ({ refreshAccount: mocks.refreshAccount, isCryptoActive: mocks.isCryptoActive }),
 }));

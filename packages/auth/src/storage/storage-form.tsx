@@ -154,7 +154,6 @@ export function StorageForm({
             onChange={(event) => setPassword(event.currentTarget.value)}
             disabled={pending}
             showStrength={isNewPassword}
-            minLength={isNewPassword ? 12 : undefined}
             required
             autoFocus={!isChangingPassword}
           />

@@ -1,8 +1,27 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { StorageForm } from '../storage/storage-form';
 
 describe('new password strength feedback', () => {
+  it.each(['setup', 'change', 'recovery'] as const)('submits an eight-character password in %s mode', async (mode) => {
+    const onSubmit = vi.fn(async () => {});
+    const screen = await render(<StorageForm mode={mode} pending={false} error={null} onSubmit={onSubmit} />);
+    const password = 'Q7#m2Vz!';
+    const currentPassword = mode === 'change' ? 'current-password' : '';
+
+    if (mode === 'change') {
+      await screen.getByLabelText('Current password', { exact: true }).fill(currentPassword);
+    }
+
+    await screen.getByLabelText(mode === 'setup' ? 'Password' : 'New password', { exact: true }).fill(password);
+    await screen.getByLabelText('Confirm password', { exact: true }).fill(password);
+    await screen.getByRole('button', { name: mode === 'setup' ? 'Continue' : 'Change password', exact: true }).click();
+
+    await vi.waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledExactlyOnceWith({ password, currentPassword, recoveryCode: '' }),
+    );
+  });
+
   it('updates as the user types and keeps the confirmation field separate', async () => {
     const screen = await render(<StorageForm mode="setup" pending={false} error={null} onSubmit={async () => {}} />);
     const password = screen.getByLabelText('Password', { exact: true });
@@ -11,13 +30,16 @@ describe('new password strength feedback', () => {
     await expect.element(screen.getByRole('meter')).toHaveAttribute('value', '0');
     await expect.element(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Not entered');
     await expect.element(password).toHaveAttribute('aria-describedby');
-    await expect.element(screen.getByText('At least 12 characters.')).not.toBeInTheDocument();
+    await expect.element(screen.getByText('At least 8 characters.')).not.toBeInTheDocument();
 
     await password.fill('short');
-    await expect.element(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Use at least 12 characters.');
+    await expect.element(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Use at least 8 characters.');
 
     await password.fill('password123456');
     await expect.element(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Weak');
+
+    await password.fill('Q7#m2Vz!');
+    await expect.element(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Fair');
 
     await password.fill('G6v!m2Qr9#tL8sZ4');
     await expect.element(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Strong');
@@ -45,8 +67,8 @@ describe('new password strength feedback', () => {
     const screen = await render(<StorageForm mode="setup" pending={false} error={null} onSubmit={async () => {}} />);
     const password = screen.getByLabelText('Password', { exact: true });
 
-    await password.fill('jG7!zQ2@xW9');
-    await expect.element(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Use at least 12 characters.');
+    await password.fill('jG7!zQ2');
+    await expect.element(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Use at least 8 characters.');
     await expect.element(screen.getByRole('meter')).toHaveAttribute('value', '2');
 
     await password.fill('é'.repeat(513));

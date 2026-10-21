@@ -14,7 +14,7 @@ import { render } from 'vitest-browser-react';
 
 import { AccountSettingsLayout } from '../account-settings/account-settings-layout';
 import { RecoverySettingsPage } from '../account-settings/recovery/recovery-settings-page';
-import { encryptedProductUser, productUser } from './identity-fixtures';
+import { encryptedProductUser, identitySession, productUser } from './identity-fixtures';
 
 const mocks = vi.hoisted(() => ({
   user: null as User | null,
@@ -25,6 +25,9 @@ const PASSWORD = 'A long storage password for this test';
 const CODE = 'ABCD-EFGH-JKLM-NPQR-STVW-XY23-45';
 
 vi.mock('../use-session', () => ({ useSession: () => ({ user: mocks.user }) }));
+vi.mock('../auth-context', () => ({
+  useAuthClient: () => ({ useSession: () => ({ data: identitySession() }) }),
+}));
 vi.mock('../use-crypto-unlock', () => ({
   useCryptoUnlock: () => ({ isCryptoActive: mocks.isCryptoActive, refreshAccount: async () => {} }),
 }));

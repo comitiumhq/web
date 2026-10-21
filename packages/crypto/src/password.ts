@@ -3,8 +3,8 @@ import * as common from '@zxcvbn-ts/language-common';
 import * as english from '@zxcvbn-ts/language-en';
 
 const MAX_PASSWORD_BYTES = 1024;
-const MIN_PASSWORD_LENGTH = 12;
-const MIN_PASSWORD_SCORE = 3;
+const MIN_PASSWORD_LENGTH = 8;
+const MIN_PASSWORD_SCORE = 2;
 
 const PASSWORD_ERRORS = {
   'too-long': `Storage password exceeds ${MAX_PASSWORD_BYTES} UTF-8 bytes`,

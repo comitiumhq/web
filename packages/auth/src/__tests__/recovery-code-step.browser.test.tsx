@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 
 import { RecoveryCodeStep } from '../storage/recovery/recovery-code-step';
+import { identitySession } from './identity-fixtures';
 
 const mocks = vi.hoisted(() => ({
   createRecoveryKit: vi.fn(),
@@ -10,6 +11,9 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../storage/recovery/recovery-kit-pdf', () => ({ createRecoveryKit: mocks.createRecoveryKit }));
 vi.mock('@comitium/ui/download', () => ({ triggerFileDownload: mocks.download }));
+vi.mock('../auth-context', () => ({
+  useAuthClient: () => ({ useSession: () => ({ data: identitySession() }) }),
+}));
 
 const CODE = 'ABCD-EFGH-JKLM-NPQR-STVW-XY23-45';
 
@@ -47,7 +51,7 @@ describe('recovery code', () => {
     await vi.waitFor(() =>
       expect(mocks.download).toHaveBeenCalledWith(bytes, 'comitium-recovery-kit.pdf', 'application/pdf'),
     );
-    expect(mocks.createRecoveryKit).toHaveBeenCalledWith(CODE);
+    expect(mocks.createRecoveryKit).toHaveBeenCalledWith(CODE, window.location.origin, 'person@example.com');
     await expect.element(screen.getByRole('heading', { name: 'Save your recovery kit' })).toBeVisible();
     await expect.element(screen.getByRole('button', { name: 'Continue', exact: true })).toBeDisabled();
     expect(confirm).not.toHaveBeenCalled();
