@@ -16,7 +16,7 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
   let level = Math.max(1, strength.score);
 
   if (strength.error === 'too-short') {
-    label = 'Use at least 12 characters.';
+    label = 'Use at least 8 characters.';
     color = 'bg-warning';
     level = Math.min(level, 2);
   } else if (strength.error === 'too-long') {

@@ -3,7 +3,7 @@ import { ApiError } from '@comitium/schemas/api-errors';
 
 const STORAGE_ERROR_MESSAGES = new Map([
   ['Storage password exceeds 1024 UTF-8 bytes', 'Password is too long. Choose a shorter password.'],
-  ['Storage password must contain at least 12 characters', 'Use at least 12 characters.'],
+  ['Storage password must contain at least 8 characters', 'Use at least 8 characters.'],
   ['Storage password is too easy to guess', 'Choose a stronger password. Avoid common words and patterns.'],
   ['Recovery code is invalid', 'Check your recovery code and try again.'],
   [

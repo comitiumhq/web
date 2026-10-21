@@ -5,6 +5,7 @@ import { Label } from '@comitium/ui/label';
 import { Spinner } from '@comitium/ui/spinner';
 import { CheckIcon, DownloadIcon, FileTextIcon } from 'lucide-react';
 import { useCallback, useId, useState } from 'react';
+import { useAuthClient } from '../../auth-context';
 import { AuthFormError } from '../../auth-form-error';
 import { StorageFormHeader } from '../storage-form-header';
 
@@ -25,6 +26,9 @@ export function RecoveryCodeStep({
   onCancel,
   dialog = false,
 }: RecoveryCodeStepProps) {
+  const client = useAuthClient();
+  const { data: session } = client.useSession();
+  const email = session?.user.email;
   const id = useId();
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,8 +55,12 @@ export function RecoveryCodeStep({
     setError(null);
 
     try {
+      if (!email) {
+        throw new Error('Account email is unavailable');
+      }
+
       const { createRecoveryKit } = await import('./recovery-kit-pdf');
-      const pdf = await createRecoveryKit(code);
+      const pdf = await createRecoveryKit(code, window.location.origin, email);
 
       triggerFileDownload(pdf, 'comitium-recovery-kit.pdf', 'application/pdf');
       setDownloadStarted(true);
@@ -61,7 +69,7 @@ export function RecoveryCodeStep({
     } finally {
       setDownloading(false);
     }
-  }, [code]);
+  }, [code, email]);
 
   const changeSaved = useCallback((checked: boolean | 'indeterminate') => setSaved(checked === true), []);
 
