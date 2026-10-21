@@ -70,6 +70,7 @@ describe('crypto worker production build', () => {
         ...endpoint,
         self: endpoint,
         Function: functionConstructor,
+        AbortController,
         TextEncoder,
         TextDecoder,
         crypto,

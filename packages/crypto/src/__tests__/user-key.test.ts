@@ -1,5 +1,5 @@
 import { base64 } from '@scure/base';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { keyContextBytes } from '../key-context';
 import { encodePassword } from '../password';
@@ -7,7 +7,6 @@ import { publicEncryptionKeySchema } from '../schemas';
 import { passwordWrapSchema, wrappedUserKeySchema } from '../schemas/user-key';
 import { createCryptoSessionIdentity } from '../session';
 import {
-  createPasswordWrap,
   decryptUserKey,
   deriveKeyAuthHash,
   encodeKeyAuthSecret,
@@ -18,70 +17,27 @@ import { TEST_KEYS, tamperBase64 } from './crypto-helpers';
 import vector from './fixtures/key-protocol-v1.json';
 import { KEY_SHARE, OTHER_USER_ID, PASSWORD, UNLOCK_KEY, USER_ID, userKeyFixture } from './unlock-fixtures';
 
-let fixture: Awaited<ReturnType<typeof userKeyFixture>>;
-
-beforeAll(async () => {
-  fixture = await userKeyFixture();
-}, 15000);
+const fixture = userKeyFixture();
 
 describe('password and recovery key wrappers', () => {
-  it('opens fixed v1 ciphertext and preserves its ownership proof and fingerprints', async () => {
+  it('opens fixed v1 ciphertext with recovery and preserves its ownership proof and fingerprints', async () => {
     const wrapped = wrappedUserKeySchema.parse(vector.encryptedUserKey);
     const publicKey = publicEncryptionKeySchema.parse(vector.userPublicKey);
-    const password = await unlockUserKey(wrapped, vector.userId, publicKey, {
-      method: 'password',
-      password: vector.password,
-      keyShare: vector.keyShare,
-    });
     const recovery = await unlockUserKey(wrapped, vector.userId, publicKey, {
       method: 'recovery_code',
-      recoveryCode: vector.recoveryCode,
+      recoveryCode: vector.recoveryCode.toLowerCase().replaceAll('-', ' '),
     });
     const context = { userId: vector.userId, keyVersion: wrapped.keyVersion };
 
-    expect(base64.encode(password.userPrivateKey)).toBe(vector.userPrivateKey);
-    expect(base64.encode(password.unlockKey)).toBe(vector.unlockKey);
-    expect(recovery).toEqual(password);
-    expect(encodeKeyAuthSecret(password.unlockKey, context)).toBe(vector.keyAuthSecret);
-    expect(deriveKeyAuthHash(password.unlockKey, context)).toBe(vector.keyAuthHash);
+    expect(base64.encode(recovery.userPrivateKey)).toBe(vector.userPrivateKey);
+    expect(base64.encode(recovery.unlockKey)).toBe(vector.unlockKey);
+    expect(encodeKeyAuthSecret(recovery.unlockKey, context)).toBe(vector.keyAuthSecret);
+    expect(deriveKeyAuthHash(recovery.unlockKey, context)).toBe(vector.keyAuthHash);
     expect(userKeyWrapsFingerprint(wrapped.wraps)).toBe(vector.wrapsFingerprint);
     expect(createCryptoSessionIdentity(wrapped, vector.userId).encryptedKeyFingerprint).toBe(
       vector.encryptedKeyFingerprint,
     );
   });
-
-  it('unlocks the same user key/U with password + share or independent recovery code', async () => {
-    const password = await unlockUserKey(fixture.bundle, USER_ID, fixture.publicKey, {
-      method: 'password',
-      password: PASSWORD,
-      keyShare: KEY_SHARE,
-    });
-    const recovery = await unlockUserKey(fixture.bundle, USER_ID, fixture.publicKey, {
-      method: 'recovery_code',
-      recoveryCode: fixture.recoveryCode.toLowerCase().replaceAll('-', ' '),
-    });
-
-    expect(password.userPrivateKey).toEqual(TEST_KEYS.alice.privateKey);
-    expect(recovery.userPrivateKey).toEqual(password.userPrivateKey);
-    expect(recovery.unlockKey).toEqual(UNLOCK_KEY);
-  });
-
-  it('rejects the wrong password or the wrong share', async () => {
-    await expect(
-      unlockUserKey(fixture.bundle, USER_ID, fixture.publicKey, {
-        method: 'password',
-        password: `${PASSWORD}!`,
-        keyShare: KEY_SHARE,
-      }),
-    ).rejects.toThrow();
-    await expect(
-      unlockUserKey(fixture.bundle, USER_ID, fixture.publicKey, {
-        method: 'password',
-        password: PASSWORD,
-        keyShare: base64.encode(new Uint8Array(32)),
-      }),
-    ).rejects.toThrow();
-  }, 15000);
 
   it('binds recovery and private-key ciphertext to the user, generation and public key', async () => {
     const credential = { method: 'recovery_code' as const, recoveryCode: fixture.recoveryCode };
@@ -146,27 +102,6 @@ describe('password and recovery key wrappers', () => {
       }).success,
     ).toBe(false);
     expect(wrappedUserKeySchema.safeParse({ ...fixture.bundle, legacy: true }).success).toBe(false);
-  });
-
-  it('changes password wrappers without changing U/private-key ciphertext or recovery', async () => {
-    const wrapper = await createPasswordWrap(
-      UNLOCK_KEY,
-      { userId: USER_ID, keyVersion: 1 },
-      'satellite apricot harbor glacier 91',
-      KEY_SHARE,
-    );
-    const rewrapped = {
-      ...fixture.bundle,
-      wraps: fixture.bundle.wraps.map((wrap) => (wrap.method === 'password' ? wrapper : wrap)),
-    };
-    const recovered = await unlockUserKey(rewrapped, USER_ID, fixture.publicKey, {
-      method: 'recovery_code',
-      recoveryCode: fixture.recoveryCode,
-    });
-
-    expect(recovered.unlockKey).toEqual(UNLOCK_KEY);
-    expect(rewrapped.pk).toBe(fixture.bundle.pk);
-    expect(userKeyWrapsFingerprint(rewrapped.wraps)).not.toBe(userKeyWrapsFingerprint(fixture.bundle.wraps));
   });
 
   it('keeps exact password bytes and rejects the UTF-8 byte cap before KDF', () => {

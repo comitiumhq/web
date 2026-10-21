@@ -1,8 +1,10 @@
 import { base64 } from '@scure/base';
+import { publicEncryptionKeySchema } from '../schemas';
+import { wrappedUserKeySchema } from '../schemas/user-key';
 import type { VaultKeyAccess } from '../schemas/vault-key';
-import { generateRecoveryCode, wrapUserKey } from '../user-key';
 import { wrapSearchKey, wrapVaultKey } from '../vault-key';
 import { TEST_KEYS } from './crypto-helpers';
+import vector from './fixtures/key-protocol-v1.json';
 
 export const USER_ID = '0199a000-0000-7000-8000-000000000001';
 export const OTHER_USER_ID = '0199a000-0000-7000-8000-000000000002';
@@ -13,18 +15,12 @@ export const KEY_SHARE = base64.encode(new Uint8Array(32).fill(7));
 export const UNLOCK_KEY = new Uint8Array(32).fill(9);
 export const SEARCH_KEY = new Uint8Array(32).fill(11);
 
-export async function userKeyFixture(keyVersion = 1) {
-  const recoveryCode = generateRecoveryCode();
-  const bundle = await wrapUserKey(
-    TEST_KEYS.alice.privateKey,
-    UNLOCK_KEY,
-    { userId: USER_ID, keyVersion },
-    PASSWORD,
-    KEY_SHARE,
-    recoveryCode,
-  );
-
-  return { bundle, recoveryCode, publicKey: TEST_KEYS.alice.publicKey };
+export function userKeyFixture() {
+  return {
+    bundle: wrappedUserKeySchema.parse(vector.encryptedUserKey),
+    recoveryCode: vector.recoveryCode,
+    publicKey: publicEncryptionKeySchema.parse(vector.userPublicKey),
+  };
 }
 
 export async function vaultFixture(vaultKeyVersion = 1): Promise<VaultKeyAccess> {

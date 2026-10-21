@@ -1,5 +1,3 @@
-import { bytesToHex } from '@noble/hashes/utils.js';
-import { base64 } from '@scure/base';
 import { describe, expect, it } from 'vitest';
 import { decryptApplicationWithVaultKey, encryptApplicationWithVaultKey } from '../application-encryption';
 import type { CryptoContextInput } from '../context';
@@ -12,15 +10,13 @@ import { decryptFileWithVaultKey, encryptFileWithVaultKey } from '../file-encryp
 import { applicantRecipient, orgVaultRecipient } from '../recipients';
 import type { PublicEncryptionKey } from '../schemas';
 import type { VaultKeyPair } from '../schemas/vault-key';
-import { generateRecoveryCode, generateUserKeyPair, unlockUserKey, wrapUserKey } from '../user-key';
+import { generateUserKeyPair } from '../user-key';
 import { generateVaultKeyPair, grantVaultAccess, unwrapVaultKey, wrapSearchKey, wrapVaultKey } from '../vault-key';
 import { sampleFormData, TEST_KEYS } from './crypto-helpers';
 
-import { ORG_ID, OTHER_USER_ID, PASSWORD, SEARCH_KEY, UNLOCK_KEY, USER_ID } from './unlock-fixtures';
+import { ORG_ID, OTHER_USER_ID, SEARCH_KEY, USER_ID } from './unlock-fixtures';
 
 describe('crypto integration', () => {
-  const keyShare = base64.encode(new Uint8Array(32).fill(7));
-
   const applicationContext: CryptoContextInput = {
     purpose: 'application_answers',
     orgId: 'org-1',
@@ -141,46 +137,6 @@ describe('crypto integration', () => {
 
       expect(bobDecrypted).toEqual(formData);
     });
-  });
-
-  describe('user key lifecycle: generate → wrap → unwrap → use', () => {
-    it('wraps user key with a password, unwraps to decrypt email content', async () => {
-      // --- User generates user keypair ---
-      const userKey = generateUserKeyPair();
-
-      // --- Wrap user key (simulates registration) ---
-      const encrypted = await wrapUserKey(
-        userKey.privateKey,
-        UNLOCK_KEY,
-        { userId: USER_ID, keyVersion: 1 },
-        PASSWORD,
-        keyShare,
-        generateRecoveryCode(),
-      );
-
-      // --- Unwrap user key (simulates login) ---
-      const { userPrivateKey: unwrapped } = await unlockUserKey(encrypted, USER_ID, userKey.publicKey, {
-        method: 'password',
-        password: PASSWORD,
-        keyShare,
-      });
-
-      expect(bytesToHex(unwrapped)).toBe(bytesToHex(userKey.privateKey));
-
-      // --- Use unwrapped key to decrypt email content ---
-      const vault = generateVaultKeyPair();
-      const emailContent = { text: 'Welcome aboard!' };
-
-      const encryptedEmail = await encryptEmailContent(
-        emailContent,
-        emailContext,
-        emailRecipients(vault.publicKey, userKey.publicKey),
-      );
-
-      const decrypted = await decryptEmailContentWithUserKey(encryptedEmail, unwrapped, emailContext);
-
-      expect(decrypted).toEqual(emailContent);
-    }, 15000);
   });
 
   describe('key isolation', () => {

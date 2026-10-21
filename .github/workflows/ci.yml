@@ -22,7 +22,6 @@ jobs:
       VITE_APP_ORIGIN: https://app.example.invalid
       VITE_MY_ORIGIN: https://my.example.invalid
       VITE_PUBLIC_SITE_ORIGIN: https://example.invalid
-      VITE_PRIVY_APP_ID: ci-placeholder
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 

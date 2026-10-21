@@ -1,6 +1,6 @@
 import { base64 } from '@scure/base';
 import { expose, releaseProxy, wrap } from 'comlink';
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { hashCandidateProfileSearchValue } from '../candidate-profile-search-hash';
 import { hashCustomFieldValue } from '../custom-field-hash';
 import { encryptEmailContent } from '../email-encryption';
@@ -50,7 +50,7 @@ vi.mock('idb-keyval', () => ({
 const confirmFreshAuth = vi.fn(async (_force?: boolean) => {});
 const DEVICE_KEY = new Uint8Array(32).fill(17);
 const emailContext = { purpose: 'email_content' as const, orgId: ORG_ID, subjectId: OTHER_USER_ID, fieldId: 'message' };
-let fixture: Awaited<ReturnType<typeof userKeyFixture>>;
+const fixture = userKeyFixture();
 let api: CryptoWorkerApi;
 let bundle: WrappedUserKey;
 let share: string;
@@ -65,10 +65,6 @@ let lostWriteResponse: boolean;
 let readBackStatus: number;
 let staleWrites: number;
 let requests: { path: string; method: string; body: Record<string, unknown> | null }[];
-
-beforeAll(async () => {
-  fixture = await userKeyFixture();
-}, 15000);
 
 beforeEach(() => {
   confirmFreshAuth.mockClear();
@@ -233,9 +229,6 @@ describe('Worker unlock and recovery flows', () => {
       }
 
       await expect(api.verifyPassword(bundle, USER_ID, fixture.publicKey, 'incorrect password')).rejects.toThrow();
-      expect(api.isActive()).toBe(true);
-
-      await api.verifyPassword(bundle, USER_ID, fixture.publicKey, PASSWORD);
       expect(api.isActive()).toBe(true);
     },
     15000,

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CryptoWorkerApi } from '../worker/crypto-api';
 import { UnlockApiError } from '../worker/unlock-api-error';
 import { mockPublicEncryptionKey, mockWrappedUserKey } from './crypto-helpers';
-import { KEY_SHARE, PASSWORD, USER_ID, userKeyFixture } from './unlock-fixtures';
+import { PASSWORD, USER_ID, userKeyFixture } from './unlock-fixtures';
 
 let api: CryptoWorkerApi;
 let remote: ReturnType<typeof wrap<CryptoWorkerApi>>;
@@ -36,8 +36,9 @@ describe('safe unlock API errors across Comlink', () => {
   ])(
     'preserves confirmation callback failure without generating a code: $failure.name',
     async ({ failure, expected }) => {
-      const fixture = await userKeyFixture();
-      await remote.unlockWithRecoveryCode(fixture.bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, false);
+      const { bundle, publicKey, recoveryCode } = userKeyFixture();
+
+      await remote.unlockWithRecoveryCode(bundle, USER_ID, publicKey, recoveryCode, false);
 
       const showCode = vi.fn(async () => {});
       const confirm = async () => {
@@ -45,12 +46,7 @@ describe('safe unlock API errors across Comlink', () => {
       };
 
       await expect(
-        remote.rewrapUserKey(
-          fixture.bundle,
-          { rotateRecoveryCode: true, repairShare: false },
-          proxy(showCode),
-          proxy(confirm),
-        ),
+        remote.rewrapUserKey(bundle, { rotateRecoveryCode: true, repairShare: false }, proxy(showCode), proxy(confirm)),
       ).rejects.toMatchObject(expected);
       expect(showCode).not.toHaveBeenCalled();
       await expect(remote.isActive()).resolves.toBe(true);
@@ -100,6 +96,10 @@ describe('safe unlock API errors across Comlink', () => {
   });
 
   it('waits for the real Comlink recovery callback before posting and preserves the displayed code after read-back failure', async () => {
+    const { bundle, publicKey, recoveryCode } = userKeyFixture();
+
+    await remote.unlockWithRecoveryCode(bundle, USER_ID, publicKey, recoveryCode, false);
+
     let posted = false;
     let shownCode = '';
     let confirm!: () => void;
@@ -110,17 +110,7 @@ describe('safe unlock API errors across Comlink', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: string) => {
-        if (input.endsWith('/key-share')) {
-          return Response.json({
-            userId: USER_ID,
-            keyShare: KEY_SHARE,
-            version: 1,
-            keyVersion: null,
-            wrapsFingerprint: null,
-          });
-        }
-
-        if (input.endsWith('/encryption-key-bundle')) {
+        if (input.endsWith('/encryption-key-bundle/wraps')) {
           posted = true;
 
           expect(shownCode).not.toBe('');
@@ -137,7 +127,12 @@ describe('safe unlock API errors across Comlink', () => {
 
       await confirmation;
     });
-    const pending = remote.initializeUserKey(USER_ID, PASSWORD, false, proxy(onRecoveryCode));
+    const pending = remote.rewrapUserKey(
+      bundle,
+      { rotateRecoveryCode: true, repairShare: false },
+      proxy(onRecoveryCode),
+      proxy(async () => {}),
+    );
     const rejected = expect(pending).rejects.toMatchObject({ status: 503 });
 
     await vi.waitFor(() => expect(onRecoveryCode).toHaveBeenCalledOnce(), { timeout: 10000 });
