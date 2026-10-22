@@ -4,7 +4,7 @@
   "private": true,
   "license": "GPL-3.0-or-later",
   "type": "module",
-  "packageManager": "bun@1.2.19",
+  "packageManager": "bun@1.4.4",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -34,6 +34,12 @@
   "devDependencies": {
     "@biomejs/biome": "2.0.6",
     "knip": "6.31.0",
-    "vite": "7.3.1"
+    "vite": "7.3.7"
+  },
+  "overrides": {
+    "sharp": "0.35.5",
+    "undici@7": "7.29.1",
+    "ws@8": "8.22.0",
+    "esbuild@<0.28.1": "0.28.1"
   }
 }

@@ -9,55 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as InviteRouteImport } from './routes/invite'
-import { Route as EncryptionRouteImport } from './routes/encryption'
-import { Route as DpaRouteImport } from './routes/dpa'
-import { Route as AiTermsRouteImport } from './routes/ai-terms'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AiTermsRouteImport } from './routes/ai-terms'
+import { Route as DpaRouteImport } from './routes/dpa'
+import { Route as EncryptionRouteImport } from './routes/encryption'
+import { Route as InviteRouteImport } from './routes/invite'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as CareersOrgSlugRouteImport } from './routes/careers/$orgSlug'
 import { Route as JobsIndexRouteImport } from './routes/jobs/index'
 import { Route as OrgSplatRouteImport } from './routes/org/$'
-import { Route as CareersOrgSlugRouteImport } from './routes/careers/$orgSlug'
 import { Route as CareersOrgSlugIndexRouteImport } from './routes/careers/$orgSlug/index'
 import { Route as CareersOrgSlugJobsPostingSlugRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug'
 import { Route as CareersOrgSlugJobsPostingSlugIndexRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/index'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InviteRoute = InviteRouteImport.update({
-  id: '/invite',
-  path: '/invite',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EncryptionRoute = EncryptionRouteImport.update({
-  id: '/encryption',
-  path: '/encryption',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DpaRoute = DpaRouteImport.update({
-  id: '/dpa',
-  path: '/dpa',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AiTermsRoute = AiTermsRouteImport.update({
@@ -65,9 +35,44 @@ const AiTermsRoute = AiTermsRouteImport.update({
   path: '/ai-terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const DpaRoute = DpaRouteImport.update({
+  id: '/dpa',
+  path: '/dpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EncryptionRoute = EncryptionRouteImport.update({
+  id: '/encryption',
+  path: '/encryption',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareersOrgSlugRoute = CareersOrgSlugRouteImport.update({
+  id: '/careers/$orgSlug',
+  path: '/careers/$orgSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobsIndexRoute = JobsIndexRouteImport.update({
@@ -78,11 +83,6 @@ const JobsIndexRoute = JobsIndexRouteImport.update({
 const OrgSplatRoute = OrgSplatRouteImport.update({
   id: '/org/$',
   path: '/org/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CareersOrgSlugRoute = CareersOrgSlugRouteImport.update({
-  id: '/careers/$orgSlug',
-  path: '/careers/$orgSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CareersOrgSlugIndexRoute = CareersOrgSlugIndexRouteImport.update({
@@ -115,7 +115,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
   '/org/$': typeof OrgSplatRoute
-  '/jobs': typeof JobsIndexRoute
+  '/jobs/': typeof JobsIndexRoute
   '/careers/$orgSlug/': typeof CareersOrgSlugIndexRoute
   '/careers/$orgSlug/jobs/$postingSlug': typeof CareersOrgSlugJobsPostingSlugRouteWithChildren
   '/careers/$orgSlug/jobs/$postingSlug/': typeof CareersOrgSlugJobsPostingSlugIndexRoute
@@ -167,7 +167,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/careers/$orgSlug'
     | '/org/$'
-    | '/jobs'
+    | '/jobs/'
     | '/careers/$orgSlug/'
     | '/careers/$orgSlug/jobs/$postingSlug'
     | '/careers/$orgSlug/jobs/$postingSlug/'
@@ -222,53 +222,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/invite': {
-      id: '/invite'
-      path: '/invite'
-      fullPath: '/invite'
-      preLoaderRoute: typeof InviteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/encryption': {
-      id: '/encryption'
-      path: '/encryption'
-      fullPath: '/encryption'
-      preLoaderRoute: typeof EncryptionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dpa': {
-      id: '/dpa'
-      path: '/dpa'
-      fullPath: '/dpa'
-      preLoaderRoute: typeof DpaRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ai-terms': {
@@ -278,17 +236,66 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AiTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/dpa': {
+      id: '/dpa'
+      path: '/dpa'
+      fullPath: '/dpa'
+      preLoaderRoute: typeof DpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/encryption': {
+      id: '/encryption'
+      path: '/encryption'
+      fullPath: '/encryption'
+      preLoaderRoute: typeof EncryptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/careers/$orgSlug': {
+      id: '/careers/$orgSlug'
+      path: '/careers/$orgSlug'
+      fullPath: '/careers/$orgSlug'
+      preLoaderRoute: typeof CareersOrgSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jobs/': {
       id: '/jobs/'
       path: '/jobs'
-      fullPath: '/jobs'
+      fullPath: '/jobs/'
       preLoaderRoute: typeof JobsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -297,13 +304,6 @@ declare module '@tanstack/react-router' {
       path: '/org/$'
       fullPath: '/org/$'
       preLoaderRoute: typeof OrgSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/careers/$orgSlug': {
-      id: '/careers/$orgSlug'
-      path: '/careers/$orgSlug'
-      fullPath: '/careers/$orgSlug'
-      preLoaderRoute: typeof CareersOrgSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/careers/$orgSlug/': {

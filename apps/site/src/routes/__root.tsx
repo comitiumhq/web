@@ -71,7 +71,7 @@ function RootDocument({ children }: { children: ReactNode }) {
   const { queryClient } = Route.useRouteContext();
   const shouldNoindex = useRouterState({
     select: (state) =>
-      state.matches.some((match) => match.status === 'error' || match.status === 'notFound' || match.globalNotFound),
+      state.matches.some((match) => match.status === 'error' || match.status === 'notFound' || match._notFound),
   });
 
   return (

@@ -80,7 +80,7 @@ This repository contains Comitium's open-source web client.
 
 ## Development
 
-[Bun 1.2.19](https://bun.sh/) is required.
+[Bun 1.4.4](https://bun.sh/) is required.
 
 ```bash
 bun install --frozen-lockfile
