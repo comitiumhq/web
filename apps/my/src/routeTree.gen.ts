@@ -9,35 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ApplicationsRouteImport } from './routes/applications'
-import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as JobsIndexRouteImport } from './routes/jobs/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as ApplicationsRouteImport } from './routes/applications'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
-import { Route as ScheduleTokenRouteImport } from './routes/schedule/$token'
-import { Route as CareersOrgSlugRouteImport } from './routes/careers/$orgSlug'
-import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
 import { Route as AccountRecoveryRouteImport } from './routes/account/recovery'
+import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
+import { Route as CareersOrgSlugRouteImport } from './routes/careers/$orgSlug'
+import { Route as JobsIndexRouteImport } from './routes/jobs/index'
+import { Route as ScheduleTokenRouteImport } from './routes/schedule/$token'
 import { Route as CareersOrgSlugIndexRouteImport } from './routes/careers/$orgSlug/index'
 import { Route as CareersOrgSlugJobsPostingSlugRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug'
 import { Route as CareersOrgSlugJobsPostingSlugIndexRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/index'
 import { Route as CareersOrgSlugJobsPostingSlugApplyRouteImport } from './routes/careers/$orgSlug/jobs/$postingSlug/apply'
 
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApplicationsRoute = ApplicationsRouteImport.update({
-  id: '/applications',
-  path: '/applications',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -45,14 +35,19 @@ const AccountRoute = AccountRouteImport.update({
   path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ApplicationsRoute = ApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JobsIndexRoute = JobsIndexRouteImport.update({
-  id: '/jobs/',
-  path: '/jobs/',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountIndexRoute = AccountIndexRouteImport.update({
@@ -60,25 +55,30 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountRoute,
 } as any)
-const ScheduleTokenRoute = ScheduleTokenRouteImport.update({
-  id: '/schedule/$token',
-  path: '/schedule/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CareersOrgSlugRoute = CareersOrgSlugRouteImport.update({
-  id: '/careers/$orgSlug',
-  path: '/careers/$orgSlug',
-  getParentRoute: () => rootRouteImport,
+const AccountRecoveryRoute = AccountRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
+  getParentRoute: () => AccountRoute,
 } as any)
 const AccountZkIdentityRoute = AccountZkIdentityRouteImport.update({
   id: '/zk-identity',
   path: '/zk-identity',
   getParentRoute: () => AccountRoute,
 } as any)
-const AccountRecoveryRoute = AccountRecoveryRouteImport.update({
-  id: '/recovery',
-  path: '/recovery',
-  getParentRoute: () => AccountRoute,
+const CareersOrgSlugRoute = CareersOrgSlugRouteImport.update({
+  id: '/careers/$orgSlug',
+  path: '/careers/$orgSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsIndexRoute = JobsIndexRouteImport.update({
+  id: '/jobs/',
+  path: '/jobs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScheduleTokenRoute = ScheduleTokenRouteImport.update({
+  id: '/schedule/$token',
+  path: '/schedule/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CareersOrgSlugIndexRoute = CareersOrgSlugIndexRouteImport.update({
   id: '/',
@@ -115,7 +115,7 @@ export interface FileRoutesByFullPath {
   '/careers/$orgSlug': typeof CareersOrgSlugRouteWithChildren
   '/schedule/$token': typeof ScheduleTokenRoute
   '/account/': typeof AccountIndexRoute
-  '/jobs': typeof JobsIndexRoute
+  '/jobs/': typeof JobsIndexRoute
   '/careers/$orgSlug/': typeof CareersOrgSlugIndexRoute
   '/careers/$orgSlug/jobs/$postingSlug': typeof CareersOrgSlugJobsPostingSlugRouteWithChildren
   '/careers/$orgSlug/jobs/$postingSlug/apply': typeof CareersOrgSlugJobsPostingSlugApplyRoute
@@ -166,7 +166,7 @@ export interface FileRouteTypes {
     | '/careers/$orgSlug'
     | '/schedule/$token'
     | '/account/'
-    | '/jobs'
+    | '/jobs/'
     | '/careers/$orgSlug/'
     | '/careers/$orgSlug/jobs/$postingSlug'
     | '/careers/$orgSlug/jobs/$postingSlug/apply'
@@ -217,25 +217,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/applications': {
-      id: '/applications'
-      path: '/applications'
-      fullPath: '/applications'
-      preLoaderRoute: typeof ApplicationsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -245,18 +231,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/applications': {
+      id: '/applications'
+      path: '/applications'
+      fullPath: '/applications'
+      preLoaderRoute: typeof ApplicationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jobs/': {
-      id: '/jobs/'
-      path: '/jobs'
-      fullPath: '/jobs'
-      preLoaderRoute: typeof JobsIndexRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account/': {
@@ -266,19 +259,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/schedule/$token': {
-      id: '/schedule/$token'
-      path: '/schedule/$token'
-      fullPath: '/schedule/$token'
-      preLoaderRoute: typeof ScheduleTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/careers/$orgSlug': {
-      id: '/careers/$orgSlug'
-      path: '/careers/$orgSlug'
-      fullPath: '/careers/$orgSlug'
-      preLoaderRoute: typeof CareersOrgSlugRouteImport
-      parentRoute: typeof rootRouteImport
+    '/account/recovery': {
+      id: '/account/recovery'
+      path: '/recovery'
+      fullPath: '/account/recovery'
+      preLoaderRoute: typeof AccountRecoveryRouteImport
+      parentRoute: typeof AccountRoute
     }
     '/account/zk-identity': {
       id: '/account/zk-identity'
@@ -287,12 +273,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountZkIdentityRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/account/recovery': {
-      id: '/account/recovery'
-      path: '/recovery'
-      fullPath: '/account/recovery'
-      preLoaderRoute: typeof AccountRecoveryRouteImport
-      parentRoute: typeof AccountRoute
+    '/careers/$orgSlug': {
+      id: '/careers/$orgSlug'
+      path: '/careers/$orgSlug'
+      fullPath: '/careers/$orgSlug'
+      preLoaderRoute: typeof CareersOrgSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs/': {
+      id: '/jobs/'
+      path: '/jobs'
+      fullPath: '/jobs/'
+      preLoaderRoute: typeof JobsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schedule/$token': {
+      id: '/schedule/$token'
+      path: '/schedule/$token'
+      fullPath: '/schedule/$token'
+      preLoaderRoute: typeof ScheduleTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/careers/$orgSlug/': {
       id: '/careers/$orgSlug/'

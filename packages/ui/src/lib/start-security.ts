@@ -1,14 +1,16 @@
 import { createMiddleware, getGlobalStartContext } from '@tanstack/react-start';
-import { setResponseHeaders } from '@tanstack/react-start/server';
 
 import { createCspNonce, securityHeaders } from './security-headers';
 
-export const securityHeadersMiddleware = createMiddleware({ type: 'request' }).server(({ next }) => {
+export const securityHeadersMiddleware = createMiddleware({ type: 'request' }).server(async ({ next }) => {
   const nonce = createCspNonce();
+  const result = await next({ context: { nonce } });
 
-  setResponseHeaders(securityHeaders(nonce));
+  for (const [name, value] of Object.entries(securityHeaders(nonce))) {
+    result.response.headers.set(name, value);
+  }
 
-  return next({ context: { nonce } });
+  return result;
 });
 
 export function getRequestCspNonce(): string | undefined {

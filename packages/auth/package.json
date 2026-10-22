@@ -44,7 +44,7 @@
     "@comitium/schemas": "workspace:*",
     "@comitium/ui": "workspace:*",
     "@tanstack/react-query": "5.90.21",
-    "@tanstack/react-router": "1.147.3",
+    "@tanstack/react-router": "1.170.41",
     "@zkpassport/sdk": "0.18.2",
     "@zkpassport/ui": "0.18.2",
     "better-auth": "1.7.11",
@@ -62,10 +62,10 @@
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.2",
     "@vitejs/plugin-react": "5.1.2",
-    "@vitest/browser-playwright": "4.0.18",
+    "@vitest/browser-playwright": "4.1.12",
     "playwright": "1.57.0",
     "typescript": "5.8.3",
-    "vitest": "4.0.18",
+    "vitest": "4.1.12",
     "vitest-browser-react": "2.0.5"
   }
 }

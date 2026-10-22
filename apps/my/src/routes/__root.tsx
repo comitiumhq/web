@@ -62,7 +62,7 @@ function RootLayout() {
     select: (state) => ({
       authPage: isAuthRoutePath(state.location.pathname),
       shouldNoindex: state.matches.some(
-        (match) => match.status === 'error' || match.status === 'notFound' || match.globalNotFound,
+        (match) => match.status === 'error' || match.status === 'notFound' || match._notFound,
       ),
     }),
   });

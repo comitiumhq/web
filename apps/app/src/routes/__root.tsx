@@ -57,7 +57,7 @@ function RootLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const shouldNoindex = useRouterState({
     select: (state) =>
-      state.matches.some((match) => match.status === 'error' || match.status === 'notFound' || match.globalNotFound),
+      state.matches.some((match) => match.status === 'error' || match.status === 'notFound' || match._notFound),
   });
   const authPage = isAuthRoutePath(pathname);
   const routeOwnsHeader = pathname.startsWith('/org/');

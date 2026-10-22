@@ -44,12 +44,12 @@
   },
   "dependencies": {
     "@comitium/crypto": "workspace:*",
-    "@tiptap/core": "3.22.3",
+    "@tiptap/core": "3.30.5",
     "zod": "4.4.3"
   },
   "devDependencies": {
     "@scure/base": "2.0.0",
     "typescript": "5.8.3",
-    "vitest": "4.0.18"
+    "vitest": "4.1.12"
   }
 }

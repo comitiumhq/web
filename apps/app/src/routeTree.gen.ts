@@ -9,57 +9,52 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as InviteRouteImport } from './routes/invite'
-import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as InviteRouteImport } from './routes/invite'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
-import { Route as OrgCreateRouteImport } from './routes/org/create'
-import { Route as OrgOrgIdRouteImport } from './routes/org/$orgId'
-import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
 import { Route as AccountRecoveryRouteImport } from './routes/account/recovery'
+import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-identity'
+import { Route as OrgOrgIdRouteImport } from './routes/org/$orgId'
+import { Route as OrgCreateRouteImport } from './routes/org/create'
 import { Route as OrgOrgIdIndexRouteImport } from './routes/org/$orgId/index'
-import { Route as OrgOrgIdSettingsRouteImport } from './routes/org/$orgId/settings'
-import { Route as OrgOrgIdPipelineRouteImport } from './routes/org/$orgId/pipeline'
 import { Route as OrgOrgIdOrganizationRouteImport } from './routes/org/$orgId/organization'
-import { Route as OrgOrgIdSettingsIndexRouteImport } from './routes/org/$orgId/settings/index'
-import { Route as OrgOrgIdOrganizationIndexRouteImport } from './routes/org/$orgId/organization/index'
+import { Route as OrgOrgIdPipelineRouteImport } from './routes/org/$orgId/pipeline'
+import { Route as OrgOrgIdSettingsRouteImport } from './routes/org/$orgId/settings'
 import { Route as OrgOrgIdJobsIndexRouteImport } from './routes/org/$orgId/jobs/index'
-import { Route as OrgOrgIdSettingsCalendarRouteImport } from './routes/org/$orgId/settings/calendar'
-import { Route as OrgOrgIdOrganizationTagsRouteImport } from './routes/org/$orgId/organization/tags'
-import { Route as OrgOrgIdOrganizationMembersRouteImport } from './routes/org/$orgId/organization/members'
-import { Route as OrgOrgIdOrganizationLocationsRouteImport } from './routes/org/$orgId/organization/locations'
-import { Route as OrgOrgIdOrganizationJobTemplatesRouteImport } from './routes/org/$orgId/organization/job-templates'
-import { Route as OrgOrgIdOrganizationInterviewsRouteImport } from './routes/org/$orgId/organization/interviews'
-import { Route as OrgOrgIdOrganizationInterviewReasonsRouteImport } from './routes/org/$orgId/organization/interview-reasons'
-import { Route as OrgOrgIdOrganizationInterviewPlansRouteImport } from './routes/org/$orgId/organization/interview-plans'
-import { Route as OrgOrgIdOrganizationEmailTemplatesRouteImport } from './routes/org/$orgId/organization/email-templates'
-import { Route as OrgOrgIdOrganizationDepartmentsRouteImport } from './routes/org/$orgId/organization/departments'
-import { Route as OrgOrgIdOrganizationDataPrivacyRouteImport } from './routes/org/$orgId/organization/data-privacy'
-import { Route as OrgOrgIdOrganizationCustomFieldsRouteImport } from './routes/org/$orgId/organization/custom-fields'
-import { Route as OrgOrgIdOrganizationCompanyRouteImport } from './routes/org/$orgId/organization/company'
-import { Route as OrgOrgIdOrganizationCloseReasonsRouteImport } from './routes/org/$orgId/organization/close-reasons'
-import { Route as OrgOrgIdOrganizationArchiveReasonsRouteImport } from './routes/org/$orgId/organization/archive-reasons'
 import { Route as OrgOrgIdJobsJobIdRouteImport } from './routes/org/$orgId/jobs/$jobId'
-import { Route as OrgOrgIdOrganizationJobTemplatesIndexRouteImport } from './routes/org/$orgId/organization/job-templates/index'
-import { Route as OrgOrgIdOrganizationInterviewsIndexRouteImport } from './routes/org/$orgId/organization/interviews/index'
-import { Route as OrgOrgIdOrganizationInterviewPlansIndexRouteImport } from './routes/org/$orgId/organization/interview-plans/index'
-import { Route as OrgOrgIdOrganizationFeedbackFormsIndexRouteImport } from './routes/org/$orgId/organization/feedback-forms/index'
-import { Route as OrgOrgIdOrganizationApplicationFormsIndexRouteImport } from './routes/org/$orgId/organization/application-forms/index'
-import { Route as OrgOrgIdJobsJobIdSettingsRouteImport } from './routes/org/$orgId/jobs/$jobId/settings'
-import { Route as OrgOrgIdJobsJobIdPostingRouteImport } from './routes/org/$orgId/jobs/$jobId/posting'
-import { Route as OrgOrgIdJobsJobIdPipelineRouteImport } from './routes/org/$orgId/jobs/$jobId/pipeline'
-import { Route as OrgOrgIdJobsJobIdInterviewPlanRouteImport } from './routes/org/$orgId/jobs/$jobId/interview-plan'
+import { Route as OrgOrgIdOrganizationIndexRouteImport } from './routes/org/$orgId/organization/index'
+import { Route as OrgOrgIdOrganizationArchiveReasonsRouteImport } from './routes/org/$orgId/organization/archive-reasons'
+import { Route as OrgOrgIdOrganizationCloseReasonsRouteImport } from './routes/org/$orgId/organization/close-reasons'
+import { Route as OrgOrgIdOrganizationCompanyRouteImport } from './routes/org/$orgId/organization/company'
+import { Route as OrgOrgIdOrganizationCustomFieldsRouteImport } from './routes/org/$orgId/organization/custom-fields'
+import { Route as OrgOrgIdOrganizationDataPrivacyRouteImport } from './routes/org/$orgId/organization/data-privacy'
+import { Route as OrgOrgIdOrganizationDepartmentsRouteImport } from './routes/org/$orgId/organization/departments'
+import { Route as OrgOrgIdOrganizationEmailTemplatesRouteImport } from './routes/org/$orgId/organization/email-templates'
+import { Route as OrgOrgIdOrganizationInterviewPlansRouteImport } from './routes/org/$orgId/organization/interview-plans'
+import { Route as OrgOrgIdOrganizationInterviewReasonsRouteImport } from './routes/org/$orgId/organization/interview-reasons'
+import { Route as OrgOrgIdOrganizationInterviewsRouteImport } from './routes/org/$orgId/organization/interviews'
+import { Route as OrgOrgIdOrganizationJobTemplatesRouteImport } from './routes/org/$orgId/organization/job-templates'
+import { Route as OrgOrgIdOrganizationLocationsRouteImport } from './routes/org/$orgId/organization/locations'
+import { Route as OrgOrgIdOrganizationMembersRouteImport } from './routes/org/$orgId/organization/members'
+import { Route as OrgOrgIdOrganizationTagsRouteImport } from './routes/org/$orgId/organization/tags'
+import { Route as OrgOrgIdSettingsIndexRouteImport } from './routes/org/$orgId/settings/index'
+import { Route as OrgOrgIdSettingsCalendarRouteImport } from './routes/org/$orgId/settings/calendar'
 import { Route as OrgOrgIdJobsJobIdCriteriaRouteImport } from './routes/org/$orgId/jobs/$jobId/criteria'
+import { Route as OrgOrgIdJobsJobIdInterviewPlanRouteImport } from './routes/org/$orgId/jobs/$jobId/interview-plan'
+import { Route as OrgOrgIdJobsJobIdPipelineRouteImport } from './routes/org/$orgId/jobs/$jobId/pipeline'
+import { Route as OrgOrgIdJobsJobIdPostingRouteImport } from './routes/org/$orgId/jobs/$jobId/posting'
+import { Route as OrgOrgIdJobsJobIdSettingsRouteImport } from './routes/org/$orgId/jobs/$jobId/settings'
+import { Route as OrgOrgIdOrganizationApplicationFormsIndexRouteImport } from './routes/org/$orgId/organization/application-forms/index'
+import { Route as OrgOrgIdOrganizationFeedbackFormsIndexRouteImport } from './routes/org/$orgId/organization/feedback-forms/index'
+import { Route as OrgOrgIdOrganizationInterviewPlansIndexRouteImport } from './routes/org/$orgId/organization/interview-plans/index'
+import { Route as OrgOrgIdOrganizationInterviewsIndexRouteImport } from './routes/org/$orgId/organization/interviews/index'
+import { Route as OrgOrgIdOrganizationJobTemplatesIndexRouteImport } from './routes/org/$orgId/organization/job-templates/index'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InviteRoute = InviteRouteImport.update({
-  id: '/invite',
-  path: '/invite',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -67,9 +62,14 @@ const AccountRoute = AccountRouteImport.update({
   path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountIndexRoute = AccountIndexRouteImport.update({
@@ -77,39 +77,29 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountRoute,
 } as any)
-const OrgCreateRoute = OrgCreateRouteImport.update({
-  id: '/org/create',
-  path: '/org/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrgOrgIdRoute = OrgOrgIdRouteImport.update({
-  id: '/org/$orgId',
-  path: '/org/$orgId',
-  getParentRoute: () => rootRouteImport,
+const AccountRecoveryRoute = AccountRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
+  getParentRoute: () => AccountRoute,
 } as any)
 const AccountZkIdentityRoute = AccountZkIdentityRouteImport.update({
   id: '/zk-identity',
   path: '/zk-identity',
   getParentRoute: () => AccountRoute,
 } as any)
-const AccountRecoveryRoute = AccountRecoveryRouteImport.update({
-  id: '/recovery',
-  path: '/recovery',
-  getParentRoute: () => AccountRoute,
+const OrgOrgIdRoute = OrgOrgIdRouteImport.update({
+  id: '/org/$orgId',
+  path: '/org/$orgId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrgCreateRoute = OrgCreateRouteImport.update({
+  id: '/org/create',
+  path: '/org/create',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const OrgOrgIdIndexRoute = OrgOrgIdIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => OrgOrgIdRoute,
-} as any)
-const OrgOrgIdSettingsRoute = OrgOrgIdSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => OrgOrgIdRoute,
-} as any)
-const OrgOrgIdPipelineRoute = OrgOrgIdPipelineRouteImport.update({
-  id: '/pipeline',
-  path: '/pipeline',
   getParentRoute: () => OrgOrgIdRoute,
 } as any)
 const OrgOrgIdOrganizationRoute = OrgOrgIdOrganizationRouteImport.update({
@@ -117,104 +107,30 @@ const OrgOrgIdOrganizationRoute = OrgOrgIdOrganizationRouteImport.update({
   path: '/organization',
   getParentRoute: () => OrgOrgIdRoute,
 } as any)
-const OrgOrgIdSettingsIndexRoute = OrgOrgIdSettingsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => OrgOrgIdSettingsRoute,
+const OrgOrgIdPipelineRoute = OrgOrgIdPipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
+  getParentRoute: () => OrgOrgIdRoute,
 } as any)
-const OrgOrgIdOrganizationIndexRoute =
-  OrgOrgIdOrganizationIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
+const OrgOrgIdSettingsRoute = OrgOrgIdSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => OrgOrgIdRoute,
+} as any)
 const OrgOrgIdJobsIndexRoute = OrgOrgIdJobsIndexRouteImport.update({
   id: '/jobs/',
   path: '/jobs/',
   getParentRoute: () => OrgOrgIdRoute,
 } as any)
-const OrgOrgIdSettingsCalendarRoute =
-  OrgOrgIdSettingsCalendarRouteImport.update({
-    id: '/calendar',
-    path: '/calendar',
-    getParentRoute: () => OrgOrgIdSettingsRoute,
-  } as any)
-const OrgOrgIdOrganizationTagsRoute =
-  OrgOrgIdOrganizationTagsRouteImport.update({
-    id: '/tags',
-    path: '/tags',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationMembersRoute =
-  OrgOrgIdOrganizationMembersRouteImport.update({
-    id: '/members',
-    path: '/members',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationLocationsRoute =
-  OrgOrgIdOrganizationLocationsRouteImport.update({
-    id: '/locations',
-    path: '/locations',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationJobTemplatesRoute =
-  OrgOrgIdOrganizationJobTemplatesRouteImport.update({
-    id: '/job-templates',
-    path: '/job-templates',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationInterviewsRoute =
-  OrgOrgIdOrganizationInterviewsRouteImport.update({
-    id: '/interviews',
-    path: '/interviews',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationInterviewReasonsRoute =
-  OrgOrgIdOrganizationInterviewReasonsRouteImport.update({
-    id: '/interview-reasons',
-    path: '/interview-reasons',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationInterviewPlansRoute =
-  OrgOrgIdOrganizationInterviewPlansRouteImport.update({
-    id: '/interview-plans',
-    path: '/interview-plans',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationEmailTemplatesRoute =
-  OrgOrgIdOrganizationEmailTemplatesRouteImport.update({
-    id: '/email-templates',
-    path: '/email-templates',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationDepartmentsRoute =
-  OrgOrgIdOrganizationDepartmentsRouteImport.update({
-    id: '/departments',
-    path: '/departments',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationDataPrivacyRoute =
-  OrgOrgIdOrganizationDataPrivacyRouteImport.update({
-    id: '/data-privacy',
-    path: '/data-privacy',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationCustomFieldsRoute =
-  OrgOrgIdOrganizationCustomFieldsRouteImport.update({
-    id: '/custom-fields',
-    path: '/custom-fields',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationCompanyRoute =
-  OrgOrgIdOrganizationCompanyRouteImport.update({
-    id: '/company',
-    path: '/company',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationCloseReasonsRoute =
-  OrgOrgIdOrganizationCloseReasonsRouteImport.update({
-    id: '/close-reasons',
-    path: '/close-reasons',
+const OrgOrgIdJobsJobIdRoute = OrgOrgIdJobsJobIdRouteImport.update({
+  id: '/jobs/$jobId',
+  path: '/jobs/$jobId',
+  getParentRoute: () => OrgOrgIdRoute,
+} as any)
+const OrgOrgIdOrganizationIndexRoute =
+  OrgOrgIdOrganizationIndexRouteImport.update({
+    id: '/',
+    path: '/',
     getParentRoute: () => OrgOrgIdOrganizationRoute,
   } as any)
 const OrgOrgIdOrganizationArchiveReasonsRoute =
@@ -223,57 +139,99 @@ const OrgOrgIdOrganizationArchiveReasonsRoute =
     path: '/archive-reasons',
     getParentRoute: () => OrgOrgIdOrganizationRoute,
   } as any)
-const OrgOrgIdJobsJobIdRoute = OrgOrgIdJobsJobIdRouteImport.update({
-  id: '/jobs/$jobId',
-  path: '/jobs/$jobId',
-  getParentRoute: () => OrgOrgIdRoute,
+const OrgOrgIdOrganizationCloseReasonsRoute =
+  OrgOrgIdOrganizationCloseReasonsRouteImport.update({
+    id: '/close-reasons',
+    path: '/close-reasons',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationCompanyRoute =
+  OrgOrgIdOrganizationCompanyRouteImport.update({
+    id: '/company',
+    path: '/company',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationCustomFieldsRoute =
+  OrgOrgIdOrganizationCustomFieldsRouteImport.update({
+    id: '/custom-fields',
+    path: '/custom-fields',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationDataPrivacyRoute =
+  OrgOrgIdOrganizationDataPrivacyRouteImport.update({
+    id: '/data-privacy',
+    path: '/data-privacy',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationDepartmentsRoute =
+  OrgOrgIdOrganizationDepartmentsRouteImport.update({
+    id: '/departments',
+    path: '/departments',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationEmailTemplatesRoute =
+  OrgOrgIdOrganizationEmailTemplatesRouteImport.update({
+    id: '/email-templates',
+    path: '/email-templates',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationInterviewPlansRoute =
+  OrgOrgIdOrganizationInterviewPlansRouteImport.update({
+    id: '/interview-plans',
+    path: '/interview-plans',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationInterviewReasonsRoute =
+  OrgOrgIdOrganizationInterviewReasonsRouteImport.update({
+    id: '/interview-reasons',
+    path: '/interview-reasons',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationInterviewsRoute =
+  OrgOrgIdOrganizationInterviewsRouteImport.update({
+    id: '/interviews',
+    path: '/interviews',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationJobTemplatesRoute =
+  OrgOrgIdOrganizationJobTemplatesRouteImport.update({
+    id: '/job-templates',
+    path: '/job-templates',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationLocationsRoute =
+  OrgOrgIdOrganizationLocationsRouteImport.update({
+    id: '/locations',
+    path: '/locations',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationMembersRoute =
+  OrgOrgIdOrganizationMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationTagsRoute =
+  OrgOrgIdOrganizationTagsRouteImport.update({
+    id: '/tags',
+    path: '/tags',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdSettingsIndexRoute = OrgOrgIdSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OrgOrgIdSettingsRoute,
 } as any)
-const OrgOrgIdOrganizationJobTemplatesIndexRoute =
-  OrgOrgIdOrganizationJobTemplatesIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => OrgOrgIdOrganizationJobTemplatesRoute,
+const OrgOrgIdSettingsCalendarRoute =
+  OrgOrgIdSettingsCalendarRouteImport.update({
+    id: '/calendar',
+    path: '/calendar',
+    getParentRoute: () => OrgOrgIdSettingsRoute,
   } as any)
-const OrgOrgIdOrganizationInterviewsIndexRoute =
-  OrgOrgIdOrganizationInterviewsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => OrgOrgIdOrganizationInterviewsRoute,
-  } as any)
-const OrgOrgIdOrganizationInterviewPlansIndexRoute =
-  OrgOrgIdOrganizationInterviewPlansIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => OrgOrgIdOrganizationInterviewPlansRoute,
-  } as any)
-const OrgOrgIdOrganizationFeedbackFormsIndexRoute =
-  OrgOrgIdOrganizationFeedbackFormsIndexRouteImport.update({
-    id: '/feedback-forms/',
-    path: '/feedback-forms/',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdOrganizationApplicationFormsIndexRoute =
-  OrgOrgIdOrganizationApplicationFormsIndexRouteImport.update({
-    id: '/application-forms/',
-    path: '/application-forms/',
-    getParentRoute: () => OrgOrgIdOrganizationRoute,
-  } as any)
-const OrgOrgIdJobsJobIdSettingsRoute =
-  OrgOrgIdJobsJobIdSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => OrgOrgIdJobsJobIdRoute,
-  } as any)
-const OrgOrgIdJobsJobIdPostingRoute =
-  OrgOrgIdJobsJobIdPostingRouteImport.update({
-    id: '/posting',
-    path: '/posting',
-    getParentRoute: () => OrgOrgIdJobsJobIdRoute,
-  } as any)
-const OrgOrgIdJobsJobIdPipelineRoute =
-  OrgOrgIdJobsJobIdPipelineRouteImport.update({
-    id: '/pipeline',
-    path: '/pipeline',
+const OrgOrgIdJobsJobIdCriteriaRoute =
+  OrgOrgIdJobsJobIdCriteriaRouteImport.update({
+    id: '/criteria',
+    path: '/criteria',
     getParentRoute: () => OrgOrgIdJobsJobIdRoute,
   } as any)
 const OrgOrgIdJobsJobIdInterviewPlanRoute =
@@ -282,11 +240,53 @@ const OrgOrgIdJobsJobIdInterviewPlanRoute =
     path: '/interview-plan',
     getParentRoute: () => OrgOrgIdJobsJobIdRoute,
   } as any)
-const OrgOrgIdJobsJobIdCriteriaRoute =
-  OrgOrgIdJobsJobIdCriteriaRouteImport.update({
-    id: '/criteria',
-    path: '/criteria',
+const OrgOrgIdJobsJobIdPipelineRoute =
+  OrgOrgIdJobsJobIdPipelineRouteImport.update({
+    id: '/pipeline',
+    path: '/pipeline',
     getParentRoute: () => OrgOrgIdJobsJobIdRoute,
+  } as any)
+const OrgOrgIdJobsJobIdPostingRoute =
+  OrgOrgIdJobsJobIdPostingRouteImport.update({
+    id: '/posting',
+    path: '/posting',
+    getParentRoute: () => OrgOrgIdJobsJobIdRoute,
+  } as any)
+const OrgOrgIdJobsJobIdSettingsRoute =
+  OrgOrgIdJobsJobIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => OrgOrgIdJobsJobIdRoute,
+  } as any)
+const OrgOrgIdOrganizationApplicationFormsIndexRoute =
+  OrgOrgIdOrganizationApplicationFormsIndexRouteImport.update({
+    id: '/application-forms/',
+    path: '/application-forms/',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationFeedbackFormsIndexRoute =
+  OrgOrgIdOrganizationFeedbackFormsIndexRouteImport.update({
+    id: '/feedback-forms/',
+    path: '/feedback-forms/',
+    getParentRoute: () => OrgOrgIdOrganizationRoute,
+  } as any)
+const OrgOrgIdOrganizationInterviewPlansIndexRoute =
+  OrgOrgIdOrganizationInterviewPlansIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => OrgOrgIdOrganizationInterviewPlansRoute,
+  } as any)
+const OrgOrgIdOrganizationInterviewsIndexRoute =
+  OrgOrgIdOrganizationInterviewsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => OrgOrgIdOrganizationInterviewsRoute,
+  } as any)
+const OrgOrgIdOrganizationJobTemplatesIndexRoute =
+  OrgOrgIdOrganizationJobTemplatesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => OrgOrgIdOrganizationJobTemplatesRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -319,7 +319,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgId/organization/members': typeof OrgOrgIdOrganizationMembersRoute
   '/org/$orgId/organization/tags': typeof OrgOrgIdOrganizationTagsRoute
   '/org/$orgId/settings/calendar': typeof OrgOrgIdSettingsCalendarRoute
-  '/org/$orgId/jobs': typeof OrgOrgIdJobsIndexRoute
+  '/org/$orgId/jobs/': typeof OrgOrgIdJobsIndexRoute
   '/org/$orgId/organization/': typeof OrgOrgIdOrganizationIndexRoute
   '/org/$orgId/settings/': typeof OrgOrgIdSettingsIndexRoute
   '/org/$orgId/jobs/$jobId/criteria': typeof OrgOrgIdJobsJobIdCriteriaRoute
@@ -327,8 +327,8 @@ export interface FileRoutesByFullPath {
   '/org/$orgId/jobs/$jobId/pipeline': typeof OrgOrgIdJobsJobIdPipelineRoute
   '/org/$orgId/jobs/$jobId/posting': typeof OrgOrgIdJobsJobIdPostingRoute
   '/org/$orgId/jobs/$jobId/settings': typeof OrgOrgIdJobsJobIdSettingsRoute
-  '/org/$orgId/organization/application-forms': typeof OrgOrgIdOrganizationApplicationFormsIndexRoute
-  '/org/$orgId/organization/feedback-forms': typeof OrgOrgIdOrganizationFeedbackFormsIndexRoute
+  '/org/$orgId/organization/application-forms/': typeof OrgOrgIdOrganizationApplicationFormsIndexRoute
+  '/org/$orgId/organization/feedback-forms/': typeof OrgOrgIdOrganizationFeedbackFormsIndexRoute
   '/org/$orgId/organization/interview-plans/': typeof OrgOrgIdOrganizationInterviewPlansIndexRoute
   '/org/$orgId/organization/interviews/': typeof OrgOrgIdOrganizationInterviewsIndexRoute
   '/org/$orgId/organization/job-templates/': typeof OrgOrgIdOrganizationJobTemplatesIndexRoute
@@ -447,7 +447,7 @@ export interface FileRouteTypes {
     | '/org/$orgId/organization/members'
     | '/org/$orgId/organization/tags'
     | '/org/$orgId/settings/calendar'
-    | '/org/$orgId/jobs'
+    | '/org/$orgId/jobs/'
     | '/org/$orgId/organization/'
     | '/org/$orgId/settings/'
     | '/org/$orgId/jobs/$jobId/criteria'
@@ -455,8 +455,8 @@ export interface FileRouteTypes {
     | '/org/$orgId/jobs/$jobId/pipeline'
     | '/org/$orgId/jobs/$jobId/posting'
     | '/org/$orgId/jobs/$jobId/settings'
-    | '/org/$orgId/organization/application-forms'
-    | '/org/$orgId/organization/feedback-forms'
+    | '/org/$orgId/organization/application-forms/'
+    | '/org/$orgId/organization/feedback-forms/'
     | '/org/$orgId/organization/interview-plans/'
     | '/org/$orgId/organization/interviews/'
     | '/org/$orgId/organization/job-templates/'
@@ -554,18 +554,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/invite': {
-      id: '/invite'
-      path: '/invite'
-      fullPath: '/invite'
-      preLoaderRoute: typeof InviteRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -575,11 +568,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account/': {
@@ -589,19 +589,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/org/create': {
-      id: '/org/create'
-      path: '/org/create'
-      fullPath: '/org/create'
-      preLoaderRoute: typeof OrgCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/org/$orgId': {
-      id: '/org/$orgId'
-      path: '/org/$orgId'
-      fullPath: '/org/$orgId'
-      preLoaderRoute: typeof OrgOrgIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/account/recovery': {
+      id: '/account/recovery'
+      path: '/recovery'
+      fullPath: '/account/recovery'
+      preLoaderRoute: typeof AccountRecoveryRouteImport
+      parentRoute: typeof AccountRoute
     }
     '/account/zk-identity': {
       id: '/account/zk-identity'
@@ -610,32 +603,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountZkIdentityRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/account/recovery': {
-      id: '/account/recovery'
-      path: '/recovery'
-      fullPath: '/account/recovery'
-      preLoaderRoute: typeof AccountRecoveryRouteImport
-      parentRoute: typeof AccountRoute
+    '/org/$orgId': {
+      id: '/org/$orgId'
+      path: '/org/$orgId'
+      fullPath: '/org/$orgId'
+      preLoaderRoute: typeof OrgOrgIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/org/create': {
+      id: '/org/create'
+      path: '/org/create'
+      fullPath: '/org/create'
+      preLoaderRoute: typeof OrgCreateRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/org/$orgId/': {
       id: '/org/$orgId/'
       path: '/'
       fullPath: '/org/$orgId/'
       preLoaderRoute: typeof OrgOrgIdIndexRouteImport
-      parentRoute: typeof OrgOrgIdRoute
-    }
-    '/org/$orgId/settings': {
-      id: '/org/$orgId/settings'
-      path: '/settings'
-      fullPath: '/org/$orgId/settings'
-      preLoaderRoute: typeof OrgOrgIdSettingsRouteImport
-      parentRoute: typeof OrgOrgIdRoute
-    }
-    '/org/$orgId/pipeline': {
-      id: '/org/$orgId/pipeline'
-      path: '/pipeline'
-      fullPath: '/org/$orgId/pipeline'
-      preLoaderRoute: typeof OrgOrgIdPipelineRouteImport
       parentRoute: typeof OrgOrgIdRoute
     }
     '/org/$orgId/organization': {
@@ -645,123 +631,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrgOrgIdOrganizationRouteImport
       parentRoute: typeof OrgOrgIdRoute
     }
-    '/org/$orgId/settings/': {
-      id: '/org/$orgId/settings/'
-      path: '/'
-      fullPath: '/org/$orgId/settings/'
-      preLoaderRoute: typeof OrgOrgIdSettingsIndexRouteImport
-      parentRoute: typeof OrgOrgIdSettingsRoute
+    '/org/$orgId/pipeline': {
+      id: '/org/$orgId/pipeline'
+      path: '/pipeline'
+      fullPath: '/org/$orgId/pipeline'
+      preLoaderRoute: typeof OrgOrgIdPipelineRouteImport
+      parentRoute: typeof OrgOrgIdRoute
+    }
+    '/org/$orgId/settings': {
+      id: '/org/$orgId/settings'
+      path: '/settings'
+      fullPath: '/org/$orgId/settings'
+      preLoaderRoute: typeof OrgOrgIdSettingsRouteImport
+      parentRoute: typeof OrgOrgIdRoute
+    }
+    '/org/$orgId/jobs/': {
+      id: '/org/$orgId/jobs/'
+      path: '/jobs'
+      fullPath: '/org/$orgId/jobs/'
+      preLoaderRoute: typeof OrgOrgIdJobsIndexRouteImport
+      parentRoute: typeof OrgOrgIdRoute
+    }
+    '/org/$orgId/jobs/$jobId': {
+      id: '/org/$orgId/jobs/$jobId'
+      path: '/jobs/$jobId'
+      fullPath: '/org/$orgId/jobs/$jobId'
+      preLoaderRoute: typeof OrgOrgIdJobsJobIdRouteImport
+      parentRoute: typeof OrgOrgIdRoute
     }
     '/org/$orgId/organization/': {
       id: '/org/$orgId/organization/'
       path: '/'
       fullPath: '/org/$orgId/organization/'
       preLoaderRoute: typeof OrgOrgIdOrganizationIndexRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/jobs/': {
-      id: '/org/$orgId/jobs/'
-      path: '/jobs'
-      fullPath: '/org/$orgId/jobs'
-      preLoaderRoute: typeof OrgOrgIdJobsIndexRouteImport
-      parentRoute: typeof OrgOrgIdRoute
-    }
-    '/org/$orgId/settings/calendar': {
-      id: '/org/$orgId/settings/calendar'
-      path: '/calendar'
-      fullPath: '/org/$orgId/settings/calendar'
-      preLoaderRoute: typeof OrgOrgIdSettingsCalendarRouteImport
-      parentRoute: typeof OrgOrgIdSettingsRoute
-    }
-    '/org/$orgId/organization/tags': {
-      id: '/org/$orgId/organization/tags'
-      path: '/tags'
-      fullPath: '/org/$orgId/organization/tags'
-      preLoaderRoute: typeof OrgOrgIdOrganizationTagsRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/members': {
-      id: '/org/$orgId/organization/members'
-      path: '/members'
-      fullPath: '/org/$orgId/organization/members'
-      preLoaderRoute: typeof OrgOrgIdOrganizationMembersRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/locations': {
-      id: '/org/$orgId/organization/locations'
-      path: '/locations'
-      fullPath: '/org/$orgId/organization/locations'
-      preLoaderRoute: typeof OrgOrgIdOrganizationLocationsRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/job-templates': {
-      id: '/org/$orgId/organization/job-templates'
-      path: '/job-templates'
-      fullPath: '/org/$orgId/organization/job-templates'
-      preLoaderRoute: typeof OrgOrgIdOrganizationJobTemplatesRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/interviews': {
-      id: '/org/$orgId/organization/interviews'
-      path: '/interviews'
-      fullPath: '/org/$orgId/organization/interviews'
-      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewsRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/interview-reasons': {
-      id: '/org/$orgId/organization/interview-reasons'
-      path: '/interview-reasons'
-      fullPath: '/org/$orgId/organization/interview-reasons'
-      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewReasonsRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/interview-plans': {
-      id: '/org/$orgId/organization/interview-plans'
-      path: '/interview-plans'
-      fullPath: '/org/$orgId/organization/interview-plans'
-      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewPlansRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/email-templates': {
-      id: '/org/$orgId/organization/email-templates'
-      path: '/email-templates'
-      fullPath: '/org/$orgId/organization/email-templates'
-      preLoaderRoute: typeof OrgOrgIdOrganizationEmailTemplatesRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/departments': {
-      id: '/org/$orgId/organization/departments'
-      path: '/departments'
-      fullPath: '/org/$orgId/organization/departments'
-      preLoaderRoute: typeof OrgOrgIdOrganizationDepartmentsRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/data-privacy': {
-      id: '/org/$orgId/organization/data-privacy'
-      path: '/data-privacy'
-      fullPath: '/org/$orgId/organization/data-privacy'
-      preLoaderRoute: typeof OrgOrgIdOrganizationDataPrivacyRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/custom-fields': {
-      id: '/org/$orgId/organization/custom-fields'
-      path: '/custom-fields'
-      fullPath: '/org/$orgId/organization/custom-fields'
-      preLoaderRoute: typeof OrgOrgIdOrganizationCustomFieldsRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/company': {
-      id: '/org/$orgId/organization/company'
-      path: '/company'
-      fullPath: '/org/$orgId/organization/company'
-      preLoaderRoute: typeof OrgOrgIdOrganizationCompanyRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationRoute
-    }
-    '/org/$orgId/organization/close-reasons': {
-      id: '/org/$orgId/organization/close-reasons'
-      path: '/close-reasons'
-      fullPath: '/org/$orgId/organization/close-reasons'
-      preLoaderRoute: typeof OrgOrgIdOrganizationCloseReasonsRouteImport
       parentRoute: typeof OrgOrgIdOrganizationRoute
     }
     '/org/$orgId/organization/archive-reasons': {
@@ -771,67 +673,116 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrgOrgIdOrganizationArchiveReasonsRouteImport
       parentRoute: typeof OrgOrgIdOrganizationRoute
     }
-    '/org/$orgId/jobs/$jobId': {
-      id: '/org/$orgId/jobs/$jobId'
-      path: '/jobs/$jobId'
-      fullPath: '/org/$orgId/jobs/$jobId'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdRouteImport
-      parentRoute: typeof OrgOrgIdRoute
-    }
-    '/org/$orgId/organization/job-templates/': {
-      id: '/org/$orgId/organization/job-templates/'
-      path: '/'
-      fullPath: '/org/$orgId/organization/job-templates/'
-      preLoaderRoute: typeof OrgOrgIdOrganizationJobTemplatesIndexRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationJobTemplatesRoute
-    }
-    '/org/$orgId/organization/interviews/': {
-      id: '/org/$orgId/organization/interviews/'
-      path: '/'
-      fullPath: '/org/$orgId/organization/interviews/'
-      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewsIndexRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationInterviewsRoute
-    }
-    '/org/$orgId/organization/interview-plans/': {
-      id: '/org/$orgId/organization/interview-plans/'
-      path: '/'
-      fullPath: '/org/$orgId/organization/interview-plans/'
-      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewPlansIndexRouteImport
-      parentRoute: typeof OrgOrgIdOrganizationInterviewPlansRoute
-    }
-    '/org/$orgId/organization/feedback-forms/': {
-      id: '/org/$orgId/organization/feedback-forms/'
-      path: '/feedback-forms'
-      fullPath: '/org/$orgId/organization/feedback-forms'
-      preLoaderRoute: typeof OrgOrgIdOrganizationFeedbackFormsIndexRouteImport
+    '/org/$orgId/organization/close-reasons': {
+      id: '/org/$orgId/organization/close-reasons'
+      path: '/close-reasons'
+      fullPath: '/org/$orgId/organization/close-reasons'
+      preLoaderRoute: typeof OrgOrgIdOrganizationCloseReasonsRouteImport
       parentRoute: typeof OrgOrgIdOrganizationRoute
     }
-    '/org/$orgId/organization/application-forms/': {
-      id: '/org/$orgId/organization/application-forms/'
-      path: '/application-forms'
-      fullPath: '/org/$orgId/organization/application-forms'
-      preLoaderRoute: typeof OrgOrgIdOrganizationApplicationFormsIndexRouteImport
+    '/org/$orgId/organization/company': {
+      id: '/org/$orgId/organization/company'
+      path: '/company'
+      fullPath: '/org/$orgId/organization/company'
+      preLoaderRoute: typeof OrgOrgIdOrganizationCompanyRouteImport
       parentRoute: typeof OrgOrgIdOrganizationRoute
     }
-    '/org/$orgId/jobs/$jobId/settings': {
-      id: '/org/$orgId/jobs/$jobId/settings'
-      path: '/settings'
-      fullPath: '/org/$orgId/jobs/$jobId/settings'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdSettingsRouteImport
-      parentRoute: typeof OrgOrgIdJobsJobIdRoute
+    '/org/$orgId/organization/custom-fields': {
+      id: '/org/$orgId/organization/custom-fields'
+      path: '/custom-fields'
+      fullPath: '/org/$orgId/organization/custom-fields'
+      preLoaderRoute: typeof OrgOrgIdOrganizationCustomFieldsRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
     }
-    '/org/$orgId/jobs/$jobId/posting': {
-      id: '/org/$orgId/jobs/$jobId/posting'
-      path: '/posting'
-      fullPath: '/org/$orgId/jobs/$jobId/posting'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdPostingRouteImport
-      parentRoute: typeof OrgOrgIdJobsJobIdRoute
+    '/org/$orgId/organization/data-privacy': {
+      id: '/org/$orgId/organization/data-privacy'
+      path: '/data-privacy'
+      fullPath: '/org/$orgId/organization/data-privacy'
+      preLoaderRoute: typeof OrgOrgIdOrganizationDataPrivacyRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
     }
-    '/org/$orgId/jobs/$jobId/pipeline': {
-      id: '/org/$orgId/jobs/$jobId/pipeline'
-      path: '/pipeline'
-      fullPath: '/org/$orgId/jobs/$jobId/pipeline'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdPipelineRouteImport
+    '/org/$orgId/organization/departments': {
+      id: '/org/$orgId/organization/departments'
+      path: '/departments'
+      fullPath: '/org/$orgId/organization/departments'
+      preLoaderRoute: typeof OrgOrgIdOrganizationDepartmentsRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/email-templates': {
+      id: '/org/$orgId/organization/email-templates'
+      path: '/email-templates'
+      fullPath: '/org/$orgId/organization/email-templates'
+      preLoaderRoute: typeof OrgOrgIdOrganizationEmailTemplatesRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/interview-plans': {
+      id: '/org/$orgId/organization/interview-plans'
+      path: '/interview-plans'
+      fullPath: '/org/$orgId/organization/interview-plans'
+      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewPlansRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/interview-reasons': {
+      id: '/org/$orgId/organization/interview-reasons'
+      path: '/interview-reasons'
+      fullPath: '/org/$orgId/organization/interview-reasons'
+      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewReasonsRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/interviews': {
+      id: '/org/$orgId/organization/interviews'
+      path: '/interviews'
+      fullPath: '/org/$orgId/organization/interviews'
+      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewsRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/job-templates': {
+      id: '/org/$orgId/organization/job-templates'
+      path: '/job-templates'
+      fullPath: '/org/$orgId/organization/job-templates'
+      preLoaderRoute: typeof OrgOrgIdOrganizationJobTemplatesRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/locations': {
+      id: '/org/$orgId/organization/locations'
+      path: '/locations'
+      fullPath: '/org/$orgId/organization/locations'
+      preLoaderRoute: typeof OrgOrgIdOrganizationLocationsRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/members': {
+      id: '/org/$orgId/organization/members'
+      path: '/members'
+      fullPath: '/org/$orgId/organization/members'
+      preLoaderRoute: typeof OrgOrgIdOrganizationMembersRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/tags': {
+      id: '/org/$orgId/organization/tags'
+      path: '/tags'
+      fullPath: '/org/$orgId/organization/tags'
+      preLoaderRoute: typeof OrgOrgIdOrganizationTagsRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/settings/': {
+      id: '/org/$orgId/settings/'
+      path: '/'
+      fullPath: '/org/$orgId/settings/'
+      preLoaderRoute: typeof OrgOrgIdSettingsIndexRouteImport
+      parentRoute: typeof OrgOrgIdSettingsRoute
+    }
+    '/org/$orgId/settings/calendar': {
+      id: '/org/$orgId/settings/calendar'
+      path: '/calendar'
+      fullPath: '/org/$orgId/settings/calendar'
+      preLoaderRoute: typeof OrgOrgIdSettingsCalendarRouteImport
+      parentRoute: typeof OrgOrgIdSettingsRoute
+    }
+    '/org/$orgId/jobs/$jobId/criteria': {
+      id: '/org/$orgId/jobs/$jobId/criteria'
+      path: '/criteria'
+      fullPath: '/org/$orgId/jobs/$jobId/criteria'
+      preLoaderRoute: typeof OrgOrgIdJobsJobIdCriteriaRouteImport
       parentRoute: typeof OrgOrgIdJobsJobIdRoute
     }
     '/org/$orgId/jobs/$jobId/interview-plan': {
@@ -841,12 +792,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrgOrgIdJobsJobIdInterviewPlanRouteImport
       parentRoute: typeof OrgOrgIdJobsJobIdRoute
     }
-    '/org/$orgId/jobs/$jobId/criteria': {
-      id: '/org/$orgId/jobs/$jobId/criteria'
-      path: '/criteria'
-      fullPath: '/org/$orgId/jobs/$jobId/criteria'
-      preLoaderRoute: typeof OrgOrgIdJobsJobIdCriteriaRouteImport
+    '/org/$orgId/jobs/$jobId/pipeline': {
+      id: '/org/$orgId/jobs/$jobId/pipeline'
+      path: '/pipeline'
+      fullPath: '/org/$orgId/jobs/$jobId/pipeline'
+      preLoaderRoute: typeof OrgOrgIdJobsJobIdPipelineRouteImport
       parentRoute: typeof OrgOrgIdJobsJobIdRoute
+    }
+    '/org/$orgId/jobs/$jobId/posting': {
+      id: '/org/$orgId/jobs/$jobId/posting'
+      path: '/posting'
+      fullPath: '/org/$orgId/jobs/$jobId/posting'
+      preLoaderRoute: typeof OrgOrgIdJobsJobIdPostingRouteImport
+      parentRoute: typeof OrgOrgIdJobsJobIdRoute
+    }
+    '/org/$orgId/jobs/$jobId/settings': {
+      id: '/org/$orgId/jobs/$jobId/settings'
+      path: '/settings'
+      fullPath: '/org/$orgId/jobs/$jobId/settings'
+      preLoaderRoute: typeof OrgOrgIdJobsJobIdSettingsRouteImport
+      parentRoute: typeof OrgOrgIdJobsJobIdRoute
+    }
+    '/org/$orgId/organization/application-forms/': {
+      id: '/org/$orgId/organization/application-forms/'
+      path: '/application-forms'
+      fullPath: '/org/$orgId/organization/application-forms/'
+      preLoaderRoute: typeof OrgOrgIdOrganizationApplicationFormsIndexRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/feedback-forms/': {
+      id: '/org/$orgId/organization/feedback-forms/'
+      path: '/feedback-forms'
+      fullPath: '/org/$orgId/organization/feedback-forms/'
+      preLoaderRoute: typeof OrgOrgIdOrganizationFeedbackFormsIndexRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationRoute
+    }
+    '/org/$orgId/organization/interview-plans/': {
+      id: '/org/$orgId/organization/interview-plans/'
+      path: '/'
+      fullPath: '/org/$orgId/organization/interview-plans/'
+      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewPlansIndexRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationInterviewPlansRoute
+    }
+    '/org/$orgId/organization/interviews/': {
+      id: '/org/$orgId/organization/interviews/'
+      path: '/'
+      fullPath: '/org/$orgId/organization/interviews/'
+      preLoaderRoute: typeof OrgOrgIdOrganizationInterviewsIndexRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationInterviewsRoute
+    }
+    '/org/$orgId/organization/job-templates/': {
+      id: '/org/$orgId/organization/job-templates/'
+      path: '/'
+      fullPath: '/org/$orgId/organization/job-templates/'
+      preLoaderRoute: typeof OrgOrgIdOrganizationJobTemplatesIndexRouteImport
+      parentRoute: typeof OrgOrgIdOrganizationJobTemplatesRoute
     }
   }
 }
