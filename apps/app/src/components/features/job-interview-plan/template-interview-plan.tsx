@@ -9,6 +9,7 @@ import { useQueryOwnerActivities, useQueryOwnerActivityOptions } from '@/hooks/q
 import { usePermissions } from '@/hooks/use-permissions';
 import { Permission } from '@/lib/schemas/org';
 import type { StageActivityOwner } from '@/lib/schemas/stage-activities';
+import { isDefined } from '@/lib/utils';
 
 import { InterviewPlanEditorView } from './editor-view';
 
@@ -22,6 +23,9 @@ interface TemplateInterviewPlanProps {
 export function TemplateInterviewPlan({ orgId, templateId, selectedPlanId, isArchived }: TemplateInterviewPlanProps) {
   const [localPlanId, setLocalPlanId] = useState(selectedPlanId);
   const owner = useMemo<StageActivityOwner>(() => ({ kind: 'jobTemplate', orgId, templateId }), [orgId, templateId]);
+  const updateTemplate = useUpdateJobTemplate();
+  const isPlanSettled = !updateTemplate.isPending && localPlanId === selectedPlanId;
+  const canReadActivities = isDefined(selectedPlanId) && isPlanSettled;
   const { data: plansData, isLoading: plansLoading, error: plansError } = useQueryInterviewPlans(orgId);
   const {
     data: planData,
@@ -32,15 +36,15 @@ export function TemplateInterviewPlan({ orgId, templateId, selectedPlanId, isArc
     data: activitiesData,
     isLoading: activitiesLoading,
     error: activitiesError,
-  } = useQueryOwnerActivities(localPlanId === null ? null : owner);
-  const updateTemplate = useUpdateJobTemplate();
+  } = useQueryOwnerActivities(canReadActivities ? owner : null);
   const { can } = usePermissions();
   const canManage = can(Permission.JOB_TEMPLATE_WRITE) && !isArchived;
+  const canManageActivities = canManage && canReadActivities;
   const {
     data: activityOptionsData,
     isLoading: activityOptionsLoading,
     error: activityOptionsError,
-  } = useQueryOwnerActivityOptions(canManage && localPlanId !== null ? owner : null);
+  } = useQueryOwnerActivityOptions(canManageActivities ? owner : null);
 
   useEffect(() => {
     setLocalPlanId(selectedPlanId);
@@ -101,7 +105,7 @@ export function TemplateInterviewPlan({ orgId, templateId, selectedPlanId, isArc
       feedbackForms={activityOptionsData?.data.feedbackForms ?? []}
       members={activityOptionsData?.data.members ?? []}
       canSelectPlan={canManage}
-      canManageActivities={canManage}
+      canManageActivities={canManageActivities}
       planControlDisabled={updateTemplate.isPending}
       plansUnavailable={Boolean(plansError)}
       isRefreshingPlan={updateTemplate.isPending}
