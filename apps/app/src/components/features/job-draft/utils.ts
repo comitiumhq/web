@@ -56,25 +56,27 @@ export function validateForPublish({
     errors.push({ label: 'Employment type', target: 'settings' });
   }
 
-  if (!values.compensationCurrency) {
-    errors.push({ label: 'Currency', target: 'settings' });
-  }
+  if (values.compensationDisplayMode !== 'hidden') {
+    if (!values.compensationCurrency) {
+      errors.push({ label: 'Currency', target: 'settings' });
+    }
 
-  if (!values.compensationPeriod) {
-    errors.push({ label: 'Pay period', target: 'settings' });
-  }
+    if (!values.compensationPeriod) {
+      errors.push({ label: 'Pay period', target: 'settings' });
+    }
 
-  const hasMin = values.compensationMin != null && values.compensationMin > 0;
-  const hasMax = values.compensationMax != null && values.compensationMax > 0;
+    const hasMin = values.compensationMin != null && values.compensationMin > 0;
+    const hasMax = values.compensationMax != null && values.compensationMax > 0;
 
-  if (!hasMin || !hasMax) {
-    errors.push({ label: 'Compensation', target: 'settings' });
-  } else if (
-    isDefined(values.compensationMin) &&
-    isDefined(values.compensationMax) &&
-    values.compensationMin > values.compensationMax
-  ) {
-    errors.push({ label: 'Compensation (min must be less than max)', target: 'settings' });
+    if (!hasMin || !hasMax) {
+      errors.push({ label: 'Compensation', target: 'settings' });
+    } else if (
+      isDefined(values.compensationMin) &&
+      isDefined(values.compensationMax) &&
+      values.compensationMin > values.compensationMax
+    ) {
+      errors.push({ label: 'Compensation (min must be less than max)', target: 'settings' });
+    }
   }
 
   if (!richTextToPlainText(description)) {

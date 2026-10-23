@@ -65,6 +65,7 @@ describe('CareerJobDetailPage', () => {
     );
     const applyButton = screen.getByLabelText('Apply unavailable: application limit reached');
 
+    await expect.element(screen.getByText('Not disclosed', { exact: true })).toBeVisible();
     await expect.element(applyButton).toBeDisabled();
     await applyButton.hover();
     await expect.element(screen.getByText('This job has reached its application limit.')).toBeInTheDocument();

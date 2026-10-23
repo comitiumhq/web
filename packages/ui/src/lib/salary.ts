@@ -7,8 +7,14 @@ const PERIOD_SUFFIX: Record<string, string> = {
   year: '/yr',
 };
 
-function getCurrencySymbol(code: string): string {
-  return CURRENCIES.find((c) => c.value === code)?.symbol ?? '$';
+function getCurrencyPrefix(code: string): string {
+  const currency = CURRENCIES.find((item) => item.value === code);
+
+  if (currency && code !== 'USD' && CURRENCIES.some((item) => item.value !== code && item.symbol === currency.symbol)) {
+    return `${code} `;
+  }
+
+  return currency?.symbol ?? '$';
 }
 
 function getSuffix(period?: string | null): string {
@@ -23,14 +29,14 @@ function compactNumber(n: number): string {
   return n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`;
 }
 
-export function formatSalary(
+function formatSalary(
   min: number | null,
   max: number | null,
   currency?: string | null,
   period?: string | null,
 ): string {
   if (min == null && max == null) {
-    return 'Competitive salary';
+    return 'Not disclosed';
   }
 
   const suffix = getSuffix(period);
@@ -52,10 +58,10 @@ export function formatSalary(
     return `Up to ${formatter.format(max)}${suffix}`;
   }
 
-  return 'Competitive salary';
+  return 'Not disclosed';
 }
 
-export function formatCompactSalary(
+function formatCompactSalary(
   min: number | null,
   max: number | null,
   currency?: string | null,
@@ -65,19 +71,19 @@ export function formatCompactSalary(
     return null;
   }
 
-  const sym = getCurrencySymbol(currency || 'USD');
+  const prefix = getCurrencyPrefix(currency || 'USD');
   const suffix = getSuffix(period);
 
   if (min != null && max != null) {
-    return `${sym}${compactNumber(min)}-${compactNumber(max)}${suffix}`;
+    return `${prefix}${compactNumber(min)}-${compactNumber(max)}${suffix}`;
   }
 
   if (min != null) {
-    return `${sym}${compactNumber(min)}+${suffix}`;
+    return `${prefix}${compactNumber(min)}+${suffix}`;
   }
 
   if (max != null) {
-    return `Up to ${sym}${compactNumber(max)}${suffix}`;
+    return `Up to ${prefix}${compactNumber(max)}${suffix}`;
   }
 
   return null;
@@ -89,14 +95,10 @@ export function formatCompensationSalary(compensation: CompensationConfig | null
   return formatSalary(tier?.base_min ?? null, tier?.base_max ?? null, tier?.currency, tier?.period);
 }
 
-export function formatCompensationCompact(compensation: CompensationConfig | null): string | null {
+export function formatCompensationCompact(compensation: CompensationConfig | null): string {
   const tier = getTier(compensation);
 
-  return formatCompactSalary(tier?.base_min ?? null, tier?.base_max ?? null, tier?.currency, tier?.period);
-}
-
-export function hasCompensation(compensation: CompensationConfig | null): boolean {
-  const tier = getTier(compensation);
-
-  return tier?.base_min != null || tier?.base_max != null;
+  return (
+    formatCompactSalary(tier?.base_min ?? null, tier?.base_max ?? null, tier?.currency, tier?.period) ?? 'Not disclosed'
+  );
 }

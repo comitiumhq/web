@@ -156,6 +156,7 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
                   hiringTeam={hiringTeam}
                   onChangeHiringTeam={handleHiringTeamChange}
                   showPublishRequiredMarkers={false}
+                  showCompensationDisclosure={false}
                 />
               </Form>
             )}

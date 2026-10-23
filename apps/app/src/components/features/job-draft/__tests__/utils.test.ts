@@ -16,6 +16,7 @@ const baseValues = {
   compensationPeriod: 'year',
   compensationMin: 115000,
   compensationMax: 150000,
+  compensationDisplayMode: 'inherit',
 } satisfies JobSettingsFormData;
 
 describe('job draft utils', () => {
@@ -76,6 +77,7 @@ describe('job draft utils', () => {
           },
         ],
       },
+      compensationDisplayMode: 'inherit',
       description,
       skills: [{ skillId: '99999999-9999-4999-8999-999999999999', required: true }],
       formId: '33333333-3333-4333-8333-333333333333',
@@ -129,6 +131,7 @@ describe('job draft utils', () => {
       employmentType: null,
       category: null,
       compensation: null,
+      compensationDisplayMode: 'inherit',
       description: null,
       skills: [],
       formId: null,
@@ -197,5 +200,40 @@ describe('job draft utils', () => {
       { label: 'Application capacity', target: 'posting' },
       { label: 'Interview plan', target: 'interview-plan' },
     ]);
+  });
+
+  it('publishes without a range only when compensation is explicitly not disclosed', () => {
+    const input = {
+      values: { ...baseValues, compensationMin: undefined, compensationMax: undefined },
+      description: {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build the product.' }] }],
+      },
+      formId: '33333333-3333-4333-8333-333333333333',
+      formIsArchived: false,
+      criteria: [],
+      interviewPlanId: '66666666-6666-4666-8666-666666666666',
+    };
+
+    expect(validateForPublish(input)).toEqual([{ label: 'Compensation', target: 'settings' }]);
+    expect(validateForPublish({ ...input, values: { ...input.values, compensationDisplayMode: 'hidden' } })).toEqual(
+      [],
+    );
+
+    const saved = prepareDraftSave(
+      {
+        values: { ...baseValues, compensationDisplayMode: 'hidden' },
+        description: null,
+        skills: [],
+        formId: null,
+        criteria: [],
+        interviewPlanId: null,
+        hiringTeam: [],
+      },
+      2,
+    );
+
+    expect(saved.data.compensationDisplayMode).toBe('hidden');
+    expect(saved.data.compensation?.tiers[0]).toMatchObject({ base_min: 115000, base_max: 150000 });
   });
 });

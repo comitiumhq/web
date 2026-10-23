@@ -1,6 +1,7 @@
 import { CryptoProxy } from '@comitium/crypto';
 import type { User } from '@comitium/schemas/auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StrictMode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { CryptoProvider } from '../crypto-provider';
@@ -82,6 +83,24 @@ beforeEach(() => {
 });
 
 describe('shared crypto lifecycle', () => {
+  it('restores remembered access when effects restart and the previous Worker is destroyed', async () => {
+    vi.mocked(CryptoProxy.destroy).mockImplementationOnce(async () => {
+      mocks.active = false;
+      mocks.activeUserId = null;
+      for (const notify of mocks.listeners) notify();
+    });
+    vi.mocked(CryptoProxy.tryUnlockWithRememberedDevice).mockImplementation(async () => {
+      mocks.active = true;
+      mocks.activeUserId = mocks.user?.id ?? null;
+      for (const notify of mocks.listeners) notify();
+      return true;
+    });
+
+    const screen = await render(<StrictMode>{tree(new QueryClient())}</StrictMode>);
+
+    await expect.element(screen.getByLabelText('Crypto state')).toHaveTextContent('ready:true');
+    await expect.element(screen.getByRole('dialog')).not.toBeInTheDocument();
+  });
   it('does not demand personal setup for a keyless candidate', async () => {
     mocks.user = productUser();
     const screen = await render(tree(new QueryClient()));

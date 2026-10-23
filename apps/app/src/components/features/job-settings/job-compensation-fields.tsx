@@ -1,4 +1,4 @@
-import { COMPENSATION_CURRENCIES, CURRENCIES, SALARY_PERIODS } from '@comitium/schemas/job-enums';
+import { CURRENCIES, SALARY_PERIODS } from '@comitium/schemas/job-enums';
 import { Combobox } from '@comitium/ui/combobox';
 import { FormControl, FormField, FormItem, FormMessage } from '@comitium/ui/form';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@comitium/ui/input-group';
@@ -11,61 +11,90 @@ import { RequiredMarker } from './required-marker';
 interface JobCompensationFieldsProps {
   form: UseFormReturn<JobSettingsFormData>;
   showPublishRequiredMarker?: boolean;
+  showDisclosureChoice?: boolean;
   readOnly?: boolean;
 }
 
 export function JobCompensationFields({
   form,
   showPublishRequiredMarker = true,
+  showDisclosureChoice = true,
   readOnly = false,
 }: JobCompensationFieldsProps) {
   const { control } = form;
   const currency = useWatch({ control, name: 'compensationCurrency' });
+  const displayMode = useWatch({ control, name: 'compensationDisplayMode' });
+  const isHidden = showDisclosureChoice && displayMode === 'hidden';
   const currencySymbol = CURRENCIES.find((item) => item.value === currency)?.symbol ?? '$';
 
   return (
     <fieldset disabled={readOnly}>
       <legend className="flex items-center gap-1 text-sm leading-none font-medium">
-        Compensation <RequiredMarker show={showPublishRequiredMarker} />
+        Compensation <RequiredMarker show={showPublishRequiredMarker && !isHidden} />
       </legend>
 
       <div className="mt-2 flex flex-wrap items-start gap-3">
-        <div className="grid min-w-0 flex-1 basis-72 grid-cols-[minmax(7rem,1fr)_auto_minmax(7rem,1fr)] items-start gap-2">
-          <AmountField
+        {showDisclosureChoice && (
+          <FormField
             control={control}
-            name="compensationMin"
-            ariaLabel="Minimum compensation"
-            placeholder="50,000"
-            currencySymbol={currencySymbol}
+            name="compensationDisplayMode"
+            render={({ field }) => (
+              <FormItem className="w-full sm:w-40">
+                <Select value={isHidden ? 'hidden' : 'inherit'} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-full" aria-label="Compensation disclosure">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="inherit">Salary range</SelectItem>
+                    <SelectItem value="hidden">Not disclosed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <RangeConnector>to</RangeConnector>
-          <AmountField
-            control={control}
-            name="compensationMax"
-            ariaLabel="Maximum compensation"
-            placeholder="80,000"
-            currencySymbol={currencySymbol}
-          />
-        </div>
-        <div className="grid min-w-0 flex-1 basis-64 grid-cols-[minmax(8rem,1fr)_auto_minmax(7rem,0.8fr)] items-start gap-2">
-          <CompactSelectField
-            control={control}
-            name="compensationCurrency"
-            ariaLabel="Currency"
-            placeholder="USD ($)"
-            options={COMPENSATION_CURRENCIES}
-            displayOptions={CURRENCIES}
-            searchable
-          />
-          <RangeConnector>per</RangeConnector>
-          <CompactSelectField
-            control={control}
-            name="compensationPeriod"
-            ariaLabel="Period"
-            placeholder="Year"
-            options={SALARY_PERIODS}
-          />
-        </div>
+        )}
+        {!isHidden && (
+          <div className="flex min-w-0 flex-1 flex-wrap items-start gap-3">
+            <div className="grid min-w-0 flex-1 basis-72 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2">
+              <AmountField
+                control={control}
+                name="compensationMin"
+                ariaLabel="Minimum compensation"
+                placeholder="50,000"
+                currencySymbol={currencySymbol}
+              />
+              <RangeConnector>to</RangeConnector>
+              <AmountField
+                control={control}
+                name="compensationMax"
+                ariaLabel="Maximum compensation"
+                placeholder="80,000"
+                currencySymbol={currencySymbol}
+              />
+            </div>
+            <div className="grid min-w-0 flex-1 basis-64 grid-cols-[minmax(0,1fr)_auto_minmax(0,0.8fr)] items-start gap-2">
+              <CompactSelectField
+                control={control}
+                name="compensationCurrency"
+                ariaLabel="Currency"
+                placeholder="USD ($)"
+                options={CURRENCIES}
+                searchable
+              />
+              <RangeConnector>per</RangeConnector>
+              <CompactSelectField
+                control={control}
+                name="compensationPeriod"
+                ariaLabel="Period"
+                placeholder="Year"
+                options={SALARY_PERIODS}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </fieldset>
   );
@@ -123,7 +152,6 @@ interface CompactSelectFieldProps {
   ariaLabel: string;
   placeholder: string;
   options: readonly { value: string; label: string }[];
-  displayOptions?: readonly { value: string; label: string }[];
   searchable?: boolean;
 }
 
@@ -133,7 +161,6 @@ function CompactSelectField({
   ariaLabel,
   placeholder,
   options,
-  displayOptions = options,
   searchable = false,
 }: CompactSelectFieldProps) {
   return (
@@ -141,20 +168,15 @@ function CompactSelectField({
       control={control}
       name={name}
       render={({ field }) => {
-        const selectedLabel = displayOptions.find((option) => option.value === field.value)?.label;
+        const selectedLabel = options.find((option) => option.value === field.value)?.label;
 
         if (searchable) {
-          const searchableOptions = options.map((option) => ({
-            value: option.value,
-            label: displayOptions.find((displayOption) => displayOption.value === option.value)?.label ?? option.label,
-          }));
-
           return (
             <FormItem>
               <FormControl>
                 <Combobox
                   ariaLabel={ariaLabel}
-                  options={searchableOptions}
+                  options={options}
                   value={field.value ?? null}
                   onValueChange={field.onChange}
                   placeholder={placeholder}

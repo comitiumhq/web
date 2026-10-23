@@ -82,11 +82,8 @@ export const CURRENCIES = [
   { value: 'ZAR', label: 'ZAR (R)', symbol: 'R' },
   { value: 'THB', label: 'THB (฿)', symbol: '฿' },
   { value: 'TWD', label: 'TWD (NT$)', symbol: 'NT$' },
+  { value: 'UAH', label: 'UAH (₴)', symbol: '₴' },
 ] as const;
-
-export const COMPENSATION_CURRENCIES = CURRENCIES.filter(
-  (currency) => currency.value === 'USD' || currency.value === 'EUR',
-);
 
 export type Currency = (typeof CURRENCIES)[number]['value'];
 

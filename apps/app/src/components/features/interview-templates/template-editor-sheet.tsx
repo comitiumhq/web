@@ -215,32 +215,49 @@ export function TemplateEditorSheet({ orgId, open, onOpenChange, mode, template 
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="durationMinutes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duration</FormLabel>
-                    <Select value={String(field.value)} onValueChange={handleDurationChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          {DURATION_OPTIONS.map((d) => (
-                            <SelectItem key={d} value={String(d)}>
-                              {d} min
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid items-start gap-4 sm:grid-cols-[auto_minmax(0,1fr)]">
+                <FormField
+                  control={form.control}
+                  name="durationMinutes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration</FormLabel>
+                      <Select value={String(field.value)} onValueChange={handleDurationChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectGroup>
+                            {DURATION_OPTIONS.map((d) => (
+                              <SelectItem key={d} value={String(d)}>
+                                {d} min
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="feedbackFormId"
+                  render={({ field }) => (
+                    <FormItem className="min-w-0">
+                      <FormLabel>Feedback form</FormLabel>
+                      <FeedbackFormSelect
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        forms={feedbackForms ?? []}
+                      />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div>
                 <Label className="mb-1.5 block">
@@ -256,21 +273,6 @@ export function TemplateEditorSheet({ orgId, open, onOpenChange, mode, template 
                   placeholder="Add interview briefing, questions, rubric notes, or signals to look for..."
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="feedbackFormId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Feedback form</FormLabel>
-                    <FeedbackFormSelect
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      forms={feedbackForms ?? []}
-                    />
-                  </FormItem>
-                )}
-              />
             </FeatureSheetBody>
 
             <FeatureSheetFooter stackOnMobile>

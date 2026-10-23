@@ -11,13 +11,7 @@ import { Sheet, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { FileTextIcon } from 'lucide-react';
 import { useQueryOrg } from '@/hooks/queries/use-query-org';
-import {
-  formatCompensationSalary,
-  formatEmploymentType,
-  formatLocation,
-  formatLocationType,
-  hasCompensation,
-} from '@/lib/utils';
+import { formatCompensationSalary, formatEmploymentType, formatLocation, formatLocationType } from '@/lib/utils';
 
 interface DraftPreviewDialogProps {
   orgId: string;
@@ -32,6 +26,7 @@ export function DraftPreviewDialog({ orgId, draft, description, open, onOpenChan
   const locationTypeText = formatLocationType(draft.locationType);
   const locationText = formatLocation(draft.location);
   const renderedDescription = richTextToMarkdown(description);
+  const compensation = draft.compensationDisplayMode === 'hidden' ? null : draft.compensation;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -58,11 +53,7 @@ export function DraftPreviewDialog({ orgId, draft, description, open, onOpenChan
           </div>
 
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-label-14 text-muted-foreground">
-            {hasCompensation(draft.compensation) && (
-              <span className="tabular-nums text-foreground font-semibold">
-                {formatCompensationSalary(draft.compensation)}
-              </span>
-            )}
+            <span className="tabular-nums text-foreground font-semibold">{formatCompensationSalary(compensation)}</span>
             {locationTypeText && (
               <>
                 <span>•</span>

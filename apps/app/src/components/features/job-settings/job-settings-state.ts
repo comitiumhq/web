@@ -19,6 +19,7 @@ export function jobToSettingsFormValues(job: JobEditor): JobSettingsFormData {
       (job.compensation?.tiers[0]?.period as JobSettingsFormData['compensationPeriod']) ?? DEFAULT_COMPENSATION_PERIOD,
     compensationMin: job.compensation?.tiers[0]?.base_min ?? undefined,
     compensationMax: job.compensation?.tiers[0]?.base_max ?? undefined,
+    compensationDisplayMode: job.compensationDisplayMode,
     applicationCapacity: job.applicationCapacity,
   };
 }
@@ -41,5 +42,6 @@ export function prepareJobSettingsUpdate(values: JobSettingsFormData, expectedVe
     employmentType: normalizedValues.employmentType ?? null,
     category: normalizedValues.category ?? null,
     compensation: buildCompensation(normalizedValues),
+    compensationDisplayMode: normalizedValues.compensationDisplayMode ?? 'inherit',
   };
 }
