@@ -21,6 +21,7 @@ type ReadyState = {
   mode: 'create' | 'edit';
   formId: string;
   previousSubmissionId: string | null;
+  formSnapshotHash: `0x${string}` | null;
 };
 
 type FormState = { status: 'idle' } | { status: 'loading' } | ReadyState | { status: 'error'; message: string };
@@ -42,6 +43,7 @@ export interface FeedbackSubmissionFlowResult {
   mode: 'create' | 'edit' | null;
   formId: string | null;
   previousSubmissionId: string | null;
+  formSnapshotHash: `0x${string}` | null;
 }
 
 type ResolveFeedbackFormAsync = ReturnType<typeof useResolveFeedbackForm>['mutateAsync'];
@@ -98,6 +100,7 @@ async function buildEditState(
     defaultValues: values,
     formId: previous.formId,
     previousSubmissionId: previous.id,
+    formSnapshotHash: null,
   };
 }
 
@@ -116,6 +119,7 @@ async function buildCreateState(
     snapshot,
     defaultValues: buildDefaultValues(snapshot),
     formId: snapshot.formId,
+    formSnapshotHash: result.data.formSnapshotHash,
     previousSubmissionId: null,
   };
 }
@@ -211,6 +215,7 @@ export function useFeedbackSubmissionFlow({
       mode: state.mode,
       formId: state.formId,
       previousSubmissionId: state.previousSubmissionId,
+      formSnapshotHash: state.formSnapshotHash,
     };
   }
 
@@ -223,6 +228,7 @@ export function useFeedbackSubmissionFlow({
       mode: null,
       formId: null,
       previousSubmissionId: null,
+      formSnapshotHash: null,
     };
   }
 
@@ -234,5 +240,6 @@ export function useFeedbackSubmissionFlow({
     mode: null,
     formId: null,
     previousSubmissionId: null,
+    formSnapshotHash: null,
   };
 }
