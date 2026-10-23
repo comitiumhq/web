@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@comitium/ui/dropdown-menu';
 import { TableCell, TableRow } from '@comitium/ui/table';
-import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, PencilIcon, StarIcon } from 'lucide-react';
+import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, EyeIcon, PencilIcon, StarIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { useArchiveForm, useRestoreForm } from '@/hooks/mutations/use-form';
 import { cn } from '@/lib/utils';
@@ -24,9 +24,10 @@ interface FormListRowProps {
   form: FormDefinitionListItem;
   canManage: boolean;
   onOpen: (formId: string) => void;
+  onPreview: (formId: string) => void;
 }
 
-export const FormListRow = memo(function FormListRow({ orgId, form, canManage, onOpen }: FormListRowProps) {
+export const FormListRow = memo(function FormListRow({ orgId, form, canManage, onOpen, onPreview }: FormListRowProps) {
   const { mutate: archive, isPending: isArchiving } = useArchiveForm();
   const { mutate: restore, isPending: isRestoring } = useRestoreForm();
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
@@ -45,6 +46,7 @@ export const FormListRow = memo(function FormListRow({ orgId, form, canManage, o
   }, [isArchived, onOpen, form.id]);
 
   const stopRowClick = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
+  const handlePreview = useCallback(() => onPreview(form.id), [onPreview, form.id]);
 
   const openArchiveDialog = useCallback(() => setArchiveDialogOpen(true), []);
   const closeArchiveDialog = useCallback(() => setArchiveDialogOpen(false), []);
@@ -112,6 +114,10 @@ export const FormListRow = memo(function FormListRow({ orgId, form, canManage, o
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[160px]" onClick={stopRowClick}>
+                <DropdownMenuItem onClick={handlePreview}>
+                  <EyeIcon />
+                  Preview
+                </DropdownMenuItem>
                 {isArchived ? (
                   <DropdownMenuItem onClick={handleRestore} disabled={isRestoring}>
                     <ArchiveRestoreIcon />

@@ -1,5 +1,6 @@
 import type { AdminFormDetail } from '@comitium/schemas/forms/form-definitions';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
 
 const mocks = vi.hoisted(() => ({
@@ -80,6 +81,34 @@ beforeEach(() => {
 });
 
 describe('FormEditor', () => {
+  it('previews unsaved edits without saving test answers or losing the draft', async () => {
+    mocks.form = existingForm();
+    const screen = await render(
+      <FormEditor
+        orgId={ORG_ID}
+        formClass="feedback"
+        formId={FORM_ID}
+        onSaved={mocks.onSaved}
+        onClose={mocks.onClose}
+      />,
+    );
+
+    await screen.getByLabelText('Title').fill('Draft scorecard');
+    await screen.getByRole('tab', { name: 'Preview', exact: true }).click();
+    await expect.element(screen.getByRole('heading', { name: 'Draft scorecard' })).toBeVisible();
+    await screen.getByRole('textbox').fill('A test answer');
+    await userEvent.keyboard('{Enter}');
+
+    expect(mocks.createForm).not.toHaveBeenCalled();
+    expect(mocks.updateForm).not.toHaveBeenCalled();
+    expect(mocks.onClose).not.toHaveBeenCalled();
+
+    await screen.getByRole('tab', { name: 'Edit', exact: true }).click();
+    await expect.element(screen.getByLabelText('Title')).toHaveValue('Draft scorecard');
+    await screen.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect.element(screen.getByText('Your unsaved changes will be lost.')).toBeVisible();
+  });
+
   it('does not duplicate application identity fields that the server seeds', async () => {
     const screen = await render(
       <FormEditor
