@@ -137,7 +137,7 @@ export function EmailSheet({
   }, [resolvedSubject, form]);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
       form.reset({ subject: '' });
       resetTemplate();
       setPreselectionApplied(false);
@@ -219,7 +219,7 @@ export function EmailSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
-      <FeatureSheetContent ref={sheetContentRef} size="editor">
+      <FeatureSheetContent ref={sheetContentRef} size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Email candidate</SheetTitle>
           <SheetDescription>Compose and review the message before sending.</SheetDescription>

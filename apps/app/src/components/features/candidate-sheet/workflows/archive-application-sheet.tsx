@@ -1,5 +1,5 @@
-import { Alert, AlertDescription, AlertTitle } from '@comitium/ui/alert';
 import { Button } from '@comitium/ui/button';
+import { Checkbox } from '@comitium/ui/checkbox';
 import {
   FeatureSheetBody,
   FeatureSheetContent,
@@ -11,9 +11,8 @@ import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
-import { Switch } from '@comitium/ui/switch';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArchiveIcon, TriangleAlertIcon } from 'lucide-react';
+import { ArchiveIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -29,8 +28,7 @@ import {
 import type { RichTextEditorHandle } from '@/components/tiptap-ui/rich-text-editor';
 import { useQueryArchiveReasonsList } from '@/hooks/queries/use-query-archive-reasons-list';
 import { useEmailTemplateSelector } from '@/hooks/use-email-template-selector';
-import type { ArchiveReasonOutcome } from '@/lib/schemas/archive-reasons';
-import type { ComposeEmailData, EmailTemplateUseCase } from '@/lib/schemas/emails';
+import type { ComposeEmailData } from '@/lib/schemas/emails';
 import { tipTapToPlainText } from '@/lib/tiptap/tokens';
 import { appendSignature, containsUnresolvedTemplateToken } from '@/lib/utils/email-tokens';
 
@@ -58,24 +56,6 @@ interface ArchiveApplicationSheetProps {
   candidateFirstName?: string | null;
   jobTitle: string | null;
   canSendEmail: boolean;
-}
-
-const OUTCOME_TEMPLATE_USE_CASE: Record<ArchiveReasonOutcome, EmailTemplateUseCase> = {
-  employer_rejected: 'rejection',
-  candidate_withdrew: 'application_withdrew',
-  candidate_unresponsive: 'application_unresponsive',
-};
-
-function getArchiveSubmitLabel(isPending: boolean, sendsEmail: boolean): string {
-  if (isPending) {
-    return 'Archiving...';
-  }
-
-  if (sendsEmail) {
-    return 'Archive & send email';
-  }
-
-  return 'Archive application';
 }
 
 export function ArchiveApplicationSheet({
@@ -106,7 +86,6 @@ export function ArchiveApplicationSheet({
       archiveReasonId: '',
       subject: '',
     },
-    mode: 'onChange',
   });
   const archiveReasonId = form.watch('archiveReasonId');
   const subject = form.watch('subject');
@@ -114,9 +93,7 @@ export function ArchiveApplicationSheet({
     () => reasons.find((reason) => reason.id === archiveReasonId) ?? null,
     [archiveReasonId, reasons],
   );
-  const emailIsRequired = selectedReason?.outcome === 'employer_rejected';
-  const showEmailFields = emailIsRequired || (canSendEmail && shouldSendEmail);
-  const useCase = selectedReason ? OUTCOME_TEMPLATE_USE_CASE[selectedReason.outcome] : undefined;
+  const sendsEmail = canSendEmail && shouldSendEmail;
   const {
     templates,
     templatesReady,
@@ -131,10 +108,9 @@ export function ArchiveApplicationSheet({
   } = useEmailTemplateSelector({
     applicationId,
     orgId,
-    enabled: open && showEmailFields && selectedReason !== null,
+    enabled: open && canSendEmail,
     candidateFirstName,
     jobTitle,
-    useCase,
   });
   const editorContent = useMemo(() => appendSignature(messageDoc, emailSignature), [emailSignature, messageDoc]);
   const reasonOptions = useMemo(
@@ -157,15 +133,10 @@ export function ArchiveApplicationSheet({
     [templates],
   );
   const subjectHasUnresolvedToken = containsUnresolvedTemplateToken(subject);
-  const canSubmit =
-    selectedReason !== null &&
-    !reasonsUnavailable &&
-    (!showEmailFields || (Boolean(candidateEmail) && subject.trim().length > 0 && !subjectHasUnresolvedToken));
-  const submitLabel = getArchiveSubmitLabel(isPending, showEmailFields);
+  const hasValidReason = selectedReason !== null && !reasonsUnavailable;
+  const canSubmitEmail = Boolean(candidateEmail) && subject.trim().length > 0 && !subjectHasUnresolvedToken;
+  const canSubmit = hasValidReason && (!sendsEmail || canSubmitEmail);
   const senderLabel = getEmailSenderLabel(senderName);
-  const description = emailIsRequired
-    ? 'Choose a reason, then review the required candidate email.'
-    : 'Choose a reason for archiving this application.';
 
   let reasonPlaceholder = 'Select a reason';
 
@@ -190,11 +161,12 @@ export function ArchiveApplicationSheet({
   }, [form, resolvedSubject]);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
       form.reset({
         archiveReasonId: '',
         subject: '',
       });
+
       setShouldSendEmail(false);
       resetTemplate();
     }
@@ -202,11 +174,13 @@ export function ArchiveApplicationSheet({
 
   const handleReasonChange = useCallback(
     (value: string | null) => {
-      form.setValue('archiveReasonId', value ?? '', { shouldDirty: true, shouldValidate: true });
-      form.setValue('subject', '');
-      resetTemplate();
+      if (!value || value === archiveReasonId) {
+        return;
+      }
+
+      form.setValue('archiveReasonId', value, { shouldDirty: true, shouldValidate: true });
     },
-    [form, resetTemplate],
+    [archiveReasonId, form],
   );
 
   const handleTemplateValueChange = useCallback(
@@ -220,7 +194,7 @@ export function ArchiveApplicationSheet({
 
   const handleSubmit = useCallback(
     (data: ArchiveFormData) => {
-      if (!showEmailFields) {
+      if (!sendsEmail) {
         onSubmit({
           action: 'archive',
           archiveReasonId: data.archiveReasonId,
@@ -270,7 +244,7 @@ export function ArchiveApplicationSheet({
 
       onSubmit({ action: 'archive', archiveReasonId: data.archiveReasonId, notice });
     },
-    [candidateEmail, form, onSubmit, selectedTemplateId, showEmailFields],
+    [candidateEmail, form, onSubmit, selectedTemplateId, sendsEmail],
   );
 
   const handleSendEmailChange = useCallback(
@@ -299,10 +273,10 @@ export function ArchiveApplicationSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
-      <FeatureSheetContent ref={sheetContentRef} size="editor">
+      <FeatureSheetContent ref={sheetContentRef} size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">Archive application</SheetTitle>
-          <SheetDescription>{description}</SheetDescription>
+          <SheetDescription>Choose a reason for archiving this application.</SheetDescription>
         </FeatureSheetHeader>
 
         <Form {...form}>
@@ -311,107 +285,87 @@ export function ArchiveApplicationSheet({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="flex min-h-0 flex-1 flex-col"
           >
-            <FeatureSheetBody className="flex flex-col gap-5">
-              {!emailIsRequired && canSendEmail && (
-                <div className="flex items-center justify-between gap-4 rounded-xl border border-border px-4 py-3">
-                  <div>
-                    <Label htmlFor="archive-send-email">Send email to candidate</Label>
-                    <p className="text-copy-12 text-muted-foreground">Optional for withdrawal or no contact.</p>
-                  </div>
-                  <Switch
+            <FeatureSheetBody className="flex flex-col gap-3">
+              <FormField
+                control={form.control}
+                name="archiveReasonId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reason</FormLabel>
+                    <FormControl>
+                      <ArchiveReasonSelect
+                        options={reasonOptions}
+                        value={field.value || null}
+                        onValueChange={handleReasonChange}
+                        placeholder={reasonPlaceholder}
+                        disabled={isPending || isLoadingReasons || reasonsUnavailable}
+                        portalContainerRef={sheetContentRef}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    {reasonsUnavailable && (
+                      <p className="text-copy-12 text-destructive">Archive reasons could not be loaded.</p>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              {canSendEmail && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
                     id="archive-send-email"
-                    checked={shouldSendEmail}
-                    onCheckedChange={handleSendEmailChange}
+                    checked={sendsEmail}
+                    onCheckedChange={(checked) => handleSendEmailChange(checked === true)}
                     disabled={isPending || !candidateEmail}
+                    aria-controls="archive-email-fields"
+                    aria-expanded={sendsEmail}
                   />
+                  <Label htmlFor="archive-send-email" className="font-normal leading-5">
+                    Send email
+                  </Label>
                 </div>
               )}
+              <div id="archive-email-fields" hidden={!sendsEmail} className="space-y-5">
+                <EmailDeliverySummary sender={senderLabel} recipient={candidateEmail ?? 'Unavailable'} />
 
-              {showEmailFields && (
-                <>
-                  {!candidateEmail && (
-                    <Alert variant="warning">
-                      <TriangleAlertIcon />
-                      <AlertTitle>Candidate email unavailable</AlertTitle>
-                      <AlertDescription>
-                        Unlock candidate data or add an email address before archiving.
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                <EmailTemplateField
+                  label="Email template"
+                  options={templateOptions}
+                  value={selectedTemplateId || null}
+                  onValueChange={handleTemplateValueChange}
+                  placeholder={templatePlaceholder}
+                  emptyMessage="No matching templates found."
+                  loading={!templatesReady}
+                  disabled={isPending || templatesError || templateOptions.length === 0}
+                  errorMessage={
+                    templatesError
+                      ? 'Templates could not be loaded. You can still compose the email manually.'
+                      : undefined
+                  }
+                  portalContainerRef={sheetContentRef}
+                />
 
-                  <EmailDeliverySummary sender={senderLabel} recipient={candidateEmail ?? 'Unavailable'} />
-                </>
-              )}
-
-              <div className={showEmailFields ? 'grid gap-5 sm:grid-cols-2' : undefined}>
                 <FormField
                   control={form.control}
-                  name="archiveReasonId"
+                  name="subject"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Reason</FormLabel>
+                      <FormLabel>Subject</FormLabel>
                       <FormControl>
-                        <ArchiveReasonSelect
-                          options={reasonOptions}
-                          value={field.value || null}
-                          onValueChange={handleReasonChange}
-                          placeholder={reasonPlaceholder}
-                          disabled={isPending || isLoadingReasons || reasonsUnavailable}
-                          portalContainerRef={sheetContentRef}
-                        />
+                        <Input placeholder="Email subject..." disabled={isPending} {...field} />
                       </FormControl>
                       <FormMessage />
-                      {reasonsUnavailable && (
-                        <p className="text-copy-12 text-destructive">Archive reasons could not be loaded.</p>
+                      {subjectHasUnresolvedToken && (
+                        <p className="text-copy-12 text-destructive">
+                          Replace unresolved template values before archiving.
+                        </p>
                       )}
                     </FormItem>
                   )}
                 />
 
-                {showEmailFields && (
-                  <EmailTemplateField
-                    label="Email template"
-                    options={selectedReason ? templateOptions : []}
-                    value={selectedReason ? selectedTemplateId || null : null}
-                    onValueChange={handleTemplateValueChange}
-                    placeholder={selectedReason ? templatePlaceholder : 'Select a reason first'}
-                    emptyMessage={selectedReason ? 'No matching templates found.' : 'Select a reason first.'}
-                    loading={selectedReason !== null && !templatesReady}
-                    disabled={!selectedReason || isPending || templatesError || templateOptions.length === 0}
-                    errorMessage={
-                      templatesError
-                        ? 'Templates could not be loaded. You can still compose the email manually.'
-                        : undefined
-                    }
-                    portalContainerRef={sheetContentRef}
-                  />
-                )}
+                <EmailMessageField content={editorContent} handleRef={editorRef} disabled={isPending} />
               </div>
-
-              {showEmailFields && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="subject"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subject</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Email subject..." disabled={isPending} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        {subjectHasUnresolvedToken && (
-                          <p className="text-copy-12 text-destructive">
-                            Replace unresolved template values before archiving.
-                          </p>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-
-                  <EmailMessageField content={editorContent} handleRef={editorRef} disabled={isPending} />
-                </>
-              )}
             </FeatureSheetBody>
 
             <FeatureSheetFooter>
@@ -419,8 +373,9 @@ export function ArchiveApplicationSheet({
                 Cancel
               </Button>
               <Button type="submit" variant="destructive" disabled={isPending || !canSubmit}>
-                {isPending ? <Spinner data-icon="inline-start" /> : <ArchiveIcon data-icon="inline-start" />}
-                {submitLabel}
+                {isPending && <Spinner data-icon="inline-start" />}
+                {!isPending && <ArchiveIcon data-icon="inline-start" />}
+                {isPending ? 'Archiving...' : 'Archive'}
               </Button>
             </FeatureSheetFooter>
           </form>

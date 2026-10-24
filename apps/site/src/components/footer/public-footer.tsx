@@ -1,3 +1,4 @@
+import { GitHubIcon, LinkedInIcon } from '@comitium/ui/brand-icons';
 import { cn } from '@comitium/ui/cn';
 import { ComitiumLogo } from '@comitium/ui/comitium-logo';
 import { PageContainer } from '@comitium/ui/page-container';
@@ -25,7 +26,7 @@ export function PublicFooter() {
               title="Illia Yablonski on LinkedIn"
               className="inline-flex size-9 items-center justify-center rounded-md transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
-              <img src="/social/linkedin.svg" alt="" className="size-5" />
+              <LinkedInIcon className="size-5 text-[#0a66c2]" />
             </a>
             <a
               href={GITHUB_URL}
@@ -35,7 +36,7 @@ export function PublicFooter() {
               title="Comitium on GitHub"
               className="inline-flex size-9 items-center justify-center rounded-md transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
-              <img src="/social/github.svg" alt="" className="size-5 dark:invert" />
+              <GitHubIcon className="size-5 text-black dark:text-white" />
             </a>
           </nav>
         </div>

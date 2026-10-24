@@ -50,7 +50,7 @@ export function DirectBookingLinkDialog({
 
   return (
     <Sheet open={open} onOpenChange={dialog.handleOpenChange}>
-      <FeatureSheetContent side="right" size="editor">
+      <FeatureSheetContent side="right" size="form">
         <FeatureSheetHeader>
           <SheetTitle>Send scheduling link</SheetTitle>
           <SheetDescription>Configure the interview and email the candidate a link to choose a time.</SheetDescription>

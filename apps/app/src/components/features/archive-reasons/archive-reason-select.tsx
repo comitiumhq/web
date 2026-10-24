@@ -24,6 +24,7 @@ export function ArchiveReasonSelect({
       options={options}
       value={value}
       onValueChange={onValueChange}
+      clearable={false}
       placeholder={placeholder}
       searchPlaceholder="Search reasons..."
       emptyMessage="No matching reasons found."

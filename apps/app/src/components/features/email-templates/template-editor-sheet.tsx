@@ -117,7 +117,7 @@ export function TemplateEditorSheet({ orgId, open, mode, template, onClose }: Te
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <FeatureSheetContent size="editor">
+      <FeatureSheetContent size="form">
         <FeatureSheetHeader>
           <SheetTitle className="text-heading-20">{title}</SheetTitle>
           <SheetDescription>{description}</SheetDescription>

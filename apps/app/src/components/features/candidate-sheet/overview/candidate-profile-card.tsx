@@ -1,17 +1,10 @@
 import type { PublicEncryptionKey, VaultKeyAccess } from '@comitium/crypto';
 import { type CandidateProfile, formatCandidateLocation } from '@comitium/schemas/candidates';
+import { GitHubIcon, LinkedInIcon } from '@comitium/ui/brand-icons';
 import { Button } from '@comitium/ui/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@comitium/ui/card';
 import { Skeleton } from '@comitium/ui/skeleton';
-import {
-  BriefcaseBusinessIcon,
-  Building2Icon,
-  ExternalLinkIcon,
-  GlobeIcon,
-  MapPinIcon,
-  PencilIcon,
-  PhoneIcon,
-} from 'lucide-react';
+import { BriefcaseBusinessIcon, Building2Icon, GlobeIcon, MapPinIcon, PencilIcon, PhoneIcon } from 'lucide-react';
 import { type ReactNode, useCallback, useState } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { useEncryptionUnlocked } from '@/hooks/use-encryption-unlocked';
@@ -206,7 +199,7 @@ function CandidateProfileFields({ profile }: { profile: CandidateProfile }) {
     <div className="flex flex-col gap-2.5">
       {currentTitle && currentCompany && (
         <ProfileField icon={<BriefcaseBusinessIcon />}>
-          {currentTitle} at {currentCompany}
+          {currentTitle} <span className="text-muted-foreground">at {currentCompany}</span>
         </ProfileField>
       )}
       {currentTitle && !currentCompany && <ProfileField icon={<BriefcaseBusinessIcon />}>{currentTitle}</ProfileField>}
@@ -214,12 +207,12 @@ function CandidateProfileFields({ profile }: { profile: CandidateProfile }) {
       {phone && <ProfileField icon={<PhoneIcon />}>{phone}</ProfileField>}
       {locationLabel && <ProfileField icon={<MapPinIcon />}>{locationLabel}</ProfileField>}
       {isUrl(linkedIn) && (
-        <ProfileLink icon={<ExternalLinkIcon />} href={linkedIn}>
+        <ProfileLink icon={<LinkedInIcon />} href={linkedIn}>
           LinkedIn
         </ProfileLink>
       )}
       {isUrl(github) && (
-        <ProfileLink icon={<ExternalLinkIcon />} href={github}>
+        <ProfileLink icon={<GitHubIcon />} href={github}>
           GitHub
         </ProfileLink>
       )}

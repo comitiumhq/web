@@ -21,6 +21,7 @@
     "./avatar": "./src/components/avatar.tsx",
     "./back-button": "./src/components/back-button.tsx",
     "./badge": "./src/components/badge.tsx",
+    "./brand-icons": "./src/components/brand-icons.tsx",
     "./button": "./src/components/button.tsx",
     "./browser": "./src/lib/browser.ts",
     "./calendar": "./src/components/calendar.tsx",
