@@ -26,7 +26,7 @@ function LoginRoute() {
 
   return (
     <AuthLoginSurface
-      defaultReturnTo="/applications"
+      defaultReturnTo="/jobs"
       homeHref="/jobs"
       homeLabel="Back to jobs"
       navigate={replace}

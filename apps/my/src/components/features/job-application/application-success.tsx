@@ -1,5 +1,3 @@
-import { Button } from '@comitium/ui/button';
-import { Link } from '@tanstack/react-router';
 import { CheckIcon } from 'lucide-react';
 
 interface ApplicationSuccessProps {
@@ -19,11 +17,6 @@ export function ApplicationSuccess({ jobTitle, company }: ApplicationSuccessProp
           <p className="text-copy-14 text-muted-foreground">
             <strong>{jobTitle}</strong> at <strong>{company}</strong>
           </p>
-        </div>
-        <div>
-          <Button variant="outline" asChild>
-            <Link to="/applications">View my applications</Link>
-          </Button>
         </div>
       </div>
     </div>

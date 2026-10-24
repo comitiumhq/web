@@ -1,14 +1,13 @@
-import { Button } from '@comitium/ui/button';
-import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@comitium/ui/collapsible';
 import { formatRelativeTime } from '@comitium/ui/date';
 import { getMemberDisplayName, type MemberDisplayIdentity } from '@comitium/ui/display-name';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
-import { ChevronDownIcon, ChevronUpIcon, EllipsisVerticalIcon, PencilIcon, TrashIcon } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { ChevronDownIcon } from 'lucide-react';
+import { memo, useState } from 'react';
 import { MemberAvatar } from '@/components/user/member-avatar';
-import { useDeleteFeedbackSubmission } from '@/hooks/mutations/use-feedback-submission';
 import type { FeedbackSubmission } from '@/lib/schemas/feedback-submissions';
+import { isDefined } from '@/lib/utils';
 
+import { SubmissionActions } from './submission-actions';
 import type { DecryptedEntry } from './types';
 import { EntryBody } from './values-view';
 
@@ -32,91 +31,38 @@ export const SubmittedRow = memo(function SubmittedRow({
   onEdit,
 }: SubmittedRowProps) {
   const [open, setOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-
-  const { mutate: deleteSubmission, isPending: isDeleting } = useDeleteFeedbackSubmission();
-
-  const handleToggle = useCallback(() => {
-    setOpen((prev) => !prev);
-  }, []);
-
-  const handleEditClick = useCallback(() => {
-    setMenuOpen(false);
-    onEdit?.();
-  }, [onEdit]);
-
-  const handleDeleteRequest = useCallback(() => {
-    setMenuOpen(false);
-    setDeleteOpen(true);
-  }, []);
-
-  const handleDeleteConfirm = useCallback(() => {
-    if (!applicationId) {
-      return;
-    }
-
-    deleteSubmission({ applicationId, submissionId: submission.id }, { onSuccess: () => setDeleteOpen(false) });
-  }, [applicationId, submission.id, deleteSubmission]);
-
-  const canEdit = isOwn && onEdit !== null;
-  const canDelete = isOwn && !!applicationId;
-  const hasMenu = canEdit || canDelete;
-  const ChevronGlyph = open ? ChevronUpIcon : ChevronDownIcon;
+  const hasActions = isOwn && (isDefined(onEdit) || isDefined(applicationId));
+  const authorName = getMemberDisplayName(identity);
 
   return (
-    <>
-      <div className="flex items-center gap-1 px-4 py-2.5">
-        <MemberAvatar identity={identity} size="sm" className="shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-label-13 font-medium truncate">{getMemberDisplayName(identity)}</p>
-          <p className="text-label-12 text-muted-foreground">{formatRelativeTime(submission.submittedAt)}</p>
-        </div>
-
-        {hasMenu && (
-          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="shrink-0 text-muted-foreground hover:text-foreground"
-                disabled={isDeleting}
-                aria-label="Feedback actions"
-              >
-                <EllipsisVerticalIcon strokeWidth={2} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {canEdit && (
-                <DropdownMenuItem onClick={handleEditClick}>
-                  <PencilIcon />
-                  Edit feedback
-                </DropdownMenuItem>
-              )}
-              {canDelete && (
-                <DropdownMenuItem onClick={handleDeleteRequest} variant="destructive">
-                  <TrashIcon />
-                  Delete feedback
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-
-        <button
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className="relative">
+        <CollapsibleTrigger
           type="button"
-          onClick={handleToggle}
-          aria-expanded={open}
-          aria-label={open ? 'Collapse feedback' : 'Expand feedback'}
-          className="p-1 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          aria-label={`${open ? 'Collapse' : 'Expand'} feedback from ${authorName}`}
+          className="group/feedback flex w-full items-center gap-2 px-4 py-2.5 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
         >
-          <ChevronGlyph className="size-4" />
-        </button>
+          <MemberAvatar identity={identity} size="sm" className="shrink-0" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-label-13 font-medium">{authorName}</span>
+            <span className="block text-label-12 text-muted-foreground">
+              {formatRelativeTime(submission.submittedAt)}
+            </span>
+          </span>
+
+          {hasActions && <span aria-hidden className="w-8 shrink-0" />}
+
+          <ChevronDownIcon
+            aria-hidden
+            className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-aria-expanded/feedback:rotate-180 motion-reduce:transition-none"
+          />
+        </CollapsibleTrigger>
+
+        {hasActions && <SubmissionActions applicationId={applicationId} submissionId={submission.id} onEdit={onEdit} />}
       </div>
 
-      {open && (
-        <div className="border-t border-separator bg-muted px-4 pb-3 pt-1">
+      <CollapsibleContent className="overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] [animation-duration:200ms]! [animation-timing-function:cubic-bezier(0.4,0,0.2,1)]! data-closed:animate-accordion-up data-open:animate-accordion-down motion-reduce:animate-none!">
+        <div className="border-t border-separator bg-muted/30 px-4 pb-4 pt-1">
           <EntryBody
             entry={entry}
             snapshot={submission.formSnapshot}
@@ -124,18 +70,7 @@ export const SubmittedRow = memo(function SubmittedRow({
             orgId={orgId}
           />
         </div>
-      )}
-
-      <ConfirmDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        title="Delete feedback?"
-        description="Your submission will be removed from this candidate's record. You can submit fresh feedback afterwards."
-        actionLabel="Delete"
-        pendingLabel="Deleting…"
-        onConfirm={handleDeleteConfirm}
-        isPending={isDeleting}
-      />
-    </>
+      </CollapsibleContent>
+    </Collapsible>
   );
 });

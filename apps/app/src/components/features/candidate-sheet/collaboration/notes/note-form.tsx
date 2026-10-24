@@ -89,8 +89,6 @@ export function NoteForm({ orgId, candidateId, vaultPublicKey, vaultKeyVersion }
   return (
     <Form {...form}>
       <div className="flex flex-col gap-2">
-        <p className="text-label-13">Add Note</p>
-
         <RichTextEditor
           content={EMPTY_DOC}
           handleRef={editorRef}
