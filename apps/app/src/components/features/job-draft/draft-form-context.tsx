@@ -2,11 +2,10 @@ import { useNavigate } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
-import { DraftNavigationGuard } from './draft-navigation-guard';
+import { AutosaveNavigationGuard } from '../editor-autosave/autosave-navigation-guard';
 import { type DraftTab, getDraftSection } from './sections';
 import { useDraftForm } from './use-draft-form';
-import { getStepStatuses, type PublishError, validateForPublish } from './utils';
+import { getStepStatuses, isDraftEditorPath, type PublishError, validateForPublish } from './utils';
 
 interface DraftFormProviderProps {
   orgId: string;
@@ -47,7 +46,7 @@ export function DraftFormProvider({ orgId, jobId, children }: DraftFormProviderP
         return false;
       }
 
-      const values = draftForm.form.getValues() as JobSettingsFormData;
+      const values = draftForm.form.getValues();
       const errors = validateForPublish({
         values,
         description: draftForm.description,
@@ -121,10 +120,12 @@ export function DraftFormProvider({ orgId, jobId, children }: DraftFormProviderP
     ],
   );
 
+  const containsPath = useCallback((pathname: string) => isDraftEditorPath(pathname, orgId, jobId), [orgId, jobId]);
+
   return (
     <DraftFormContext.Provider value={value}>
       {children}
-      <DraftNavigationGuard orgId={orgId} jobId={jobId} enabled={draftForm.isDirty} />
+      <AutosaveNavigationGuard autosave={draftForm.autosave} containsPath={containsPath} />
     </DraftFormContext.Provider>
   );
 }

@@ -1,11 +1,13 @@
 import type { JobSummary } from '@comitium/schemas/jobs';
 import { Button } from '@comitium/ui/button';
 import { Skeleton } from '@comitium/ui/skeleton';
+import { useIsMutating } from '@tanstack/react-query';
 import { Link, useLocation } from '@tanstack/react-router';
 import { ArrowLeftIcon, KanbanIcon, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { DRAFT_SECTIONS } from '@/components/features/job-draft/sections';
 import type { StepStatus } from '@/components/features/job-draft/utils';
+import { qk } from '@/hooks/query-keys';
 import {
   EvaluationCriteriaIcon,
   InterviewPlanIcon,
@@ -38,6 +40,8 @@ export function JobDetailLayout({
   children,
 }: JobDetailLayoutProps) {
   const { pathname } = useLocation();
+  const savingJob = useIsMutating({ mutationKey: qk.jobs.editor(orgId, jobId) });
+  const savingPosting = useIsMutating({ mutationKey: qk.jobs.posting(orgId, jobId) });
   const showNav = job !== null || showNavigationSkeleton;
 
   return (
@@ -46,7 +50,7 @@ export function JobDetailLayout({
         orgId={orgId}
         job={job}
         actions={actions}
-        lifecycleActionsDisabled={lifecycleActionsDisabled}
+        lifecycleActionsDisabled={lifecycleActionsDisabled || savingJob > 0 || savingPosting > 0}
       />
 
       {showNav &&

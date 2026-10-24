@@ -105,44 +105,59 @@ describe('Interview plan selection', () => {
     const screen = await render(<DraftPlan />, { wrapper });
 
     await screen.getByRole('button', { name: 'Select plan', exact: true }).click();
+
     await screen.getByRole('button', { name: /Engineering loop/ }).click();
+
     await expect.element(screen.getByRole('heading', { name: 'Technical interview', exact: true })).toBeVisible();
+
     expect(mocks.getOwnerActivities).not.toHaveBeenCalled();
     await expect
       .element(screen.getByRole('button', { name: 'Add activity to Technical interview' }))
       .not.toBeInTheDocument();
 
     await screen.getByRole('button', { name: 'Save selection' }).click();
+
     await expect.element(screen.getByRole('button', { name: 'Add activity to Technical interview' })).toBeVisible();
+
     expect(mocks.getOwnerActivities).toHaveBeenCalledWith({ kind: 'job', jobId: 'job' });
   });
 
-  it('waits for a template plan update and refreshed owner before loading its activities', async () => {
-    let resolveSave!: (value: { success: boolean }) => void;
-    mocks.updateJobTemplate.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
+  it('waits for the saved template plan before loading editable activities', async () => {
+    const selectPlan = vi.fn();
     const screen = await render(
-      <TemplateInterviewPlan orgId="org" templateId="template" selectedPlanId={null} isArchived={false} />,
+      <TemplateInterviewPlan
+        orgId="org"
+        templateId="template"
+        selectedPlanId="plan"
+        savedPlanId={null}
+        isSaving
+        isArchived={false}
+        onSelectPlan={selectPlan}
+      />,
       { wrapper },
     );
 
-    await screen.getByRole('button', { name: 'Select plan', exact: true }).click();
-    await screen.getByRole('button', { name: /Engineering loop/ }).click();
     await expect.element(screen.getByRole('heading', { name: 'Engineering loop', exact: true })).toBeVisible();
+
     await expect.element(screen.getByRole('button', { name: 'Change plan', exact: true })).toBeDisabled();
+
     expect(mocks.getOwnerActivities).not.toHaveBeenCalled();
 
     mocks.savedPlanId = 'plan';
-    resolveSave({ success: true });
-    await expect.element(screen.getByRole('button', { name: 'Change plan', exact: true })).toBeEnabled();
-    expect(mocks.getOwnerActivities).not.toHaveBeenCalled();
     await screen.rerender(
-      <TemplateInterviewPlan orgId="org" templateId="template" selectedPlanId="plan" isArchived={false} />,
+      <TemplateInterviewPlan
+        orgId="org"
+        templateId="template"
+        selectedPlanId="plan"
+        savedPlanId="plan"
+        isSaving={false}
+        isArchived={false}
+        onSelectPlan={selectPlan}
+      />,
     );
+
     await expect.element(screen.getByRole('button', { name: 'Add activity to Technical interview' })).toBeVisible();
+
     expect(mocks.getOwnerActivities).toHaveBeenCalledWith({
       kind: 'jobTemplate',
       orgId: 'org',

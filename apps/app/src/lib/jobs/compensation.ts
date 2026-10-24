@@ -1,6 +1,7 @@
 import { DEFAULT_COMPENSATION_CURRENCY, DEFAULT_COMPENSATION_PERIOD } from '@comitium/schemas/job-enums';
 import { NON_DIGIT_REGEX, THOUSANDS_SEPARATOR_POSITION_REGEX } from '@comitium/schemas/patterns';
 import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
+import { isDefined } from '@/lib/utils';
 
 type CompensationFormValues = Pick<
   JobSettingsFormData,
@@ -8,7 +9,10 @@ type CompensationFormValues = Pick<
 >;
 
 export function buildCompensation(values: CompensationFormValues) {
-  if (values.compensationMin == null && values.compensationMax == null) {
+  const hasAmounts = isDefined(values.compensationMin) || isDefined(values.compensationMax);
+  const hasUnits = isDefined(values.compensationCurrency) || isDefined(values.compensationPeriod);
+
+  if (!hasAmounts && !hasUnits) {
     return null;
   }
 

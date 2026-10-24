@@ -24,24 +24,17 @@ export function jobToSettingsFormValues(job: JobEditor): JobSettingsFormData {
   };
 }
 
-export function prepareJobSettingsUpdate(values: JobSettingsFormData, expectedVersion: number): UpdateJobEditorData {
-  const normalizedValues = { ...values, title: values.title.trim() };
-  const departmentUpdate = normalizedValues.departmentId ? { departmentId: normalizedValues.departmentId } : {};
-  const locationUpdate = normalizedValues.locationId
-    ? {
-        locationId: normalizedValues.locationId,
-        locationType: normalizedValues.locationType ?? null,
-      }
-    : {};
+export function prepareJobSettingsUpdate(values: JobSettingsFormData): Omit<UpdateJobEditorData, 'expectedVersion'> {
+  const departmentUpdate = values.departmentId ? { departmentId: values.departmentId } : {};
+  const locationUpdate = values.locationId ? { locationId: values.locationId } : {};
 
   return {
-    expectedVersion,
-    title: normalizedValues.title,
+    title: values.title.trim(),
     ...departmentUpdate,
     ...locationUpdate,
-    employmentType: normalizedValues.employmentType ?? null,
-    category: normalizedValues.category ?? null,
-    compensation: buildCompensation(normalizedValues),
-    compensationDisplayMode: normalizedValues.compensationDisplayMode ?? 'inherit',
+    employmentType: values.employmentType ?? null,
+    category: values.category ?? null,
+    compensation: buildCompensation(values),
+    compensationDisplayMode: values.compensationDisplayMode ?? 'inherit',
   };
 }

@@ -6,9 +6,11 @@ export interface JobQueryTarget {
   jobId: string;
 }
 
-export function invalidateJobQueries(queryClient: QueryClient, target: JobQueryTarget) {
-  const refetchType = 'all' as const;
-
+export function invalidateJobQueries(
+  queryClient: QueryClient,
+  target: JobQueryTarget,
+  refetchType: 'active' | 'all' = 'all',
+) {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: qk.jobs.detail(target.jobId), refetchType }),
     queryClient.invalidateQueries({ queryKey: qk.jobs.editor(target.orgId, target.jobId), refetchType }),

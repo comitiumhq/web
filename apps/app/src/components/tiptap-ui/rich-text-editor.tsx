@@ -29,6 +29,7 @@ interface RichTextEditorProps {
   disabled?: boolean;
   compact?: boolean;
   onUpdate?: (doc: TipTapDoc, html: string) => void;
+  syncContent?: boolean;
   debounceMs?: number;
   minHeightClass?: string;
   toolbar?: React.ReactNode;
@@ -43,6 +44,7 @@ export const RichTextEditor = memo(function RichTextEditor({
   disabled = false,
   compact = false,
   onUpdate,
+  syncContent = false,
   debounceMs = 300,
   minHeightClass,
   toolbar,
@@ -77,12 +79,15 @@ export const RichTextEditor = memo(function RichTextEditor({
       isReadyRef.current = true;
     },
     onTransaction({ editor: ed, transaction }) {
-      if (!isReadyRef.current || !transaction.docChanged || !onUpdateRef.current) {
+      const isUserEdit = isReadyRef.current && transaction.docChanged && !transaction.getMeta('preventUpdate');
+      const handleUpdate = onUpdateRef.current;
+
+      if (!isUserEdit || !handleUpdate) {
         return;
       }
 
       if (debounceMs === 0) {
-        onUpdateRef.current(ed.getJSON() as TipTapDoc, ed.getHTML());
+        handleUpdate(ed.getJSON() as TipTapDoc, ed.getHTML());
 
         return;
       }
@@ -100,13 +105,24 @@ export const RichTextEditor = memo(function RichTextEditor({
   }, []);
 
   useEffect(() => {
-    if (!editor || onUpdate || content === lastContentRef.current) {
+    if (!editor || (onUpdate && !syncContent) || content === lastContentRef.current) {
       return;
     }
 
     lastContentRef.current = content;
-    editor.commands.setContent(content ?? EMPTY_DOC);
-  }, [editor, content, onUpdate]);
+
+    const nextContent = content ?? EMPTY_DOC;
+
+    /**
+     * Local edits echo the current document back through content.
+     * Only replace external changes so typing keeps its selection and undo history.
+     */
+    if (JSON.stringify(editor.getJSON()) === JSON.stringify(nextContent)) {
+      return;
+    }
+
+    editor.commands.setContent(nextContent, { emitUpdate: false });
+  }, [editor, content, onUpdate, syncContent]);
 
   useEffect(() => {
     if (editor) {

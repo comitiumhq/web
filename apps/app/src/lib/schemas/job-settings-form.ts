@@ -8,13 +8,14 @@ import {
 import { uuidSchema } from '@comitium/schemas/public';
 import { locationEntrySchema } from '@comitium/schemas/public-jobs';
 import { z } from 'zod';
+import { isDefined } from '@/lib/utils';
 
 /**
  * Schema for editable Job settings shared by drafts, open Jobs, and templates.
  */
 export const JobSettingsFormSchema = z
   .object({
-    title: z.string().min(1, 'Title is required').max(255, 'Title is too long'),
+    title: z.string().trim().min(1, 'Title is required').max(255, 'Title is too long'),
     departmentId: uuidSchema.optional(),
     locationId: uuidSchema.optional(),
     location: z.array(locationEntrySchema).optional(),
@@ -31,6 +32,17 @@ export const JobSettingsFormSchema = z
   .superRefine((values, context) => {
     if (values.compensationDisplayMode === 'hidden') {
       return;
+    }
+
+    const { compensationMin, compensationMax } = values;
+    const hasBothAmounts = isDefined(compensationMin) && isDefined(compensationMax);
+
+    if (hasBothAmounts && compensationMin > compensationMax) {
+      context.addIssue({
+        code: 'custom',
+        path: ['compensationMax'],
+        message: 'Must be at least the minimum compensation',
+      });
     }
 
     for (const name of ['compensationMin', 'compensationMax'] as const) {

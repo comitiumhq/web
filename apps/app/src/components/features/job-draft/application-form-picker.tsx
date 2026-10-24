@@ -21,29 +21,22 @@ import { cn } from '@/lib/utils';
 
 interface ApplicationFormPickerProps {
   orgId: string;
+  disabled?: boolean;
   owner: ApplicationFormOptionsOwner;
   formId: string | null;
   onChange: (formId: string | null) => void;
 }
 
-export function ApplicationFormPicker({ orgId, owner, formId, onChange }: ApplicationFormPickerProps) {
+export function ApplicationFormPicker({
+  orgId,
+  owner,
+  formId,
+  onChange,
+  disabled = false,
+}: ApplicationFormPickerProps) {
   const { can } = usePermissions();
   const { data, isLoading, isError, isFetching, refetch } = useQueryApplicationFormOptions(orgId, owner);
   const forms = data?.data ?? [];
-  const defaultFormId = useMemo(() => forms.find((form) => form.isDefaultForm)?.id ?? null, [forms]);
-  const selectedFormId = formId ?? defaultFormId;
-
-  useEffect(() => {
-    if (formId !== null) {
-      return;
-    }
-
-    if (defaultFormId === null) {
-      return;
-    }
-
-    onChange(defaultFormId);
-  }, [defaultFormId, formId, onChange]);
 
   if (isLoading) {
     return <ApplicationFormListSkeleton />;
@@ -102,7 +95,8 @@ export function ApplicationFormPicker({ orgId, owner, formId, onChange }: Applic
         <ApplicationFormOptionRow
           key={form.id}
           form={form}
-          isSelected={selectedFormId === form.id}
+          isSelected={formId === form.id}
+          disabled={disabled}
           onSelect={onChange}
         />
       ))}
@@ -154,12 +148,14 @@ function FormMetaLine({ detail }: { detail: ApplicationFormOption }) {
 interface ApplicationFormOptionRowProps {
   form: ApplicationFormOption;
   isSelected: boolean;
+  disabled?: boolean;
   onSelect: (formId: string | null) => void;
 }
 
 const ApplicationFormOptionRow = memo(function ApplicationFormOptionRow({
   form,
   isSelected,
+  disabled,
   onSelect,
 }: ApplicationFormOptionRowProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -182,6 +178,7 @@ const ApplicationFormOptionRow = memo(function ApplicationFormOptionRow({
       <button
         type="button"
         onClick={handleSelect}
+        disabled={disabled}
         aria-label={`Select ${form.title}`}
         aria-pressed={isSelected}
         className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"

@@ -1,15 +1,22 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { EvaluationCriterion, HiringTeamEntry } from '@comitium/schemas/jobs';
-import { MAX_POSTING_SKILLS, type SkillRequirement } from '@comitium/schemas/skills';
+import type { SkillRequirement } from '@comitium/schemas/skills';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import { useForm, useWatch } from 'react-hook-form';
 import { useSaveJobEditor } from '@/components/features/job-settings/use-save-job-editor';
 import { useQueryJobEditor } from '@/hooks/queries/use-query-job-editor';
-import { POSTING_SKILL_LIMIT_MESSAGE } from '@/lib/jobs/skills';
+import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
+import { useAutosave } from '@/hooks/use-autosave';
+import { useJobPermissions } from '@/hooks/use-job-permissions';
 import { type JobSettingsFormData, JobSettingsFormSchema } from '@/lib/schemas/job-settings-form';
-import { type DraftEditorState, draftToEditorState, prepareDraftSave } from './draft-editor-state';
+import { Permission } from '@/lib/schemas/org';
+import {
+  type JobAutosaveData,
+  type JobConfigurationState,
+  prepareJobAutosave,
+} from '../job-settings/job-autosave-state';
+import { draftToEditorState } from './draft-editor-state';
 
 export function useDraftForm(orgId: string, jobId: string) {
   const { data: draft, isLoading, error } = useQueryJobEditor(orgId, jobId);
@@ -19,32 +26,27 @@ export function useDraftForm(orgId: string, jobId: string) {
   const [interviewPlanId, setInterviewPlanId] = useState<string | null>(null);
   const [criteria, setCriteria] = useState<EvaluationCriterion[]>([]);
   const [hiringTeam, setHiringTeam] = useState<HiringTeamEntry[]>([]);
-  const [nonFormDirty, setNonFormDirty] = useState(false);
-  const [version, setVersion] = useState(0);
+  const [initialData, setInitialData] = useState<JobAutosaveData | null>(null);
   const isInitializedRef = useRef(false);
-  const isApplyingSnapshotRef = useRef(false);
-  const editRevisionRef = useRef(0);
   const versionRef = useRef(0);
 
   const form = useForm<JobSettingsFormData>({
     resolver: zodResolver(JobSettingsFormSchema),
+    mode: 'onChange',
     defaultValues: {
       title: '',
     },
   });
 
   const applySnapshot = useCallback(
-    (snapshot: DraftEditorState) => {
-      isApplyingSnapshotRef.current = true;
+    (snapshot: JobConfigurationState) => {
       form.reset(snapshot.values);
-      isApplyingSnapshotRef.current = false;
       setDescription(snapshot.description);
       setSkills(snapshot.skills);
       setFormId(snapshot.formId);
       setCriteria(snapshot.criteria);
       setInterviewPlanId(snapshot.interviewPlanId);
       setHiringTeam(snapshot.hiringTeam);
-      setNonFormDirty(false);
     },
     [form],
   );
@@ -57,156 +59,128 @@ export function useDraftForm(orgId: string, jobId: string) {
     const snapshot = draftToEditorState(draft);
 
     versionRef.current = draft.version;
-    setVersion(draft.version);
     applySnapshot(snapshot);
+    setInitialData(prepareJobAutosave(snapshot).data);
     isInitializedRef.current = true;
   }, [applySnapshot, draft]);
 
-  useEffect(() => {
-    const subscription = form.watch(() => {
-      if (!isInitializedRef.current || isApplyingSnapshotRef.current) {
-        return;
-      }
+  useWatch({ control: form.control });
 
-      editRevisionRef.current += 1;
+  /**
+   * Initialization can reset the form before the watch subscription is ready.
+   * Read current values so mounting an editor never submits stale defaults.
+   */
+  const values = form.getValues();
+  const { canOnJob } = useJobPermissions(jobId);
+  const { data: summary } = useQueryJobSummary(jobId);
+  const { mutateAsync: persistDraft } = useSaveJobEditor(orgId, jobId);
+  const snapshot = prepareJobAutosave(
+    { values, description, skills, formId, criteria, interviewPlanId, hiringTeam },
+    { isPostingPublished: summary?.postingStatus === 'published' },
+  );
+  const isMutableJob = draft && draft.status !== 'closed' && !draft.archivedAt;
+  const canAutosave = Boolean(initialData && isMutableJob && canOnJob(Permission.JOB_EDIT));
+  const autosave = useAutosave({
+    ...snapshot,
+    initialData,
+    enabled: canAutosave,
+    onSave: async (changes) => {
+      const result = await persistDraft({ ...changes, expectedVersion: versionRef.current });
+
+      versionRef.current = result.version;
+    },
+  });
+
+  useEffect(() => {
+    if (!draft || !initialData) {
+      return;
+    }
+
+    const hasLocalChanges = autosave.isDirty || autosave.isSaving || autosave.error;
+    const canAcceptRefresh = !hasLocalChanges && draft.version > versionRef.current;
+
+    if (!canAcceptRefresh) {
+      return;
+    }
+
+    const next = draftToEditorState(draft);
+
+    versionRef.current = draft.version;
+    applySnapshot(next);
+    autosave.acceptSavedData(prepareJobAutosave(next).data);
+  }, [
+    draft,
+    initialData,
+    autosave.isDirty,
+    autosave.isSaving,
+    autosave.error,
+    autosave.acceptSavedData,
+    applySnapshot,
+  ]);
+
+  useEffect(() => {
+    const subscription = form.watch((_, { name }) => {
+      const isTextField =
+        name === 'title' || name === 'compensationMin' || name === 'compensationMax' || name === 'applicationCapacity';
+
+      if (name && !isTextField) {
+        autosave.saveImmediately();
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, [form]);
-
-  const { mutateAsync: persistDraft, isPending: isSaving } = useSaveJobEditor(orgId, jobId);
-
-  const markNonFormDirty = useCallback(() => {
-    editRevisionRef.current += 1;
-    setNonFormDirty(true);
-  }, []);
-
-  const currentSnapshot = useCallback(
-    (): DraftEditorState => ({
-      values: { ...form.getValues() },
-      description,
-      skills: [...skills],
-      formId,
-      criteria: [...criteria],
-      interviewPlanId,
-      hiringTeam: [...hiringTeam],
-    }),
-    [criteria, description, form, formId, hiringTeam, interviewPlanId, skills],
-  );
-
-  const isDirty = form.formState.isDirty || nonFormDirty;
-
-  const save = useCallback(async (): Promise<number | null> => {
-    const isValid = await form.trigger();
-    const values = form.getValues();
-
-    if (!values.title.trim()) {
-      form.setError('title', { message: 'Title is required' });
-
-      return null;
-    }
-
-    if (!isValid) {
-      return null;
-    }
-
-    if (skills.length > MAX_POSTING_SKILLS) {
-      toast.error(POSTING_SKILL_LIMIT_MESSAGE);
-
-      return null;
-    }
-
-    if (!isDirty) {
-      return versionRef.current;
-    }
-
-    const snapshot = currentSnapshot();
-    const prepared = prepareDraftSave(snapshot, versionRef.current);
-    const submittedRevision = editRevisionRef.current;
-
-    try {
-      const result = await persistDraft(prepared.data);
-
-      versionRef.current = result.version;
-      setVersion(result.version);
-
-      if (editRevisionRef.current === submittedRevision) {
-        applySnapshot(prepared.state);
-      }
-
-      return result.version;
-    } catch {
-      return null;
-    }
-  }, [applySnapshot, currentSnapshot, form, isDirty, persistDraft, skills.length]);
-
-  const handleDescriptionChange = useCallback(
-    (content: TipTapDoc) => {
-      setDescription(content);
-      markNonFormDirty();
-    },
-    [markNonFormDirty],
-  );
+  }, [form, autosave.saveImmediately]);
 
   const handleSkillsChange = useCallback(
     (updated: SkillRequirement[]) => {
       setSkills(updated);
-      markNonFormDirty();
+      autosave.saveImmediately();
     },
-    [markNonFormDirty],
+    [autosave.saveImmediately],
   );
 
   const handleFormIdChange = useCallback(
     (next: string | null) => {
       setFormId(next);
-      markNonFormDirty();
+      autosave.saveImmediately();
     },
-    [markNonFormDirty],
-  );
-
-  const handleCriteriaChange = useCallback(
-    (updated: EvaluationCriterion[]) => {
-      setCriteria(updated);
-      markNonFormDirty();
-    },
-    [markNonFormDirty],
+    [autosave.saveImmediately],
   );
 
   const handleInterviewPlanChange = useCallback(
     (planId: string | null) => {
       setInterviewPlanId(planId);
-      markNonFormDirty();
+      autosave.saveImmediately();
     },
-    [markNonFormDirty],
+    [autosave.saveImmediately],
   );
 
   const handleHiringTeamChange = useCallback(
     (team: HiringTeamEntry[]) => {
       setHiringTeam(team);
-      markNonFormDirty();
+      autosave.saveImmediately();
     },
-    [markNonFormDirty],
+    [autosave.saveImmediately],
   );
 
   return {
     draft,
-    isLoading,
+    isLoading: isLoading || Boolean(draft && initialData === null),
     error,
     form,
-    version,
-    isDirty,
-    isSaving,
-    save,
+    isDirty: autosave.isDirty,
+    isSaving: autosave.isSaving,
+    autosave,
     description,
     skills,
     formId,
     criteria,
     interviewPlanId,
     hiringTeam,
-    handleDescriptionChange,
+    handleDescriptionChange: setDescription,
     handleSkillsChange,
     handleFormIdChange,
-    handleCriteriaChange,
+    handleCriteriaChange: setCriteria,
     handleInterviewPlanChange,
     handleHiringTeamChange,
   };

@@ -33,6 +33,8 @@ export const jobTemplateSchema = z.object({
   updatedAt: z.string(),
 });
 
+export type JobTemplate = z.infer<typeof jobTemplateSchema>;
+
 const jobTemplateListItemSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -69,7 +71,12 @@ export const createJobTemplateBodySchema = z.object({
 
 export type CreateJobTemplateBody = z.infer<typeof createJobTemplateBodySchema>;
 
-const updateJobTemplateBodySchema = createJobTemplateBodySchema.partial();
+const updateJobTemplateBodySchema = createJobTemplateBodySchema.partial().extend({
+  employmentType: z.string().nullable().optional(),
+  category: z.string().nullable().optional(),
+  compensation: compensationConfigSchema.nullable().optional(),
+  criteria: z.array(evaluationCriterionSchema).max(MAX_EVALUATION_CRITERIA).nullable().optional(),
+});
 export type UpdateJobTemplateBody = z.infer<typeof updateJobTemplateBodySchema>;
 
 export const createDraftFromTemplateResponseSchema = z.object({

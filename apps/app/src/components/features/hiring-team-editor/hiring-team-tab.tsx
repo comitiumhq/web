@@ -6,11 +6,12 @@ import type { OrgTeamMember } from '@/lib/schemas/org';
 
 interface HiringTeamTabProps {
   orgId: string;
+  readOnly?: boolean;
   hiringTeam: HiringTeamEntry[];
   onChangeHiringTeam: (team: HiringTeamEntry[]) => void;
 }
 
-export function HiringTeamTab({ orgId, hiringTeam, onChangeHiringTeam }: HiringTeamTabProps) {
+export function HiringTeamTab({ orgId, hiringTeam, onChangeHiringTeam, readOnly = false }: HiringTeamTabProps) {
   const { data: orgMembers, isLoading, isError } = useQueryOrgTeam(orgId);
 
   const availableMembers = useMemo(
@@ -64,6 +65,7 @@ export function HiringTeamTab({ orgId, hiringTeam, onChangeHiringTeam }: HiringT
   return (
     <HiringTeamEditor
       members={members}
+      readOnly={readOnly}
       availableMembers={availableMembers}
       isLoading={isLoading}
       isError={isError}
