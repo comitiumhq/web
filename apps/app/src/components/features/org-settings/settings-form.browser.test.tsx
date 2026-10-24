@@ -1,6 +1,6 @@
 import { ApiError } from '@comitium/schemas/api-errors';
 import { TooltipProvider } from '@comitium/ui/tooltip';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import type { MyOrg, OrgDetails } from '@/lib/schemas/org';
 
@@ -30,6 +30,7 @@ function renderSettingsForm() {
 }
 
 const ORG_ID = '11111111-1111-4111-8111-111111111111';
+const MY_ORIGIN = 'https://my.comitium.test';
 const org = { id: ORG_ID } as MyOrg;
 const details: OrgDetails = {
   id: ORG_ID,
@@ -44,7 +45,13 @@ const details: OrgDetails = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubEnv('VITE_MY_ORIGIN', MY_ORIGIN);
+
   mocks.data = { ...details };
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 describe('Company Profile careers URL', () => {
@@ -82,6 +89,6 @@ describe('Company Profile careers URL', () => {
     await address.fill('acme-global');
     await expect
       .element(screen.getByRole('link', { name: 'View careers page', exact: true }))
-      .toHaveAttribute('href', 'http://localhost:3002/careers/acme-corp');
+      .toHaveAttribute('href', `${MY_ORIGIN}/careers/acme-corp`);
   });
 });
