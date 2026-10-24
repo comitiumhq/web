@@ -1,26 +1,7 @@
-import { AuthGuard } from '@comitium/auth/auth-guard';
-import { createFileRoute } from '@tanstack/react-router';
-import { MyApplicationsDashboard } from '@/components/features/my-applications';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/applications')({
-  ssr: false,
-  component: ApplicationsPage,
+  beforeLoad: () => {
+    throw notFound();
+  },
 });
-
-function ApplicationsPage() {
-  return (
-    <AuthGuard>
-      <ApplicationsContent />
-    </AuthGuard>
-  );
-}
-
-function ApplicationsContent() {
-  return (
-    <div className="h-full flex flex-col overflow-auto bg-background">
-      <div className="flex-1 min-h-0">
-        <MyApplicationsDashboard />
-      </div>
-    </div>
-  );
-}

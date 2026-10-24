@@ -59,6 +59,8 @@ export function CryptoProvider({ apiUrl, accountQueryKey, children }: CryptoProv
     CryptoProxy.init(apiUrl);
 
     return () => {
+      attempted.current = null;
+      restoring.current = null;
       void CryptoProxy.destroy();
     };
   }, [apiUrl]);

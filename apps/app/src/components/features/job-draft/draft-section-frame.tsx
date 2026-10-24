@@ -14,7 +14,7 @@ interface DraftSectionFrameProps {
 }
 
 export function DraftSectionFrame({ tab, children, actions }: DraftSectionFrameProps) {
-  const { orgId, draft, isLoading, error, publishErrors, handleValidationFieldClick, dismissPublishErrors } =
+  const { orgId, draft, isLoading, error, publishErrors, handleValidationFieldClick, dismissPublishErrors, autosave } =
     useDraftFormContext();
 
   if (isLoading) {
@@ -29,7 +29,7 @@ export function DraftSectionFrame({ tab, children, actions }: DraftSectionFrameP
   const header = <SectionHeader title={section.label} description={null} />;
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto" onBlurCapture={() => void autosave.flush()}>
       {publishErrors.length > 0 && (
         <PublishValidationBanner
           errors={publishErrors}

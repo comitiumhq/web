@@ -30,7 +30,7 @@ export const TimelineEventRow = memo(function TimelineEventRow({
 
   return (
     <ActivityEventRow
-      avatar={<MemberAvatar identity={toDisplayIdentity(event)} size="sm" className="mt-0.5 shrink-0" />}
+      avatar={<MemberAvatar identity={toDisplayIdentity(event)} size="sm" className="shrink-0" />}
       label={getEventLabel(event)}
       actor={actor}
       subline={getEventSubline(event, selectedApplicationId) || null}

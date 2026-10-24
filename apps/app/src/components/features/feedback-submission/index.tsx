@@ -204,6 +204,7 @@ function FeedbackSubmissionView({
       mode={flow.mode ?? 'create'}
       formId={flow.formId}
       previousSubmissionId={flow.previousSubmissionId}
+      formSnapshotHash={flow.formSnapshotHash}
       vaultPublicKey={vaultPublicKey}
       vaultKeyVersion={vaultKeyVersion}
       vaultAccess={vaultAccess}
@@ -282,6 +283,7 @@ interface FeedbackFormProps {
   mode: 'create' | 'edit';
   formId: string;
   previousSubmissionId: string | null;
+  formSnapshotHash: `0x${string}` | null;
   vaultPublicKey: PublicEncryptionKey | null;
   vaultKeyVersion: number | null;
   vaultAccess: VaultKeyAccess | undefined;
@@ -300,6 +302,7 @@ function FeedbackForm(props: FeedbackFormProps) {
     mode,
     formId,
     previousSubmissionId,
+    formSnapshotHash,
     onComplete,
     onCancel,
     contained = false,
@@ -359,12 +362,18 @@ function FeedbackForm(props: FeedbackFormProps) {
         return;
       }
 
+      if (!isDefined(formSnapshotHash)) {
+        toast.error('Feedback form not ready');
+
+        return;
+      }
+
       const sourceBody = getFeedbackSubmissionSourceBody(source);
 
       createSubmission(
         {
           applicationId,
-          body: { ...sourceBody, formId, answerEnvelopes, fieldValues },
+          body: { ...sourceBody, formId, formSnapshotHash, answerEnvelopes, fieldValues },
         },
         { onSuccess: onComplete },
       );

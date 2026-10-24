@@ -629,23 +629,21 @@ function FeedEntry({ item, candidateName }: { item: FeedItem; candidateName: str
   const EventIcon = item.label === 'Application submitted' ? FileCheck : CalendarCheck;
 
   return (
-    <div className={cn(!item.actor && '[&>div]:items-center')}>
-      <ActivityEventRow
-        avatar={
-          item.actor ? (
-            <PreviewMemberAvatar name={item.actor} className="mt-0.5" />
-          ) : (
-            <span className="flex size-6 shrink-0 items-center justify-center">
-              <EventIcon aria-hidden className={cn('size-4', LANDING_SECONDARY_ICON_CLASS_NAME)} />
-            </span>
-          )
-        }
-        label={item.label}
-        actor={item.actor}
-        subline={item.subline}
-        time={<span className="shrink-0 text-label-12 text-[color:var(--landing-text-meta)]">{item.time}</span>}
-      />
-    </div>
+    <ActivityEventRow
+      avatar={
+        item.actor ? (
+          <PreviewMemberAvatar name={item.actor} />
+        ) : (
+          <span className="flex size-6 shrink-0 items-center justify-center">
+            <EventIcon aria-hidden className={cn('size-4', LANDING_SECONDARY_ICON_CLASS_NAME)} />
+          </span>
+        )
+      }
+      label={item.label}
+      actor={item.actor}
+      subline={item.subline}
+      time={<span className="shrink-0 text-label-12 text-[color:var(--landing-text-meta)]">{item.time}</span>}
+    />
   );
 }
 

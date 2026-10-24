@@ -10,6 +10,7 @@ import { SkillsEditor } from './skills-editor';
 
 interface PostingEditorProps {
   orgId: string;
+  readOnly?: boolean;
   owner: ApplicationFormOptionsOwner;
   description: TipTapDoc | null;
   onDescriptionChange: (content: TipTapDoc) => void;
@@ -23,6 +24,7 @@ interface PostingEditorProps {
 
 export function PostingEditor({
   orgId,
+  readOnly = false,
   owner,
   description,
   onDescriptionChange,
@@ -36,19 +38,35 @@ export function PostingEditor({
   const capacityPanel = onApplicationCapacityChange ? (
     <Card>
       <CardContent>
-        <ApplicationCapacityControl value={applicationCapacity ?? null} onChange={onApplicationCapacityChange} />
+        <ApplicationCapacityControl
+          disabled={readOnly}
+          value={applicationCapacity ?? null}
+          onChange={onApplicationCapacityChange}
+        />
       </CardContent>
     </Card>
   ) : undefined;
 
   return (
     <PostingTabs
-      description={<PostingDescriptionEditor content={description} onChange={onDescriptionChange} />}
-      skills={<SkillsEditor value={skills} onChange={onSkillsChange} />}
+      description={
+        <PostingDescriptionEditor
+          content={description}
+          readOnly={readOnly}
+          onChange={readOnly ? undefined : onDescriptionChange}
+        />
+      }
+      skills={<SkillsEditor value={skills} disabled={readOnly} onChange={onSkillsChange} />}
       applicationForm={
         <Card>
           <CardContent>
-            <ApplicationFormPicker orgId={orgId} owner={owner} formId={formId} onChange={onFormIdChange} />
+            <ApplicationFormPicker
+              orgId={orgId}
+              owner={owner}
+              formId={formId}
+              disabled={readOnly}
+              onChange={onFormIdChange}
+            />
           </CardContent>
         </Card>
       }

@@ -33,11 +33,9 @@ const ArchivedApplicationRow = memo(function ArchivedApplicationRow({
   }, [app.id, onCandidateClick]);
 
   return (
-    <TableRow>
+    <TableRow onClick={handleClick} className="cursor-pointer">
       <TableCell>
-        <button type="button" className="font-medium hover:underline" onClick={handleClick}>
-          {candidateName}
-        </button>
+        <span className="font-medium">{candidateName}</span>
       </TableCell>
       <TableCell className="text-muted-foreground">{APPLICATION_TERMINAL_OUTCOME_LABEL[app.terminalOutcome]}</TableCell>
       <TableCell className="text-muted-foreground">{app.archiveReasonLabel ?? '—'}</TableCell>

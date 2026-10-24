@@ -21,6 +21,7 @@ import { Permission } from '@/lib/schemas/org';
 
 import { FormEditSheet } from './form-edit-sheet';
 import { FormListRow } from './form-list-row';
+import { FormPreviewSheet } from './form-preview';
 
 type TabValue = 'active' | 'archived';
 
@@ -88,6 +89,7 @@ export function FormsSettingsList({ orgId, formClass, selectedFormId, onSelected
   const [tab, setTab] = useState<TabValue>('active');
   const [page, setPage] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
+  const [previewFormId, setPreviewFormId] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQueryFormsList(orgId, {
     formClass,
@@ -117,6 +119,7 @@ export function FormsSettingsList({ orgId, formClass, selectedFormId, onSelected
   }, []);
 
   const handleCreate = useCallback(() => setIsCreating(true), []);
+  const handleClosePreview = useCallback(() => setPreviewFormId(null), []);
 
   const handleClose = useCallback(() => {
     setIsCreating(false);
@@ -169,6 +172,7 @@ export function FormsSettingsList({ orgId, formClass, selectedFormId, onSelected
           canManage={canManage}
           orgId={orgId}
           onOpen={onSelectedFormChange}
+          onPreview={setPreviewFormId}
           onPageChange={setPage}
         />
       </EntitySettingsPage>
@@ -181,6 +185,7 @@ export function FormsSettingsList({ orgId, formClass, selectedFormId, onSelected
         onSaved={handleSaved}
         onClose={handleClose}
       />
+      <FormPreviewSheet orgId={orgId} formId={previewFormId} onClose={handleClosePreview} />
     </>
   );
 }
@@ -197,6 +202,7 @@ interface FormsContentProps {
   canManage: boolean;
   orgId: string;
   onOpen: (formId: string) => void;
+  onPreview: (formId: string) => void;
   onPageChange: (page: number) => void;
 }
 
@@ -212,6 +218,7 @@ function FormsContent({
   canManage,
   orgId,
   onOpen,
+  onPreview,
   onPageChange,
 }: FormsContentProps) {
   if (isLoading) {
@@ -236,7 +243,14 @@ function FormsContent({
         scrollAreaClassName={DATA_TABLE_SCROLL_AREA_CLASS}
       >
         {forms.map((form) => (
-          <FormListRow key={form.id} form={form} canManage={canManage} orgId={orgId} onOpen={onOpen} />
+          <FormListRow
+            key={form.id}
+            form={form}
+            canManage={canManage}
+            orgId={orgId}
+            onOpen={onOpen}
+            onPreview={onPreview}
+          />
         ))}
       </DataTable>
 

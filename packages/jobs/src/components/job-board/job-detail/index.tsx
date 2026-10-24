@@ -1,7 +1,7 @@
 import type { Job, JobListItem } from '@comitium/schemas/public-jobs';
 import { Badge } from '@comitium/ui/badge';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
-import { formatCompensationSalary, hasCompensation } from '@comitium/ui/salary';
+import { formatCompensationSalary } from '@comitium/ui/salary';
 import { ScrollArea } from '@comitium/ui/scroll-area';
 import { BriefcaseBusinessIcon, MapPinIcon } from 'lucide-react';
 import { getPublicApplicationAvailability } from '../../../application/availability';
@@ -39,7 +39,7 @@ const JOB_FACT_VALUE_BADGE_CLASS = 'h-6 px-2 text-label-12 font-medium tabular-n
 export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetailProps) {
   const locationTypeText = formatLocationType(job.locationType);
   const locationText = formatLocation(job.location);
-  const salary = hasCompensation(job.compensation) ? formatCompensationSalary(job.compensation) : null;
+  const salary = formatCompensationSalary(job.compensation);
   const applicationAvailability = getPublicApplicationAvailability(job);
   const canApply = applicationAvailability === 'accepting' && applyUrl !== null;
 
@@ -63,11 +63,9 @@ export function JobDetail({ job, careersUrl = null, applyUrl = null }: JobDetail
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {salary && (
-            <Badge variant="outline" className={JOB_FACT_VALUE_BADGE_CLASS}>
-              {salary}
-            </Badge>
-          )}
+          <Badge variant="outline" className={JOB_FACT_VALUE_BADGE_CLASS}>
+            {salary}
+          </Badge>
           {locationTypeText && (
             <Badge variant="outline" className={JOB_FACT_BADGE_CLASS}>
               {locationTypeText}

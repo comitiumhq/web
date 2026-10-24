@@ -3,7 +3,7 @@ import {
   formSnapshotSchema,
   formSubmissionFieldProjectionSchema,
 } from '@comitium/schemas/forms/form-submission';
-import { uuidSchema } from '@comitium/schemas/public';
+import { bytes32HexSchema, uuidSchema } from '@comitium/schemas/public';
 import { z } from 'zod';
 import { isDefined } from '@/lib/utils';
 
@@ -54,6 +54,7 @@ const createFeedbackSubmissionBodySchema = z
   .object({
     ...sourceShape,
     formId: uuidSchema,
+    formSnapshotHash: bytes32HexSchema,
     answerEnvelopes: z.array(answerEnvelopeSchema),
     fieldValues: z.array(formSubmissionFieldProjectionSchema).max(500),
   })
@@ -75,6 +76,7 @@ export type ResolveFeedbackFormBody = z.infer<typeof resolveFeedbackFormBodySche
 export const resolvedFeedbackFormResponseSchema = z.object({
   data: z.object({
     formSnapshot: formSnapshotSchema,
+    formSnapshotHash: bytes32HexSchema,
     canReadPrivate: z.boolean(),
   }),
 });

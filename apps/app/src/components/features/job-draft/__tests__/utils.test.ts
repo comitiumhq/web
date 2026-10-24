@@ -1,8 +1,8 @@
 import type { JobEditor } from '@comitium/schemas/jobs';
 import { describe, expect, it } from 'vitest';
 import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
-
-import { draftToEditorState, prepareDraftSave } from '../draft-editor-state';
+import { prepareJobAutosave } from '../../job-settings/job-autosave-state';
+import { draftToEditorState } from '../draft-editor-state';
 import { isDraftEditorPath, validateForPublish } from '../utils';
 
 const baseValues = {
@@ -16,107 +16,47 @@ const baseValues = {
   compensationPeriod: 'year',
   compensationMin: 115000,
   compensationMax: 150000,
+  compensationDisplayMode: 'inherit',
 } satisfies JobSettingsFormData;
 
 describe('job draft utils', () => {
-  it('builds one complete versioned update from the editor state', () => {
-    const description = { type: 'doc', content: [{ type: 'paragraph' }] };
-
-    expect(
-      prepareDraftSave(
-        {
-          values: { ...baseValues, title: '  People Lead  ' },
-          description,
-          skills: [
-            {
-              skillId: '99999999-9999-4999-8999-999999999999',
-              label: 'Communication',
-              required: true,
-              status: 'active',
-            },
-          ],
-          formId: '33333333-3333-4333-8333-333333333333',
-          criteria: [
-            {
-              id: '44444444-4444-4444-8444-444444444444',
-              title: 'Communication',
-              prompt: 'Assess communication.',
-            },
-            {
-              id: '55555555-5555-4555-8555-555555555555',
-              title: '',
-              prompt: '',
-            },
-          ],
-          interviewPlanId: '66666666-6666-4666-8666-666666666666',
-          hiringTeam: [
-            {
-              userId: '77777777-7777-4777-8777-777777777777',
-              role: 'hiring_manager',
-            },
-          ],
-        },
-        4,
-      ).data,
-    ).toEqual({
-      expectedVersion: 4,
-      title: 'People Lead',
-      departmentId: baseValues.departmentId,
-      locationId: baseValues.locationId,
-      locationType: 'hybrid',
-      employmentType: 'full_time',
-      category: 'hr',
-      compensation: {
-        tiers: [
-          {
-            currency: 'USD',
-            period: 'year',
-            base_min: 115000,
-            base_max: 150000,
-          },
-        ],
-      },
-      description,
-      skills: [{ skillId: '99999999-9999-4999-8999-999999999999', required: true }],
-      formId: '33333333-3333-4333-8333-333333333333',
-      applicationCapacity: null,
-      criteria: [
-        {
-          id: '44444444-4444-4444-8444-444444444444',
-          title: 'Communication',
-          prompt: 'Assess communication.',
-        },
-      ],
-      interviewPlanId: '66666666-6666-4666-8666-666666666666',
-      hiringTeam: [
-        {
-          userId: '77777777-7777-4777-8777-777777777777',
-          role: 'hiring_manager',
-        },
-      ],
+  it('keeps incomplete criteria local instead of silently deleting them', () => {
+    const criteria = [
+      { id: '44444444-4444-4444-8444-444444444444', title: 'Communication', prompt: 'Assess communication.' },
+      { id: '55555555-5555-4555-8555-555555555555', title: '', prompt: '' },
+    ];
+    const snapshot = prepareJobAutosave({
+      values: baseValues,
+      description: null,
+      skills: [],
+      formId: null,
+      criteria,
+      interviewPlanId: null,
+      hiringTeam: [],
     });
+
+    expect(snapshot.blockedKeys).toContain('criteria');
+    expect(snapshot.data.criteria).toEqual(criteria);
+    expect(snapshot.blockedKeys).not.toContain('title');
   });
 
   it('does not send location type without a selected location', () => {
     const values = { ...baseValues, locationId: undefined, locationType: undefined };
-    const update = prepareDraftSave(
-      {
-        values,
-        description: null,
-        skills: [],
-        formId: null,
-        criteria: [],
-        interviewPlanId: null,
-        hiringTeam: [],
-      },
-      2,
-    ).data;
+    const update = prepareJobAutosave({
+      values,
+      description: null,
+      skills: [],
+      formId: null,
+      criteria: [],
+      interviewPlanId: null,
+      hiringTeam: [],
+    }).data;
 
     expect(update).not.toHaveProperty('locationId');
     expect(update).not.toHaveProperty('locationType');
   });
 
-  it('uses display defaults without persisting empty compensation', () => {
+  it('includes currency and period defaults in the normalized compensation baseline', () => {
     const draft = {
       id: '88888888-8888-4888-8888-888888888888',
       status: 'draft',
@@ -129,6 +69,7 @@ describe('job draft utils', () => {
       employmentType: null,
       category: null,
       compensation: null,
+      compensationDisplayMode: 'inherit',
       description: null,
       skills: [],
       formId: null,
@@ -144,7 +85,7 @@ describe('job draft utils', () => {
     const state = draftToEditorState(draft);
 
     expect(state.values).toMatchObject({ compensationCurrency: 'USD', compensationPeriod: 'year' });
-    expect(prepareDraftSave(state, 0).data.compensation).toBeNull();
+    expect(prepareJobAutosave(state).data.compensation).toEqual({ tiers: [{ currency: 'USD', period: 'year' }] });
   });
 
   it('keeps section navigation inside the current editor', () => {
@@ -197,5 +138,60 @@ describe('job draft utils', () => {
       { label: 'Application capacity', target: 'posting' },
       { label: 'Interview plan', target: 'interview-plan' },
     ]);
+  });
+
+  it('publishes without a range only when compensation is explicitly not disclosed', () => {
+    const input = {
+      values: { ...baseValues, compensationMin: undefined, compensationMax: undefined },
+      description: {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Build the product.' }] }],
+      },
+      formId: '33333333-3333-4333-8333-333333333333',
+      formIsArchived: false,
+      criteria: [],
+      interviewPlanId: '66666666-6666-4666-8666-666666666666',
+    };
+
+    expect(validateForPublish(input)).toEqual([{ label: 'Compensation', target: 'settings' }]);
+    expect(validateForPublish({ ...input, values: { ...input.values, compensationDisplayMode: 'hidden' } })).toEqual(
+      [],
+    );
+
+    const saved = prepareJobAutosave({
+      values: { ...baseValues, compensationDisplayMode: 'hidden' },
+      description: null,
+      skills: [],
+      formId: null,
+      criteria: [],
+      interviewPlanId: null,
+      hiringTeam: [],
+    });
+
+    expect(saved.data.compensationDisplayMode).toBe('hidden');
+    expect(saved.data.compensation?.tiers[0]).toMatchObject({ base_min: 115000, base_max: 150000 });
+
+    const incompleteRange = {
+      values: input.values,
+      description: null,
+      skills: [],
+      formId: null,
+      criteria: [],
+      interviewPlanId: null,
+      hiringTeam: [],
+    };
+    const published = prepareJobAutosave(incompleteRange, { isPostingPublished: true });
+
+    expect(published.blockedKeys).toEqual(['compensation', 'compensationDisplayMode']);
+    expect(prepareJobAutosave(incompleteRange).blockedKeys).toEqual([]);
+
+    for (const compensationDisplayMode of ['hidden', 'custom'] as const) {
+      const snapshot = prepareJobAutosave(
+        { ...incompleteRange, values: { ...input.values, compensationDisplayMode } },
+        { isPostingPublished: true },
+      );
+
+      expect(snapshot.blockedKeys).toEqual([]);
+    }
   });
 });

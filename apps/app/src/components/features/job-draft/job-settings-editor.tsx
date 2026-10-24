@@ -11,7 +11,9 @@ interface JobSettingsEditorProps {
   hiringTeam: HiringTeamEntry[];
   onChangeHiringTeam: (team: HiringTeamEntry[]) => void;
   showPublishRequiredMarkers?: boolean;
+  showCompensationDisclosure?: boolean;
   initialTab?: JobSettingsTab;
+  readOnly?: boolean;
 }
 
 export function JobSettingsEditor({
@@ -20,13 +22,30 @@ export function JobSettingsEditor({
   hiringTeam,
   onChangeHiringTeam,
   showPublishRequiredMarkers = true,
+  showCompensationDisclosure = true,
   initialTab,
+  readOnly = false,
 }: JobSettingsEditorProps) {
   return (
     <JobSettingsTabs
       initialTab={initialTab}
-      basic={<JobBasicSettingsCard orgId={orgId} form={form} showPublishRequiredMarkers={showPublishRequiredMarkers} />}
-      hiringTeam={<HiringTeamTab orgId={orgId} hiringTeam={hiringTeam} onChangeHiringTeam={onChangeHiringTeam} />}
+      basic={
+        <JobBasicSettingsCard
+          orgId={orgId}
+          form={form}
+          readOnly={readOnly}
+          showPublishRequiredMarkers={showPublishRequiredMarkers}
+          showCompensationDisclosure={showCompensationDisclosure}
+        />
+      }
+      hiringTeam={
+        <HiringTeamTab
+          orgId={orgId}
+          hiringTeam={hiringTeam}
+          readOnly={readOnly}
+          onChangeHiringTeam={onChangeHiringTeam}
+        />
+      }
     />
   );
 }

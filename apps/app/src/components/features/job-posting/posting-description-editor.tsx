@@ -20,6 +20,7 @@ export const PostingDescriptionEditor = memo(function PostingDescriptionEditor({
     <RichTextEditor
       content={content}
       onUpdate={onChange}
+      syncContent
       toolbar={readOnly ? undefined : <DescriptionToolbar />}
       placeholder=""
       debounceMs={0}

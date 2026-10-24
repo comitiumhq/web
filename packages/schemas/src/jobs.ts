@@ -162,6 +162,7 @@ export const jobEditorSchema = z.object({
   employmentType: z.string().nullable(),
   category: z.string().nullable(),
   compensation: compensationConfigSchema.nullable(),
+  compensationDisplayMode: z.enum(['inherit', 'hidden', 'custom']),
   formId: uuidSchema.nullable(),
   applicationCapacity: z.number().int().min(1).max(1000).nullable(),
   criteria: z.array(evaluationCriterionSchema).nullable(),
@@ -265,6 +266,7 @@ export type UpdateJobEditorData = {
   employmentType?: string | null;
   category?: string | null;
   compensation?: CompensationConfig | null;
+  compensationDisplayMode?: 'inherit' | 'hidden' | 'custom';
   formId?: string | null;
   applicationCapacity?: number | null;
   criteria?: EvaluationCriterion[] | null;

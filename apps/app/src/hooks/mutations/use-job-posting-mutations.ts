@@ -4,18 +4,32 @@ import { toast } from 'sonner';
 import { qk } from '@/hooks/query-keys';
 import { publishJobPosting, unpublishJobPosting, updateJobPosting } from '@/lib/api/jobs';
 import { invalidateJobQueries, type JobQueryTarget } from './invalidate-job-queries';
+import { invalidateSettingsUsage } from './invalidate-settings-usage';
 
 export function useUpdateJobPosting(target: JobQueryTarget) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: qk.jobs.posting(target.orgId, target.jobId),
     mutationFn: (data: UpdateJobPostingData) => updateJobPosting(target.orgId, target.jobId, data),
-    onSuccess: (posting) => {
-      queryClient.setQueryData(qk.jobs.posting(target.orgId, target.jobId), posting);
-      void invalidateJobQueries(queryClient, target);
-      toast.success('Posting settings saved');
+    onSuccess: async (posting, changes) => {
+      const postingKey = qk.jobs.posting(target.orgId, target.jobId);
+
+      await queryClient.cancelQueries({ queryKey: postingKey, exact: true });
+
+      queryClient.setQueryData(postingKey, posting);
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: qk.jobs.summary(target.jobId) }),
+        queryClient.invalidateQueries({ queryKey: qk.jobs.editor(target.orgId, target.jobId) }),
+        queryClient.invalidateQueries({ queryKey: qk.jobs.orgRoot(target.orgId) }),
+        queryClient.invalidateQueries({ queryKey: qk.jobs.draftsOrg(target.orgId) }),
+      ]);
+
+      if ('formId' in changes) {
+        invalidateSettingsUsage(queryClient);
+      }
     },
-    onError: (error: Error) => toast.error(error.message || 'Could not save Posting settings'),
   });
 }
 
@@ -27,6 +41,7 @@ export function usePublishJobPosting(target: JobQueryTarget) {
     onSuccess: async (posting) => {
       queryClient.setQueryData(qk.jobs.posting(target.orgId, target.jobId), posting);
       await invalidateJobQueries(queryClient, target);
+
       toast.success('Posting published');
     },
     onError: (error: Error) => toast.error(error.message || 'Could not publish Posting'),
@@ -44,6 +59,7 @@ export function useUnpublishJobPosting(target: JobQueryTarget) {
     onSuccess: async (result) => {
       queryClient.setQueryData(qk.jobs.posting(target.orgId, target.jobId), result.posting);
       await invalidateJobQueries(queryClient, target);
+
       toast.success('Posting unpublished', { id: 'unpublish-posting' });
     },
     onError: (error: Error) => {

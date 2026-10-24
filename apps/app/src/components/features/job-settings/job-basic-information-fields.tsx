@@ -200,7 +200,7 @@ function CategoryField({
               ariaLabel="Category"
               options={[...CATEGORIES]}
               value={field.value ?? null}
-              onValueChange={field.onChange}
+              onValueChange={(value) => field.onChange(value ?? undefined)}
               placeholder="Select category"
               searchPlaceholder="Search category…"
               emptyMessage="No category options found."

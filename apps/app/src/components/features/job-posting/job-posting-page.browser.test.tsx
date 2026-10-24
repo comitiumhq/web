@@ -1,3 +1,4 @@
+import { TooltipProvider } from '@comitium/ui/tooltip';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { JobPostingPage } from './job-posting-page';
@@ -80,12 +81,19 @@ vi.mock('@/config/site', () => ({
   getMyOrigin: () => 'https://my.example.test',
 }));
 
-vi.mock('./application-form-dialog', () => ({
-  ApplicationFormDialog: () => null,
+vi.mock('../editor-autosave/autosave-navigation-guard', () => ({ AutosaveNavigationGuard: () => null }));
+
+vi.mock('../job-draft/application-form-picker', () => ({
+  ApplicationFormPicker: ({ onChange }: { onChange: (formId: string | null) => void }) => (
+    <button type="button" onClick={() => onChange('form-2')}>
+      Select another form
+    </button>
+  ),
 }));
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.updateAsync.mockResolvedValue({ version: 8 });
   mocks.job = {
     canonicalUrl: 'https://jobs.example.test/careers/acme/jobs/backend-engineer',
     lifecycle: {
@@ -111,26 +119,58 @@ beforeEach(() => {
 });
 
 describe('JobPostingPage', () => {
-  it('edits and saves the description inline', async () => {
+  it('keeps form selection in its existing dialog and saves the choice immediately', async () => {
+    const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
+
+    await screen.getByRole('tab', { name: 'Application form' }).click();
+
+    await expect.element(screen.getByText('Default Application Form', { exact: true })).toBeVisible();
+    await expect.element(screen.getByRole('button', { name: 'Select another form' })).not.toBeInTheDocument();
+
+    await screen.getByRole('button', { name: 'Change form' }).click();
+
+    const dialog = screen.getByRole('dialog');
+
+    await expect.element(dialog.getByRole('heading', { name: 'Choose Application Form' })).toBeVisible();
+    await expect.element(dialog.getByRole('button', { name: 'Save', exact: true })).not.toBeInTheDocument();
+
+    await dialog.getByRole('button', { name: 'Select another form' }).click();
+
+    await expect
+      .poll(() => mocks.updateAsync.mock.calls)
+      .toEqual([[{ expectedVersion: 7, formId: 'form-2', skills: undefined }]]);
+    await expect.element(screen.getByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('autosaves the description without a save button', async () => {
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await expect.element(screen.getByTestId('description-editor')).toHaveAttribute('data-read-only', 'false');
+
     await expect.element(screen.getByRole('tab', { name: 'Skills' })).not.toBeInTheDocument();
+
     await expect.element(screen.getByRole('button', { name: 'Edit description' })).not.toBeInTheDocument();
 
     await screen.getByRole('button', { name: 'Update description' }).click();
-    await screen.getByRole('button', { name: 'Save changes' }).click();
 
-    expect(mocks.updateAsync).toHaveBeenCalledExactlyOnceWith({
-      expectedVersion: 7,
-      description: UPDATED_DESCRIPTION,
-    });
+    await expect
+      .poll(() => mocks.updateAsync.mock.calls)
+      .toEqual([
+        [
+          {
+            expectedVersion: 7,
+            description: UPDATED_DESCRIPTION,
+            skills: undefined,
+          },
+        ],
+      ]);
   });
 
   it('publishes an unpublished Posting directly', async () => {
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await expect.element(screen.getByRole('button', { name: 'Publish' })).toBeEnabled();
+
     await screen.getByRole('button', { name: 'Publish' }).click();
 
     expect(mocks.publish).toHaveBeenCalledExactlyOnceWith({ expectedVersion: 7 });
@@ -141,25 +181,31 @@ describe('JobPostingPage', () => {
       ...mocks.posting,
       form: { ...mocks.posting.form, isArchived: true },
     };
+
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await screen.getByRole('button', { name: 'Publish' }).click();
 
     await expect.element(screen.getByText('Complete required fields:')).toBeInTheDocument();
+
     await expect.element(screen.getByRole('button', { name: 'Application form' })).toBeInTheDocument();
+
     expect(mocks.publish).not.toHaveBeenCalled();
   });
 
   it('requires confirmation before unpublishing', async () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
+
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await screen.getByRole('button', { name: 'Posting actions' }).click();
+
     await screen.getByRole('menuitem', { name: 'Unpublish' }).click();
 
     const dialog = screen.getByRole('dialog');
 
     await expect.element(dialog.getByRole('heading', { name: 'Unpublish this Posting?' })).toBeInTheDocument();
+
     await dialog.getByRole('button', { name: 'Unpublish' }).click();
 
     expect(mocks.unpublish).toHaveBeenCalledExactlyOnceWith(
@@ -170,6 +216,7 @@ describe('JobPostingPage', () => {
 
   it('opens the canonical Posting path in the candidate app', async () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
+
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await expect
@@ -179,27 +226,63 @@ describe('JobPostingPage', () => {
 
   it('renders a Closed Job Posting as read-only', async () => {
     mocks.job = { ...mocks.job, status: 'closed' };
+
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await expect.element(screen.getByTestId('description-editor')).toHaveAttribute('data-read-only', 'true');
 
     await screen.getByRole('tab', { name: 'Application form' }).click();
+
     await expect.element(screen.getByRole('button', { name: 'Change form' })).not.toBeInTheDocument();
 
     await screen.getByRole('tab', { name: 'Capacity' }).click();
+
     await expect.element(screen.getByRole('button', { name: 'Save changes' })).not.toBeInTheDocument();
+
     await expect.element(screen.getByLabelText('Maximum applications')).toBeDisabled();
+
     await expect.element(screen.getByRole('button', { name: 'Publish' })).toBeDisabled();
   });
 
-  it('enables the capacity save action only after the value changes', async () => {
+  it('autosaves capacity and keeps the input editable', async () => {
     mocks.posting = { ...mocks.posting, status: 'published' };
+
     const screen = await render(<JobPostingPage orgId="org-1" jobId="job-1" />);
 
     await screen.getByRole('tab', { name: 'Capacity' }).click();
-    await expect.element(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+
     await screen.getByLabelText('Maximum applications').fill('30');
 
-    await expect.element(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+    await expect
+      .poll(() => mocks.updateAsync.mock.calls)
+      .toEqual([[{ expectedVersion: 7, applicationCapacity: 30, skills: undefined }]]);
+
+    await expect.element(screen.getByLabelText('Maximum applications')).toBeEnabled();
+
+    await expect.element(screen.getByRole('button', { name: 'Save changes' })).not.toBeInTheDocument();
+  });
+
+  it('explains invalid capacity in the warning tooltip and clears it after correction', async () => {
+    const screen = await render(
+      <TooltipProvider>
+        <JobPostingPage orgId="org-1" jobId="job-1" />
+      </TooltipProvider>,
+    );
+
+    await screen.getByRole('tab', { name: 'Capacity' }).click();
+    await screen.getByLabelText('Maximum applications').fill('1001');
+    await screen.getByRole('button', { name: 'Unsaved changes' }).hover();
+    await expect
+      .element(screen.getByRole('tooltip'))
+      .toHaveTextContent('Capacity must be a whole number between 1 and 1,000');
+
+    expect(mocks.updateAsync).not.toHaveBeenCalled();
+
+    await screen.getByLabelText('Maximum applications').fill('30');
+    await expect.element(screen.getByRole('button', { name: 'Unsaved changes' })).not.toBeInTheDocument();
+    await expect.element(screen.getByRole('tooltip')).not.toBeInTheDocument();
+    await expect
+      .poll(() => mocks.updateAsync.mock.calls)
+      .toEqual([[{ expectedVersion: 7, applicationCapacity: 30, skills: undefined }]]);
   });
 });

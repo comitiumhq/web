@@ -70,7 +70,11 @@ export function JobLifecycleMenu({ job, orgId, actionsDisabled = false }: JobLif
             </DropdownMenuItem>
           )}
           {canClose && (
-            <DropdownMenuItem variant="destructive" onSelect={() => setCloseDialogOpen(true)}>
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={actionsDisabled}
+              onSelect={() => setCloseDialogOpen(true)}
+            >
               Close job
             </DropdownMenuItem>
           )}

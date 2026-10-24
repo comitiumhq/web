@@ -10,6 +10,7 @@ import { EmptyState } from '@comitium/ui/empty-state';
 import { Input } from '@comitium/ui/input';
 import { Label } from '@comitium/ui/label';
 import { Skeleton } from '@comitium/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { type DragDropEventHandlers, DragDropProvider } from '@dnd-kit/react';
 import { CircleAlertIcon, PlusIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -17,7 +18,7 @@ import { toast } from 'sonner';
 import { useCreateForm, useUpdateForm } from '@/hooks/mutations/use-form';
 import { useQueryForm } from '@/hooks/queries/use-query-form';
 import { applyDndReorder } from '@/lib/utils/dnd';
-
+import { FormPreview } from './form-preview';
 import { type FormBuilderQuestion, optionsToSelectableValues, type QuestionFormData } from './question-form';
 import { SectionCard, type SectionCardData, type SectionController } from './section-card';
 
@@ -142,6 +143,7 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
   const [sections, setSections] = useState<EditorSection[]>([]);
   const [snapshot, setSnapshot] = useState<string>('');
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+  const [view, setView] = useState('edit');
 
   const initialize = useCallback(
     (detail?: AdminFormDetail) => {
@@ -345,39 +347,56 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="form-title-input">Title</Label>
-            <Input
-              id="form-title-input"
-              value={title}
-              onChange={handleTitleChange}
-              disabled={isSaving}
-              placeholder={titlePlaceholder}
-            />
-          </div>
+      <Tabs value={view} onValueChange={setView} className="min-h-0 flex-1 gap-0">
+        <TabsList aria-label="Form view" className="absolute top-3.5 right-14">
+          <TabsTrigger value="edit">Edit</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+        </TabsList>
+        <TabsContent value="edit" className="min-h-0 overflow-y-auto px-6 py-6">
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="form-title-input">Title</Label>
+              <Input
+                id="form-title-input"
+                value={title}
+                onChange={handleTitleChange}
+                disabled={isSaving}
+                placeholder={titlePlaceholder}
+              />
+            </div>
 
-          <div className="flex flex-col gap-4">
-            {canDragSections ? (
-              <DragDropProvider onDragEnd={handleSectionDragEnd}>{sectionCards}</DragDropProvider>
-            ) : (
-              sectionCards
-            )}
+            <div className="flex flex-col gap-4">
+              {canDragSections ? (
+                <DragDropProvider onDragEnd={handleSectionDragEnd}>{sectionCards}</DragDropProvider>
+              ) : (
+                sectionCards
+              )}
 
-            <Button
-              type="button"
-              variant="outline"
-              className="self-start"
-              onClick={handleAddSection}
-              disabled={isSaving}
-            >
-              <PlusIcon data-icon="inline-start" />
-              Add section
-            </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="self-start"
+                onClick={handleAddSection}
+                disabled={isSaving}
+              >
+                <PlusIcon data-icon="inline-start" />
+                Add section
+              </Button>
+            </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+        <TabsContent value="preview" className="min-h-0 overflow-y-auto px-6 py-6">
+          <FormPreview
+            formClass={formClass}
+            title={title}
+            sections={sections.map((section) => ({
+              id: section.clientId,
+              title: section.title,
+              questions: section.questions,
+            }))}
+          />
+        </TabsContent>
+      </Tabs>
 
       <div className="border-t border-separator px-6 py-4 shrink-0 flex flex-row justify-end gap-2">
         <Button type="button" variant="outline" onClick={handleClose} disabled={isSaving}>

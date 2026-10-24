@@ -58,13 +58,11 @@ export const CareerJobRow = memo(function CareerJobRow({ job, isLast }: CareerJo
             )}
           </div>
 
-          {salary && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className={ROW_VALUE_BADGE_CLASS}>
-                {salary}
-              </Badge>
-            </div>
-          )}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className={ROW_VALUE_BADGE_CLASS}>
+              {salary}
+            </Badge>
+          </div>
           <RequiredSkillPreview skills={job.skills} />
         </div>
 

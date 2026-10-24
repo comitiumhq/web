@@ -75,16 +75,27 @@ export function useUpdateJobTemplate() {
 
   return useMutation({
     mutationFn: (params: UpdateParams) => updateJobTemplate(params.orgId, params.templateId, params.body),
-    onSuccess: (_, variables) => {
-      toast.success('Job template updated');
-      invalidateTemplates(queryClient, variables.orgId);
+    onSuccess: async (_, variables) => {
+      const { orgId, templateId, body } = variables;
+      const planChanged = 'interviewPlanId' in body;
+      const titleChanged = 'title' in body;
+      const affectsSettingsUsage = planChanged || titleChanged || 'formId' in body;
+      const refreshes = [queryClient.invalidateQueries({ queryKey: qk.templates.jobsRoot(orgId) })];
 
-      if ('interviewPlanId' in variables.body) {
-        queryClient.invalidateQueries({ queryKey: qk.stageActivities.root() });
-        queryClient.invalidateQueries({ queryKey: qk.interviewPlans.root(variables.orgId) });
+      if (planChanged) {
+        refreshes.push(queryClient.invalidateQueries({ queryKey: qk.stageActivities.template(orgId, templateId) }));
+      }
+
+      if (planChanged || titleChanged) {
+        refreshes.push(queryClient.invalidateQueries({ queryKey: qk.interviewPlans.root(orgId) }));
+      }
+
+      await Promise.all(refreshes);
+
+      if (affectsSettingsUsage) {
+        invalidateSettingsUsage(queryClient);
       }
     },
-    onError: onMutationError,
   });
 }
 

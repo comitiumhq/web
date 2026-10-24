@@ -121,7 +121,7 @@ beforeEach(() => {
   mocks.decryptFeedbackBuckets.mockResolvedValue({ answer: 'decrypted' });
   mocks.ensureUnlocked.mockResolvedValue(undefined);
   mocks.isLoadingSubmissions = false;
-  mocks.resolveForm.mockResolvedValue({ data: { formSnapshot: snapshot() } });
+  mocks.resolveForm.mockResolvedValue({ data: { formSnapshot: snapshot(), formSnapshotHash: `0x${'1'.repeat(64)}` } });
   mocks.submissions = [];
 });
 
@@ -138,6 +138,7 @@ describe('useFeedbackSubmissionFlow', () => {
     expect(hook.result.current).toMatchObject({
       formId: FORM_ID,
       previousSubmissionId: null,
+      formSnapshotHash: `0x${'1'.repeat(64)}`,
       defaultValues: { defaultAnswer: '' },
     });
   });
@@ -177,8 +178,8 @@ describe('useFeedbackSubmissionFlow', () => {
   });
 
   it('ignores an older form response after the source changes', async () => {
-    const first = deferred<{ data: { formSnapshot: FormDefinitionSnapshot } }>();
-    const second = deferred<{ data: { formSnapshot: FormDefinitionSnapshot } }>();
+    const first = deferred<{ data: { formSnapshot: FormDefinitionSnapshot; formSnapshotHash: string } }>();
+    const second = deferred<{ data: { formSnapshot: FormDefinitionSnapshot; formSnapshotHash: string } }>();
     const secondFormId = '99999999-9999-4999-8999-999999999999';
 
     mocks.resolveForm.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
@@ -192,10 +193,10 @@ describe('useFeedbackSubmissionFlow', () => {
     });
     await vi.waitFor(() => expect(mocks.resolveForm).toHaveBeenCalledTimes(2));
 
-    second.resolve({ data: { formSnapshot: snapshot(secondFormId) } });
+    second.resolve({ data: { formSnapshot: snapshot(secondFormId), formSnapshotHash: `0x${'2'.repeat(64)}` } });
     await vi.waitFor(() => expect(hook.result.current.formId).toBe(secondFormId));
 
-    first.resolve({ data: { formSnapshot: snapshot() } });
+    first.resolve({ data: { formSnapshot: snapshot(), formSnapshotHash: `0x${'1'.repeat(64)}` } });
     await Promise.resolve();
     await Promise.resolve();
 

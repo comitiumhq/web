@@ -26,7 +26,7 @@ export function CriterionEvidenceContent({ evidenceState, orgId }: CriterionEvid
 
   if (evidenceState.status === 'error') {
     return (
-      <p className="border-t border-separator bg-muted/30 px-4 py-3 text-label-12 text-destructive">
+      <p className="border-t border-separator bg-muted/30 px-4 py-3 text-copy-14 text-destructive">
         Evidence could not be decrypted.
       </p>
     );
@@ -34,12 +34,12 @@ export function CriterionEvidenceContent({ evidenceState, orgId }: CriterionEvid
 
   return (
     <div className="space-y-3 border-t border-separator bg-muted/30 px-4 py-3">
-      <p className="text-label-12 leading-relaxed text-foreground">{evidenceState.evidence.rationale}</p>
+      <p className="text-copy-14 text-content-foreground">{evidenceState.evidence.rationale}</p>
       {evidenceState.evidence.citations.length > 0 && (
         <ul className="space-y-2">
           {evidenceState.evidence.citations.map((citation) => (
             <li key={citation.excerpt} className="border-l-2 border-border pl-2.5">
-              <p className="text-label-12 leading-relaxed text-muted-foreground">“{citation.excerpt}”</p>
+              <p className="text-copy-14 text-muted-foreground">“{citation.excerpt}”</p>
             </li>
           ))}
         </ul>
@@ -51,8 +51,8 @@ export function CriterionEvidenceContent({ evidenceState, orgId }: CriterionEvid
 function CriterionEvidenceSkeleton() {
   return (
     <div className="space-y-2 border-t border-separator bg-muted/30 px-4 py-3">
-      <Skeleton className="h-3 w-full" />
-      <Skeleton className="h-3 w-4/5" />
+      <Skeleton className="h-3.5 w-full" />
+      <Skeleton className="h-3.5 w-4/5" />
       <Skeleton className="mt-3 h-8 w-full" />
     </div>
   );

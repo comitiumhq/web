@@ -1,10 +1,9 @@
-import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@comitium/ui/dropdown-menu';
 import { SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, type ReactNode, useCallback, useState } from 'react';
 import {
   useActivateJobTemplate,
   useArchiveJobTemplate,
@@ -21,6 +20,7 @@ interface TemplateHeaderProps {
   templateTitle: string;
   status: JobTemplateStatus;
   isDirty: boolean;
+  saveStatus?: ReactNode;
   isNew: boolean;
   onArchived: () => void;
 }
@@ -31,6 +31,7 @@ export const TemplateHeader = memo(function TemplateHeader({
   templateTitle,
   status,
   isDirty,
+  saveStatus,
   isNew,
   onArchived,
 }: TemplateHeaderProps) {
@@ -44,7 +45,7 @@ export const TemplateHeader = memo(function TemplateHeader({
   const isArchived = status === 'archived';
   const isActive = status === 'active';
   const isInactive = status === 'inactive';
-  const anyPending = isActivating || isDeactivating || isArchiving || isRestoring;
+  const anyPending = isDirty || isActivating || isDeactivating || isArchiving || isRestoring;
 
   const handleActivate = useCallback(() => {
     if (!templateId) {
@@ -92,13 +93,13 @@ export const TemplateHeader = memo(function TemplateHeader({
     <>
       <div className="flex shrink-0 items-start justify-between gap-3 border-b border-separator px-6 py-5">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <SheetTitle className="text-heading-20 truncate">
               {isNew ? 'New job template' : templateTitle || 'Untitled template'}
             </SheetTitle>
             <SheetDescription className="sr-only">Job template editor</SheetDescription>
             {!isNew && <TemplateStatusBadge status={status} />}
-            {!isNew && isDirty && <Badge variant="secondary">Unsaved changes</Badge>}
+            {saveStatus}
           </div>
         </div>
 

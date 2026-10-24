@@ -1,10 +1,5 @@
 import type { ApplicationProcessingStatus } from '@comitium/schemas/applications';
 
-const FAILURE_STATUS_LABELS = {
-  retryable_failed: 'Application processing delayed',
-  terminal_failed: 'Application processing unavailable',
-} as const;
-
 interface EvaluationStatusProps {
   processing: ApplicationProcessingStatus;
 }
@@ -12,14 +7,6 @@ interface EvaluationStatusProps {
 export function EvaluationStatus({ processing }: EvaluationStatusProps) {
   if (processing.criteriaEvaluationMode === null) {
     return null;
-  }
-
-  if (processing.status === 'retryable_failed' || processing.status === 'terminal_failed') {
-    return (
-      <div className="rounded-lg bg-muted/50 px-3 py-3">
-        <p className="text-label-14">{FAILURE_STATUS_LABELS[processing.status]}</p>
-      </div>
-    );
   }
 
   if (processing.status !== 'complete') {

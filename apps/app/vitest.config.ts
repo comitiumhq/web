@@ -12,6 +12,7 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		include: [
+			'@noble/hashes/argon2.js',
 			'@noble/hashes/hmac.js',
 			'@dnd-kit/react',
 			'@dnd-kit/react/sortable',
@@ -23,6 +24,7 @@ export default defineConfig({
 			'@tanstack/react-router',
 			'neverthrow',
 			'react-hook-form',
+			'uuid',
 		],
 	},
 	test: {

@@ -1,6 +1,6 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
 import type { JobPosting } from '@comitium/schemas/jobs';
-import { MAX_POSTING_SKILLS, type SkillRequirement } from '@comitium/schemas/skills';
+import type { SkillRequirement } from '@comitium/schemas/skills';
 import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Card, CardContent } from '@comitium/ui/card';
@@ -9,21 +9,18 @@ import { PageContainer } from '@comitium/ui/page-container';
 import { richTextToPlainText } from '@comitium/ui/rich-text';
 import { Spinner } from '@comitium/ui/spinner';
 import { ExternalLinkIcon, PencilIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { DraftSectionSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
 import { getMyOrigin } from '@/config/site';
-import {
-  usePublishJobPosting,
-  useUnpublishJobPosting,
-  useUpdateJobPosting,
-} from '@/hooks/mutations/use-job-posting-mutations';
+import { usePublishJobPosting, useUnpublishJobPosting } from '@/hooks/mutations/use-job-posting-mutations';
 import { useQueryJobPosting } from '@/hooks/queries/use-query-job-posting';
 import { useQueryJobSummary } from '@/hooks/queries/use-query-job-summary';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
-import { toSkillSelections } from '@/lib/jobs/skills';
 import { Permission } from '@/lib/schemas/org';
 
+import { AutosaveNavigationGuard } from '../editor-autosave/autosave-navigation-guard';
+import { AutosaveStatus } from '../editor-autosave/autosave-status';
 import { isValidApplicationCapacity } from './application-capacity';
 import { ApplicationCapacityControl } from './application-capacity-control';
 import { ApplicationFormDialog } from './application-form-dialog';
@@ -32,6 +29,7 @@ import { PostingDescriptionEditor } from './posting-description-editor';
 import { type PostingTab, PostingTabs } from './posting-tabs';
 import { PublishValidationBanner, type PublishValidationError } from './publish-validation-banner';
 import { SkillsEditor } from './skills-editor';
+import { usePostingAutosave } from './use-posting-autosave';
 
 const UNPUBLISH_DESCRIPTION =
   'The Posting will be removed from job boards and stop accepting new applications. Existing candidates will remain in the Pipeline.';
@@ -44,24 +42,22 @@ interface JobPostingPageProps {
 export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
   const postingQuery = useQueryJobPosting(orgId, jobId);
   const summaryQuery = useQueryJobSummary(jobId);
-  const updatePosting = useUpdateJobPosting({ orgId, jobId });
   const publishPosting = usePublishJobPosting({ orgId, jobId });
   const unpublishPosting = useUnpublishJobPosting({ orgId, jobId });
   const { canOnJob, isLoading: permissionsLoading } = useJobPermissions(jobId);
-  const [applicationCapacity, setApplicationCapacity] = useState<number | null>(null);
-  const [descriptionDraft, setDescriptionDraft] = useState<TipTapDoc | null>(null);
-  const [skillsDraft, setSkillsDraft] = useState<SkillRequirement[] | null>(null);
-  const [descriptionHasChanged, setDescriptionHasChanged] = useState(false);
   const [activeTab, setActiveTab] = useState<PostingTab>('description');
   const [publishErrors, setPublishErrors] = useState<PublishValidationError<PostingTab>[]>([]);
-  const [applicationFormDialogOpen, setApplicationFormDialogOpen] = useState(false);
   const [unpublishOpen, setUnpublishOpen] = useState(false);
+  const [applicationFormDialogOpen, setApplicationFormDialogOpen] = useState(false);
 
-  useEffect(() => {
-    if (postingQuery.data) {
-      setApplicationCapacity(postingQuery.data.applicationCapacity);
-    }
-  }, [postingQuery.data]);
+  const canEdit = Boolean(summaryQuery.data && summaryQuery.data.status !== 'closed' && canOnJob(Permission.JOB_EDIT));
+  const {
+    autosave,
+    data: local,
+    setData,
+    version,
+    isInitialized,
+  } = usePostingAutosave(orgId, jobId, postingQuery.data, canEdit);
 
   if (postingQuery.isLoading || summaryQuery.isLoading) {
     return <DraftSectionSkeleton tab="posting" />;
@@ -79,29 +75,22 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     );
   }
 
+  if (!isInitialized) {
+    return <DraftSectionSkeleton tab="posting" />;
+  }
+
   const isPostingPublished = posting.status === 'published';
-  const isJobClosed = job.status === 'closed';
   const postingAllowsPublication = !isPostingPublished && job.status === 'open';
 
-  const canEdit = !isJobClosed && canOnJob(Permission.JOB_EDIT);
   const canPublishPosting = canOnJob(Permission.JOB_PUBLISH);
   const canUnpublishPosting = canOnJob(Permission.JOB_UNPUBLISH);
   const canPublish = canPublishPosting && postingAllowsPublication && !permissionsLoading;
 
-  const currentDescription = descriptionHasChanged ? descriptionDraft : posting.description;
-  const currentSkills = skillsDraft ?? posting.skills;
-  const capacityHasChanged = applicationCapacity !== posting.applicationCapacity;
-  const skillsHaveChanged = skillsDraft !== null;
+  const currentDescription = local.description ?? null;
+  const currentSkills = local.skills ?? [];
+  const applicationCapacity = local.applicationCapacity ?? null;
   const hasRetiredSkills = currentSkills.some((skill) => skill.status === 'retired');
-  const hasUnsavedPostingChanges = descriptionHasChanged || skillsHaveChanged || capacityHasChanged;
-
-  const isSavingPosting = updatePosting.isPending;
-  const canSaveChanges = canEdit && !isSavingPosting;
-  const canSaveDescription =
-    canSaveChanges && descriptionHasChanged && Boolean(richTextToPlainText(currentDescription));
-  const canSaveSkills =
-    canSaveChanges && skillsHaveChanged && !hasRetiredSkills && currentSkills.length <= MAX_POSTING_SKILLS;
-  const canSaveCapacity = canSaveChanges && capacityHasChanged && isValidApplicationCapacity(applicationCapacity);
+  const hasUnsavedPostingChanges = autosave.isDirty || autosave.isSaving;
 
   const candidatePostingUrl = getCandidatePostingUrl(job.canonicalUrl);
 
@@ -111,57 +100,25 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     }
 
     await navigator.clipboard.writeText(candidatePostingUrl);
+
     toast.success('Posting link copied');
   };
 
-  const handleSaveCapacity = () => {
-    if (!canSaveCapacity) {
-      return;
-    }
-
-    updatePosting.mutate({
-      expectedVersion: posting.version,
-      applicationCapacity,
-    });
-  };
-
   const handleDescriptionChange = (description: TipTapDoc) => {
-    setDescriptionDraft(description);
-    setDescriptionHasChanged(true);
+    setData((current) => ({ ...current, description }));
     setPublishErrors([]);
   };
 
-  const handleSaveDescription = async () => {
-    if (!canSaveDescription || !currentDescription) {
-      return;
-    }
-
-    await updatePosting.mutateAsync({
-      expectedVersion: posting.version,
-      description: currentDescription,
-    });
-
-    setDescriptionHasChanged(false);
+  const handleSkillsChange = (skills: SkillRequirement[]) => {
+    setData((current) => ({ ...current, skills }));
+    autosave.saveImmediately();
   };
 
-  const handleSaveSkills = async () => {
-    if (!canSaveSkills) {
-      return;
-    }
-
-    await updatePosting.mutateAsync({
-      expectedVersion: posting.version,
-      skills: toSkillSelections(currentSkills),
-    });
-    setSkillsDraft(null);
-  };
-
-  const handleSaveApplicationForm = async (formId: string) => {
-    await updatePosting.mutateAsync({
-      expectedVersion: posting.version,
-      formId,
-    });
+  const handleFormChange = (formId: string | null) => {
+    setData((current) => ({ ...current, formId }));
+    autosave.saveImmediately();
     setPublishErrors([]);
+    setApplicationFormDialogOpen(false);
   };
 
   const handlePublish = () => {
@@ -175,17 +132,22 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
     }
 
     setPublishErrors([]);
-    publishPosting.mutate({ expectedVersion: posting.version });
+    publishPosting.mutate({ expectedVersion: version.current });
   };
 
-  const handleUnpublish = () => {
-    unpublishPosting.mutate(posting.version, {
+  const handleUnpublish = async () => {
+    if (!(await autosave.flush())) {
+      return;
+    }
+
+    unpublishPosting.mutate(version.current, {
       onSuccess: () => setUnpublishOpen(false),
     });
   };
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto" onBlurCapture={() => void autosave.flush()}>
+      <AutosaveNavigationGuard autosave={autosave} />
       {publishErrors.length > 0 && (
         <PublishValidationBanner
           errors={publishErrors}
@@ -206,7 +168,8 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
             </Badge>
           </div>
 
-          <div className="flex flex-wrap justify-end gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {canEdit && <AutosaveStatus autosave={autosave} />}
             {isPostingPublished && candidatePostingUrl && (
               <Button asChild variant="outline" size="sm">
                 <a href={candidatePostingUrl} target="_blank" rel="noopener noreferrer">
@@ -230,7 +193,7 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
             {isPostingPublished && (
               <PostingActionsMenu
                 canCopyLink={candidatePostingUrl !== null}
-                canUnpublish={canUnpublishPosting}
+                canUnpublish={canUnpublishPosting && !hasUnsavedPostingChanges}
                 onCopyLink={() => void handleCopyPostingLink()}
                 onUnpublish={() => setUnpublishOpen(true)}
               />
@@ -247,31 +210,14 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
                 content={currentDescription}
                 onChange={canEdit ? handleDescriptionChange : undefined}
                 readOnly={!canEdit}
-                disabled={isSavingPosting}
               />
-              {canEdit && descriptionHasChanged && (
-                <div className="flex justify-end">
-                  <Button size="sm" onClick={() => void handleSaveDescription()} disabled={!canSaveDescription}>
-                    {isSavingPosting && <Spinner data-icon="inline-start" />}
-                    {isSavingPosting ? 'Saving...' : 'Save changes'}
-                  </Button>
-                </div>
-              )}
             </div>
           }
           skills={
             <div className="space-y-3">
-              <SkillsEditor value={currentSkills} onChange={setSkillsDraft} disabled={!canEdit || isSavingPosting} />
-              {skillsHaveChanged && hasRetiredSkills && (
+              <SkillsEditor value={currentSkills} onChange={handleSkillsChange} disabled={!canEdit} />
+              {hasRetiredSkills && (
                 <p className="text-copy-13 text-destructive">Remove or replace retired skills before saving.</p>
-              )}
-              {canEdit && skillsHaveChanged && (
-                <div className="flex justify-end">
-                  <Button size="sm" onClick={() => void handleSaveSkills()} disabled={!canSaveSkills}>
-                    {isSavingPosting && <Spinner data-icon="inline-start" />}
-                    {isSavingPosting ? 'Saving...' : 'Save skills'}
-                  </Button>
-                </div>
               )}
             </div>
           }
@@ -302,21 +248,13 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
                   <ApplicationCapacityControl
                     value={applicationCapacity}
                     onChange={(value) => {
-                      setApplicationCapacity(value);
+                      setData((current) => ({ ...current, applicationCapacity: value }));
                       setPublishErrors([]);
                     }}
-                    disabled={!canEdit || isSavingPosting}
+                    disabled={!canEdit}
                   />
                 </CardContent>
               </Card>
-              {canEdit && (
-                <div className="flex justify-end">
-                  <Button size="sm" onClick={handleSaveCapacity} disabled={!canSaveCapacity}>
-                    {isSavingPosting && <Spinner data-icon="inline-start" />}
-                    {isSavingPosting ? 'Saving...' : 'Save changes'}
-                  </Button>
-                </div>
-              )}
             </div>
           }
         />
@@ -333,15 +271,16 @@ export function JobPostingPage({ orgId, jobId }: JobPostingPageProps) {
         isPending={unpublishPosting.isPending}
       />
 
-      <ApplicationFormDialog
-        currentFormId={posting.form?.id ?? null}
-        isPending={updatePosting.isPending}
-        jobId={jobId}
-        open={applicationFormDialogOpen}
-        orgId={orgId}
-        onOpenChange={setApplicationFormDialogOpen}
-        onSave={handleSaveApplicationForm}
-      />
+      {canEdit && (
+        <ApplicationFormDialog
+          currentFormId={local.formId ?? null}
+          jobId={jobId}
+          open={applicationFormDialogOpen}
+          orgId={orgId}
+          onOpenChange={setApplicationFormDialogOpen}
+          onSelect={handleFormChange}
+        />
+      )}
     </div>
   );
 }

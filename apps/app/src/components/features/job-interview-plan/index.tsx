@@ -12,6 +12,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { isJobConfigurationReadOnly } from '@/lib/jobs/status';
 import { Permission } from '@/lib/schemas/org';
 import type { StageActivityOwner } from '@/lib/schemas/stage-activities';
+import { isDefined } from '@/lib/utils';
 
 import { InterviewPlanEditorView } from './editor-view';
 import { InterviewPlanSkeleton } from './skeleton';
@@ -30,7 +31,10 @@ interface JobInterviewPlanProps {
 
 export function JobInterviewPlan({ org, jobId, draftPlan }: JobInterviewPlanProps) {
   const { data: jobSummary, isLoading: summaryLoading, error: summaryError } = useQueryJobSummary(jobId);
-  const selectedPlanId = draftPlan?.selectedPlanId ?? jobSummary?.interviewPlanId ?? null;
+  const savedPlanId = jobSummary?.interviewPlanId ?? null;
+  const selectedPlanId = draftPlan ? draftPlan.selectedPlanId : savedPlanId;
+  const hasUnsavedPlanSelection = selectedPlanId !== savedPlanId;
+  const canReadActivities = isDefined(savedPlanId) && !hasUnsavedPlanSelection;
   const owner = useMemo<StageActivityOwner>(() => ({ kind: 'job', jobId }), [jobId]);
   const { canOnJob, isLoading: permissionsLoading } = useJobPermissions(jobId);
   const { can } = usePermissions();
@@ -53,16 +57,15 @@ export function JobInterviewPlan({ org, jobId, draftPlan }: JobInterviewPlanProp
     data: activitiesData,
     isLoading: activitiesLoading,
     error: activitiesError,
-  } = useQueryOwnerActivities(selectedPlanId === null ? null : owner);
+  } = useQueryOwnerActivities(canReadActivities ? owner : null);
   const isReadOnly = isJobConfigurationReadOnly(jobSummary?.status ?? null);
-  const hasUnsavedPlanSelection = Boolean(draftPlan && selectedPlanId !== jobSummary?.interviewPlanId);
   const canManageActivities =
-    canOnJob(Permission.INTERVIEW_WRITE) && !isReadOnly && !hasUnsavedPlanSelection && !draftPlan?.isSaving;
+    canOnJob(Permission.INTERVIEW_WRITE) && !isReadOnly && canReadActivities && !draftPlan?.isSaving;
   const {
     data: activityOptionsData,
     isLoading: activityOptionsLoading,
     error: activityOptionsError,
-  } = useQueryOwnerActivityOptions(canManageActivities && selectedPlanId !== null ? owner : null);
+  } = useQueryOwnerActivityOptions(canManageActivities ? owner : null);
   const {
     data: plansData,
     isLoading: plansLoading,

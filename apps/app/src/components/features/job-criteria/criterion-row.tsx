@@ -162,6 +162,7 @@ export const CriterionRow = memo(function CriterionRow({
               value={criterion.title}
               onChange={handleTitleChange}
               placeholder="e.g. React experience"
+              aria-required
               maxLength={MAX_EVALUATION_CRITERION_TITLE_LENGTH}
               disabled={readOnly}
             />
@@ -181,6 +182,7 @@ export const CriterionRow = memo(function CriterionRow({
               value={criterion.prompt}
               onChange={handlePromptChange}
               placeholder="e.g. Has 3+ years building production React apps with hooks and TypeScript"
+              aria-required
               maxLength={MAX_EVALUATION_CRITERION_PROMPT_LENGTH}
               rows={5}
               className="min-h-32 resize-none"

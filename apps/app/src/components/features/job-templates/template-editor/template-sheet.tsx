@@ -1,4 +1,5 @@
 import { Button } from '@comitium/ui/button';
+import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { EmptyState } from '@comitium/ui/empty-state';
 import { FeatureSheetContent } from '@comitium/ui/feature-sheet';
 import { Form } from '@comitium/ui/form';
@@ -8,13 +9,15 @@ import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { Spinner } from '@comitium/ui/spinner';
 import { FileXIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { CriteriaTab } from '@/components/features/job-criteria';
 import { DetailsSkeleton } from '@/components/features/job-draft/draft-section-skeleton';
 import { JobSettingsEditor } from '@/components/features/job-draft/job-settings-editor';
 import { TemplateInterviewPlan } from '@/components/features/job-interview-plan/template-interview-plan';
 import { PostingEditor } from '@/components/features/job-posting/posting-editor';
+import { AutosaveNavigationGuard } from '../../editor-autosave/autosave-navigation-guard';
+import { AutosaveStatus } from '../../editor-autosave/autosave-status';
 
 import { TemplateHeader } from './header';
 import { InterviewPlanTab } from './interview-plan-tab';
@@ -32,31 +35,59 @@ interface TemplateSheetProps {
 }
 
 export function TemplateSheet({ orgId, templateId, isNew, open, onOpenChange, onCreated }: TemplateSheetProps) {
-  const handleCloseSheet = useCallback(() => onOpenChange(false), [onOpenChange]);
+  const selection = useRef({ templateId, isNew });
+  const allowLeave = useRef(false);
+  const beforeClose = useRef<() => Promise<boolean>>(async () => true);
+  const [discardOpen, setDiscardOpen] = useState(false);
 
-  if (!open || (!templateId && !isNew)) {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <FeatureSheetContent side="right" size="workspace">
-          <SheetTitle className="sr-only">Job template editor</SheetTitle>
-          <SheetDescription className="sr-only">Edit reusable job template defaults.</SheetDescription>
-        </FeatureSheetContent>
-      </Sheet>
-    );
+  if (open && (templateId || isNew)) {
+    selection.current = { templateId, isNew };
   }
 
+  const handleCloseSheet = useCallback(async () => {
+    if (await beforeClose.current()) {
+      onOpenChange(false);
+    } else {
+      setDiscardOpen(true);
+    }
+  }, [onOpenChange]);
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <FeatureSheetContent side="right" size="workspace">
-        <TemplateEditor
-          key={templateId ?? 'new'}
-          orgId={orgId}
-          templateId={templateId}
-          onClose={handleCloseSheet}
-          onCreated={onCreated}
-        />
-      </FeatureSheetContent>
-    </Sheet>
+    <>
+      <Sheet open={open} onOpenChange={(next) => (next ? onOpenChange(true) : void handleCloseSheet())}>
+        <FeatureSheetContent side="right" size="workspace">
+          {selection.current.templateId || selection.current.isNew ? (
+            <TemplateEditor
+              key={selection.current.templateId ?? 'new'}
+              orgId={orgId}
+              templateId={selection.current.templateId}
+              beforeClose={beforeClose}
+              allowLeave={allowLeave}
+              onClose={handleCloseSheet}
+              onCreated={onCreated}
+            />
+          ) : (
+            <>
+              <SheetTitle className="sr-only">Job template editor</SheetTitle>
+              <SheetDescription className="sr-only">Edit reusable job template defaults.</SheetDescription>
+            </>
+          )}
+        </FeatureSheetContent>
+      </Sheet>
+      <ConfirmDialog
+        open={discardOpen}
+        onOpenChange={setDiscardOpen}
+        title="Leave without saving?"
+        description="Some changes have not been saved. Stay to complete the fields or retry saving."
+        actionLabel="Discard changes"
+        cancelLabel="Keep editing"
+        onConfirm={() => {
+          allowLeave.current = true;
+          setDiscardOpen(false);
+          onOpenChange(false);
+        }}
+      />
+    </>
   );
 }
 
@@ -64,10 +95,12 @@ interface TemplateEditorProps {
   orgId: string;
   templateId: string | null;
   onClose: () => void;
+  beforeClose: RefObject<() => Promise<boolean>>;
+  allowLeave: RefObject<boolean>;
   onCreated: (templateId: string) => void;
 }
 
-function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEditorProps) {
+function TemplateEditor({ orgId, templateId, onClose, onCreated, beforeClose, allowLeave }: TemplateEditorProps) {
   const {
     template,
     isLoading,
@@ -76,8 +109,9 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
     isDirty,
     isSaving,
     isNew,
-    save,
-    discard,
+    readOnly,
+    create,
+    autosave,
     description,
     skills,
     formId,
@@ -90,10 +124,21 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
     handleCriteriaChange,
     handleInterviewPlanChange,
     handleHiringTeamChange,
-  } = useTemplateForm(orgId, templateId, { onSaved: onClose, onCreated });
+  } = useTemplateForm(orgId, templateId, {
+    onCreated: (id) => {
+      allowLeave.current = true;
+      onCreated(id);
+    },
+  });
+
+  useEffect(() => {
+    allowLeave.current = false;
+  }, [allowLeave]);
 
   const [activeSection, setActiveSection] = useState<TemplateSection>('settings');
   const watchedTitle = useWatch({ control: form.control, name: 'title' });
+
+  beforeClose.current = async () => (isNew ? !isDirty : autosave.flush());
 
   if (!isNew && isLoading) {
     return (
@@ -124,17 +169,28 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
   const currentTitle = watchedTitle || form.getValues('title') || '';
   const displayTitle = currentTitle || (template?.title ?? '');
   const trimmedTitle = currentTitle.trim();
-  const canSave = trimmedTitle.length > 0 && (isNew || isDirty) && !isSaving;
-  const saveLabel = isNew ? 'Create template' : 'Save changes';
+  const canCreate = isNew && !readOnly && trimmedTitle.length > 0 && !isSaving;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div
+      className="flex flex-col h-full overflow-hidden"
+      onBlurCapture={() => {
+        if (!isNew) {
+          void autosave.flush();
+        }
+      }}
+    >
+      <AutosaveNavigationGuard
+        containsPath={() => allowLeave.current}
+        autosave={{ ...autosave, isDirty, flush: async () => beforeClose.current() }}
+      />
       <TemplateHeader
         orgId={orgId}
         templateId={templateId}
         templateTitle={displayTitle}
         status={template?.status ?? 'inactive'}
-        isDirty={isDirty}
+        isDirty={isDirty || isSaving}
+        saveStatus={!isNew && !readOnly ? <AutosaveStatus autosave={autosave} /> : null}
         isNew={isNew}
         onArchived={onClose}
       />
@@ -155,7 +211,9 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
                   form={form}
                   hiringTeam={hiringTeam}
                   onChangeHiringTeam={handleHiringTeamChange}
+                  readOnly={readOnly}
                   showPublishRequiredMarkers={false}
+                  showCompensationDisclosure={false}
                 />
               </Form>
             )}
@@ -163,6 +221,7 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
               <PostingEditor
                 orgId={orgId}
                 owner={{ kind: 'job_template' }}
+                readOnly={readOnly}
                 description={description}
                 onDescriptionChange={handleDescriptionChange}
                 skills={skills}
@@ -172,14 +231,17 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
               />
             )}
             {activeSection === 'criteria' && (
-              <CriteriaTab criteria={criteria} onChangeCriteria={handleCriteriaChange} />
+              <CriteriaTab criteria={criteria} onChangeCriteria={handleCriteriaChange} readOnly={readOnly} />
             )}
             {activeSection === 'interview-plan' &&
               (templateId && template ? (
                 <TemplateInterviewPlan
                   orgId={orgId}
                   templateId={templateId}
-                  selectedPlanId={template.interviewPlanId}
+                  selectedPlanId={interviewPlanId}
+                  savedPlanId={template.interviewPlanId}
+                  isSaving={autosave.isSaving}
+                  onSelectPlan={handleInterviewPlanChange}
                   isArchived={template.status === 'archived'}
                 />
               ) : (
@@ -193,20 +255,16 @@ function TemplateEditor({ orgId, templateId, onClose, onCreated }: TemplateEdito
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center justify-end gap-2 border-t border-separator px-6 py-4">
-        {isNew ? (
+      {isNew && (
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-separator px-6 py-4">
           <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>
             Cancel
           </Button>
-        ) : (
-          <Button type="button" variant="outline" onClick={discard} disabled={!isDirty || isSaving}>
-            Discard changes
+          <Button type="button" onClick={create} disabled={!canCreate}>
+            {isSaving ? <Spinner /> : 'Create template'}
           </Button>
-        )}
-        <Button type="button" onClick={save} disabled={!canSave}>
-          {isSaving ? <Spinner /> : saveLabel}
-        </Button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -234,11 +292,6 @@ function TemplateEditorSkeleton() {
             <DetailsSkeleton />
           </PageContainer>
         </div>
-      </div>
-
-      <div className="flex shrink-0 items-center justify-end gap-2 border-t border-separator px-6 py-4">
-        <Skeleton className="h-9 w-20 rounded-full" />
-        <Skeleton className="h-9 w-28 rounded-full" />
       </div>
     </div>
   );

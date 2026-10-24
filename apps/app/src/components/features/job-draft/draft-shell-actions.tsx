@@ -16,6 +16,7 @@ import { useArchiveJob } from '@/hooks/mutations/use-job-archive-mutations';
 import { useJobPermissions } from '@/hooks/use-job-permissions';
 import { usePermissions } from '@/hooks/use-permissions';
 import { Permission } from '@/lib/schemas/org';
+import { AutosaveStatus } from '../editor-autosave/autosave-status';
 import { useDraftFormContext } from './draft-form-context';
 
 function getDuplicateLabel(isDuplicating: boolean) {
@@ -25,7 +26,7 @@ function getDuplicateLabel(isDuplicating: boolean) {
 export function DraftShellActions() {
   const { can } = usePermissions();
   const navigate = useNavigate();
-  const { orgId, jobId, draft, isDirty, isSaving, save } = useDraftFormContext();
+  const { orgId, jobId, draft, isDirty, isSaving, autosave } = useDraftFormContext();
   const { canOnJob } = useJobPermissions(jobId);
   const { mutate: createDraft, isPending: isDuplicating } = useCreateDraft(orgId);
   const { mutate: archiveJob, isPending: isArchiving } = useArchiveJob();
@@ -60,9 +61,7 @@ export function DraftShellActions() {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={save} disabled={!isDirty || actionsDisabled}>
-        {isSaving ? 'Saving...' : 'Save changes'}
-      </Button>
+      <AutosaveStatus autosave={autosave} />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

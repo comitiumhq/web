@@ -3,6 +3,7 @@ import { APPLICATION_TERMINAL_OUTCOME_LABEL } from '@comitium/ui/application-out
 import { Button } from '@comitium/ui/button';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
 import { Skeleton } from '@comitium/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { Link } from '@tanstack/react-router';
 import { ArrowUpRightIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useRef } from 'react';
@@ -138,11 +139,10 @@ function InitialConsiderationsSkeleton({ kind }: { kind: InitialConsiderationsSt
 
 function ConsiderationRowSkeleton({ short = false }: { short?: boolean }) {
   return (
-    <div className="border-l-2 border-l-transparent px-3 pb-3 pt-3" aria-hidden>
+    <div className="border-l-2 border-l-transparent px-3 py-2.5" aria-hidden>
       <Skeleton className={short ? 'h-4 w-4/5 rounded-md' : 'h-4 w-full rounded-md'} />
       <Skeleton className="mt-2 h-3 w-24 rounded-md" />
       <Skeleton className="mt-1.5 h-3 w-16 rounded-md" />
-      <Skeleton className="mt-3 h-3 w-14 rounded-md" />
     </div>
   );
 }
@@ -161,6 +161,7 @@ const ConsiderationButton = memo(function ConsiderationButton({
   onClick,
 }: ConsiderationButtonProps) {
   const ref = useRef<HTMLButtonElement>(null);
+  const jobTitle = app.jobTitle || 'Untitled Job';
   const status = getConsiderationStatusLabel(app);
 
   useEffect(() => {
@@ -175,40 +176,55 @@ const ConsiderationButton = memo(function ConsiderationButton({
 
   return (
     <div
-      className={cn('rounded-l-none rounded-r-lg border-l-2 border-l-transparent transition-colors hover:bg-muted/40', {
-        'border-l-primary bg-muted/60': isCurrent,
-      })}
+      className={cn(
+        'relative rounded-l-none rounded-r-lg border-l-2 border-l-transparent transition-colors hover:bg-muted/40',
+        {
+          'border-l-primary bg-muted/60': isCurrent,
+        },
+      )}
     >
-      <Button
-        ref={ref}
-        variant="ghost"
-        onClick={handleClick}
-        aria-current={isCurrent ? 'true' : undefined}
-        className="h-auto w-full justify-start rounded-none px-3 pb-1.5 pt-3 text-left hover:bg-transparent focus-visible:ring-inset"
-      >
-        <div className="w-full min-w-0">
-          <p className="whitespace-normal break-words text-sm font-medium leading-5 text-foreground">
-            {app.jobTitle || 'Untitled Job'}
-          </p>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            ref={ref}
+            variant="ghost"
+            onClick={handleClick}
+            aria-current={isCurrent ? 'true' : undefined}
+            className="h-auto w-full justify-start rounded-none px-3 py-2.5 text-left hover:bg-transparent focus-visible:ring-inset"
+          >
+            <div className="w-full min-w-0">
+              <p className="line-clamp-2 whitespace-normal break-words pr-6 text-copy-13 font-medium leading-5 text-foreground">
+                {jobTitle}
+              </p>
 
-          <p className="mt-1 whitespace-normal break-words text-xs text-foreground/70">{status}</p>
+              <p className="mt-1 whitespace-normal break-words text-xs font-normal text-content-foreground">{status}</p>
 
-          {app.appliedAt && <p className="mt-0.5 text-xs text-muted-foreground">{formatRelativeTime(app.appliedAt)}</p>}
-        </div>
-      </Button>
+              {app.appliedAt && (
+                <p className="mt-0.5 text-xs font-normal text-meta-foreground">{formatRelativeTime(app.appliedAt)}</p>
+              )}
+            </div>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">{jobTitle}</TooltipContent>
+      </Tooltip>
 
-      <Button variant="link" size="sm" className="h-auto justify-start gap-1 px-3 pb-3 pt-1 text-xs" asChild>
-        <Link
-          to="/org/$orgId/jobs/$jobId/pipeline"
-          params={{ orgId, jobId: app.jobId }}
-          search={{ tab: 'active' }}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View job
-          <ArrowUpRightIcon className="size-3.5" />
-        </Link>
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" size="icon-xs" className="absolute right-1 top-1.5 text-muted-foreground" asChild>
+            <Link
+              to="/org/$orgId/jobs/$jobId/pipeline"
+              params={{ orgId, jobId: app.jobId }}
+              search={{ tab: 'active' }}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`View job: ${jobTitle}`}
+            >
+              <ArrowUpRightIcon className="size-3.5" />
+            </Link>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>View job</TooltipContent>
+      </Tooltip>
     </div>
   );
 });

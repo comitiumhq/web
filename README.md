@@ -20,8 +20,6 @@
   <a href="https://comitium.co">Website</a>
   ·
   <a href="packages/crypto/README.md">Encryption</a>
-  ·
-
 </p>
 
 <picture>

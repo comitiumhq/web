@@ -1,11 +1,11 @@
 import type { TipTapDoc } from '@comitium/schemas/common';
-import { Badge } from '@comitium/ui/badge';
 import { Button } from '@comitium/ui/button';
 import { Card } from '@comitium/ui/card';
 import { ConfirmDialog } from '@comitium/ui/confirm-dialog';
 import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
-import { LockIcon, XIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
+import { LockIcon, NotepadTextIcon, XIcon } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
 import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
@@ -44,6 +44,8 @@ export const NoteCard = memo(function NoteCard({
   previewLines = 6,
 }: NoteCardProps) {
   const actorName = getActorDisplayName(authorName);
+  const NoteIcon = isPrivate ? LockIcon : NotepadTextIcon;
+  const noteLabel = isPrivate ? 'Private note' : 'Note';
 
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
@@ -64,14 +66,18 @@ export const NoteCard = memo(function NoteCard({
 
         <span className="text-label-13 font-medium flex-1 truncate">{actorName}</span>
 
-        {isPrivate && (
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 shrink-0 gap-0.5">
-            <LockIcon />
-            Private
-          </Badge>
-        )}
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span role="img" aria-label={noteLabel} className="inline-flex text-meta-foreground">
+                <NoteIcon aria-hidden className="size-3.5" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{noteLabel}</TooltipContent>
+          </Tooltip>
 
-        <span className="text-label-12 text-meta-foreground shrink-0">{formatRelativeTime(createdAt)}</span>
+          <span className="text-label-12 text-meta-foreground">{formatRelativeTime(createdAt)}</span>
+        </div>
 
         {isOwnNote && onDelete && (
           <Button

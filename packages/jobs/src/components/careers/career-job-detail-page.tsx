@@ -3,7 +3,7 @@ import { CompanyAvatar } from '@comitium/ui/company-avatar';
 import { formatRelativeTime } from '@comitium/ui/date';
 import { formatEmploymentType, formatLocation, formatLocationType } from '@comitium/ui/formatting';
 import { PageContainer } from '@comitium/ui/page-container';
-import { formatCompensationSalary, hasCompensation } from '@comitium/ui/salary';
+import { formatCompensationSalary } from '@comitium/ui/salary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@comitium/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@comitium/ui/tooltip';
 import { Link } from '@tanstack/react-router';
@@ -88,7 +88,7 @@ export function CareerJobDetailPage({
   const companyLogo = job.org.logo ?? job.companyInfo?.logo ?? null;
   const locationTypeText = formatLocationType(job.locationType);
   const locationText = formatLocation(job.location);
-  const salary = hasCompensation(job.compensation) ? formatCompensationSalary(job.compensation) : null;
+  const salary = formatCompensationSalary(job.compensation);
   const careerPageUrl = `/careers/${job.org.careersSlug}`;
   const applicationAvailability = getPublicApplicationAvailability(job);
   const applyPath = applyUrl ?? `/careers/${job.org.careersSlug}/jobs/${job.postingSlug}/apply`;

@@ -116,6 +116,7 @@ function flow(overrides: Partial<FeedbackSubmissionFlowResult> = {}): FeedbackSu
     mode: 'create',
     formId: FORM_ID,
     previousSubmissionId: null,
+    formSnapshotHash: `0x${'1'.repeat(64)}`,
     ...overrides,
   };
 }
@@ -166,6 +167,7 @@ describe('FeedbackSubmissionPanel', () => {
         body: {
           activityId: ACTIVITY_ID,
           formId: FORM_ID,
+          formSnapshotHash: `0x${'1'.repeat(64)}`,
           answerEnvelopes: [
             { visibility: 'standard', answers: { ct: 'standard-ciphertext' } },
             { visibility: 'private', answers: { ct: 'private-ciphertext' } },

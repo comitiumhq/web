@@ -1,12 +1,11 @@
 import { httpsUrlSchema } from '@comitium/schemas/common';
 import { CAREERS_SLUG_REGEX } from '@comitium/schemas/patterns';
 import { z } from 'zod';
-import { isReservedCareersSlug } from '@/lib/careers/slugs';
+import { CAREERS_SLUG_MAX_LENGTH, isReservedCareersSlug } from '@/lib/careers/slugs';
 
 const ORG_PROFILE_NAME_MAX_LENGTH = 255;
 const ORG_PROFILE_DESCRIPTION_MAX_LENGTH = 1000;
 const ORG_PROFILE_WEBSITE_MAX_LENGTH = 255;
-const ORG_CAREERS_SLUG_MAX_LENGTH = 80;
 
 const URL_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i;
 
@@ -30,11 +29,11 @@ export const orgSettingsSchema = z.object({
     .string()
     .trim()
     .toLowerCase()
-    .min(3, 'Public slug must be at least 3 characters')
-    .max(ORG_CAREERS_SLUG_MAX_LENGTH)
+    .min(3, 'Careers page address must be at least 3 characters')
+    .max(CAREERS_SLUG_MAX_LENGTH)
     .regex(CAREERS_SLUG_REGEX, 'Use lowercase letters, numbers, and hyphens')
     .refine((value) => !isReservedCareersSlug(value), {
-      message: 'This public slug is reserved',
+      message: 'This careers page address is reserved',
     }),
   description: z.string().trim().max(ORG_PROFILE_DESCRIPTION_MAX_LENGTH),
   website: z

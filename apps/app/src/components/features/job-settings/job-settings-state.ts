@@ -19,27 +19,22 @@ export function jobToSettingsFormValues(job: JobEditor): JobSettingsFormData {
       (job.compensation?.tiers[0]?.period as JobSettingsFormData['compensationPeriod']) ?? DEFAULT_COMPENSATION_PERIOD,
     compensationMin: job.compensation?.tiers[0]?.base_min ?? undefined,
     compensationMax: job.compensation?.tiers[0]?.base_max ?? undefined,
+    compensationDisplayMode: job.compensationDisplayMode,
     applicationCapacity: job.applicationCapacity,
   };
 }
 
-export function prepareJobSettingsUpdate(values: JobSettingsFormData, expectedVersion: number): UpdateJobEditorData {
-  const normalizedValues = { ...values, title: values.title.trim() };
-  const departmentUpdate = normalizedValues.departmentId ? { departmentId: normalizedValues.departmentId } : {};
-  const locationUpdate = normalizedValues.locationId
-    ? {
-        locationId: normalizedValues.locationId,
-        locationType: normalizedValues.locationType ?? null,
-      }
-    : {};
+export function prepareJobSettingsUpdate(values: JobSettingsFormData): Omit<UpdateJobEditorData, 'expectedVersion'> {
+  const departmentUpdate = values.departmentId ? { departmentId: values.departmentId } : {};
+  const locationUpdate = values.locationId ? { locationId: values.locationId } : {};
 
   return {
-    expectedVersion,
-    title: normalizedValues.title,
+    title: values.title.trim(),
     ...departmentUpdate,
     ...locationUpdate,
-    employmentType: normalizedValues.employmentType ?? null,
-    category: normalizedValues.category ?? null,
-    compensation: buildCompensation(normalizedValues),
+    employmentType: values.employmentType ?? null,
+    category: values.category ?? null,
+    compensation: buildCompensation(values),
+    compensationDisplayMode: values.compensationDisplayMode ?? 'inherit',
   };
 }
