@@ -50,7 +50,7 @@ function useOrgGuardState(orgId: string, isSignedIn: boolean) {
   const orgsQuery = useQueryMyOrgs();
   const org = orgsQuery.data?.find((organization) => organization.id === orgId);
   const memberQuery = useQueryOrgMe(isSignedIn && org ? orgId : undefined);
-  const isWaitingForOrganization = !org && orgsQuery.isLoading;
+  const isWaitingForOrganization = !org && orgsQuery.isFetching;
   const hasSessionExpired = isUnauthorizedError(orgsQuery.error) || isUnauthorizedError(memberQuery.error);
 
   return { org, hasSessionExpired, isWaitingForOrganization };

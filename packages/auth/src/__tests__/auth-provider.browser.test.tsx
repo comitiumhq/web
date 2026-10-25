@@ -1,5 +1,5 @@
 import { CryptoProxy } from '@comitium/crypto';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { Component, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
@@ -60,6 +60,12 @@ function Probe() {
   );
 }
 
+function PublicApplicationForm({ load }: { load: () => Promise<string> }) {
+  const query = useQuery({ queryKey: ['careers', 'apply-form'], queryFn: load });
+
+  return <output aria-label="Application form">{query.data ?? 'Loading application form'}</output>;
+}
+
 function Login() {
   const session = useSession();
 
@@ -111,6 +117,40 @@ function tree(bootstrapAccount = vi.fn(async () => productUser()), children: Rea
 }
 
 describe('native auth readiness and identity lifecycle', () => {
+  it('resumes an in-flight public form query after initial identity resolution clears the cache', async () => {
+    let finishIdentity!: () => void;
+    let finishForm!: (form: string) => void;
+    const clearingIdentity = new Promise<void>((resolve) => {
+      finishIdentity = resolve;
+    });
+    const pendingForm = new Promise<string>((resolve) => {
+      finishForm = resolve;
+    });
+    const load = vi.fn(() => pendingForm);
+
+    vi.mocked(CryptoProxy.clear).mockReturnValueOnce(clearingIdentity);
+
+    const screen = await render(
+      tree(
+        undefined,
+        <>
+          <Probe />
+          <PublicApplicationForm load={load} />
+        </>,
+      ).ui,
+    );
+
+    await vi.waitFor(() => expect(load).toHaveBeenCalledOnce());
+
+    finishIdentity();
+
+    await expect.element(screen.getByLabelText('Account state')).toHaveTextContent(`ready:${AUTH_USER_ID}`);
+
+    finishForm('First name, last name, email and resume');
+
+    await expect.element(screen.getByLabelText('Application form')).toHaveTextContent('First name');
+  });
+
   it('bootstraps the authenticated product account', async () => {
     const bootstrapAccount = vi.fn(async () => productUser());
     const { ui } = tree(bootstrapAccount);

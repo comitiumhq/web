@@ -123,7 +123,7 @@ export function AuthProvider({ children, client, bootstrapAccount, accountQueryK
   return (
     <AuthClientContext.Provider value={client}>
       <AccountReadinessContext.Provider value={readiness}>
-        <FreshAuthentication>{children}</FreshAuthentication>
+        <FreshAuthentication key={resolvedIdentity}>{children}</FreshAuthentication>
       </AccountReadinessContext.Provider>
     </AuthClientContext.Provider>
   );

@@ -58,7 +58,7 @@ export function useQueryCandidateProjections(orgId: string) {
 
       signal.throwIfAborted();
 
-      if (listRefresh.pending) {
+      if (listRefresh.pending || !result.hasMore) {
         const refreshNow = !result.hasMore || Date.now() - listRefresh.lastRefreshAt >= LIST_REFRESH_INTERVAL_MS;
         const refetchType = refreshNow ? 'active' : 'none';
 

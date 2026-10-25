@@ -1,5 +1,5 @@
-import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { onlineManager, QueryClient, QueryClientProvider, QueryObserver } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { qk } from '@/hooks/query-keys';
 import { runCandidateProjectionPass } from '@/lib/candidates/run-projections';
@@ -45,26 +45,44 @@ afterEach(() => {
 });
 
 describe('organization projection lifecycle', () => {
-  it('coalesces list refetches during a backlog and flushes when the backlog finishes', async () => {
+  it('coalesces backlog refreshes and picks up processing completed outside this client', async () => {
+    let criteria = '1/6';
+    const load = vi.fn(async () => criteria);
+    const list = new QueryObserver(client, {
+      queryKey: qk.jobs.kanban('job-1', {}),
+      queryFn: load,
+      initialData: '—',
+      staleTime: Number.POSITIVE_INFINITY,
+    });
+
+    onTestFinished(list.subscribe(() => {}));
+
     vi.mocked(runCandidateProjectionPass).mockResolvedValue({ ...empty, hasMore: true, candidateIds: ['candidate-1'] });
-    const invalidate = vi.spyOn(client, 'invalidateQueries');
-    const listCalls = () =>
-      invalidate.mock.calls.flatMap(([options]) =>
-        options?.queryKey?.join('/') === qk.pipeline.candidatesRoot().join('/')
-          ? [options.refetchType ?? 'active']
-          : [],
-      );
+
     await render(view('org-1'));
-    await vi.waitFor(() => expect(listCalls()).toHaveLength(1));
-    const queryKey = client.getQueryCache().getAll()[0].queryKey;
+
+    await vi.waitFor(() => expect(list.getCurrentResult().data).toBe('1/6'));
+    const queryKey = qk.org.detail('org-1');
+
+    criteria = '3/6';
 
     vi.mocked(runCandidateProjectionPass).mockResolvedValue({ ...empty, hasMore: true, candidateIds: ['candidate-2'] });
+
     await client.refetchQueries({ queryKey });
-    expect(listCalls()).toEqual(['active', 'none']);
+
+    expect(load).toHaveBeenCalledOnce();
+    expect(list.getCurrentResult().data).toBe('1/6');
 
     vi.mocked(runCandidateProjectionPass).mockResolvedValue(empty);
+
     await client.refetchQueries({ queryKey });
-    expect(listCalls()).toEqual(['active', 'none', 'active']);
+
+    expect(list.getCurrentResult().data).toBe('3/6');
+    criteria = '4/6';
+
+    await client.refetchQueries({ queryKey });
+
+    expect(list.getCurrentResult().data).toBe('4/6');
   });
   it('starts after unlock without a Candidate Sheet and stops when locked', async () => {
     state.active = false;

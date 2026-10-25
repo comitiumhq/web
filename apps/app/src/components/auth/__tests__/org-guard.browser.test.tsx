@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   orgsQuery: {
     data: undefined as Array<Record<string, unknown>> | undefined,
     error: null as unknown,
-    isLoading: false,
+    isFetching: false,
   },
   session: {
     isSessionLoading: false,
@@ -81,7 +81,7 @@ function tree() {
 beforeEach(() => {
   mocks.ensureCreatedOrgEncryption.mockClear();
   mocks.memberQuery = { error: null };
-  mocks.orgsQuery = { data: undefined, error: null, isLoading: false };
+  mocks.orgsQuery = { data: undefined, error: null, isFetching: false };
   mocks.session = {
     isSessionLoading: false,
     isSignedIn: true,
@@ -89,9 +89,25 @@ beforeEach(() => {
 });
 
 describe('OrgGuard', () => {
+  it('waits for a membership refresh before deciding organization access', async () => {
+    mocks.orgsQuery.data = [];
+    mocks.orgsQuery.isFetching = true;
+    const screen = await render(tree());
+
+    await expect.element(screen.getByText('Page not found')).not.toBeInTheDocument();
+    await expect.element(screen.getByText('Organization workspace')).not.toBeInTheDocument();
+
+    mocks.orgsQuery.data = [org];
+    mocks.orgsQuery.isFetching = false;
+
+    await screen.rerender(tree());
+
+    await expect.element(screen.getByText('Organization workspace')).toBeInTheDocument();
+  });
+
   it('does not render or reject the organization while session and organization data are loading', async () => {
     mocks.session.isSessionLoading = true;
-    mocks.orgsQuery.isLoading = true;
+    mocks.orgsQuery.isFetching = true;
     const screen = await render(tree());
 
     await expect.element(screen.getByText('Organization workspace')).not.toBeInTheDocument();
