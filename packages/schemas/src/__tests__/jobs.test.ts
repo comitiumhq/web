@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { jobListItemSchema } from '../public-jobs';
 
 describe('jobListItemSchema', () => {
-  it('accepts the public list projection without recruiter lifecycle state', () => {
+  it('accepts a public Remote job without a city or recruiter lifecycle state', () => {
     const result = jobListItemSchema.safeParse({
       id: 'job-id',
       postingId: '00000000-0000-4000-8000-000000000001',
@@ -17,8 +17,8 @@ describe('jobListItemSchema', () => {
       socialDescription: null,
       status: 'open',
       createdAt: '2026-07-13T12:00:00.000Z',
-      location: null,
-      locationType: null,
+      location: [{ name: 'Remote — Europe', cityId: null }],
+      locationType: 'remote',
       employmentType: null,
       category: null,
       compensation: null,

@@ -22,7 +22,7 @@ export type CompensationConfig = z.infer<typeof compensationConfigSchema>;
 
 export const locationEntrySchema = z.object({
   name: z.string(),
-  cityId: z.number(),
+  cityId: z.number().nullable(),
 });
 
 export type LocationEntry = z.infer<typeof locationEntrySchema>;

@@ -71,7 +71,7 @@ function matchesStatusFilter(job: OrgJobListItem, status: StatusFilter): boolean
     return job.archivedAt !== null;
   }
 
-  if (status === 'draft' || job.archivedAt !== null) {
+  if (status === 'draft' || job.status === 'draft' || job.archivedAt !== null) {
     return false;
   }
 
