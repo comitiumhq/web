@@ -30,7 +30,7 @@ const PLUS_CHAR_REGEX = /\+/g;
 function getAutoComplete(question: RenderableFormQuestion): string | undefined {
   const profileField = question.config?.candidateProfileField;
 
-  if (profileField) {
+  if (profileField === 'first_name' || profileField === 'last_name') {
     return AUTOCOMPLETE_BY_PROFILE_FIELD[profileField];
   }
 
@@ -58,7 +58,6 @@ export function TextWidget({ question, field, placeholder }: TextWidgetProps) {
   const autoComplete = getAutoComplete(question);
   const isNumeric = question.questionType === 'number';
   const isPhone = question.questionType === 'phone';
-
   const value = field.value ?? '';
   const handleNumberChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {

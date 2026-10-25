@@ -3,13 +3,11 @@ import { type EncryptedEnvelope, encryptedEnvelopeSchema } from '@comitium/crypt
 import { ALGORITHM_SUITE_VERSION } from '@comitium/crypto/version';
 import type { JSONContent } from '@tiptap/core';
 import { z } from 'zod';
-import { HMAC_SHA256_HEX_REGEX } from './patterns';
-
-const PUBLIC_HTTPS_HOSTNAME_REGEX =
-  /^(?!localhost$)(?!.*\.localhost$)(?!127(?:\.\d{1,3}){3}$)(?!0\.0\.0\.0$)(?!\[::1\]$).+$/i;
 
 export { ALGORITHM_SUITE_VERSION };
+
 export { encryptedEnvelopeSchema };
+
 export type { EncryptedEnvelope };
 
 // --- Blind-index hash ---
@@ -17,15 +15,8 @@ export type { EncryptedEnvelope };
 // custom-field-value blind indexes. Case-insensitive (callers should normalize
 // to lowercase before send, but the schema accepts mixed).
 
-export const hmacSha256HexSchema = z
-  .string()
-  .regex(HMAC_SHA256_HEX_REGEX, 'Expected hex-encoded HMAC-SHA256 (64 chars)');
-
-export const httpsUrlSchema = z.url({
-  protocol: /^https$/,
-  hostname: PUBLIC_HTTPS_HOSTNAME_REGEX,
-  error: 'Enter a valid HTTPS URL',
-});
+export { httpsUrlSchema } from '@comitium/crypto/form-values';
+export { hmacSha256HexSchema } from '@comitium/crypto/schemas';
 
 // --- TipTap / JSON content ---
 // TipTap docs are deeply nested recursive structures.
@@ -45,4 +36,5 @@ const displayIdentitySchema = z.object({
 export type DisplayIdentity = z.infer<typeof displayIdentitySchema>;
 
 export { wrappedKeySchema };
+
 export type { WrappedKey };

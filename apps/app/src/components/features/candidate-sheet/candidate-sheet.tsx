@@ -83,6 +83,7 @@ export function CandidateSheet({
     downloadApplicationFile,
     downloadingQuestionId,
     decryptedProfile,
+    profileRevision,
     isLoadingProfile,
     hasEncryptedProfile,
     profileQueryError,
@@ -170,13 +171,9 @@ export function CandidateSheet({
   });
 
   const handleRetryEmails = useCallback(() => refetchEmails(), [refetchEmails]);
-
   const handleRetryEmailDecryption = useCallback(() => retryEmailDecryption(), [retryEmailDecryption]);
-
   const handleRetryEmailDecryptionKey = useCallback(() => refetchEmailDecryptionKey(), [refetchEmailDecryptionKey]);
-
   const handleRetryFormSubmission = useCallback(() => refetchFormSubmission(), [refetchFormSubmission]);
-
   const handleLoadMoreEmails = useCallback(() => fetchNextEmailsPage(), [fetchNextEmailsPage]);
   const handleRetryOtherApplications = useCallback(() => refetchOtherApplications(), [refetchOtherApplications]);
 
@@ -211,7 +208,6 @@ export function CandidateSheet({
 
   const sidebarAccess = {
     canManageNotes: capabilities.candidate.canCreateNote,
-    canProjectFormFields: capabilities.candidate.canEditProfile,
     canModerateFeedback: capabilities.consideration.canModerateFeedback,
     canSubmitFeedback: capabilities.consideration.canSubmitFeedback,
     isOnHiringTeam,
@@ -277,6 +273,7 @@ export function CandidateSheet({
       application={application}
       orgId={orgId}
       decryptedProfile={decryptedProfile}
+      profileRevision={profileRevision}
       isLoadingProfile={isLoadingProfile}
       hasEncryptedProfile={hasEncryptedProfile}
       profileQueryError={profileQueryError}

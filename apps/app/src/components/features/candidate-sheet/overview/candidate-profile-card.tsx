@@ -16,6 +16,7 @@ interface CandidateProfileCardProps {
   candidateId: string | null;
   orgId: string;
   profile: CandidateProfile | null;
+  profileRevision: number | null;
   isLoading: boolean;
   hasEncryptedProfile: boolean;
   queryError: boolean;
@@ -33,7 +34,8 @@ export function CandidateProfileCard(props: CandidateProfileCardProps) {
   const { isUnlocked, runUnlocked } = useEncryptionUnlocked(orgId);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const editorProps = getCandidateProfileEditorProps(props);
-  const canOpenEditor = isDefined(editorProps);
+  const canOpenEditor =
+    isDefined(editorProps) && props.profileRevision !== null && !isLoading && !queryError && !decryptionError;
   const handleEdit = useCallback(() => runUnlocked(() => setIsEditOpen(true)), [runUnlocked]);
 
   return (
@@ -67,12 +69,14 @@ export function CandidateProfileCard(props: CandidateProfileCardProps) {
         </CardContent>
       </Card>
 
-      {canOpenEditor && (
+      {editorProps && isUnlocked && (
         <CandidateProfileEditSheet
+          key={`${orgId}:${editorProps.candidateId}`}
           open={isEditOpen}
           onOpenChange={setIsEditOpen}
           orgId={orgId}
           profile={profile}
+          profileRevision={props.profileRevision}
           {...editorProps}
         />
       )}

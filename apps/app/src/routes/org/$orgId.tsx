@@ -4,6 +4,7 @@ import { RouteNotFound } from '@comitium/ui/route-not-found';
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { AuthenticatedAppShell } from '@/components/auth/authenticated-app-shell';
+import { CandidateProjectionCoordinator } from '@/components/auth/candidate-projection-coordinator';
 
 export const Route = createFileRoute('/org/$orgId')({
   ssr: false,
@@ -36,6 +37,7 @@ function OrgLayout() {
 
   return (
     <AuthenticatedAppShell>
+      <CandidateProjectionCoordinator orgId={orgId} />
       <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-background">
         <div className="min-h-0 flex-1">
           <Outlet />

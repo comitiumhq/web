@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { connectorValueSchemas } from '@comitium/crypto/form-values';
 
 import { applyRequirement } from './helpers';
 import { ALL_FORM_CLASSES, type FieldTypeDef } from './types';
@@ -20,7 +20,7 @@ export const phoneDef: FieldTypeDef = {
     requiresSingletonPerForm: false,
     requiresSelectableValues: false,
   },
-  valueSchema: (ctx) => applyRequirement(z.string().min(3).max(40), ctx),
+  valueSchema: (ctx) => applyRequirement(connectorValueSchemas.phone, ctx),
   connectorCompat: (target) => {
     if (target === 'phone') {
       return 'supported';

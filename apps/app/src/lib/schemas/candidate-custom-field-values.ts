@@ -27,17 +27,6 @@ export const listCandidateCustomFieldValuesResponseSchema = z.object({
   data: z.array(customFieldValueRowSchema),
 });
 
-const projectCandidateCustomFieldValueBodySchema = z.object({
-  connectorId: uuidSchema,
-  submissionId: uuidSchema,
-  encryptedValue: encryptedEnvelopeSchema,
-  valueHash: hmacSha256HexSchema.optional(),
-});
-
-export type ProjectCandidateCustomFieldValueBody = z.infer<typeof projectCandidateCustomFieldValueBodySchema>;
-
-export const projectCandidateCustomFieldValueResponseSchema = z.object({ applied: z.boolean() });
-
 const batchCandidateCustomFieldValueItemSchema = z.object({
   fieldId: uuidSchema,
   encryptedValue: encryptedEnvelopeSchema.nullable(),

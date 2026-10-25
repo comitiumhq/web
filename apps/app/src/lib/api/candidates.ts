@@ -17,6 +17,7 @@ import {
   resolveCandidateResponseSchema,
 } from '@comitium/schemas/candidates';
 import type { EncryptedEnvelope } from '@comitium/schemas/common';
+import { successSchema } from '@comitium/schemas/public';
 import { activityFeedResponseSchema } from '@/lib/schemas/emails';
 
 import { api } from './client';
@@ -54,18 +55,11 @@ export function updateCandidateProfile(
   candidateId: string,
   profile: EncryptedEnvelope,
   searchProjection: CandidateProfileSearchProjection,
+  expectedProfileRevision: number,
 ) {
   return api.patch(
     `/candidates/${candidateId}/profile`,
-    { profile, searchProjection },
-    candidateProfileUpdateResponseSchema,
-  );
-}
-
-export function projectCandidateProfileSearch(candidateId: string, searchProjection: CandidateProfileSearchProjection) {
-  return api.put(
-    `/candidates/${candidateId}/profile/search-projection`,
-    { searchProjection },
+    { profile, searchProjection, expectedProfileRevision },
     candidateProfileUpdateResponseSchema,
   );
 }
@@ -146,11 +140,11 @@ export function updateCandidateFile(
     makeCurrentResume?: true;
   },
 ) {
-  return api.patch(`/candidates/${candidateId}/files/${fileId}`, body, candidateProfileUpdateResponseSchema);
+  return api.patch(`/candidates/${candidateId}/files/${fileId}`, body, successSchema);
 }
 
 export function deleteCandidateFile(candidateId: string, fileId: string) {
-  return api.delete(`/candidates/${candidateId}/files/${fileId}`, candidateProfileUpdateResponseSchema);
+  return api.delete(`/candidates/${candidateId}/files/${fileId}`, successSchema);
 }
 
 export function fetchEncryptedCandidateFile(candidateId: string, fileId: string) {

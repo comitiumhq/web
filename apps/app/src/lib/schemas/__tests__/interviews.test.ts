@@ -81,6 +81,7 @@ describe('candidate sheet interview contracts', () => {
       data: {
         applicationId: '00000000-0000-4000-8000-000000000006',
         candidateProfileInput: null,
+        candidateProfileInputApplicationId: null,
         jobTitle: 'Protocol Engineer',
         interview: {
           eventId: EVENT_ID,

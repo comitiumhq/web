@@ -2,6 +2,7 @@ import {
   answerEnvelopeSchema,
   formSnapshotSchema,
   formSubmissionFieldProjectionSchema,
+  storedAnswerEnvelopeSchema,
 } from '@comitium/schemas/forms/form-submission';
 import { bytes32HexSchema, uuidSchema } from '@comitium/schemas/public';
 import { z } from 'zod';
@@ -15,7 +16,7 @@ const feedbackSubmissionSchema = z.object({
   interviewEventId: uuidSchema.nullable(),
   isAdhoc: z.boolean(),
   formSnapshot: formSnapshotSchema,
-  answerEnvelopes: z.array(answerEnvelopeSchema),
+  answerEnvelopes: z.array(storedAnswerEnvelopeSchema),
   canReadPrivate: z.boolean(),
   submittedByUserId: uuidSchema.nullable(),
   submittedAt: z.string(),
@@ -68,9 +69,7 @@ const updateFeedbackSubmissionBodySchema = z.object({
 });
 
 export type UpdateFeedbackSubmissionBody = z.infer<typeof updateFeedbackSubmissionBodySchema>;
-
 const resolveFeedbackFormBodySchema = z.object(sourceShape).refine(sourceRefine, sourceRefineMessage);
-
 export type ResolveFeedbackFormBody = z.infer<typeof resolveFeedbackFormBodySchema>;
 
 export const resolvedFeedbackFormResponseSchema = z.object({

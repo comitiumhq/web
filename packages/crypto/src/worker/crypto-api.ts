@@ -5,6 +5,7 @@ import {
   encryptApplicationWithVaultKeyAndOverlays,
 } from '../application-encryption';
 import { type CandidateProfileSearchField, hashCandidateProfileSearchValue } from '../candidate-profile-search-hash';
+import type { CandidateProjectionItem } from '../candidate-projections';
 import type { CryptoContextInput } from '../context';
 import { keyWrapAad } from '../context';
 import { hashCustomFieldValue } from '../custom-field-hash';
@@ -28,6 +29,7 @@ import type { RecipientDescriptor } from '../recipients';
 import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from '../schemas';
 import type { VaultKeyAccess } from '../schemas/vault-key';
 import { hashTagLabel } from '../tag-hash';
+import { processCandidateProjection } from './candidate-projection';
 import { OrgVault } from './org-vault';
 import { UserKeySession } from './user-key-session';
 
@@ -56,6 +58,10 @@ export class CryptoWorkerApi {
 
   ready(): true {
     return true;
+  }
+
+  async processCandidateProjection(orgId: string, vaultAccess: VaultKeyAccess, item: CandidateProjectionItem) {
+    return processCandidateProjection(this, orgId, vaultAccess, item);
   }
 
   async encryptApplication(

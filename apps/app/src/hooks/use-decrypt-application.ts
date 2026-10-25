@@ -21,7 +21,6 @@ export function useDecryptApplication(
   const [state, setState] = useState<DecryptState>(INITIAL_STATE);
   const generationRef = useRef(0);
   const { canUnlock, ensureUnlocked, isCryptoActive } = useCryptoUnlock();
-
   const hasAnswers = !!answerEnvelopes && answerEnvelopes.length > 0;
   const canDecrypt = hasAnswers && !!formId && canUnlock && !!vaultAccess;
   const answerSetKey = `${orgId}:${submissionId ?? 'none'}`;
@@ -39,13 +38,14 @@ export function useDecryptApplication(
     }
 
     const generation = generationRef.current + 1;
+
     generationRef.current = generation;
     setState((s) => ({ ...s, isDecrypting: true, error: null }));
 
     try {
       await ensureUnlocked();
 
-      const data = await decryptAnswerBuckets(orgId, formId, answerEnvelopes, vaultAccess);
+      const data = await decryptAnswerBuckets(orgId, answerEnvelopes, vaultAccess);
 
       if (generationRef.current === generation) {
         setState({ data, error: null, isDecrypting: false });

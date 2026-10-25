@@ -3,6 +3,7 @@ import { type EnvelopeRecipient, isProcessorRecipient } from './recipients';
 
 const ORG_VAULT_ONLY_PURPOSES = new Set<CryptoPurpose>([
   'candidate_profile',
+  'candidate_profile_enrichment',
   'candidate_note',
   'candidate_tag',
   'custom_field_value',

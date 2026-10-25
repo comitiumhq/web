@@ -18,6 +18,7 @@ const CANDIDATE_PROFILE = {
   },
   currentTitle: 'Engineer',
   currentCompany: 'Analytical Engines Inc.',
+  manuallyClearedFields: [],
 };
 
 describe('decrypted payload parsers', () => {

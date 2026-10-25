@@ -22,6 +22,7 @@ export type EncryptedEnvelopeWithOverlays = {
 const COMPRESSIBLE_ENVELOPE_PURPOSES = new Set<CryptoPurpose>([
   'application_answers',
   'candidate_profile',
+  'candidate_profile_enrichment',
   'candidate_note',
   'candidate_tag',
   'custom_field_value',
@@ -44,6 +45,7 @@ export async function encryptEnvelope(
 
   try {
     const payload = await prepareJsonPayload(data, COMPRESSIBLE_ENVELOPE_PURPOSES.has(context.purpose));
+
     const encrypted = await encryptPayloadBytes(
       payload.bytes,
       dek,

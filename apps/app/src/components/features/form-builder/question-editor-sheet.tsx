@@ -1,3 +1,4 @@
+import { CANDIDATE_PROFILE_MAPPING_FIELDS, CANDIDATE_PROFILE_MAPPINGS } from '@comitium/crypto/candidate-profile';
 import type { FormClass } from '@comitium/schemas/forms';
 import { Button } from '@comitium/ui/button';
 import { Checkbox } from '@comitium/ui/checkbox';
@@ -45,6 +46,10 @@ const DEFAULT_COPY = {
   requiredHelp: 'Respondents must answer this question to submit.',
 };
 
+const PROFILE_TARGETS = CANDIDATE_PROFILE_MAPPING_FIELDS.filter(
+  (field) => !CANDIDATE_PROFILE_MAPPINGS[field].managed,
+).map((value) => ({ value, ...CANDIDATE_PROFILE_MAPPINGS[value] }));
+
 function getSheetTitle(isLocked: boolean, isEdit: boolean) {
   if (isLocked) {
     return 'System question';
@@ -83,6 +88,7 @@ export function QuestionEditorSheet({ formClass, state, onClose, onSubmit, isPen
         description: state.question.description ?? '',
         isRequired: state.question.isRequired,
         isPrivate: state.question.isPrivate,
+        candidateProfileField: state.question.config?.candidateProfileField,
         options: selectableValuesToOptions(state.question.selectableValues),
       });
     } else {
@@ -92,6 +98,7 @@ export function QuestionEditorSheet({ formClass, state, onClose, onSubmit, isPen
 
   const fieldType = form.watch('questionType');
   const needsOptions = isChoiceType(fieldType);
+  const profileTargets = PROFILE_TARGETS.filter((target) => target.questionType === fieldType);
 
   useEffect(() => {
     if (!needsOptions && form.getValues('options').length > 0) {
@@ -193,6 +200,39 @@ export function QuestionEditorSheet({ formClass, state, onClose, onSubmit, isPen
 
               {needsOptions && (
                 <QuestionOptionsEditor control={form.control} disabled={inputsDisabled || isLinkedReusableField} />
+              )}
+
+              {formClass === 'application' && !isLocked && profileTargets.length > 0 && (
+                <FormField
+                  control={form.control}
+                  name="candidateProfileField"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Candidate profile field</FormLabel>
+                      <Select
+                        value={field.value ?? 'none'}
+                        onValueChange={(value) => field.onChange(value === 'none' ? undefined : value)}
+                        disabled={inputsDisabled}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">Keep as an answer only</SelectItem>
+                          {profileTargets.map((target) => (
+                            <SelectItem key={target.value} value={target.value}>
+                              {target.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>Fill a missing profile value from this answer.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
 
               <FormField

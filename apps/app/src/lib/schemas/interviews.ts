@@ -59,9 +59,7 @@ const getInterviewBusyBodySchema = z.object({
 });
 
 export type GetInterviewBusyBody = z.infer<typeof getInterviewBusyBodySchema>;
-
 const rsvpStatusSchema = z.enum(['accepted', 'declined', 'tentative', 'awaiting']).nullable();
-
 export type RsvpStatus = z.infer<typeof rsvpStatusSchema>;
 
 export const interviewRsvpResponseSchema = z.object({
@@ -129,7 +127,6 @@ export const interviewsListSchema = z.object({
 });
 
 export type InterviewsList = z.infer<typeof interviewsListSchema>;
-
 const interviewFeedbackStatusSchema = z.enum(['submitted', 'pending', 'not_due', 'not_required']);
 
 const interviewProgressInterviewerSchema = z.object({
@@ -319,6 +316,7 @@ export const myInterviewsListSchema = z.object({
 export const interviewBriefingResponseSchema = z.object({
   data: z.object({
     applicationId: uuidSchema,
+    candidateProfileInputApplicationId: uuidSchema.nullable(),
     candidateProfileInput: encryptedEnvelopeSchema
       .refine((envelope) => envelope.purpose === 'candidate_profile_input', 'Expected candidate profile input envelope')
       .nullable(),

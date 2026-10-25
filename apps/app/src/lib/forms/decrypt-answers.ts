@@ -5,12 +5,12 @@ import type { EncryptedEnvelope } from '@comitium/schemas/common';
 
 export interface AnswerBucket {
   visibility: string;
+  cryptoSubjectId: string;
   answers: EncryptedEnvelope;
 }
 
 export async function decryptFeedbackBuckets(
   orgId: string,
-  applicationId: string,
   formId: string,
   buckets: AnswerBucket[],
   vaultAccess: VaultKeyAccess,
@@ -22,7 +22,7 @@ export async function decryptFeedbackBuckets(
       bucket.answers,
       orgId,
       vaultAccess,
-      feedbackAnswerBucketContext(orgId, applicationId, formId, bucket.visibility),
+      feedbackAnswerBucketContext(orgId, bucket.cryptoSubjectId, formId, bucket.visibility),
     );
 
     Object.assign(merged, decrypted);
@@ -33,7 +33,6 @@ export async function decryptFeedbackBuckets(
 
 export async function decryptAnswerBuckets(
   orgId: string,
-  formId: string,
   buckets: AnswerBucket[],
   vaultAccess: VaultKeyAccess,
 ): Promise<Record<string, unknown>> {
@@ -44,7 +43,7 @@ export async function decryptAnswerBuckets(
       bucket.answers,
       orgId,
       vaultAccess,
-      applicationAnswerBucketContext(orgId, formId, bucket.visibility),
+      applicationAnswerBucketContext(orgId, bucket.cryptoSubjectId, bucket.visibility),
     );
 
     Object.assign(merged, decrypted);

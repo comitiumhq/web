@@ -51,6 +51,7 @@ function profile(firstName: string): CandidateProfile {
     location: null,
     currentTitle: null,
     currentCompany: null,
+    manuallyClearedFields: [],
   };
 }
 
@@ -92,17 +93,22 @@ describe('useDecryptCandidateNames', () => {
     );
 
     await vi.waitFor(() => expect(mocks.decryptApplication).toHaveBeenCalledTimes(1));
+
     await hook.rerender({
       applications: [application('candidate-1', 'ciphertext-b')],
       orgId: 'org-b',
     });
+
     await vi.waitFor(() => expect(mocks.decryptApplication).toHaveBeenCalledTimes(2));
 
     orgB.resolve(profile('Current'));
+
     await vi.waitFor(() => expect(hook.result.current.get('candidate-1')?.firstName).toBe('Current'));
 
     orgA.resolve(profile('Stale'));
+
     await Promise.resolve();
+
     await Promise.resolve();
 
     expect(hook.result.current.get('candidate-1')?.firstName).toBe('Current');
@@ -123,9 +129,11 @@ describe('useDecryptCandidateNames', () => {
     );
 
     await vi.waitFor(() => expect(hook.result.current.get('candidate-cache')?.firstName).toBe('First'));
+
     await hook.rerender({ applications: [application('candidate-cache', 'ciphertext-2')] });
 
     await vi.waitFor(() => expect(hook.result.current.get('candidate-cache')?.firstName).toBe('Updated'));
+
     expect(mocks.decryptApplication).toHaveBeenCalledTimes(2);
   });
 
@@ -139,6 +147,7 @@ describe('useDecryptCandidateNames', () => {
     await vi.waitFor(() => expect(hook.result.current.get('candidate-clear')?.firstName).toBe('Visible'));
 
     mocks.isCryptoActive = false;
+
     await hook.rerender();
 
     await vi.waitFor(() => expect(hook.result.current.size).toBe(0));

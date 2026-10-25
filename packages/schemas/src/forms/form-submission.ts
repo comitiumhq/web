@@ -1,6 +1,5 @@
 import { encryptedEnvelopeSchema } from '@comitium/crypto/schemas';
 import { z } from 'zod';
-import { hmacSha256HexSchema } from '../common';
 import { uuidSchema } from './contract-primitives';
 import { formSectionRowSchema, formSnapshotQuestionSchema } from './form-definitions';
 
@@ -19,30 +18,21 @@ export const formSnapshotSchema = z.object({
 
 export type FormDefinitionSnapshot = z.infer<typeof formSnapshotSchema>;
 
-const fieldValueIdentitySchema = z.object({
-  questionId: uuidSchema,
-  reusableFieldId: uuidSchema,
-  ordinal: z.number().int().nonnegative(),
-});
-
-export const formSubmissionFieldProjectionSchema = z.discriminatedUnion('kind', [
-  fieldValueIdentitySchema.extend({ kind: z.literal('digest'), value: hmacSha256HexSchema }),
-  fieldValueIdentitySchema.extend({ kind: z.literal('number'), value: z.string() }),
-  fieldValueIdentitySchema.extend({ kind: z.literal('timestamp'), value: z.string() }),
-]);
-
-export type FormSubmissionFieldProjection = z.infer<typeof formSubmissionFieldProjectionSchema>;
-
-export const FORM_FIELD_PROJECTION_VERSION = 1;
-
+export {
+  type FormSubmissionFieldProjection,
+  formSubmissionFieldProjectionSchema,
+} from '@comitium/crypto/schemas';
 export const answerEnvelopeSchema = z.object({
   visibility: z.enum(['standard', 'private']),
   answers: encryptedEnvelopeSchema,
 });
 
+export const storedAnswerEnvelopeSchema = answerEnvelopeSchema.extend({ cryptoSubjectId: uuidSchema });
+
 const candidateIdentityInputSchema = z
   .object({
     applicationId: uuidSchema,
+    cryptoApplicationId: uuidSchema,
     questionId: uuidSchema,
     envelope: encryptedEnvelopeSchema.refine(
       (envelope) => envelope.purpose === 'candidate_identity_input' && envelope.ct.length <= 500_000,
@@ -86,8 +76,7 @@ export const formSubmissionResponseSchema = z
     id: uuidSchema,
     formId: uuidSchema,
     formSnapshot: formSnapshotSchema,
-    fieldProjectionVersion: z.number().int().nullable(),
-    answerEnvelopes: z.array(answerEnvelopeSchema),
+    answerEnvelopes: z.array(storedAnswerEnvelopeSchema),
     candidateIdentityInputs: candidateIdentityInputsSchema,
     files: z.array(formSubmissionFileSchema),
     canReadPrivate: z.boolean(),

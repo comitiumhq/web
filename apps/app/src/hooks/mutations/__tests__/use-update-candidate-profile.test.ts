@@ -49,9 +49,11 @@ const PROFILE: CandidateProfile = {
   location: { cityId: 2_950_159, city: 'Berlin', region: 'Berlin', country: 'DE' },
   currentTitle: null,
   currentCompany: null,
+  manuallyClearedFields: [],
 };
 
 const ENCRYPTED_PROFILE = { purpose: 'candidate_profile' };
+
 const SEARCH_PROJECTION = {
   version: 1,
   contactEmailDigest: '1'.repeat(64),
@@ -63,6 +65,7 @@ interface CandidateProfileMutationParams {
   candidateId: string;
   orgId: string;
   profile: CandidateProfile;
+  expectedProfileRevision: number;
   vaultPublicKey: { v: 1; xwing: string };
   vaultKeyVersion: number;
   vaultAccess: { ek: string };
@@ -91,6 +94,7 @@ describe('candidate profile update', () => {
       candidateId: '11111111-1111-4111-8111-111111111111',
       orgId: '22222222-2222-4222-8222-222222222222',
       profile: PROFILE,
+      expectedProfileRevision: 7,
       vaultPublicKey: { v: 1, xwing: 'public-key' },
       vaultKeyVersion: 3,
       vaultAccess: { ek: 'wrapped-vault-key' },
@@ -101,6 +105,7 @@ describe('candidate profile update', () => {
       '11111111-1111-4111-8111-111111111111',
       ENCRYPTED_PROFILE,
       SEARCH_PROJECTION,
+      7,
     );
   });
 });

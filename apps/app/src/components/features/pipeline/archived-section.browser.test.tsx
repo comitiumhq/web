@@ -7,6 +7,7 @@ import type { ArchivedApplication } from '@/lib/schemas/pipeline';
 import { ArchivedSection } from './archived-section';
 
 const candidateId = '33333333-3333-4333-8333-333333333333';
+
 const profile: CandidateProfile = {
   firstName: 'Amara',
   lastName: 'Okafor',
@@ -18,6 +19,7 @@ const profile: CandidateProfile = {
   location: null,
   currentTitle: null,
   currentCompany: null,
+  manuallyClearedFields: [],
 };
 
 const rejectedApplication: ArchivedApplication = {
@@ -86,7 +88,9 @@ describe('ArchivedSection candidate navigation', () => {
     const row = screen.getByRole('row', { name: /Amara Okafor Transferred/ });
 
     row.element().focus();
+
     await userEvent.keyboard('{Enter}');
+
     await userEvent.keyboard(' ');
 
     expect(onCandidateClick).toHaveBeenCalledTimes(2);

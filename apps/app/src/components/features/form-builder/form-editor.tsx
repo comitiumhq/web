@@ -1,3 +1,4 @@
+import { profileMappingError } from '@comitium/crypto/candidate-profile';
 import type { FormClass } from '@comitium/schemas/forms';
 import {
   APPLICATION_REQUIRED_FIELDS,
@@ -133,12 +134,9 @@ function seedSectionsForFormClass(formClass: FormClass): EditorSection[] {
 export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormEditorProps) {
   const isNew = formId === null;
   const { data, isLoading, error } = useQueryForm(orgId, formId);
-
   const { mutate: createForm, isPending: isCreating } = useCreateForm();
   const { mutate: updateForm, isPending: isUpdating } = useUpdateForm();
-
   const isSaving = isCreating || isUpdating;
-
   const [title, setTitle] = useState('');
   const [sections, setSections] = useState<EditorSection[]>([]);
   const [snapshot, setSnapshot] = useState<string>('');
@@ -222,6 +220,7 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
                   description: formData.description.trim().length > 0 ? formData.description.trim() : null,
                   isRequired: formData.isRequired,
                   isPrivate: formData.isPrivate,
+                  config: { ...q.config, candidateProfileField: formData.candidateProfileField },
                   selectableValues: formData.options.length > 0 ? optionsToSelectableValues(formData.options) : null,
                 }
               : q,
@@ -246,6 +245,23 @@ export function FormEditor({ orgId, formClass, formId, onSaved, onClose }: FormE
   );
 
   const handleSave = useCallback(() => {
+    const mappedFields = new Set<string>();
+
+    for (const question of sections.flatMap((section) => section.questions)) {
+      const mapping = question.config?.candidateProfileField;
+      const error = profileMappingError(question, formClass);
+
+      if (error || (mapping && mappedFields.has(mapping))) {
+        toast.error(error ?? 'A Candidate profile field can be mapped only once per form');
+
+        return;
+      }
+
+      if (mapping) {
+        mappedFields.add(mapping);
+      }
+    }
+
     const trimmedTitle = title.trim();
 
     if (trimmedTitle.length === 0) {
@@ -485,7 +501,7 @@ function draftQuestionFromForm(data: QuestionFormData, sectionId: string, positi
     isPrivate: data.isPrivate,
     isLocked: false,
     selectableValues,
-    config: null,
+    config: data.candidateProfileField ? { candidateProfileField: data.candidateProfileField } : null,
     reusableFieldId: null,
   };
 }
@@ -504,6 +520,7 @@ function serialize(title: string, sections: EditorSection[]): string {
         isRequired: q.isRequired,
         isPrivate: q.isPrivate,
         reusableFieldId: q.reusableFieldId,
+        config: q.config,
         selectableValues: q.selectableValues,
       })),
     })),

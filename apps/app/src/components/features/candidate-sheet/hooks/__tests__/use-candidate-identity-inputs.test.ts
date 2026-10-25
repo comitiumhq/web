@@ -14,7 +14,8 @@ describe('candidate identity inputs', () => {
     const identities = await decryptCandidateIdentityInputs({
       candidateIdentityInputs: [
         {
-          applicationId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          applicationId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+          cryptoApplicationId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
           questionId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
           envelope,
         },

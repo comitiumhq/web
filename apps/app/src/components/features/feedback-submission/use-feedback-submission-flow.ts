@@ -78,20 +78,13 @@ function findOwnPrevious(
 
 async function buildEditState(
   previous: FeedbackSubmission,
-  applicationId: string,
   orgId: string,
   vaultAccess: VaultKeyAccess,
   ensureUnlocked: () => Promise<void>,
 ): Promise<ReadyState> {
   await ensureUnlocked();
 
-  const values = await decryptFeedbackBuckets(
-    orgId,
-    applicationId,
-    previous.formId,
-    previous.answerEnvelopes,
-    vaultAccess,
-  );
+  const values = await decryptFeedbackBuckets(orgId, previous.formId, previous.answerEnvelopes, vaultAccess);
 
   return {
     status: 'ready',
@@ -145,7 +138,6 @@ export function useFeedbackSubmissionFlow({
   );
 
   const editVaultAccess = ownPrevious ? vaultAccess : undefined;
-
   const [state, setState] = useState<FormState>({ status: 'idle' });
 
   useEffect(() => {
@@ -166,7 +158,7 @@ export function useFeedbackSubmissionFlow({
         return;
       }
 
-      ready = buildEditState(ownPrevious, applicationId, orgId, editVaultAccess, ensureUnlocked);
+      ready = buildEditState(ownPrevious, orgId, editVaultAccess, ensureUnlocked);
     } else {
       ready = buildCreateState(resolveForm, applicationId, source);
     }

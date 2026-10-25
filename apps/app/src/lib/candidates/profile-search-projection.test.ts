@@ -47,6 +47,7 @@ describe('projectCandidateProfileSearch', () => {
       location: { cityId: 2_950_159, city: 'Berlin', region: 'Berlin', country: 'DE' },
       currentTitle: 'Engineer',
       currentCompany: null,
+      manuallyClearedFields: [],
     };
 
     const projection = await projectCandidateProfileSearch(ORG_ID, WRAPPED_VAULT_KEY, profile);
@@ -80,6 +81,7 @@ describe('projectCandidateProfileSearch', () => {
       location: null,
       currentTitle: null,
       currentCompany: null,
+      manuallyClearedFields: [],
     });
 
     expect(mocks.hashCandidateProfileSearchValue).not.toHaveBeenCalled();

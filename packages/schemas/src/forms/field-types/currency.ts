@@ -1,12 +1,7 @@
-import { z } from 'zod';
+import { connectorValueSchemas } from '@comitium/crypto/form-values';
 
 import { applyRequirement } from './helpers';
 import { ALL_OBJECT_TYPES, FEEDBACK_ONLY_CLASSES, type FieldTypeDef } from './types';
-
-const currencyValue = z.object({
-  amount: z.number(),
-  currency: z.string().length(3).toUpperCase(),
-});
 
 export const currencyDef: FieldTypeDef = {
   id: 'currency',
@@ -25,7 +20,7 @@ export const currencyDef: FieldTypeDef = {
     requiresSingletonPerForm: false,
     requiresSelectableValues: false,
   },
-  valueSchema: (ctx) => applyRequirement(currencyValue, ctx),
+  valueSchema: (ctx) => applyRequirement(connectorValueSchemas.currency, ctx),
   connectorCompat: (target) => {
     if (target === 'currency') {
       return 'supported';

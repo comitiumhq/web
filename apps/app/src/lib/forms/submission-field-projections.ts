@@ -1,49 +1,14 @@
-import type { VaultKeyAccess } from '@comitium/crypto';
-import { CryptoProxy } from '@comitium/crypto';
-import type { FormDefinitionSnapshot, FormSubmissionFieldProjection } from '@comitium/schemas/forms/form-submission';
-import {
-  extractSubmissionFieldProjectionSources,
-  type SubmissionFieldProjectionSource,
-} from '@comitium/schemas/forms/submission-field-values';
+import { CryptoProxy, type VaultKeyAccess } from '@comitium/crypto';
+import { projectSubmissionFieldValues as projectFieldValues } from '@comitium/crypto/form-projections';
+import type { FormDefinitionSnapshot } from '@comitium/schemas/forms/form-submission';
 
-export async function projectSubmissionFieldValues(
+export function projectSubmissionFieldValues(
   orgId: string,
   vaultAccess: VaultKeyAccess,
   form: FormDefinitionSnapshot,
   answers: Record<string, unknown>,
-): Promise<FormSubmissionFieldProjection[]> {
-  const sources = extractSubmissionFieldProjectionSources(form, answers);
-
-  return Promise.all(sources.map((source) => projectFieldValue(orgId, vaultAccess, source)));
-}
-
-async function projectFieldValue(
-  orgId: string,
-  vaultAccess: VaultKeyAccess,
-  source: SubmissionFieldProjectionSource,
-): Promise<FormSubmissionFieldProjection> {
-  const identity = {
-    questionId: source.questionId,
-    reusableFieldId: source.reusableFieldId,
-    ordinal: source.ordinal,
-  };
-
-  switch (source.kind) {
-    case 'boolean':
-    case 'option':
-      return {
-        ...identity,
-        kind: 'digest',
-        value: await CryptoProxy.hashCategoricalFormFieldValue(
-          orgId,
-          vaultAccess,
-          source.reusableFieldId,
-          source.kind,
-          source.value,
-        ),
-      };
-    case 'number':
-    case 'timestamp':
-      return { ...identity, kind: source.kind, value: source.value };
-  }
+) {
+  return projectFieldValues(form, answers, (fieldId, kind, value) =>
+    CryptoProxy.hashCategoricalFormFieldValue(orgId, vaultAccess, fieldId, kind, value),
+  );
 }

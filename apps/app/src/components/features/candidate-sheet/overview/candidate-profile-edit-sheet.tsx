@@ -1,6 +1,12 @@
 import type { PublicEncryptionKey, VaultKeyAccess } from '@comitium/crypto';
-import { type CandidateProfile, formatCandidateLocation } from '@comitium/schemas/candidates';
-import { httpsUrlSchema } from '@comitium/schemas/common';
+import {
+  type CandidateProfile,
+  type CandidateProfileValues,
+  createCandidateProfile,
+  editCandidateProfile,
+  formatCandidateLocation,
+  normalizeCandidateProfileUrl,
+} from '@comitium/schemas/candidates';
 import { candidateLocationValueSchema } from '@comitium/schemas/forms/field-types/candidate-location';
 import { Button } from '@comitium/ui/button';
 import { CitySearchInput } from '@comitium/ui/city-search-input';
@@ -15,7 +21,7 @@ import { Input } from '@comitium/ui/input';
 import { Sheet, SheetDescription, SheetTitle } from '@comitium/ui/sheet';
 import { Spinner } from '@comitium/ui/spinner';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useUpdateCandidateProfile } from '@/hooks/mutations/use-update-candidate-profile';
@@ -23,14 +29,21 @@ import { searchCities } from '@/lib/api/cities';
 import { cn } from '@/lib/utils';
 
 const optionalProfileFieldSchema = z.string().trim().max(500, 'Use 500 characters or fewer');
-const optionalProfileUrlSchema = optionalProfileFieldSchema.pipe(
-  z.union([z.literal(''), httpsUrlSchema], { error: 'Enter an HTTPS URL' }),
-);
+
+const optionalProfileUrlSchema = optionalProfileFieldSchema.transform((value, ctx) => {
+  try {
+    return normalizeCandidateProfileUrl(value) ?? '';
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Enter an HTTP(S) URL' });
+
+    return z.NEVER;
+  }
+});
 
 const candidateProfileFormSchema = z.object({
   firstName: optionalProfileFieldSchema,
   lastName: optionalProfileFieldSchema,
-  email: optionalProfileFieldSchema,
+  email: optionalProfileFieldSchema.pipe(z.union([z.literal(''), z.email()])),
   phone: optionalProfileFieldSchema,
   location: candidateLocationValueSchema.nullable(),
   currentTitle: optionalProfileFieldSchema,
@@ -95,6 +108,7 @@ interface CandidateProfileEditSheetProps {
   candidateId: string;
   orgId: string;
   profile: CandidateProfile | null;
+  profileRevision: number | null;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
   vaultAccess: VaultKeyAccess;
@@ -108,21 +122,27 @@ export function CandidateProfileEditSheet({
   candidateId,
   orgId,
   profile,
+  profileRevision,
   vaultPublicKey,
   vaultKeyVersion,
   vaultAccess,
 }: CandidateProfileEditSheetProps) {
   const { mutateAsync: updateProfile, isPending } = useUpdateCandidateProfile();
+  const wasOpen = useRef(false);
+  const baseline = useRef({ profile, profileRevision });
   const form = useForm<CandidateProfileFormValues>({
     resolver: zodResolver(candidateProfileFormSchema),
     defaultValues: toProfileFormValues(profile),
   });
 
   useEffect(() => {
-    if (open) {
+    if (open && !wasOpen.current) {
+      baseline.current = { profile, profileRevision };
       form.reset(toProfileFormValues(profile));
     }
-  }, [form, open, profile]);
+
+    wasOpen.current = open;
+  }, [form, open, profile, profileRevision]);
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -138,10 +158,19 @@ export function CandidateProfileEditSheet({
   const handleCancel = useCallback(() => handleOpenChange(false), [handleOpenChange]);
   const handleSubmit = useCallback(
     async (values: CandidateProfileFormValues) => {
+      if (baseline.current.profileRevision === null) {
+        return;
+      }
+
+      const nextValues = toCandidateProfile(values);
+
       await updateProfile({
         candidateId,
         orgId,
-        profile: toCandidateProfile(values),
+        profile: baseline.current.profile
+          ? editCandidateProfile(baseline.current.profile, nextValues)
+          : createCandidateProfile(nextValues),
+        expectedProfileRevision: baseline.current.profileRevision,
         vaultPublicKey,
         vaultKeyVersion,
         vaultAccess,
@@ -163,6 +192,7 @@ export function CandidateProfileEditSheet({
         <FeatureSheetBody>
           <Form {...form}>
             <form
+              noValidate
               id={FORM_ID}
               onSubmit={form.handleSubmit(handleSubmit)}
               className="grid grid-cols-1 gap-5 sm:grid-cols-2"
@@ -256,7 +286,7 @@ function toProfileFormValues(profile: CandidateProfile | null): CandidateProfile
   };
 }
 
-function toCandidateProfile(values: CandidateProfileFormValues): CandidateProfile {
+function toCandidateProfile(values: CandidateProfileFormValues): CandidateProfileValues {
   return {
     firstName: normalizeProfileField(values.firstName),
     lastName: normalizeProfileField(values.lastName),

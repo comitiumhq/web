@@ -1,4 +1,4 @@
-import { httpsUrlSchema } from '../../common';
+import { connectorValueSchemas } from '@comitium/crypto/form-values';
 import { applyRequirement } from './helpers';
 import { ALL_FORM_CLASSES, ALL_OBJECT_TYPES, type FieldTypeDef } from './types';
 
@@ -19,7 +19,7 @@ export const urlDef: FieldTypeDef = {
     requiresSingletonPerForm: false,
     requiresSelectableValues: false,
   },
-  valueSchema: (ctx) => applyRequirement(httpsUrlSchema.max(2_048), ctx),
+  valueSchema: (ctx) => applyRequirement(connectorValueSchemas.url, ctx),
   connectorCompat: (target) => {
     if (target === 'url' || target === 'short_answer') {
       return 'supported';

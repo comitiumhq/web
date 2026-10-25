@@ -12,9 +12,6 @@ import { getCandidateDisplayName } from '@/lib/utils';
 
 import { useApplicationDetail } from '../hooks/use-application-detail';
 import { useDecryptProfile } from '../hooks/use-decrypt-profile';
-import { useProjectApplicationFormSearch } from '../hooks/use-project-application-form-search';
-import { useProjectCandidateProfileSearch } from '../hooks/use-project-candidate-profile-search';
-import { useProjectFormSubmission } from '../hooks/use-project-form-submission';
 
 interface UseCandidateSheetModelParams {
   applicationId: string | null;
@@ -37,11 +34,11 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
 
   const {
     profile: decryptedProfile,
+    profileRevision,
     isLoading: isLoadingProfile,
     hasEncryptedProfile,
     queryError: profileQueryError,
     decryptionError: profileDecryptionError,
-    searchProjectionVersion,
     retryQuery: retryProfileQuery,
   } = useDecryptProfile(application?.candidateId, orgId, detail.vaultAccess);
 
@@ -84,36 +81,6 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
 
   const candidateFirstName = decryptedProfile?.firstName ?? null;
   const candidateName = formatCandidateName(decryptedProfile);
-  const canEditCandidate = application?.considerationContext.capabilities.candidate.canEditProfile === true;
-
-  useProjectFormSubmission({
-    orgId,
-    candidateId: application?.candidateId ?? null,
-    formId: detail.formSubmission?.formId ?? null,
-    submissionId: detail.formSubmission?.id ?? null,
-    decryptedAnswers: decryptedData,
-    enabled: canEditCandidate,
-  });
-
-  useProjectCandidateProfileSearch({
-    candidateId: application?.candidateId ?? null,
-    orgId,
-    profile: decryptedProfile,
-    storedVersion: searchProjectionVersion,
-    vaultAccess: detail.vaultAccess,
-    enabled: canEditCandidate,
-  });
-
-  useProjectApplicationFormSearch({
-    applicationId: application?.id ?? null,
-    orgId,
-    form: detail.formSubmission?.formSnapshot ?? null,
-    answers: decryptedData,
-    storedVersion: detail.formSubmission?.fieldProjectionVersion ?? null,
-    vaultAccess: detail.vaultAccess,
-    enabled: canEditCandidate && detail.formSubmission?.canReadPrivate === true,
-  });
-
   const canUseProvidedStages = effectiveJobId === jobId && Boolean(stages?.length);
   const { data: pipelineData } = useQueryPipeline(!canUseProvidedStages && open ? effectiveJobId : null);
   const resolvedStages = canUseProvidedStages ? stages : pipelineData?.stages;
@@ -134,6 +101,7 @@ export function useCandidateSheetModel({ applicationId, jobId, orgId, stages, op
     retryFormDecryption,
     application,
     decryptedProfile,
+    profileRevision,
     isLoadingProfile,
     hasEncryptedProfile,
     profileQueryError,
