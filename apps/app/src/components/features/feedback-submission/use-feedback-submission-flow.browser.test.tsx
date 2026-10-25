@@ -130,6 +130,7 @@ describe('useFeedbackSubmissionFlow', () => {
     const hook = await renderFlow(activitySource());
 
     await vi.waitFor(() => expect(hook.result.current.mode).toBe('create'));
+
     expect(mocks.resolveForm).toHaveBeenCalledExactlyOnceWith({
       applicationId: APPLICATION_ID,
       body: { activityId: ACTIVITY_ID },
@@ -149,13 +150,14 @@ describe('useFeedbackSubmissionFlow', () => {
       previousSubmission({ id: '88888888-8888-4888-8888-888888888888', isDeleted: true }),
       previousSubmission(),
     ];
+
     const hook = await renderFlow(activitySource());
 
     await vi.waitFor(() => expect(hook.result.current.mode).toBe('edit'));
+
     expect(mocks.ensureUnlocked).toHaveBeenCalledOnce();
     expect(mocks.decryptFeedbackBuckets).toHaveBeenCalledExactlyOnceWith(
       ORG_ID,
-      APPLICATION_ID,
       FORM_ID,
       mocks.submissions[2]?.answerEnvelopes,
       vaultAccess,
@@ -169,6 +171,7 @@ describe('useFeedbackSubmissionFlow', () => {
 
   it('waits for the wrapped vault key instead of exposing an undecrypted edit form', async () => {
     mocks.submissions = [previousSubmission()];
+
     const hook = await renderFlow(activitySource(), null);
 
     expect(hook.result.current).toMatchObject({ isLoading: true, snapshot: null, defaultValues: null });
@@ -187,17 +190,22 @@ describe('useFeedbackSubmissionFlow', () => {
     const hook = await renderFlow(activitySource());
 
     await vi.waitFor(() => expect(mocks.resolveForm).toHaveBeenCalledTimes(1));
+
     await hook.rerender({
       currentSource: activitySource('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
       wrappedKey: vaultAccess,
     });
+
     await vi.waitFor(() => expect(mocks.resolveForm).toHaveBeenCalledTimes(2));
 
     second.resolve({ data: { formSnapshot: snapshot(secondFormId), formSnapshotHash: `0x${'2'.repeat(64)}` } });
+
     await vi.waitFor(() => expect(hook.result.current.formId).toBe(secondFormId));
 
     first.resolve({ data: { formSnapshot: snapshot(), formSnapshotHash: `0x${'1'.repeat(64)}` } });
+
     await Promise.resolve();
+
     await Promise.resolve();
 
     expect(hook.result.current.formId).toBe(secondFormId);

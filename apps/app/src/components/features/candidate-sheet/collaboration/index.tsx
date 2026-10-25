@@ -29,7 +29,6 @@ type CandidateCollaborationVariant = 'panel' | 'compact';
 
 interface CandidateCollaborationAccess extends FeedbackAccessState {
   canManageNotes: boolean;
-  canProjectFormFields: boolean;
 }
 
 export interface CandidateCollaborationProps {
@@ -186,7 +185,6 @@ export function CandidateCollaboration({
             <div className="px-4 pb-4 pt-20">
               <FeedbackTab
                 applicationId={applicationId}
-                candidateId={candidateId}
                 orgId={orgId}
                 stageActivities={stageActivities}
                 currentUserId={currentUserId}

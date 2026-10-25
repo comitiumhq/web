@@ -16,8 +16,6 @@ import type { InterviewEventRef } from '@/lib/interviews/feedback';
 import type { FeedbackSubmission } from '@/lib/schemas/feedback-submissions';
 import type { ApplicationReviewActivity } from '@/lib/schemas/stage-activities';
 
-import { type ProjectableFormSubmission, useProjectFormSubmissions } from '../../hooks/use-project-form-submission';
-
 import { CriteriaEvaluation } from './criteria-evaluation';
 import { Empty, ErrorState, GatedEmpty, LoadingState } from './empty-states';
 import { EvaluationStatus } from './evaluation-status';
@@ -26,13 +24,10 @@ import { GroupCard } from './group-card';
 import type { FeedbackAccessState, SourceGroup } from './types';
 import { useDecryptedSubmissions } from './use-decrypted-submissions';
 
-interface FeedbackTabAccess extends FeedbackAccessState {
-  canProjectFormFields: boolean;
-}
+interface FeedbackTabAccess extends FeedbackAccessState {}
 
 interface FeedbackTabProps {
   applicationId: string | null;
-  candidateId: string | null;
   orgId: string;
   stageActivities: CandidateSheetStageActivity[];
   currentUserId: string;
@@ -48,7 +43,6 @@ interface FeedbackTabProps {
 
 export function FeedbackTab({
   applicationId,
-  candidateId,
   orgId,
   stageActivities,
   currentUserId,
@@ -133,10 +127,8 @@ export function FeedbackTab({
           <GroupsList
             groups={groups}
             applicationId={applicationId}
-            candidateId={candidateId}
             orgId={orgId}
             vaultAccess={vaultAccess}
-            canProjectFormFields={access.canProjectFormFields}
             currentUserId={currentUserId}
             onReviewActivity={onReviewActivity}
             onSubmitInterviewFeedback={onSubmitInterviewFeedback}
@@ -185,10 +177,8 @@ function getFeedbackState(
 interface GroupsListProps {
   groups: SourceGroup[];
   applicationId: string | null;
-  candidateId: string | null;
   orgId: string;
   vaultAccess: VaultKeyAccess | undefined;
-  canProjectFormFields: boolean;
   currentUserId: string;
   onReviewActivity: ((activity: ApplicationReviewActivity) => void) | null;
   onSubmitInterviewFeedback: ((event: InterviewEventRef) => void) | null;
@@ -197,10 +187,8 @@ interface GroupsListProps {
 function GroupsList({
   groups,
   applicationId,
-  candidateId,
   orgId,
   vaultAccess,
-  canProjectFormFields,
   currentUserId,
   onReviewActivity,
   onSubmitInterviewFeedback,
@@ -215,25 +203,6 @@ function GroupsList({
     [groups],
   );
   const decryptedMap = useDecryptedSubmissions(allSubmissions, orgId, vaultAccess);
-  const projectableSubmissions = useMemo<ProjectableFormSubmission[]>(
-    () =>
-      allSubmissions.flatMap((submission) => {
-        const entry = decryptedMap.get(submission.id);
-
-        return entry?.status === 'ready'
-          ? [{ id: submission.id, formId: submission.formId, answers: entry.values }]
-          : [];
-      }),
-    [allSubmissions, decryptedMap],
-  );
-
-  useProjectFormSubmissions({
-    orgId,
-    candidateId,
-    submissions: projectableSubmissions,
-    enabled: canProjectFormFields,
-  });
-
   const memberMap = useQueryOrgTeamMap(orgId);
 
   return (

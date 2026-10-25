@@ -1,10 +1,10 @@
+import { CANDIDATE_PROFILE_MAPPING_FIELDS } from '@comitium/crypto/candidate-profile';
 import { z } from 'zod';
 
 import { dataArraySchema, selectableValueSchema, uuidSchema } from './contract-primitives';
 import { FIELD_TYPE_IDS, FORM_CLASSES } from './field-types/types';
 
 const formClassSchema = z.enum(FORM_CLASSES);
-
 export const FIELD_PROJECTION_VALUE_KINDS = ['boolean', 'option', 'number', 'timestamp'] as const;
 
 const formReusableFieldDescriptorSchema = z
@@ -53,7 +53,7 @@ const formQuestionConfigSchema = z
   .object({
     supportedFileTypes: z.array(z.string()).optional(),
     maxFileSizeBytes: z.number().int().positive().optional(),
-    candidateProfileField: z.enum(['first_name', 'last_name']).optional(),
+    candidateProfileField: z.enum(CANDIDATE_PROFILE_MAPPING_FIELDS).optional(),
   })
   .strict();
 
@@ -123,7 +123,6 @@ const applicationFormOptionSchema = formOptionSchema
   .strict();
 
 export type ApplicationFormOption = z.infer<typeof applicationFormOptionSchema>;
-
 export const applicationFormOptionsResponseSchema = dataArraySchema(applicationFormOptionSchema);
 
 export const nestedFormSchema = z.object({
@@ -147,7 +146,6 @@ export const adminFormDetailSchema = z.object({
 });
 
 export type AdminFormDetail = z.infer<typeof adminFormDetailSchema>;
-
 export const listFormsResponseSchema = dataArraySchema(formDefinitionListItemSchema);
 
 const feedbackFormJobActivityUsageSchema = z.object({
@@ -199,7 +197,6 @@ const applicationFormUsageDataSchema = z.object({
 
 export const feedbackFormUsageSchema = z.object({ data: feedbackFormUsageDataSchema });
 export const applicationFormUsageSchema = z.object({ data: applicationFormUsageDataSchema });
-
 export type FeedbackFormUsage = z.infer<typeof feedbackFormUsageSchema>['data'];
 export type ApplicationFormUsage = z.infer<typeof applicationFormUsageSchema>['data'];
 

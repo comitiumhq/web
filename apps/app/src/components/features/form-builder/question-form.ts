@@ -1,3 +1,4 @@
+import { CANDIDATE_PROFILE_MAPPING_FIELDS, profileMappingError } from '@comitium/crypto/candidate-profile';
 import { FIELD_TYPE_IDS, type FieldTypeId } from '@comitium/schemas/forms';
 import type { FormQuestionRow } from '@comitium/schemas/forms/form-definitions';
 import { z } from 'zod';
@@ -9,6 +10,7 @@ export const questionFormSchema = z
     description: z.string().trim().max(2000, 'Max 2000 characters'),
     isRequired: z.boolean(),
     isPrivate: z.boolean(),
+    candidateProfileField: z.enum(CANDIDATE_PROFILE_MAPPING_FIELDS).optional(),
     options: z
       .array(
         z.object({
@@ -20,6 +22,15 @@ export const questionFormSchema = z
       .max(200, 'Max 200 options'),
   })
   .superRefine((data, ctx) => {
+    const error = profileMappingError(
+      { ...data, config: { candidateProfileField: data.candidateProfileField } },
+      'application',
+    );
+
+    if (error) {
+      ctx.addIssue({ code: 'custom', path: ['candidateProfileField'], message: error });
+    }
+
     if (isChoiceType(data.questionType) && data.options.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

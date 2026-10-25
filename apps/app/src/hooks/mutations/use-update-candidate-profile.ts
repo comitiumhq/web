@@ -14,6 +14,7 @@ interface UpdateCandidateProfileParams {
   candidateId: string;
   orgId: string;
   profile: CandidateProfile;
+  expectedProfileRevision: number;
   vaultPublicKey: PublicEncryptionKey;
   vaultKeyVersion: number;
   vaultAccess: VaultKeyAccess;
@@ -28,6 +29,7 @@ export function useUpdateCandidateProfile() {
       candidateId,
       orgId,
       profile,
+      expectedProfileRevision,
       vaultPublicKey,
       vaultKeyVersion,
       vaultAccess,
@@ -44,7 +46,7 @@ export function useUpdateCandidateProfile() {
         projectCandidateProfileSearch(orgId, vaultAccess, profile),
       ]);
 
-      return updateCandidateProfile(candidateId, encryptedProfile, searchProjection);
+      return updateCandidateProfile(candidateId, encryptedProfile, searchProjection, expectedProfileRevision);
     },
 
     onSuccess: (_, { candidateId }) => {

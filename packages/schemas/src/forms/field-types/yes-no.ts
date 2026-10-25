@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { connectorValueSchemas } from '@comitium/crypto/form-values';
 
 import { applyRequirement } from './helpers';
 import { ALL_FORM_CLASSES, ALL_OBJECT_TYPES, type FieldTypeDef } from './types';
@@ -20,7 +20,7 @@ export const yesNoDef: FieldTypeDef = {
     requiresSingletonPerForm: false,
     requiresSelectableValues: false,
   },
-  valueSchema: (ctx) => applyRequirement(z.enum(['yes', 'no']), ctx),
+  valueSchema: (ctx) => applyRequirement(connectorValueSchemas.yes_no, ctx),
   connectorCompat: (target) => {
     if (target === 'yes_no') {
       return 'supported';

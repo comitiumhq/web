@@ -9,7 +9,7 @@ import { parseDecryptedCandidateProfile } from '@/lib/crypto/decrypted-payloads'
 
 type ProfileDecryptionState =
   | { candidateId: string; status: 'decrypting'; profile: null }
-  | { candidateId: string; status: 'success'; profile: CandidateProfile }
+  | { candidateId: string; revision: number; status: 'success'; profile: CandidateProfile }
   | { candidateId: string; status: 'error'; profile: null };
 
 export function useDecryptProfile(candidateId: string | null | undefined, orgId: string, vaultAccess?: VaultKeyAccess) {
@@ -53,7 +53,12 @@ export function useDecryptProfile(candidateId: string | null | undefined, orgId:
           return;
         }
 
-        setDecryptionState({ candidateId: candidateData.id, status: 'success', profile });
+        setDecryptionState({
+          candidateId: candidateData.id,
+          revision: candidateData.profileRevision,
+          status: 'success',
+          profile,
+        });
       })
       .catch(() => {
         if (!cancelled) {
@@ -66,7 +71,15 @@ export function useDecryptProfile(candidateId: string | null | undefined, orgId:
     };
   }, [candidateData, candidateId, vaultAccess, orgId, isCryptoActive]);
 
+  let profileRevision =
+    hasCurrentCandidateData && !candidateData?.profile ? (candidateData?.profileRevision ?? null) : null;
+
+  if (currentDecryptionState?.status === 'success') {
+    profileRevision = currentDecryptionState.revision;
+  }
+
   return {
+    profileRevision,
     profile: currentDecryptionState?.status === 'success' ? currentDecryptionState.profile : null,
     isLoading: Boolean(candidateId) && (isLoading || isAwaitingDecryption),
     hasEncryptedProfile: hasCurrentEncryptedProfile,

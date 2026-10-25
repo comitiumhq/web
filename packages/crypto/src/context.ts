@@ -194,3 +194,7 @@ export function emailContentContext(orgId: string, applicationId: string): Crypt
     fieldId: 'content',
   };
 }
+
+export function candidateProfileEnrichmentContext(orgId: string, enrichmentId: string): CryptoContextInput {
+  return { purpose: 'candidate_profile_enrichment', orgId, subjectId: enrichmentId, fieldId: 'profile' };
+}

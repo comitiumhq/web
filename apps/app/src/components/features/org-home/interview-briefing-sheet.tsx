@@ -32,6 +32,7 @@ import { isInterviewFeedbackDue } from './home-data';
 import { useInterviewBriefingApplication } from './use-interview-briefing-application';
 
 const BRIEFING_TABS = ['overview', 'briefing', 'resume', 'application', 'feedback'] as const;
+
 const BRIEFING_TAB_SKELETONS = [
   { key: 'overview', width: 'w-20' },
   { key: 'briefing', width: 'w-20' },
@@ -52,7 +53,6 @@ interface InterviewBriefingSheetProps {
 export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }: InterviewBriefingSheetProps) {
   const [activeTab, setActiveTab] = useState<BriefingTab>(() => getInitialTab(interview));
   const [isFeedbackInitialized, setIsFeedbackInitialized] = useState(() => getInitialTab(interview) === 'feedback');
-
   const queryClient = useQueryClient();
   const { user } = useSession();
 
@@ -69,7 +69,6 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
   } = useQueryInterviewBriefing(open ? interview.applicationId : undefined, open ? interview.eventId : undefined);
 
   const briefing = briefingResponse?.data;
-
   const { data: vaultKey } = useQueryOrgVaultKey(open ? orgId : undefined);
   const { data: vaultAccess } = useQueryOrgVaultAccess(open ? orgId : undefined);
 
@@ -88,7 +87,7 @@ export function InterviewBriefingSheet({ interview, open, onOpenChange, orgId }:
   );
 
   const candidateProfileQuery = useDecryptCandidateProfileInput({
-    applicationId: briefing?.applicationId ?? null,
+    applicationId: briefing?.candidateProfileInputApplicationId ?? null,
     enabled: open,
     envelope: briefing?.candidateProfileInput ?? null,
     orgId,

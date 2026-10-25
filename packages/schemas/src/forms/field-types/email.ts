@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { connectorValueSchemas } from '@comitium/crypto/form-values';
 
 import { applyRequirement } from './helpers';
 import { ALL_FORM_CLASSES, type FieldTypeDef } from './types';
@@ -20,7 +20,7 @@ export const emailDef: FieldTypeDef = {
     requiresSingletonPerForm: false,
     requiresSelectableValues: false,
   },
-  valueSchema: (ctx) => applyRequirement(z.email().max(254), ctx),
+  valueSchema: (ctx) => applyRequirement(connectorValueSchemas.email, ctx),
   connectorCompat: (target) => {
     if (target === 'email' || target === 'short_answer') {
       return 'supported';

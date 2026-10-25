@@ -15,6 +15,7 @@ const PROFILE: CandidateProfile = {
   location: { cityId: 2_643_743, city: 'London', country: 'GB' },
   currentTitle: 'Staff Engineer',
   currentCompany: 'Analytical Engines',
+  manuallyClearedFields: [],
 };
 
 const CANDIDATE = createCandidate();

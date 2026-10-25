@@ -5,6 +5,10 @@
   "license": "GPL-3.0-or-later",
   "type": "module",
   "exports": {
+    "./candidate-projections": "./src/candidate-projections.ts",
+    "./form-projections": "./src/form-projections.ts",
+    "./form-values": "./src/form-values.ts",
+    "./candidate-profile": "./src/candidate-profile.ts",
     ".": "./src/index.ts",
     "./context": "./src/context.ts",
     "./envelope-key": "./src/envelope-key.ts",

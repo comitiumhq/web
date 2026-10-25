@@ -11,6 +11,7 @@ interface CandidateOverviewProps {
   application: ApplicationApiResponse;
   orgId: string;
   decryptedProfile: CandidateProfile | null;
+  profileRevision: number | null;
   isLoadingProfile: boolean;
   hasEncryptedProfile: boolean;
   profileQueryError: boolean;
@@ -25,6 +26,7 @@ export function CandidateOverview({
   application,
   orgId,
   decryptedProfile,
+  profileRevision,
   isLoadingProfile,
   hasEncryptedProfile,
   profileQueryError,
@@ -43,6 +45,7 @@ export function CandidateOverview({
           candidateId={application.candidateId}
           orgId={orgId}
           profile={decryptedProfile}
+          profileRevision={profileRevision}
           isLoading={isLoadingProfile}
           hasEncryptedProfile={hasEncryptedProfile}
           queryError={profileQueryError}

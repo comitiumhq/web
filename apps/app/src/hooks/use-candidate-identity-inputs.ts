@@ -19,7 +19,7 @@ export async function decryptCandidateIdentityInputs(params: {
         identity.envelope,
         params.orgId,
         params.vaultAccess,
-        candidateIdentityInputContext(params.orgId, identity.applicationId, identity.questionId),
+        candidateIdentityInputContext(params.orgId, identity.cryptoApplicationId, identity.questionId),
       );
 
       return [

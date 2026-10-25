@@ -21,6 +21,7 @@ function handleError(response: Response, data: unknown): never {
 }
 
 type ResponseSchema<T> = z.ZodType<T, unknown>;
+
 type ApiRequestOptions = {
   signal?: AbortSignal;
 };
@@ -128,7 +129,6 @@ async function putBlob<T>(url: string, body: Blob, uploadToken: string, schema?:
 }
 
 function deleteRequest<T>(url: string, schema?: ResponseSchema<T>): Promise<T>;
-
 function deleteRequest<T>(url: string, body: unknown, schema: ResponseSchema<T>): Promise<T>;
 
 function deleteRequest<T>(url: string, bodyOrSchema?: unknown, schema?: ResponseSchema<T>): Promise<T> {
@@ -142,7 +142,8 @@ function deleteRequest<T>(url: string, bodyOrSchema?: unknown, schema?: Response
 export const api = {
   get: <T>(url: string, schema?: ResponseSchema<T>, options?: ApiRequestOptions) =>
     request<T>(url, undefined, undefined, schema, options),
-  post: <T>(url: string, body?: unknown, schema?: ResponseSchema<T> | null) => request<T>(url, 'POST', body, schema),
+  post: <T>(url: string, body?: unknown, schema?: ResponseSchema<T> | null, options?: ApiRequestOptions) =>
+    request<T>(url, 'POST', body, schema, options),
   put: <T>(url: string, body?: unknown, schema?: ResponseSchema<T>) => request<T>(url, 'PUT', body, schema),
   patch: <T>(url: string, body?: unknown, schema?: ResponseSchema<T>) => request<T>(url, 'PATCH', body, schema),
   delete: deleteRequest,

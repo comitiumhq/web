@@ -1,10 +1,8 @@
+import { currencyAnswerSchema, scoreAnswerSchema } from '@comitium/crypto/form-values';
 import { z } from 'zod';
 import { isDefined } from '../guards';
 
-export const currencyAnswerSchema = z.object({
-  amount: z.number().nonnegative(),
-  currency: z.string().length(3).toUpperCase(),
-});
+export { currencyAnswerSchema, scoreAnswerSchema };
 
 export type CurrencyAnswer = z.infer<typeof currencyAnswerSchema>;
 
@@ -18,13 +16,7 @@ const currencyAnswerDraftSchema = z.object({
   currency: z.string().optional(),
 });
 
-export const scoreAnswerSchema = z.object({
-  score: z.number().int().min(1).max(5),
-  comment: z.string().max(2000).optional(),
-});
-
 export type ScoreAnswer = z.infer<typeof scoreAnswerSchema>;
-
 export type ScoreAnswerDraft = Partial<ScoreAnswer>;
 
 const scoreAnswerDraftSchema = z.object({

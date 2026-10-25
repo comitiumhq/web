@@ -1,6 +1,7 @@
 import * as Comlink from 'comlink';
 
 import type { CandidateProfileSearchField } from './candidate-profile-search-hash';
+import type { CandidateProjectionItem } from './candidate-projections';
 import type { CryptoContextInput } from './context';
 import type { SearchableCustomFieldType } from './custom-field-search';
 import type { CategoricalFormFieldKind } from './form-field-search-hash';
@@ -29,7 +30,6 @@ let isResetting = false;
 let apiBaseUrl: string | null = null;
 let lifecycle = 0;
 let unlockPromise: Promise<UnlockResult> | null = null;
-
 const listeners = new Set<() => void>();
 
 function notify(): void {
@@ -146,6 +146,9 @@ async function unlockIdentity(
  * - Unlock and clear operations notify subscribers
  */
 export const CryptoProxy = {
+  processCandidateProjection(orgId: string, access: VaultKeyAccess, item: CandidateProjectionItem) {
+    return runOnWorker((api) => api.processCandidateProjection(orgId, access, item));
+  },
   /**
    * Eagerly initialize the crypto Worker.
    * Configure once with the product API URL before using the Worker.
@@ -433,6 +436,7 @@ export const CryptoProxy = {
     confirmFreshAuth: FreshAuthenticationHandler,
   ) {
     await confirmFreshAuth();
+
     await this.clear();
 
     const generation = lifecycle;
@@ -515,7 +519,6 @@ export const CryptoProxy = {
 
     const api = new UnlockApi(apiBaseUrl);
     const store = new RememberedDeviceStore();
-
     let deviceId: string | undefined;
     let storageError: unknown;
 

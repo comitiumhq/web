@@ -1,19 +1,10 @@
-import { z } from 'zod';
+import { candidateLocationValueSchema } from '@comitium/crypto/candidate-profile';
 
 import { applyRequirement } from './helpers';
 import { APPLICATION_LIKE_CLASSES, type FieldTypeDef } from './types';
 
-export const candidateLocationValueSchema = z
-  .object({
-    cityId: z.number().int().positive(),
-    city: z.string().min(1).max(120),
-    region: z.string().min(1).max(120).optional(),
-    country: z.string().length(2).toUpperCase(),
-  })
-  .strict();
-
-export type CandidateLocationValue = z.infer<typeof candidateLocationValueSchema>;
-
+export type { CandidateLocationValue } from '@comitium/crypto/candidate-profile';
+export { candidateLocationValueSchema } from '@comitium/crypto/candidate-profile';
 export const candidateLocationDef: FieldTypeDef = {
   id: 'candidate_location',
   meta: {

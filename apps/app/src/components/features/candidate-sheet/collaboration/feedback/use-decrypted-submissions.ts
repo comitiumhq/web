@@ -67,13 +67,7 @@ async function decryptOne(
       throw new Error('Feedback submission is not attached to an application');
     }
 
-    const values = await decryptFeedbackBuckets(
-      orgId,
-      submission.applicationId,
-      submission.formId,
-      submission.answerEnvelopes,
-      vaultAccess,
-    );
+    const values = await decryptFeedbackBuckets(orgId, submission.formId, submission.answerEnvelopes, vaultAccess);
 
     return [submission.id, { status: 'ready', values }];
   } catch (err) {

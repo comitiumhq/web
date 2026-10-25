@@ -1,9 +1,7 @@
-import { z } from 'zod';
+import { connectorValueSchemas } from '@comitium/crypto/form-values';
 
 import { applyRequirement } from './helpers';
 import { ALL_FORM_CLASSES, ALL_OBJECT_TYPES, type FieldTypeDef } from './types';
-
-const isoDateOrDateTime = z.string().refine((s) => !Number.isNaN(Date.parse(s)), { message: 'Invalid ISO 8601 date' });
 
 export const dateDef: FieldTypeDef = {
   id: 'date',
@@ -22,7 +20,7 @@ export const dateDef: FieldTypeDef = {
     requiresSingletonPerForm: false,
     requiresSelectableValues: false,
   },
-  valueSchema: (ctx) => applyRequirement(isoDateOrDateTime, ctx),
+  valueSchema: (ctx) => applyRequirement(connectorValueSchemas.date, ctx),
   connectorCompat: (target) => {
     if (target === 'date') {
       return 'supported';

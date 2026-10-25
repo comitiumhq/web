@@ -20,6 +20,8 @@ export const qk = {
     detail: (token: string | null) => ['invite', token] as const,
   },
   org: {
+    candidateProjections: (orgId: string, userId: string | null, vaultGeneration: string) =>
+      ['org', orgId, 'candidate-projections', userId, vaultGeneration] as const,
     detail: (orgId?: string | null) => ['org', orgId] as const,
     permissions: (orgId?: string | null) => ['org-permissions', orgId] as const,
     workspaceSetup: (orgId?: string) => ['org', orgId, 'workspace-setup'] as const,

@@ -10,6 +10,7 @@ const CRYPTO_PURPOSES = [
   'application_file',
   'encrypted_file',
   'candidate_profile',
+  'candidate_profile_enrichment',
   'candidate_note',
   'candidate_tag',
   'custom_field_value',
@@ -40,7 +41,6 @@ export type DataAadOptions = {
 };
 
 const nullableContextIdSchema = z.string().min(1).nullable().optional();
-
 export const cryptoPurposeSchema = z.enum(CRYPTO_PURPOSES);
 
 export const cryptoContextInputSchema = z

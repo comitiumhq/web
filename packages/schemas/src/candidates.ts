@@ -1,12 +1,14 @@
+import type { CandidateProfile } from '@comitium/crypto/candidate-profile';
 import { z } from 'zod';
-import { encryptedEnvelopeSchema, hmacSha256HexSchema } from './common';
-import { type CandidateLocationValue, candidateLocationValueSchema } from './forms/field-types/candidate-location';
+import { encryptedEnvelopeSchema } from './common';
+import type { CandidateLocationValue } from './forms/field-types/candidate-location';
 import { successSchema, uuidSchema } from './public';
 
 export const candidateSchema = z.object({
   id: z.string(),
   orgId: z.string(),
   profile: encryptedEnvelopeSchema.nullable(),
+  profileRevision: z.number().int().positive(),
   firstSeenAt: z.string(),
   updatedAt: z.string(),
   identityCount: z.number(),
@@ -106,6 +108,7 @@ const candidateNoteSchema = z.object({
 
 export const createNoteResponseSchema = z.object({ data: candidateNoteSchema });
 export const deleteNoteResponseSchema = z.object({ deleted: z.literal(true) });
+
 export const candidateNotesResponseSchema = z.object({
   data: z.array(candidateNoteSchema),
   total: z.number().int().nonnegative(),
@@ -120,34 +123,21 @@ export type CandidateNotesResponse = z.infer<typeof candidateNotesResponseSchema
 
 // --- Candidate profile (decrypted from vault) ---
 
-export const candidateProfileSchema = z.object({
-  firstName: z.string().nullable(),
-  lastName: z.string().nullable(),
-  email: z.string().nullable(),
-  phone: z.string().nullable(),
-  linkedIn: z.string().nullable(),
-  github: z.string().nullable(),
-  website: z.string().nullable(),
-  location: candidateLocationValueSchema.nullable(),
-  currentTitle: z.string().nullable(),
-  currentCompany: z.string().nullable(),
-});
-
-export type CandidateProfile = z.infer<typeof candidateProfileSchema>;
-
-export const CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION = 1;
-
-export const candidateProfileSearchProjectionSchema = z
-  .object({
-    version: z.literal(CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION),
-    contactEmailDigest: hmacSha256HexSchema.nullable(),
-    locationCityDigest: hmacSha256HexSchema.nullable(),
-    locationCountryDigest: hmacSha256HexSchema.nullable(),
-  })
-  .strict();
-
-export type CandidateProfileSearchProjection = z.infer<typeof candidateProfileSearchProjectionSchema>;
-
+export type { CandidateProfile, CandidateProfileValues } from '@comitium/crypto/candidate-profile';
+export {
+  candidateProfileSchema,
+  candidateProfileValuesSchema,
+  createCandidateProfile,
+  editCandidateProfile,
+  mergeCandidateProfile,
+  normalizeCandidateProfileUrl,
+  normalizeCandidateProfileValues,
+} from '@comitium/crypto/candidate-profile';
+export {
+  CANDIDATE_PROFILE_SEARCH_PROJECTION_VERSION,
+  type CandidateProfileSearchProjection,
+  candidateProfileSearchProjectionSchema,
+} from '@comitium/crypto/schemas';
 export function formatCandidateLocation(location: CandidateLocationValue | null): string | null {
   if (!location) {
     return null;
@@ -156,7 +146,9 @@ export function formatCandidateLocation(location: CandidateLocationValue | null)
   return [location.city, location.region, location.country].filter(Boolean).join(', ');
 }
 
-export const candidateProfileUpdateResponseSchema = successSchema;
+export const candidateProfileUpdateResponseSchema = successSchema.extend({
+  profileRevision: z.number().int().positive(),
+});
 
 const candidateFileKindSchema = z.enum(['resume', 'cover_letter', 'portfolio', 'attachment', 'other']);
 const candidateFileVisibilitySchema = z.enum(['standard', 'private']);
@@ -190,7 +182,6 @@ export const candidateFileUploadResponseSchema = z.object({
 });
 
 export const candidateFileFinalizeResponseSchema = z.object({ fileId: uuidSchema });
-
 export type CandidateFile = z.infer<typeof candidateFileSchema>;
 export type CandidateFileKind = z.infer<typeof candidateFileKindSchema>;
 export type CandidateFileVisibility = z.infer<typeof candidateFileVisibilitySchema>;

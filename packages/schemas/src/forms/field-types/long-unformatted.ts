@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { connectorValueSchemas } from '@comitium/crypto/form-values';
 
 import { applyRequirement } from './helpers';
 import { ALL_OBJECT_TYPES, APPLICATION_LIKE_CLASSES, type FieldTypeDef } from './types';
@@ -20,7 +20,7 @@ export const longUnformattedDef: FieldTypeDef = {
     requiresSingletonPerForm: false,
     requiresSelectableValues: false,
   },
-  valueSchema: (ctx) => applyRequirement(z.string().min(1).max(10_000), ctx),
+  valueSchema: (ctx) => applyRequirement(connectorValueSchemas.long_unformatted, ctx),
   connectorCompat: (target) => {
     if (target === 'long_unformatted' || target === 'short_answer') {
       return 'supported';
