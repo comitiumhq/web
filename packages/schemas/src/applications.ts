@@ -19,7 +19,7 @@ export const criterionEvidenceSchema = z
           .object({
             source: z.literal('resume'),
             questionId: z.null(),
-            excerpt: z.string().trim().min(1).max(500),
+            excerpt: z.string().trim().min(1),
           })
           .strict(),
       )
