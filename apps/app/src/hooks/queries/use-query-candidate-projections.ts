@@ -33,7 +33,7 @@ export function useQueryCandidateProjections(orgId: string) {
     enabled,
     retry: false,
     gcTime: 0,
-    refetchInterval: (state) => (state.state.data?.hasMore ? 1_000 : 15_000),
+    refetchInterval: (state) => (state.state.data?.hasMore ? 1_000 : 60_000),
     refetchIntervalInBackground: true,
     queryFn: async ({ signal }) => {
       if (!access) {
