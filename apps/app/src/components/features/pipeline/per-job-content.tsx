@@ -7,7 +7,6 @@ import { useMemo } from 'react';
 import { CandidateTable, type CandidateTableVariant } from '@/components/features/pipeline/shared/candidate-table';
 import { KanbanBoard } from '@/components/features/pipeline/shared/kanban-board';
 import { filterPipelineCandidates } from '@/components/features/pipeline/shared/pipeline-search';
-import { PipelineSearchInput } from '@/components/features/pipeline/shared/pipeline-search-input';
 import { PipelineContentSkeleton } from '@/components/features/pipeline/shared/pipeline-skeletons';
 import type { KanbanApplication, KanbanStage, PipelineCandidate } from '@/lib/schemas/pipeline';
 import { cn } from '@/lib/utils';
@@ -32,9 +31,7 @@ interface PerJobPipelineContentProps {
   onRetryStage: (stageId: string) => void;
   loadingStageIds: string[];
   failedStageIds: string[];
-  search: string;
   searchQuery: string;
-  onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   hasMoreTableCandidates: boolean;
   isLoadingMoreTableCandidates: boolean;
@@ -61,9 +58,7 @@ export function PerJobPipelineContent({
   onRetryStage,
   loadingStageIds,
   failedStageIds,
-  search,
   searchQuery,
-  onSearchChange,
   onClearSearch,
   hasMoreTableCandidates,
   isLoadingMoreTableCandidates,
@@ -71,7 +66,7 @@ export function PerJobPipelineContent({
   onLoadMoreTableCandidates,
   onRetryTableCandidates,
 }: PerJobPipelineContentProps) {
-  const hasActiveFilter = search.trim() !== '';
+  const hasActiveFilter = searchQuery !== '';
   const candidates = useMemo(
     () => filterPipelineCandidates(tableCandidates, namesMap, searchQuery, 'job'),
     [namesMap, searchQuery, tableCandidates],
@@ -127,15 +122,6 @@ export function PerJobPipelineContent({
 
   return (
     <div className={cn('flex min-h-0 flex-1 flex-col gap-3 overflow-hidden', className)}>
-      <div className="flex flex-wrap items-center gap-2">
-        <PipelineSearchInput
-          className="w-full sm:w-[230px]"
-          placeholder="Search candidates..."
-          value={search}
-          onValueChange={onSearchChange}
-        />
-      </div>
-
       {candidates.length > 0 ? (
         <div className="min-h-0 flex-1 overflow-hidden">
           {searchQuery && hasMoreTableCandidates && !hasTableLoadError && (

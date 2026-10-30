@@ -95,6 +95,7 @@ type CalendarStyle = CSSProperties & {
 };
 
 interface InterviewerCalendarProps {
+  rescheduleInterviewId?: string;
   applicationId: string;
   orgId: string;
   interviewTypeControl?: ReactNode;
@@ -113,6 +114,7 @@ interface InterviewerCalendarProps {
 }
 
 function InterviewerCalendarImpl({
+  rescheduleInterviewId,
   applicationId,
   orgId,
   interviewTypeControl,
@@ -141,6 +143,7 @@ function InterviewerCalendarImpl({
   const availabilityRange = useMemo(() => getAvailabilityRange(visibleDay, timeZone), [timeZone, visibleDay]);
 
   const availabilityQuery = useQueryInterviewBusy({
+    rescheduleInterviewId,
     applicationId,
     interviewerUserIds,
     startTime: availabilityRange.start,

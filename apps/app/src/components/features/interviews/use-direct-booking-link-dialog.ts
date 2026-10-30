@@ -6,9 +6,9 @@ import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import type { RichTextEditorHandle } from '@/components/tiptap-ui/rich-text-editor';
-import { useQueryInterviewTemplates } from '@/hooks/queries/use-query-interview-templates';
 import { useQueryCalendarStatus } from '@/hooks/queries/use-query-interviews';
 import { useQueryOrgTeam, useQueryTeamCalendarStatusMap } from '@/hooks/queries/use-query-org-team';
+import { useQueryOwnerActivityOptions } from '@/hooks/queries/use-query-stage-activities';
 import { useEmailTemplateSelector } from '@/hooks/use-email-template-selector';
 import { useQueryOrgMe } from '@/hooks/use-permissions';
 import { createSchedulingEmailDoc } from '@/lib/applications/communication/direct-booking-link-email';
@@ -41,6 +41,7 @@ export interface UseDirectBookingLinkDialogParams {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   applicationId: string;
+  jobId: string;
   orgId: string;
   currentStageId?: string | null;
   candidateEmail?: string | null;
@@ -57,6 +58,7 @@ export function useDirectBookingLinkDialog({
   open,
   onOpenChange,
   applicationId,
+  jobId,
   orgId,
   currentStageId,
   candidateEmail,
@@ -71,8 +73,8 @@ export function useDirectBookingLinkDialog({
   const editorRef = useRef<RichTextEditorHandle>(null);
   const [interviewers, setInterviewers] = useState<SelectedInterviewer[]>([]);
 
-  const { data: templatesData } = useQueryInterviewTemplates(orgId);
-  const templates = useMemo(() => templatesData?.data ?? [], [templatesData]);
+  const { data: activityOptions } = useQueryOwnerActivityOptions(open ? { kind: 'job', jobId } : null);
+  const templates = useMemo(() => activityOptions?.data.interviewTemplates ?? [], [activityOptions]);
 
   const { data: meData } = useQueryOrgMe(orgId);
   const { data: calStatus } = useQueryCalendarStatus(orgId);

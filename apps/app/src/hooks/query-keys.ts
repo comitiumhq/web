@@ -188,7 +188,9 @@ export const qk = {
       startTime: string | undefined,
       endTime: string | undefined,
       timeZone: string,
-    ) => ['interview-busy', applicationId, interviewerKey, startTime, endTime, timeZone] as const,
+      rescheduleInterviewId?: string,
+    ) =>
+      ['interview-busy', applicationId, interviewerKey, startTime, endTime, timeZone, rescheduleInterviewId] as const,
     my: (orgId?: string) => ['interviews', 'my', orgId] as const,
   },
 };

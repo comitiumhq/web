@@ -113,7 +113,10 @@ export function PerJobPipelinePageSkeleton({ activeTab }: { activeTab: PipelineT
   return (
     <div className="flex h-full flex-col overflow-hidden bg-background">
       <PageContainer className="flex min-h-0 flex-1 flex-col gap-4 py-4 sm:py-5">
-        <PipelineStageControlsSkeleton activeTab={activeTab} />
+        <PipelineStageControlsSkeleton
+          activeTab={activeTab}
+          showSearch={activeTab !== 'active' && activeTab !== 'archived'}
+        />
         <PipelineContentSkeleton activeTab={activeTab} className="min-h-0 flex-1" />
       </PageContainer>
     </div>
@@ -149,14 +152,7 @@ export function PipelineContentSkeleton({ activeTab, className }: PipelineConten
     );
   }
 
-  return (
-    <PipelineTableSkeleton
-      activeTab={activeTab}
-      className={cn('min-h-0 flex-1', className)}
-      scope="job"
-      showSearch={activeTab !== 'archived'}
-    />
-  );
+  return <PipelineTableSkeleton activeTab={activeTab} className={cn('min-h-0 flex-1', className)} scope="job" />;
 }
 
 export function KanbanBoardSkeleton({ className }: { className?: string } = {}) {
