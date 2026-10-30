@@ -1,30 +1,33 @@
-import type { QueryClient } from '@tanstack/react-query';
-import { describe, expect, it } from 'vitest';
+import { QueryClient } from '@tanstack/react-query';
+import { describe, expect, it, onTestFinished } from 'vitest';
 
 import { qk } from '@/hooks/query-keys';
 
 import { invalidateCandidateTagSurfaces } from '../use-candidate-tag';
 
-interface InvalidateCall {
-  queryKey?: readonly unknown[];
-  predicate?: (query: { queryKey: readonly unknown[] }) => boolean;
-}
-
 describe('invalidateCandidateTagSurfaces', () => {
-  it('keeps all surfaces that inline candidate tag ids under qk-owned topology', () => {
-    const calls: InvalidateCall[] = [];
-    const queryClient = {
-      invalidateQueries: (options: InvalidateCall) => {
-        calls.push(options);
-      },
-    } as unknown as QueryClient;
+  it('invalidates candidate tag surfaces without invalidating the job directory', () => {
+    const queryClient = new QueryClient();
+    onTestFinished(() => queryClient.clear());
+    const affected = [
+      qk.pipeline.candidates('org-1', {}),
+      qk.application.detail('application-1'),
+      qk.candidate.activity('candidate-1', 'application-1'),
+      qk.jobs.kanban('job-1', {}),
+      qk.candidate.directory('org-1', 'request-1'),
+    ];
+    const unaffected = qk.jobs.org('org-1', {});
+
+    for (const queryKey of [...affected, unaffected]) {
+      queryClient.setQueryData(queryKey, 'cached');
+    }
 
     invalidateCandidateTagSurfaces(queryClient);
 
-    expect(calls[0]?.queryKey).toEqual(qk.pipeline.candidatesRoot());
-    expect(calls[1]?.queryKey).toEqual(qk.application.root());
-    expect(calls[2]?.queryKey).toEqual(qk.candidate.activityRoot());
-    expect(calls[3]?.predicate?.({ queryKey: qk.jobs.kanbanRoot('job-1') })).toBe(true);
-    expect(calls[3]?.predicate?.({ queryKey: qk.jobs.orgRoot('org-1') })).toBe(false);
+    for (const queryKey of affected) {
+      expect(queryClient.getQueryState(queryKey)?.isInvalidated).toBe(true);
+    }
+
+    expect(queryClient.getQueryState(unaffected)?.isInvalidated).toBe(false);
   });
 });

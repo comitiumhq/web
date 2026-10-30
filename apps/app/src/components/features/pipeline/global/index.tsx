@@ -336,7 +336,7 @@ export function GlobalPipelineDashboard({ org, activeTab, onTabChange }: GlobalP
       </div>
 
       <CandidateSheetMount
-        selectedApp={selectedApp}
+        selected={selectedApp}
         orgId={org.id}
         onClose={handleSheetClose}
         onNavigate={isCandidateTableView ? handleNavigate : undefined}

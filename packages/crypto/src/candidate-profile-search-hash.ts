@@ -21,7 +21,10 @@ export function hashCandidateProfileSearchValue(
   );
 }
 
-function normalizeCandidateProfileSearchValue(field: CandidateProfileSearchField, value: string | number): string {
+export function normalizeCandidateProfileSearchValue(
+  field: CandidateProfileSearchField,
+  value: string | number,
+): string {
   const stringValue = String(value).trim();
 
   switch (field) {

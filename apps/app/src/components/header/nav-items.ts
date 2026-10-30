@@ -28,6 +28,12 @@ function getOrgHeaderNavItems(orgId: string): OrgHeaderNavItem[] {
       isVisible: () => true,
     },
     {
+      label: 'Candidates',
+      path: `${basePath}/candidates`,
+      isActive: (pathname) => pathname.startsWith(`${basePath}/candidates`),
+      isVisible: () => true,
+    },
+    {
       label: 'Jobs',
       path: `${basePath}/jobs`,
       isActive: (pathname) =>

@@ -1,4 +1,4 @@
-import '../worker/unlock-api-error-transport';
+import '../worker/error-transport';
 
 import { expose, proxy, releaseProxy, wrap } from 'comlink';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -41,6 +41,7 @@ describe('safe unlock API errors across Comlink', () => {
       await remote.unlockWithRecoveryCode(bundle, USER_ID, publicKey, recoveryCode, false);
 
       const showCode = vi.fn(async () => {});
+
       const confirm = async () => {
         throw failure;
       };
@@ -48,6 +49,7 @@ describe('safe unlock API errors across Comlink', () => {
       await expect(
         remote.rewrapUserKey(bundle, { rotateRecoveryCode: true, repairShare: false }, proxy(showCode), proxy(confirm)),
       ).rejects.toMatchObject(expected);
+
       expect(showCode).not.toHaveBeenCalled();
       await expect(remote.isActive()).resolves.toBe(true);
     },
@@ -103,6 +105,7 @@ describe('safe unlock API errors across Comlink', () => {
     let posted = false;
     let shownCode = '';
     let confirm!: () => void;
+
     const confirmation = new Promise<void>((resolve) => {
       confirm = resolve;
     });
@@ -127,12 +130,14 @@ describe('safe unlock API errors across Comlink', () => {
 
       await confirmation;
     });
+
     const pending = remote.rewrapUserKey(
       bundle,
       { rotateRecoveryCode: true, repairShare: false },
       proxy(onRecoveryCode),
       proxy(async () => {}),
     );
+
     const rejected = expect(pending).rejects.toMatchObject({ status: 503 });
 
     await vi.waitFor(() => expect(onRecoveryCode).toHaveBeenCalledOnce(), { timeout: 10000 });

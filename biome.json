@@ -12,10 +12,12 @@
       "!apps/*/src/routeTree.gen.ts",
       "!apps/*/src/generated/**",
       "apps/*/vite.config.ts",
+      "apps/*/vitest.config.ts",
       "apps/*/vite-plugins/**/*.ts",
       "apps/*/package.json",
       "apps/*/tsconfig.json",
       "packages/*/src/**",
+      "tooling/vite/**/*.ts",
       "packages/*/components.json",
       "packages/*/package.json",
       "packages/*/tsconfig.json",
@@ -87,5 +89,28 @@
       "jsxQuoteStyle": "double",
       "quoteStyle": "single"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "apps/app/src/lib/candidates/search/**",
+        "apps/app/src/components/features/candidates/**",
+        "apps/app/src/hooks/queries/use-query-candidate-*.ts",
+        "apps/app/src/hooks/use-candidate-directory-profiles.ts",
+        "packages/crypto/src/candidate-search*.ts",
+        "packages/crypto/src/candidate-search-cache/**",
+        "packages/crypto/src/proxy/**",
+        "packages/crypto/src/worker/candidate-search*.ts",
+        "packages/crypto/src/remembered-device-store.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useBlockStatements": "error",
+            "noNestedTernary": "error"
+          }
+        }
+      }
+    }
+  ]
 }

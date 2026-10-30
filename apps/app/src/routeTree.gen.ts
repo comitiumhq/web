@@ -19,6 +19,7 @@ import { Route as AccountZkIdentityRouteImport } from './routes/account/zk-ident
 import { Route as OrgOrgIdRouteImport } from './routes/org/$orgId'
 import { Route as OrgCreateRouteImport } from './routes/org/create'
 import { Route as OrgOrgIdIndexRouteImport } from './routes/org/$orgId/index'
+import { Route as OrgOrgIdCandidatesRouteImport } from './routes/org/$orgId/candidates'
 import { Route as OrgOrgIdOrganizationRouteImport } from './routes/org/$orgId/organization'
 import { Route as OrgOrgIdPipelineRouteImport } from './routes/org/$orgId/pipeline'
 import { Route as OrgOrgIdSettingsRouteImport } from './routes/org/$orgId/settings'
@@ -100,6 +101,11 @@ const OrgCreateRoute = OrgCreateRouteImport.update({
 const OrgOrgIdIndexRoute = OrgOrgIdIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => OrgOrgIdRoute,
+} as any)
+const OrgOrgIdCandidatesRoute = OrgOrgIdCandidatesRouteImport.update({
+  id: '/candidates',
+  path: '/candidates',
   getParentRoute: () => OrgOrgIdRoute,
 } as any)
 const OrgOrgIdOrganizationRoute = OrgOrgIdOrganizationRouteImport.update({
@@ -299,6 +305,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
   '/org/create': typeof OrgCreateRoute
   '/account/': typeof AccountIndexRoute
+  '/org/$orgId/candidates': typeof OrgOrgIdCandidatesRoute
   '/org/$orgId/organization': typeof OrgOrgIdOrganizationRouteWithChildren
   '/org/$orgId/pipeline': typeof OrgOrgIdPipelineRoute
   '/org/$orgId/settings': typeof OrgOrgIdSettingsRouteWithChildren
@@ -341,6 +348,7 @@ export interface FileRoutesByTo {
   '/account/zk-identity': typeof AccountZkIdentityRoute
   '/org/create': typeof OrgCreateRoute
   '/account': typeof AccountIndexRoute
+  '/org/$orgId/candidates': typeof OrgOrgIdCandidatesRoute
   '/org/$orgId/pipeline': typeof OrgOrgIdPipelineRoute
   '/org/$orgId': typeof OrgOrgIdIndexRoute
   '/org/$orgId/jobs/$jobId': typeof OrgOrgIdJobsJobIdRouteWithChildren
@@ -381,6 +389,7 @@ export interface FileRoutesById {
   '/org/$orgId': typeof OrgOrgIdRouteWithChildren
   '/org/create': typeof OrgCreateRoute
   '/account/': typeof AccountIndexRoute
+  '/org/$orgId/candidates': typeof OrgOrgIdCandidatesRoute
   '/org/$orgId/organization': typeof OrgOrgIdOrganizationRouteWithChildren
   '/org/$orgId/pipeline': typeof OrgOrgIdPipelineRoute
   '/org/$orgId/settings': typeof OrgOrgIdSettingsRouteWithChildren
@@ -427,6 +436,7 @@ export interface FileRouteTypes {
     | '/org/$orgId'
     | '/org/create'
     | '/account/'
+    | '/org/$orgId/candidates'
     | '/org/$orgId/organization'
     | '/org/$orgId/pipeline'
     | '/org/$orgId/settings'
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
     | '/account/zk-identity'
     | '/org/create'
     | '/account'
+    | '/org/$orgId/candidates'
     | '/org/$orgId/pipeline'
     | '/org/$orgId'
     | '/org/$orgId/jobs/$jobId'
@@ -508,6 +519,7 @@ export interface FileRouteTypes {
     | '/org/$orgId'
     | '/org/create'
     | '/account/'
+    | '/org/$orgId/candidates'
     | '/org/$orgId/organization'
     | '/org/$orgId/pipeline'
     | '/org/$orgId/settings'
@@ -622,6 +634,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/org/$orgId/'
       preLoaderRoute: typeof OrgOrgIdIndexRouteImport
+      parentRoute: typeof OrgOrgIdRoute
+    }
+    '/org/$orgId/candidates': {
+      id: '/org/$orgId/candidates'
+      path: '/candidates'
+      fullPath: '/org/$orgId/candidates'
+      preLoaderRoute: typeof OrgOrgIdCandidatesRouteImport
       parentRoute: typeof OrgOrgIdRoute
     }
     '/org/$orgId/organization': {
@@ -995,6 +1014,7 @@ const OrgOrgIdJobsJobIdRouteWithChildren =
   OrgOrgIdJobsJobIdRoute._addFileChildren(OrgOrgIdJobsJobIdRouteChildren)
 
 interface OrgOrgIdRouteChildren {
+  OrgOrgIdCandidatesRoute: typeof OrgOrgIdCandidatesRoute
   OrgOrgIdOrganizationRoute: typeof OrgOrgIdOrganizationRouteWithChildren
   OrgOrgIdPipelineRoute: typeof OrgOrgIdPipelineRoute
   OrgOrgIdSettingsRoute: typeof OrgOrgIdSettingsRouteWithChildren
@@ -1004,6 +1024,7 @@ interface OrgOrgIdRouteChildren {
 }
 
 const OrgOrgIdRouteChildren: OrgOrgIdRouteChildren = {
+  OrgOrgIdCandidatesRoute: OrgOrgIdCandidatesRoute,
   OrgOrgIdOrganizationRoute: OrgOrgIdOrganizationRouteWithChildren,
   OrgOrgIdPipelineRoute: OrgOrgIdPipelineRoute,
   OrgOrgIdSettingsRoute: OrgOrgIdSettingsRouteWithChildren,

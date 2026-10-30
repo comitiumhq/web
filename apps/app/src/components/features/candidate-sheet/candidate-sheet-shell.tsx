@@ -5,6 +5,14 @@ import { Skeleton } from '@comitium/ui/skeleton';
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from 'lucide-react';
 import { type ReactNode, useRef } from 'react';
 
+interface CandidateSheetEdgeControlsProps {
+  pager?: CandidateSheetPager;
+}
+
+interface CandidateSheetSkeletonRowProps {
+  short?: boolean;
+}
+
 interface CandidateSheetPager {
   onPrev: () => void;
   onNext: () => void;
@@ -17,7 +25,7 @@ interface CandidateSheetShellProps {
   title: string;
   description: string;
   children: ReactNode;
-  pager: CandidateSheetPager;
+  pager?: CandidateSheetPager;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -56,7 +64,7 @@ export function CandidateSheetShell({
   );
 }
 
-function CandidateSheetEdgeControls({ pager }: { pager: CandidateSheetPager }) {
+function CandidateSheetEdgeControls({ pager }: CandidateSheetEdgeControlsProps) {
   return (
     <>
       <div className="absolute top-3 right-3 z-10 sm:hidden">
@@ -74,7 +82,7 @@ function CandidateSheetEdgeControls({ pager }: { pager: CandidateSheetPager }) {
           </Button>
         </SheetClose>
 
-        {(pager.hasPrev || pager.hasNext) && (
+        {pager && (pager.hasPrev || pager.hasNext) && (
           <div className="flex flex-col gap-2">
             <Button
               variant="secondary"
@@ -260,7 +268,7 @@ function ActivitiesContentSkeleton() {
   );
 }
 
-function ProgressRow({ short = false }: { short?: boolean }) {
+function ProgressRow({ short = false }: CandidateSheetSkeletonRowProps) {
   return (
     <div className="grid grid-cols-[1.5fr_repeat(3,0.6fr)] items-center gap-4 border-t border-separator px-4 py-3">
       <Skeleton className={short ? 'h-3.5 w-24 rounded-md' : 'h-3.5 w-36 max-w-full rounded-md'} />
@@ -326,7 +334,7 @@ function CollaborationSkeleton() {
   );
 }
 
-function FeedRow({ short = false }: { short?: boolean }) {
+function FeedRow({ short = false }: CandidateSheetSkeletonRowProps) {
   return (
     <div className="flex items-center gap-3 px-1 py-2">
       <Skeleton className="size-7 shrink-0 rounded-full" />

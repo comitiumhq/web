@@ -1,11 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["packages/crypto/src/worker/crypto.worker.ts"],
-  "project": [
-    "apps/{site,my,app}/src/**/*.{ts,tsx,css}",
-    "packages/{auth,ui,crypto,schemas}/src/**/*.{ts,tsx,css}",
-    "tooling/**/*.ts"
-  ],
   "ignoreDependencies": [
     "@fontsource-variable/geist",
     "shadcn",
@@ -19,5 +13,17 @@
     "apps/app/src/lib/api/form-field-connectors.ts": ["exports"],
     "apps/app/src/lib/schemas/form-field-connectors.ts": ["exports", "types"],
     "apps/app/src/lib/tiptap/utils.ts": ["exports", "types", "duplicates"]
+  },
+  "workspaces": {
+    ".": {
+      "project": [
+        "apps/{site,my,app}/src/**/*.{ts,tsx,css}",
+        "packages/{auth,ui,crypto,schemas}/src/**/*.{ts,tsx,css}",
+        "tooling/**/*.ts"
+      ]
+    },
+    "packages/crypto": {
+      "entry": ["src/index.ts", "src/worker/crypto.worker.ts"]
+    }
   }
 }

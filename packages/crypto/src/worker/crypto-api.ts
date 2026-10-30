@@ -30,6 +30,7 @@ import type { EncryptedEnvelope, EnvelopeKey, PublicEncryptionKey } from '../sch
 import type { VaultKeyAccess } from '../schemas/vault-key';
 import { hashTagLabel } from '../tag-hash';
 import { processCandidateProjection } from './candidate-projection';
+import { CandidateSearchSession } from './candidate-search-session';
 import { OrgVault } from './org-vault';
 import { UserKeySession } from './user-key-session';
 
@@ -37,8 +38,9 @@ import { UserKeySession } from './user-key-session';
  * Exposes concrete crypto operations through Comlink; raw keys remain internal.
  */
 export class CryptoWorkerApi {
-  readonly #userSession = new UserKeySession();
+  readonly #userSession = new UserKeySession(() => this.clearCandidateSearch());
   readonly #orgVault = new OrgVault(this.#userSession);
+  readonly #candidateSearch = new CandidateSearchSession(this.#userSession, this.#orgVault, this);
 
   readonly configure = this.#userSession.configure.bind(this.#userSession);
   readonly unlockWithPassword = this.#userSession.unlockWithPassword.bind(this.#userSession);
@@ -55,6 +57,16 @@ export class CryptoWorkerApi {
   readonly clear = this.#userSession.clear.bind(this.#userSession);
   readonly generateAndWrapVaultKey = this.#orgVault.generateAndWrapVaultKey.bind(this.#orgVault);
   readonly grantVaultAccess = this.#orgVault.grantVaultAccess.bind(this.#orgVault);
+  readonly createCandidateSearchCacheKey = this.#candidateSearch.createCandidateSearchCacheKey.bind(
+    this.#candidateSearch,
+  );
+  readonly beginCandidateSearch = this.#candidateSearch.beginCandidateSearch.bind(this.#candidateSearch);
+  readonly commitCandidateSearch = this.#candidateSearch.commitCandidateSearch.bind(this.#candidateSearch);
+  readonly evaluateCandidateSearchReferences = this.#candidateSearch.evaluateCandidateSearchReferences.bind(
+    this.#candidateSearch,
+  );
+  readonly candidateSearchStatus = this.#candidateSearch.candidateSearchStatus.bind(this.#candidateSearch);
+  readonly clearCandidateSearch = this.#candidateSearch.clearCandidateSearch.bind(this.#candidateSearch);
 
   ready(): true {
     return true;

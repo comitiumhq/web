@@ -1,12 +1,12 @@
 import { useSession } from '@comitium/auth/use-session';
 import type { OtherApplicationSummary } from '@comitium/schemas/applications';
-import { useCallback } from 'react';
+import { type ComponentProps, useCallback } from 'react';
 import { FeedbackSubmissionSheet } from '@/components/features/feedback-submission';
 import { DirectBookingLinkDialog } from '@/components/features/interviews/direct-booking-link-dialog';
 import { ScheduleInterviewDialog } from '@/components/features/interviews/schedule-dialog';
 import { useQueryOtherApplications } from '@/hooks/queries/use-query-other-applications';
 import type { InterviewStage } from '@/lib/schemas/pipeline';
-
+import { CandidateRecordSheet } from './candidate-record-sheet';
 import { CandidateSheetHeader } from './candidate-sheet-header';
 import { CandidateSheetShell, CandidateSheetSkeleton } from './candidate-sheet-shell';
 import { CandidateSheetWorkspace } from './candidate-sheet-workspace';
@@ -35,7 +35,28 @@ interface CandidateSheetProps {
   candidateIds?: string[];
 }
 
-export function CandidateSheet({
+interface CandidateRecordEntry extends ComponentProps<typeof CandidateRecordSheet> {
+  applicationId: null;
+}
+
+type CandidateSheetEntryProps = CandidateSheetProps | CandidateRecordEntry;
+
+export function CandidateSheet(props: CandidateSheetEntryProps) {
+  if ('candidateId' in props) {
+    return (
+      <CandidateRecordSheet
+        candidateId={props.candidateId}
+        orgId={props.orgId}
+        open={props.open}
+        onOpenChange={props.onOpenChange}
+      />
+    );
+  }
+
+  return <ApplicationCandidateSheet {...props} />;
+}
+
+function ApplicationCandidateSheet({
   applicationId,
   jobId,
   orgId,

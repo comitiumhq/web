@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
 import { build } from 'vite';
 import { describe, expect, it, vi } from 'vitest';
+import { cryptoWorkerConfig } from '../../../../../../tooling/vite/crypto-worker-config';
 
 const APP_ROOT = fileURLToPath(new URL('../../../..', import.meta.url));
 const VIRTUAL_ENTRY = 'virtual:crypto-worker-build-test';
@@ -16,6 +17,7 @@ describe('crypto worker production build', () => {
         configFile: false,
         logLevel: 'silent',
         root: APP_ROOT,
+        worker: cryptoWorkerConfig,
         plugins: [
           {
             name: 'crypto-worker-build-test-entry',
@@ -61,9 +63,11 @@ describe('crypto worker production build', () => {
       expect(worker.fileName).toMatch(/\.js$/);
 
       const source = typeof worker.source === 'string' ? worker.source : new TextDecoder().decode(worker.source);
+
       const functionConstructor = vi.fn(() => {
         throw new EvalError('String evaluation is forbidden by CSP');
       });
+
       const endpoint = { addEventListener: vi.fn(), postMessage: vi.fn() };
 
       runInNewContext(source, {

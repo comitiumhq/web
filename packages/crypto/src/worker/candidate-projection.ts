@@ -9,6 +9,7 @@ import {
   profileMappingError,
   projectCandidateProfileSearch,
 } from '../candidate-profile';
+import type { CandidateProfileSearchField } from '../candidate-profile-search-hash';
 import {
   type CandidateProjectionItem,
   type CandidateProjectionOutput,
@@ -16,20 +17,48 @@ import {
   type ProjectionSnapshot,
   projectionResultHeader,
 } from '../candidate-projections';
-import { candidateProfileContext, customFieldValueContext } from '../context';
-import { isSearchableCustomFieldType } from '../custom-field-search';
+import { type CryptoContextInput, candidateProfileContext, customFieldValueContext } from '../context';
+import { isSearchableCustomFieldType, type SearchableCustomFieldType } from '../custom-field-search';
+import type { CategoricalFormFieldKind } from '../form-field-search-hash';
 import { isEmptyFormAnswer, projectConnectorAnswer, projectSubmissionFieldValues } from '../form-projections';
+import { isDefined } from '../runtime-guards';
+import type { EncryptedEnvelope, PublicEncryptionKey } from '../schemas';
 import type { VaultKeyAccess } from '../schemas/vault-key';
-import type { CryptoWorkerApi } from './crypto-api';
 
-type CryptoOperations = Pick<
-  CryptoWorkerApi,
-  | 'decryptApplication'
-  | 'encryptApplication'
-  | 'hashCandidateProfileSearchValue'
-  | 'hashCategoricalFormFieldValue'
-  | 'hashCustomFieldValue'
->;
+export interface CandidateProjectionCrypto {
+  decryptApplication(
+    envelope: EncryptedEnvelope,
+    orgId: string,
+    access: VaultKeyAccess,
+    context: CryptoContextInput,
+  ): Promise<Record<string, unknown>>;
+  encryptApplication(
+    publicKey: PublicEncryptionKey,
+    keyVersion: number,
+    data: unknown,
+    context: CryptoContextInput,
+  ): Promise<EncryptedEnvelope>;
+  hashCandidateProfileSearchValue(
+    orgId: string,
+    access: VaultKeyAccess,
+    field: CandidateProfileSearchField,
+    value: string | number,
+  ): Promise<string>;
+  hashCategoricalFormFieldValue(
+    orgId: string,
+    access: VaultKeyAccess,
+    fieldId: string,
+    kind: CategoricalFormFieldKind,
+    value: boolean | string,
+  ): Promise<string>;
+  hashCustomFieldValue(
+    orgId: string,
+    access: VaultKeyAccess,
+    fieldId: string,
+    fieldType: SearchableCustomFieldType,
+    value: unknown,
+  ): Promise<string>;
+}
 
 type EncryptedInput = NonNullable<Extract<CandidateProjectionItem, { kind: 'profile_search' }>['inputs']['profile']>;
 class UnreadableInput extends Error {}
@@ -38,7 +67,7 @@ class UnreadableInput extends Error {}
  * Called only inside the existing key-owning Worker. Its output contains no profile/answer plaintext.
  */
 export async function processCandidateProjection(
-  api: CryptoOperations,
+  api: CandidateProjectionCrypto,
   orgId: string,
   access: VaultKeyAccess,
   item: CandidateProjectionItem,
@@ -57,7 +86,7 @@ export async function processCandidateProjection(
 }
 
 async function read(
-  api: CryptoOperations,
+  api: CandidateProjectionCrypto,
   orgId: string,
   access: VaultKeyAccess,
   input: EncryptedInput | null,
@@ -76,7 +105,7 @@ async function read(
 }
 
 async function project(
-  api: CryptoOperations,
+  api: CandidateProjectionCrypto,
   orgId: string,
   access: VaultKeyAccess,
   item: CandidateProjectionItem,
@@ -209,7 +238,10 @@ function mappedProfileValues(
   const seen = new Set<string>();
 
   for (const question of snapshot.sections.flatMap((section) => section.questions)) {
-    if (question.visibility !== 'standard' || question.isPrivate || profileMappingError(question, snapshot.formClass)) {
+    const invalidMapping =
+      question.visibility !== 'standard' || question.isPrivate || profileMappingError(question, snapshot.formClass);
+
+    if (invalidMapping) {
       throw new UnreadableInput();
     }
 
@@ -225,7 +257,7 @@ function mappedProfileValues(
 
     const answer = answers[question.id];
 
-    if (answer === undefined || answer === null || answer === '') {
+    if (!isDefined(answer) || answer === '') {
       continue;
     }
 

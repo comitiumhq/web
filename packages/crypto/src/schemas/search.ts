@@ -18,6 +18,22 @@ export const candidateProfileSearchProjectionSchema = z
 
 export type CandidateProfileSearchProjection = z.infer<typeof candidateProfileSearchProjectionSchema>;
 
+export const candidateSearchErrorCodeSchema = z.enum([
+  'INVALID_SEARCH',
+  'SEARCH_SCOPE_CHANGED',
+  'SEARCH_CACHE_INVALID',
+  'SEARCH_RESOURCE_LIMIT',
+]);
+
+export type CandidateSearchErrorCode = z.infer<typeof candidateSearchErrorCodeSchema>;
+
+export const serializedCandidateSearchErrorSchema = z
+  .object({
+    kind: z.literal('comitium.candidate-search-error'),
+    code: candidateSearchErrorCodeSchema,
+  })
+  .strict();
+
 const fieldValueIdentitySchema = z.object({
   questionId: z.uuid(),
   reusableFieldId: z.uuid(),

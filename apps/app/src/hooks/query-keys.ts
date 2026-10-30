@@ -1,3 +1,4 @@
+import type { CandidateFilterOptionsInput } from '@comitium/schemas/candidate-search';
 import type { QueryKey } from '@tanstack/react-query';
 
 export const qk = {
@@ -20,6 +21,7 @@ export const qk = {
     detail: (token: string | null) => ['invite', token] as const,
   },
   org: {
+    candidateSearchSync: (orgId: string, session: string) => ['org', orgId, 'candidate-search-sync', session] as const,
     candidateProjections: (orgId: string, userId: string | null, vaultGeneration: string) =>
       ['org', orgId, 'candidate-projections', userId, vaultGeneration] as const,
     detail: (orgId?: string | null) => ['org', orgId] as const,
@@ -67,6 +69,11 @@ export const qk = {
     candidateNotes: (candidateId: string | null) => ['candidate-notes', candidateId] as const,
   },
   candidate: {
+    directoryRoot: () => ['candidate-directory'] as const,
+    directoryOrgRoot: (orgId: string) => ['candidate-directory', orgId] as const,
+    filterOptions: (orgId: string, filters: CandidateFilterOptionsInput) =>
+      ['candidate-filter-options', orgId, filters] as const,
+    directory: (orgId: string, requestId: string) => ['candidate-directory', orgId, requestId] as const,
     detail: (candidateId?: string | null) => ['candidate', candidateId] as const,
     files: (candidateId?: string | null) => ['candidate', candidateId, 'files'] as const,
     applicationTargetsRoot: (candidateId?: string | null) => ['candidate', candidateId, 'application-targets'] as const,

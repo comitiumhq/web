@@ -17,6 +17,7 @@ export interface CitySearchInputProps {
   size?: CitySearchInputSize;
   disabled?: boolean;
   name?: string;
+  ariaLabel?: string;
   onBlur?: FocusEventHandler<HTMLInputElement>;
   inputRef?: Ref<HTMLInputElement>;
   isFormFocusTarget?: boolean;
@@ -55,6 +56,7 @@ export function CitySearchInput({
   size = 'default',
   disabled,
   name,
+  ariaLabel,
   onBlur,
   inputRef,
   isFormFocusTarget,
@@ -141,6 +143,7 @@ export function CitySearchInput({
         <Input
           ref={inputRef}
           name={name}
+          aria-label={ariaLabel}
           value={inputValue}
           onChange={handleInputChange}
           onBlur={onBlur}

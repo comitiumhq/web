@@ -6,19 +6,31 @@ import { DEVICE_ID, OTHER_USER_ID, UNLOCK_KEY, USER_ID } from './unlock-fixtures
 
 const storage = vi.hoisted(() => new Map<string, unknown>());
 
-vi.mock('idb-keyval', () => ({
-  createStore: () => 'device-test-store',
-  get: async (key: string) => storage.get(key),
-  update: async (key: string, updater: (value: unknown) => unknown) => {
-    storage.set(key, updater(storage.get(key)));
-  },
-  del: async (key: string) => {
-    storage.delete(key);
-  },
-  keys: async () => [...storage.keys()],
-  clear: async () => {
-    storage.clear();
-  },
+vi.mock('idb', () => ({
+  openDB: async () => ({
+    get: async (_store: string, key: string) => storage.get(key),
+    delete: async (_store: string, key: string) => {
+      storage.delete(key);
+    },
+    clear: async () => {
+      storage.clear();
+    },
+    transaction: () => ({
+      done: Promise.resolve(),
+      abort() {},
+      store: {
+        getAllKeys: async () => {
+          return [...storage.keys()];
+        },
+        delete: async (key: string) => {
+          storage.delete(key);
+        },
+        put: async (value: unknown, key: string) => {
+          storage.set(key, value);
+        },
+      },
+    }),
+  }),
 }));
 
 import { RememberedDeviceStore } from '../remembered-device-store';
@@ -110,6 +122,7 @@ describe('server-assisted remembered-device record', () => {
     expect(
       await store.load({ ...params, identity: { ...identity, encryptedKeyFingerprint: 'b'.repeat(64) } }),
     ).toBeNull();
+
     expect(storage.has(slot)).toBe(false);
   });
 

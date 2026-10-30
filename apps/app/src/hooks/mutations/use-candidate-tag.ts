@@ -2,7 +2,7 @@ import { useCryptoUnlock } from '@comitium/auth/use-crypto-unlock';
 import type { PublicEncryptionKey, VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateTagContext } from '@comitium/crypto/context';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { showMutationError } from '@/hooks/mutations/mutation-error';
 import { qk } from '@/hooks/query-keys';
@@ -16,17 +16,18 @@ import {
 } from '@/lib/api/candidate-tags';
 import type { CreateCandidateTagBody } from '@/lib/schemas/candidate-tags';
 
-function invalidateAllTags(queryClient: ReturnType<typeof useQueryClient>, orgId: string) {
+function invalidateAllTags(queryClient: QueryClient, orgId: string) {
   queryClient.invalidateQueries({ queryKey: qk.candidate.tags(orgId) });
 }
 
-export function invalidateCandidateTagSurfaces(queryClient: ReturnType<typeof useQueryClient>) {
+export function invalidateCandidateTagSurfaces(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: qk.pipeline.candidatesRoot() });
   queryClient.invalidateQueries({ queryKey: qk.application.root() });
   queryClient.invalidateQueries({ queryKey: qk.candidate.activityRoot() });
   queryClient.invalidateQueries({
     predicate: (query) => qk.jobs.isKanban(query.queryKey),
   });
+  queryClient.invalidateQueries({ queryKey: qk.candidate.directoryRoot() });
 }
 
 export async function buildEncryptedLabel(
@@ -49,8 +50,6 @@ export async function buildEncryptedLabel(
 
   return { label: labelCiphertext, labelHash };
 }
-
-// --- Create ---
 
 interface CreateTagParams {
   orgId: string;
@@ -82,8 +81,6 @@ export function useCreateCandidateTag() {
   });
 }
 
-// --- Rename ---
-
 interface RenameTagParams extends CreateTagParams {
   tagId: string;
 }
@@ -109,8 +106,6 @@ export function useRenameCandidateTag() {
     onError: showMutationError,
   });
 }
-
-// --- Archive / Restore ---
 
 interface TagActionParams {
   orgId: string;
@@ -146,8 +141,6 @@ export function useRestoreCandidateTag() {
     onError: showMutationError,
   });
 }
-
-// --- Assign / Unassign ---
 
 interface AssignTagParams {
   candidateId: string;
