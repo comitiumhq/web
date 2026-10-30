@@ -52,6 +52,7 @@ export const interviewBusyResponseSchema = z.object({
 });
 
 const getInterviewBusyBodySchema = z.object({
+  rescheduleInterviewId: uuidSchema.optional(),
   interviewerUserIds: z.array(uuidSchema).min(1),
   startTime: z.string(),
   endTime: z.string(),

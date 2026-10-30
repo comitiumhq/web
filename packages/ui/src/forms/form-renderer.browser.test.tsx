@@ -1,9 +1,13 @@
-import type { RenderableForm, RenderableFormQuestion } from '@comitium/schemas/forms/form-definitions';
+import type { FormSnapshotQuestion, RenderableForm } from '@comitium/schemas/forms/form-definitions';
+import { CitySearchInput } from '@comitium/ui/city-search-input';
 import { Form } from '@comitium/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
+import { buildDefaultValues, buildFormSchema } from './build-schema';
 import type { FormattableTextInputProps } from './form-renderer';
 import { FormRenderer } from './form-renderer';
 import type { LocationInputProps } from './widgets/location-widget';
@@ -23,9 +27,9 @@ const ids = {
 function question(
   id: string,
   prompt: string,
-  questionType: RenderableFormQuestion['questionType'],
-  overrides: Partial<RenderableFormQuestion> = {},
-): RenderableFormQuestion {
+  questionType: FormSnapshotQuestion['questionType'],
+  overrides: Partial<FormSnapshotQuestion> = {},
+): FormSnapshotQuestion {
   return {
     id,
     position: 0,
@@ -33,6 +37,9 @@ function question(
     prompt,
     description: null,
     isRequired: false,
+    isPrivate: false,
+    visibility: 'standard',
+    reusableField: null,
     selectableValues: null,
     config: null,
     ...overrides,
@@ -59,7 +66,7 @@ const form: RenderableForm = {
         question(ids.firstName, 'First name', 'short_answer', {
           config: { candidateProfileField: 'first_name' },
         }),
-        question(ids.email, 'Email', 'email'),
+        question(ids.email, 'Email', 'email', { isLocked: true }),
         question(ids.consent, 'Available to relocate?', 'yes_no'),
         question(ids.location, 'Location', 'candidate_location'),
         question(ids.notes, 'Notes', 'long_formattable'),
@@ -97,6 +104,47 @@ function FormattableTextInput({ name, value, onBlur, onChange }: FormattableText
   );
 }
 
+function SearchableLocationInput(props: LocationInputProps) {
+  return (
+    <CitySearchInput
+      {...props}
+      searchCities={async () => ({
+        data: [
+          { id: 756135, name: 'Warsaw', admin1: 'Mazovia', countryCode: 'PL', country: 'Poland', population: 1862402 },
+        ],
+      })}
+    />
+  );
+}
+
+function LocationPreview({ questionType }: { questionType: 'location' | 'candidate_location' }) {
+  const preview = {
+    sections: [
+      {
+        id: ids.section,
+        position: 0,
+        title: '',
+        questions: [question(ids.location, 'Location', questionType, { isRequired: true })],
+      },
+    ],
+  };
+  const methods = useForm({
+    resolver: zodResolver(buildFormSchema(preview)),
+    defaultValues: buildDefaultValues(preview),
+    mode: 'onBlur',
+  });
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Form {...methods}>
+        <FormRenderer form={preview} control={methods.control} locationInput={SearchableLocationInput} />
+        <button type="button">Next field</button>
+      </Form>
+    </QueryClientProvider>
+  );
+}
+
 function Harness() {
   const methods = useForm({
     defaultValues: {
@@ -130,6 +178,24 @@ function Harness() {
 }
 
 describe('FormRenderer', () => {
+  it.each(['location', 'candidate_location'] as const)(
+    'clears the %s preview error after selecting a city',
+    async (questionType) => {
+      const screen = await render(<LocationPreview questionType={questionType} />);
+      const input = screen.getByPlaceholder('Start typing a city...');
+
+      await input.fill('Warsaw');
+      await screen.getByRole('button', { name: 'Warsaw, Mazovia, PL' }).click();
+      await screen.getByRole('button', { name: 'Next field' }).click();
+      await expect.element(input).toHaveValue('Warsaw, Mazovia, PL');
+      await expect.element(screen.getByText('Select a location', { exact: true })).not.toBeInTheDocument();
+
+      await input.fill('Unknown city');
+      await screen.getByRole('button', { name: 'Next field' }).click();
+      await expect.element(screen.getByText('Select a location', { exact: true })).toBeVisible();
+    },
+  );
+
   it('binds representative text, choice, location, and formattable widgets to one form submission', async () => {
     const screen = await render(<Harness />);
 

@@ -20,6 +20,8 @@ describe('recipient policy', () => {
     { purpose: 'custom_field_value', recipients: ['org_vault'] },
     { purpose: 'feedback_answers', recipients: ['org_vault'] },
     { purpose: 'criterion_evidence', recipients: ['org_vault'] },
+    { purpose: 'email_content', recipients: ['org_vault'] },
+    { purpose: 'email_content', recipients: ['org_vault', 'processor:grant-1'] },
     { purpose: 'email_content', recipients: ['org_vault', 'applicant'] },
     { purpose: 'email_content', recipients: ['org_vault', 'applicant', 'processor:grant-1'] },
   ];
@@ -109,11 +111,6 @@ describe('recipient policy', () => {
       purpose: 'email_content',
       recipients: ['applicant'],
       violation: 'email_content must include org_vault recipient',
-    },
-    {
-      purpose: 'email_content',
-      recipients: ['org_vault'],
-      violation: 'email_content must include applicant recipient',
     },
     {
       purpose: 'email_content',

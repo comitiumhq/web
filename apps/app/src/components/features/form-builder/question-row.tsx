@@ -35,7 +35,11 @@ export const QuestionRow = memo(function QuestionRow({
 }: QuestionRowProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const { ref: rowRef, isDragging } = useSortable({
+  const {
+    ref: rowRef,
+    handleRef,
+    isDragging,
+  } = useSortable({
     id: question.id,
     index,
     disabled: !canDrag,
@@ -72,14 +76,21 @@ export const QuestionRow = memo(function QuestionRow({
         onClick={handleEdit}
       >
         <div className="flex min-w-0 flex-1 items-start gap-2">
-          {canDrag && (
-            <span
-              className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors shrink-0"
-              onClick={stopPropagation}
-            >
-              <GripVerticalIcon className="size-4" />
-            </span>
-          )}
+          <Button
+            ref={handleRef}
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className={cn(
+              'mt-0.5 size-4 shrink-0 p-0 cursor-grab active:cursor-grabbing text-muted-foreground',
+              !canDrag && 'hidden',
+            )}
+            disabled={!canDrag}
+            aria-label={`Reorder ${question.prompt}`}
+            onClick={stopPropagation}
+          >
+            <GripVerticalIcon className="size-4" />
+          </Button>
 
           <div className="min-w-0 flex-1">
             <span className="block truncate text-label-14 text-foreground">{question.prompt}</span>

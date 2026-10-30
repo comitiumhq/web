@@ -2,7 +2,7 @@ import { TooltipProvider } from '@comitium/ui/tooltip';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 
-import type { ActivityFeedRow } from '@/lib/schemas/emails';
+import { type ActivityFeedRow, activityFeedResponseSchema } from '@/lib/schemas/emails';
 
 import { TimelineEventRow } from './index';
 
@@ -43,6 +43,42 @@ const event: ActivityFeedRow = {
 };
 
 describe('TimelineEventRow', () => {
+  it('loads a mixed feed with custom field updates, clears and stage changes', async () => {
+    const response = activityFeedResponseSchema.parse({
+      data: [
+        ...['custom_field_value_set', 'custom_field_value_cleared'].map((type) => ({
+          ...event,
+          id: type,
+          type,
+          scope: 'candidate',
+          applicationId: null,
+          jobId: null,
+          jobTitle: null,
+          payload: { kind: 'generic' },
+        })),
+        event,
+      ],
+      pagination: { nextCursor: null, hasMore: false },
+    });
+
+    const screen = await render(
+      <TooltipProvider>
+        {response.data.map((row) => (
+          <TimelineEventRow
+            key={row.id}
+            event={row}
+            selectedApplicationId={event.applicationId}
+            timeZone="Europe/Warsaw"
+          />
+        ))}
+      </TooltipProvider>,
+    );
+
+    await expect.element(screen.getByText('Custom field updated', { exact: true })).toBeVisible();
+    await expect.element(screen.getByText('Custom field cleared', { exact: true })).toBeVisible();
+    await expect.element(screen.getByText('Moved to Screening', { exact: true })).toBeVisible();
+  });
+
   it('renders the authenticated avatar included in the activity actor identity', async () => {
     const screen = await render(
       <TooltipProvider>

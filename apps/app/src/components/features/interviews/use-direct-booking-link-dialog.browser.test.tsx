@@ -46,25 +46,27 @@ const selectedInterviewer: SelectedInterviewer = {
   role: 'interviewer',
 };
 
-vi.mock('@/hooks/queries/use-query-interview-templates', () => ({
-  useQueryInterviewTemplates: () => ({
+vi.mock('@/hooks/queries/use-query-stage-activities', () => ({
+  useQueryOwnerActivityOptions: () => ({
     data: {
-      data: [
-        {
-          id: TEMPLATE_ID,
-          title: 'Technical interview',
-          externalTitle: null,
-          durationMinutes: 45,
-          instructions: null,
-          feedbackFormId: null,
-          isDebrief: false,
-          isArchived: false,
-          createdAt: '2026-08-28T08:00:00.000Z',
-          updatedAt: '2026-08-28T08:00:00.000Z',
-          jobCount: 0,
-          jobTemplateCount: 0,
-        },
-      ],
+      data: {
+        interviewTemplates: [
+          {
+            id: TEMPLATE_ID,
+            title: 'Technical interview',
+            externalTitle: null,
+            durationMinutes: 45,
+            instructions: null,
+            feedbackFormId: null,
+            isDebrief: false,
+            isArchived: false,
+            createdAt: '2026-08-28T08:00:00.000Z',
+            updatedAt: '2026-08-28T08:00:00.000Z',
+            jobCount: 0,
+            jobTemplateCount: 0,
+          },
+        ],
+      },
     },
   }),
 }));
@@ -127,6 +129,7 @@ function params(overrides: Partial<UseDirectBookingLinkDialogParams> = {}): UseD
     onOpenChange: mocks.onOpenChange,
     applicationId: '55555555-5555-4555-8555-555555555555',
     orgId: '66666666-6666-4666-8666-666666666666',
+    jobId: '88888888-8888-4888-8888-888888888888',
     currentStageId: STAGE_ID,
     candidateEmail: 'candidate@example.com',
     candidateFirstName: 'Candidate',

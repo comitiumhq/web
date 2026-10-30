@@ -39,7 +39,9 @@ export function CriterionEvidenceContent({ evidenceState, orgId }: CriterionEvid
         <ul className="space-y-2">
           {evidenceState.evidence.citations.map((citation) => (
             <li key={citation.excerpt} className="border-l-2 border-border pl-2.5">
-              <p className="text-copy-14 text-muted-foreground">“{citation.excerpt}”</p>
+              <p className="whitespace-pre-wrap wrap-break-word text-copy-14 text-muted-foreground">
+                “{citation.excerpt}”
+              </p>
             </li>
           ))}
         </ul>

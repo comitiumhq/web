@@ -192,6 +192,7 @@ export function RescheduleInterviewDialog({
               <Suspense fallback={<Skeleton className="h-[480px] w-full rounded-md" />}>
                 <InterviewerCalendar
                   applicationId={applicationId}
+                  rescheduleInterviewId={scheduleId}
                   orgId={orgId}
                   interviewers={interviewers}
                   timeZone={timeZone}

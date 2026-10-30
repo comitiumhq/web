@@ -134,10 +134,6 @@ function validateEmailContentRecipients(recipients: readonly EnvelopeRecipient[]
     return 'email_content must include org_vault recipient';
   }
 
-  if (!recipients.includes('applicant')) {
-    return 'email_content must include applicant recipient';
-  }
-
   if (countProcessorRecipients(recipients) > 1) {
     return 'email_content can include at most one processor recipient';
   }

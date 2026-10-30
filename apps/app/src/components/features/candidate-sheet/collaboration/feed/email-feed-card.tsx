@@ -1,14 +1,14 @@
 import { type CandidateProfile, formatCandidateName } from '@comitium/schemas/candidates';
 import { Card } from '@comitium/ui/card';
-import { ExpandableContent } from '@comitium/ui/expandable-content';
 import { Skeleton } from '@comitium/ui/skeleton';
 import { MailIcon } from 'lucide-react';
 import { memo } from 'react';
 import { EncryptedPlaceholder } from '@/components/features/encryption/encrypted-placeholder';
-import { RichTextEditor } from '@/components/tiptap-ui/rich-text-editor';
 import type { ActivityFeedRow, DecryptedEmail, EmailPayload } from '@/lib/schemas/emails';
 import { formatRelativeTime, getEmailSender } from '@/lib/utils';
 
+import { EmailContent } from '../emails/email-content';
+import { EmailRecipient } from '../emails/email-recipient';
 import { getActivityEmailSenderRole } from './activity-email';
 
 type EmailFeedEvent = ActivityFeedRow & { payload: EmailPayload };
@@ -45,9 +45,7 @@ export const EmailFeedCard = memo(function EmailFeedCard({
 
         <div className="flex-1 min-w-0">
           <span className="text-label-13 font-medium">{sender.name}</span>
-          {decryptedEmail?.content?.to && (
-            <p className="text-label-12 text-meta-foreground truncate">to: {decryptedEmail.content.to}</p>
-          )}
+          {decryptedEmail && <EmailRecipient orgId={orgId} senderRole={senderRole} to={decryptedEmail.content.to} />}
           {showJobContext && event.jobTitle && (
             <p className="text-label-12 text-meta-foreground truncate">{event.jobTitle}</p>
           )}
@@ -84,9 +82,7 @@ function EmailBody({ orgId, decryptedEmail, isDecrypting, decryptionError }: Ema
       <>
         <p className="mb-1.5 text-label-13 font-medium">{decryptedEmail.content.subject}</p>
         <div className="text-copy-13 text-content-foreground">
-          <ExpandableContent collapsedLines={4}>
-            <RichTextEditor content={decryptedEmail.content.body} readOnly />
-          </ExpandableContent>
+          <EmailContent body={decryptedEmail.content.body} collapsedLines={4} />
         </div>
       </>
     );

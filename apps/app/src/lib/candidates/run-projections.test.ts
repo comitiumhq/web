@@ -24,7 +24,7 @@ const result = {
 } as CandidateProjectionResult;
 
 beforeEach(() => {
-  vi.mocked(claimCandidateProjections).mockResolvedValue({ items: [item], hasMore: false, retryAfterMs: 15000 });
+  vi.mocked(claimCandidateProjections).mockResolvedValue({ items: [item], hasMore: false, retryAfterMs: 60000 });
   vi.mocked(applyCandidateProjections).mockResolvedValue({
     results: [{ workId: 'work', status: 'applied' }],
     hasMore: false,

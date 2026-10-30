@@ -440,6 +440,7 @@ function ApplicationCandidateSheet({
         open={scheduleOpen}
         onOpenChange={handleScheduleOpenChange}
         applicationId={application.id}
+        jobId={application.jobId}
         orgId={orgId}
         currentStageId={application.currentStageId}
         candidateEmail={decryptedEmail}
@@ -452,6 +453,7 @@ function ApplicationCandidateSheet({
         open={directBookingOpen}
         onOpenChange={handleDirectBookingOpenChange}
         applicationId={application.id}
+        jobId={application.jobId}
         orgId={orgId}
         currentStageId={application.currentStageId}
         candidateEmail={decryptedEmail}

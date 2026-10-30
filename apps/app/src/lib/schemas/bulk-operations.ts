@@ -13,7 +13,6 @@ const bulkOperationItemStatusSchema = z.enum([
   'excluded',
   'pending',
   'processing',
-  'waiting',
   'succeeded',
   'skipped',
   'failed',
@@ -26,7 +25,6 @@ const applicationItemSchema = z.object({
   jobId: z.string().nullable(),
   jobTitle: z.string().nullable(),
   requiresEmail: z.boolean(),
-  childOperationId: z.string().nullable(),
   recipientPublicKey: publicEncryptionKeySchema.nullable(),
   recipientKeyVersion: z.number().int().positive().nullable(),
   deliveryGrant: z

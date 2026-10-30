@@ -40,7 +40,11 @@ export const CustomFieldTableRow = memo(function CustomFieldTableRow({
   const isArchived = field.isArchived;
   const anyPending = isArchiving || isRestoring;
 
-  const { ref: rowRef, isDragging } = useSortable({
+  const {
+    ref: rowRef,
+    handleRef,
+    isDragging,
+  } = useSortable({
     id: field.id,
     index,
     type: 'custom-field',
@@ -78,14 +82,21 @@ export const CustomFieldTableRow = memo(function CustomFieldTableRow({
         onClick={!isArchived ? handleRowClick : undefined}
       >
         <TableCell className="w-8 p-0 pl-3">
-          {canReorder && (
-            <span
-              className="inline-flex h-8 w-6 items-center justify-center text-muted-foreground cursor-grab active:cursor-grabbing"
-              onClick={stopRowClick}
-            >
-              <GripVerticalIcon className="size-4" />
-            </span>
-          )}
+          <Button
+            ref={handleRef}
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className={cn(
+              'h-8 w-6 text-muted-foreground cursor-grab active:cursor-grabbing',
+              !canReorder && 'invisible',
+            )}
+            disabled={!canReorder}
+            aria-label={`Reorder ${field.title}`}
+            onClick={stopRowClick}
+          >
+            <GripVerticalIcon className="size-4" />
+          </Button>
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2 min-w-0">

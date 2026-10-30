@@ -1,7 +1,8 @@
 import { getMemberDisplayName } from '@comitium/ui/display-name';
 import { EmptyState } from '@comitium/ui/empty-state';
-import { type CellInfo, IlamyCalendar, type IlamyCalendarProps, type Resource } from '@ilamy/calendar';
+import { type CellInfo, dayjs, IlamyCalendar, type IlamyCalendarProps, type Resource } from '@ilamy/calendar';
 import { parseISO } from 'date-fns';
+import 'dayjs/plugin/timezone';
 import { CalendarDaysIcon, LoaderCircleIcon, UserPlusIcon } from 'lucide-react';
 import {
   type CSSProperties,
@@ -24,7 +25,6 @@ import {
   CALENDAR_GRID_SLOT_MINUTES,
   CALENDAR_START_MINUTES,
   getAvailabilityRange,
-  getCalendarDate,
   isCalendarSlotVisible,
 } from '../calendar-range';
 import {
@@ -95,6 +95,7 @@ type CalendarStyle = CSSProperties & {
 };
 
 interface InterviewerCalendarProps {
+  rescheduleInterviewId?: string;
   applicationId: string;
   orgId: string;
   interviewTypeControl?: ReactNode;
@@ -113,6 +114,7 @@ interface InterviewerCalendarProps {
 }
 
 function InterviewerCalendarImpl({
+  rescheduleInterviewId,
   applicationId,
   orgId,
   interviewTypeControl,
@@ -141,6 +143,7 @@ function InterviewerCalendarImpl({
   const availabilityRange = useMemo(() => getAvailabilityRange(visibleDay, timeZone), [timeZone, visibleDay]);
 
   const availabilityQuery = useQueryInterviewBusy({
+    rescheduleInterviewId,
     applicationId,
     interviewerUserIds,
     startTime: availabilityRange.start,
@@ -169,7 +172,7 @@ function InterviewerCalendarImpl({
 
   const events = useMemo(() => createCalendarEvents(availabilityIndex), [availabilityIndex]);
 
-  const calendarInitialDate = useMemo(() => getCalendarDate(visibleDay, timeZone), [timeZone, visibleDay]);
+  const calendarInitialDate = useMemo(() => dayjs.tz(visibleDay, timeZone), [timeZone, visibleDay]);
 
   const unavailableInterviewers =
     interviewerAvailability?.filter((interviewer) => interviewer.status === 'unavailable') ?? [];

@@ -50,7 +50,11 @@ export function SectionCard({
   controller,
   disableTitle = false,
 }: SectionCardProps) {
-  const { ref: sectionRef, isDragging } = useSortable({
+  const {
+    ref: sectionRef,
+    handleRef,
+    isDragging,
+  } = useSortable({
     id: section.id,
     index,
     type: 'section',
@@ -163,11 +167,20 @@ export function SectionCard({
       <Card ref={sectionRef} size="sm" className={cn('gap-0 py-0 transition-opacity', { 'opacity-50': isDragging })}>
         <CardHeader className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
           <div className="flex items-center gap-1 flex-1 min-w-0">
-            {canDrag && (
-              <span className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                <GripVerticalIcon className="size-4" />
-              </span>
-            )}
+            <Button
+              ref={handleRef}
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className={cn(
+                'size-4 shrink-0 p-0 cursor-grab active:cursor-grabbing text-muted-foreground',
+                !canDrag && 'hidden',
+              )}
+              disabled={!canDrag}
+              aria-label={`Reorder ${section.title || 'section'}`}
+            >
+              <GripVerticalIcon className="size-4" />
+            </Button>
             <div className="min-w-0 flex-1">
               <Input
                 value={section.title}

@@ -41,7 +41,6 @@ function OperationProgress({ operation }: { operation: BulkOperation }) {
   const total =
     operation.counts.pending +
     operation.counts.processing +
-    operation.counts.waiting +
     operation.counts.succeeded +
     operation.counts.failed +
     operation.counts.skipped;

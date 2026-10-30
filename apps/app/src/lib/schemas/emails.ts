@@ -130,6 +130,8 @@ const activityEventTypeSchema = z.enum([
   'candidate_created',
   'candidate_linked',
   'candidate_profile_updated',
+  'custom_field_value_set',
+  'custom_field_value_cleared',
   'candidate_file_added',
   'candidate_file_updated',
   'candidate_file_removed',
@@ -254,9 +256,9 @@ export type EmailTemplateUpdateBody = z.infer<typeof emailTemplateUpdateBodySche
 // --- Decrypted email (client-side, after vault decryption) ---
 
 const decryptedEmailContentSchema = z.object({
-  subject: z.string(),
-  to: z.string(),
-  body: tipTapDocSchema,
+  subject: z.string().nullable(),
+  to: z.string().optional(),
+  body: z.union([tipTapDocSchema, z.string()]),
 });
 
 export type DecryptedEmailContent = z.infer<typeof decryptedEmailContentSchema>;

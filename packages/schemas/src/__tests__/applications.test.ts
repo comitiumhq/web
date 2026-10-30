@@ -7,6 +7,7 @@ import {
   applicationSearchProjectionSchema,
   applicationSubmitDispositionSchema,
   candidateSheetConsiderationContextSchema,
+  criterionEvidenceSchema,
   criterionSummarySchema,
   finalizeApplicationInputSchema,
 } from '../applications';
@@ -15,6 +16,18 @@ const OCCUPATION_ID = '01999c64-6000-7000-8000-000000000001';
 const SKILL_ID = '01999c64-6000-7000-8000-000000000002';
 const UUID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const HASH = `0x${'1'.repeat(64)}`;
+
+describe('criterionEvidenceSchema', () => {
+  it('preserves a complete long source block and its line breaks', () => {
+    const excerpt = `${'Built production services with PostgreSQL. '.repeat(25)}\nReduced latency by 42%.`;
+    const evidence = {
+      rationale: 'Production experience is demonstrated.',
+      citations: [{ source: 'resume', questionId: null, excerpt }],
+    };
+
+    expect(criterionEvidenceSchema.parse(evidence)).toEqual(evidence);
+  });
+});
 
 function mockPublicEncryptionKey(): PublicEncryptionKey {
   return {

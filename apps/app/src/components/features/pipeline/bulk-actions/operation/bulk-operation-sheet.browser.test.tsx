@@ -9,7 +9,6 @@ const counts: BulkOperation['counts'] = {
   excluded: 1,
   pending: 0,
   processing: 0,
-  waiting: 0,
   succeeded: 0,
   skipped: 0,
   failed: 0,
@@ -41,7 +40,6 @@ function target(id: string, status: TargetStatus): PipelineBulkTarget {
     jobId: null,
     jobTitle: null,
     requiresEmail: false,
-    childOperationId: null,
     recipientPublicKey: null,
     recipientKeyVersion: null,
     deliveryGrant: null,
@@ -134,6 +132,7 @@ describe('BulkOperationSheet', () => {
     );
 
     await expect.element(screen.getByText('Processing on the server')).toBeInTheDocument();
+    await expect.element(screen.getByText('0 / 3')).toBeInTheDocument();
     await expect.element(screen.getByText('You can close this panel. The action will continue.')).toBeInTheDocument();
     await expect.element(screen.getByRole('button', { name: 'Close' }).first()).toBeInTheDocument();
   });

@@ -47,7 +47,6 @@ function target(
         jobId: `job-${id}`,
         jobTitle: `Role ${id}`,
         requiresEmail: true,
-        childOperationId: null,
         recipientPublicKey,
         recipientKeyVersion: recipientPublicKey ? 1 : null,
         deliveryGrant: {
@@ -65,7 +64,6 @@ function target(
       jobId: `job-${id}`,
       jobTitle: `Role ${id}`,
       requiresEmail: true,
-      childOperationId: null,
       recipientPublicKey,
       recipientKeyVersion: recipientPublicKey ? 1 : null,
       deliveryGrant: {

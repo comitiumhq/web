@@ -2,7 +2,7 @@ import { Button } from '@comitium/ui/button';
 import { Calendar } from '@comitium/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@comitium/ui/popover';
 import { TimezonePicker } from '@comitium/ui/timezone-picker';
-import { useIlamyCalendarContext } from '@ilamy/calendar';
+import { dayjs, useIlamyCalendarContext } from '@ilamy/calendar';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { type ReactNode, useCallback, useState } from 'react';
 import type { OrgTeamMember } from '@/lib/schemas/org';
@@ -81,8 +81,8 @@ function ScrollableControlBar({ children }: { children: ReactNode }) {
   );
 }
 
-function DateNavigator() {
-  const { currentDate, nextPeriod, prevPeriod, today, selectDate } = useIlamyCalendarContext();
+function DateNavigator({ timeZone }: { timeZone: string }) {
+  const { currentDate, nextPeriod, prevPeriod, selectDate } = useIlamyCalendarContext();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const pickerDate = new Date(currentDate.year(), currentDate.month(), currentDate.date());
@@ -106,8 +106,8 @@ function DateNavigator() {
 
   const handleToday = useCallback(() => {
     setPickerOpen(false);
-    today();
-  }, [today]);
+    selectDate(dayjs().tz(timeZone));
+  }, [selectDate, timeZone]);
 
   return (
     <div className="flex h-8 min-w-0 shrink-0 items-center overflow-hidden rounded-4xl border border-control-border/55 bg-control">
@@ -182,7 +182,7 @@ export function CalendarHeader(props: CalendarHeaderProps) {
       />
 
       <div className="ml-auto flex shrink-0 items-center justify-end gap-1.5">
-        <DateNavigator />
+        <DateNavigator timeZone={props.timeZone} />
         <InterviewerPicker {...props} />
       </div>
     </ScrollableControlBar>

@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type Control, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useScheduleInterview } from '@/hooks/mutations/use-interview-mutations';
-import { useQueryInterviewTemplates } from '@/hooks/queries/use-query-interview-templates';
+import { useQueryOwnerActivityOptions } from '@/hooks/queries/use-query-stage-activities';
 import { useQueryOrgMe } from '@/hooks/use-permissions';
 import { hasApiErrorCode } from '@/lib/api/client';
 import type { ScheduleInterviewBody } from '@/lib/schemas/interviews';
@@ -28,6 +28,7 @@ interface ScheduleInterviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   applicationId: string;
+  jobId: string;
   orgId: string;
   currentStageId?: string | null;
   candidateEmail?: string | null;
@@ -76,6 +77,7 @@ export function ScheduleInterviewDialog({
   open,
   onOpenChange,
   applicationId,
+  jobId,
   orgId,
   currentStageId,
   candidateEmail,
@@ -87,8 +89,8 @@ export function ScheduleInterviewDialog({
   const [interviewers, setInterviewers] = useState<SelectedInterviewer[]>([]);
   const [conflictingBody, setConflictingBody] = useState<ScheduleInterviewBody | null>(null);
   const [conflictDescription, setConflictDescription] = useState('');
-  const { data: templatesData } = useQueryInterviewTemplates(orgId);
-  const templates = useMemo(() => templatesData?.data ?? [], [templatesData]);
+  const { data: activityOptions } = useQueryOwnerActivityOptions(open ? { kind: 'job', jobId } : null);
+  const templates = useMemo(() => activityOptions?.data.interviewTemplates ?? [], [activityOptions]);
   const { data: meData } = useQueryOrgMe(orgId);
   const initialTimeZone = meData?.timezone ?? BROWSER_TZ;
 
@@ -170,9 +172,17 @@ export function ScheduleInterviewDialog({
     setConflictDescription('');
 
     if (prefillInterviewId) {
-      handleTemplateChange(prefillInterviewId);
+      form.setValue('interviewId', prefillInterviewId);
     }
   }, [open]);
+
+  useEffect(() => {
+    const template = templates.find((entry) => entry.id === selectedInterviewId);
+
+    if (template) {
+      form.setValue('durationMinutes', template.durationMinutes);
+    }
+  }, [form, selectedInterviewId, templates]);
 
   usePrefilledInterviewers({
     open,

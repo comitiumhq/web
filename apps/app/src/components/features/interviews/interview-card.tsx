@@ -41,11 +41,11 @@ import {
   type RsvpStatus,
 } from '@/lib/schemas/interviews';
 import { cn } from '@/lib/utils';
-
 import { CancelInterviewDialog } from './cancel-interview-dialog';
 import { INTERVIEW_STATUS_DISPLAY } from './interview-status-display';
 import { MarkNoShowDialog } from './mark-no-show-dialog';
 import { RescheduleInterviewDialog } from './reschedule-dialog';
+import { useInterviewClock } from './use-interview-clock';
 
 interface InterviewCardProps {
   interview: InterviewEvent;
@@ -167,6 +167,7 @@ export const InterviewCard = memo(function InterviewCard({
   const canComplete = interview.status === InterviewStatus.SCHEDULED;
   const canMarkNoShow = interview.status === InterviewStatus.SCHEDULED;
   const canReschedule = interview.status === InterviewStatus.SCHEDULED;
+  const now = useInterviewClock(interview.scheduledAt, interview.durationMinutes, canComplete);
   const isSchedulingLink = interview.status === InterviewStatus.LINK_SENT;
   const hasActions = canCancel || canComplete || canMarkNoShow || canReschedule;
   const cancelActionLabel = isSchedulingLink ? 'Cancel link' : 'Cancel interview';
@@ -184,7 +185,6 @@ export const InterviewCard = memo(function InterviewCard({
 
     const start = new Date(interview.scheduledAt);
     const end = addMinutes(start, interview.durationMinutes);
-    const now = new Date();
 
     return {
       canCompleteNow: !isBefore(now, end),
@@ -193,7 +193,7 @@ export const InterviewCard = memo(function InterviewCard({
       meetingStartLabel: formatInTimezone(start, displayTimeZone, 'h:mm a (zzz)'),
       formattedDate: formatInTimezone(start, displayTimeZone, 'EEE, MMM d · h:mm a (zzz)'),
     };
-  }, [interview.scheduledAt, interview.durationMinutes, displayTimeZone]);
+  }, [interview.scheduledAt, interview.durationMinutes, displayTimeZone, now]);
 
   const handleCancel = useCallback(() => {
     setMenuOpen(false);

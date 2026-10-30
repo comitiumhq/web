@@ -8,6 +8,7 @@ import { CircleAlertIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CandidateSheet } from '@/components/features/candidate-sheet';
 import type { CandidateTableVariant } from '@/components/features/pipeline/shared/candidate-table';
+import { PipelineSearchInput } from '@/components/features/pipeline/shared/pipeline-search-input';
 import { PerJobPipelinePageSkeleton } from '@/components/features/pipeline/shared/pipeline-skeletons';
 import { ArchivedPipelineButton, StageTypeTabs } from '@/components/features/pipeline/shared/stage-type-tabs';
 import type { MyOrg } from '@/hooks/queries/use-query-my-orgs';
@@ -16,6 +17,7 @@ import { useDecryptCandidateNames } from '@/hooks/use-decrypt-candidate-names';
 import { useKanbanDrag } from '@/hooks/use-kanban-drag';
 import { hasApiErrorCode } from '@/lib/api/client';
 import type { KanbanApplication } from '@/lib/schemas/pipeline';
+import { cn } from '@/lib/utils';
 
 import { PerJobPipelineContent } from './per-job-content';
 import type { PipelineTab } from './types';
@@ -207,22 +209,34 @@ export function PipelineView({
   }
 
   const isArchived = activeTab === 'archived';
+  const showSearch = !isArchived && activeTab !== 'active' && !isLoadingKanban && tableCandidates.length > 0;
   const tableVariant = getCandidateTableVariant(activeTab);
 
   return (
     <>
       <div className="flex h-full flex-col overflow-hidden bg-background">
         <PageContainer className="flex min-h-0 flex-1 flex-col gap-4 py-4 sm:py-5">
-          <div className="flex shrink-0 items-center justify-between gap-3">
+          <div
+            className={cn(
+              'flex shrink-0 items-center justify-between gap-3',
+              showSearch && 'flex-col items-stretch xl:flex-row xl:items-center',
+            )}
+          >
             <div className="min-w-0 overflow-x-auto scrollbar-hide">
               <StageTypeTabs counts={stageTypeCounts} activeTab={activeTab} onTabChange={onTabChange} />
             </div>
 
-            <ArchivedPipelineButton
-              count={archivedCount}
-              active={activeTab === 'archived'}
-              onClick={handleArchivedTabClick}
-            />
+            <div className="flex min-w-0 items-center justify-end gap-2">
+              {showSearch && (
+                <PipelineSearchInput
+                  className="min-w-0 flex-1 xl:w-64 xl:flex-none"
+                  placeholder="Search candidates..."
+                  value={search}
+                  onValueChange={handleSearchChange}
+                />
+              )}
+              <ArchivedPipelineButton count={archivedCount} active={isArchived} onClick={handleArchivedTabClick} />
+            </div>
           </div>
 
           <PerJobPipelineContent
@@ -243,9 +257,7 @@ export function PipelineView({
             onRetryStage={retryStage}
             loadingStageIds={loadingStageIds}
             failedStageIds={failedStageIds}
-            search={search}
             searchQuery={searchQuery}
-            onSearchChange={handleSearchChange}
             onClearSearch={handleClearSearch}
             hasMoreTableCandidates={filteredStages.some(
               (stage) => Boolean(stage.nextCursor) && !failedStageIds.includes(stage.id),

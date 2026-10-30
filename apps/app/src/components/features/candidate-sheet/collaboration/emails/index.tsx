@@ -99,7 +99,8 @@ export function EmailsTab({ orgId, candidateProfile, collection }: EmailsTabProp
 
         {isReady && isDecrypting && !data && <EmailsSkeleton />}
 
-        {isReady && data?.map((msg) => <EmailCard key={msg.id} email={msg} candidateProfile={candidateProfile} />)}
+        {isReady &&
+          data?.map((msg) => <EmailCard key={msg.id} orgId={orgId} email={msg} candidateProfile={candidateProfile} />)}
 
         {isReady && !decryptionError && isDecrypting && data && <EmailsSkeleton />}
 
