@@ -49,9 +49,10 @@ export function useUpdateCandidateProfile() {
       return updateCandidateProfile(candidateId, encryptedProfile, searchProjection, expectedProfileRevision);
     },
 
-    onSuccess: (_, { candidateId }) => {
+    onSuccess: (_, { candidateId, orgId }) => {
       toast.success('Candidate profile updated');
       queryClient.invalidateQueries({ queryKey: qk.candidate.detail(candidateId) });
+      queryClient.invalidateQueries({ queryKey: qk.candidate.directoryOrgRoot(orgId) });
       queryClient.invalidateQueries({ queryKey: qk.candidate.activityRoot() });
       queryClient.invalidateQueries({ queryKey: qk.application.root() });
       queryClient.invalidateQueries({ queryKey: qk.pipeline.candidatesRoot() });

@@ -4,7 +4,8 @@ import type { CandidateSearchDefinition, CandidateSearchListRow } from '@comitiu
 import { Button } from '@comitium/ui/button';
 import { DataTableVirtual } from '@comitium/ui/data-table-virtual';
 import { InfiniteCollectionStatus } from '@comitium/ui/infinite-collection-status';
-import { useMemo, useState } from 'react';
+import type { Row } from '@tanstack/react-table';
+import { useCallback, useMemo, useState } from 'react';
 import { useQueryCandidateDirectory } from '@/hooks/queries/use-query-candidate-directory';
 import { getErrorStatus } from '@/lib/api/client';
 import { type CandidateDirectoryRow, CandidateSearchChanged } from '@/lib/candidates/search/candidate-query';
@@ -42,21 +43,27 @@ export function CandidateResults({
   const preloadStart = Math.max(0, firstVisible - PROFILE_PRELOAD_ROWS);
   const preloadEnd = Math.min(rows.length, firstVisible + visibleRows.length + PROFILE_PRELOAD_ROWS);
   const profileRows = useMemo(() => rows.slice(preloadStart, preloadEnd), [rows, preloadStart, preloadEnd]);
-  const columns = useCandidateColumns(orgId, profileRows);
+  const refreshSources = useCallback(() => {
+    void query.refetch({ cancelRefetch: false });
+  }, [query.refetch]);
+
+  const columns = useCandidateColumns(orgId, profileRows, refreshSources);
   const atEnd = visibleRows.at(-1)?.candidateId === rows.at(-1)?.candidateId;
+
+  function retryPreparation(): void {
+    void query.retryPreparation().catch(() => undefined);
+  }
+
+  function selectCandidate({ original }: Row<CandidateDirectoryRow>): void {
+    onSelect(original);
+  }
 
   if (query.preparationError) {
     return (
       <div role="alert" className="flex flex-col items-center gap-3 py-16">
         <p>{candidatePreparationMessage(query.preparationError)}</p>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              void query.retryPreparation().catch(() => undefined);
-            }}
-          >
+          <Button variant="outline" size="sm" onClick={retryPreparation}>
             Retry
           </Button>
           <Button variant="ghost" size="sm" onClick={clearPrivate}>
@@ -111,7 +118,7 @@ export function CandidateResults({
         maxHeightClassName="max-h-full"
         columns={columns}
         data={rows}
-        getRowId={(row) => row.candidateId}
+        getRowId={candidateRowId}
         enableRowSelection={false}
         gridMinWidth="56rem"
         rowEstimatePx={64}
@@ -120,7 +127,7 @@ export function CandidateResults({
         loadingMoreRowCount={loading ? 10 : 3}
         onLoadMore={query.next}
         onVisibleRowsChange={setVisibleRows}
-        onRowClick={({ original }) => onSelect(original)}
+        onRowClick={selectCandidate}
         emptyState={<p className="py-12 text-center text-sm text-muted-foreground">{emptyLabel}</p>}
       />
       {!loading && (rows.length === 0 || (page?.scanning && atEnd) || query.isFetchNextPageError) && (
@@ -135,6 +142,10 @@ export function CandidateResults({
       )}
     </>
   );
+}
+
+function candidateRowId(row: CandidateDirectoryRow): string {
+  return row.candidateId;
 }
 
 function candidatePreparationMessage(error: unknown): string {

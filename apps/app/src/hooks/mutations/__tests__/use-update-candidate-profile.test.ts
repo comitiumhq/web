@@ -1,9 +1,11 @@
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { qk } from '@/hooks/query-keys';
 
 const mocks = vi.hoisted(() => ({
   encryptApplication: vi.fn(),
   ensureUnlocked: vi.fn(),
+  invalidateQueries: vi.fn(),
   mutationOptions: null as CandidateProfileMutationOptions | null,
   projectCandidateProfileSearch: vi.fn(),
   updateCandidateProfile: vi.fn(),
@@ -23,7 +25,7 @@ vi.mock('@tanstack/react-query', () => ({
 
     return {};
   },
-  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+  useQueryClient: () => ({ invalidateQueries: mocks.invalidateQueries }),
 }));
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
@@ -73,7 +75,18 @@ interface CandidateProfileMutationParams {
 
 interface CandidateProfileMutationOptions {
   mutationFn: (params: CandidateProfileMutationParams) => Promise<unknown>;
+  onSuccess: (result: unknown, params: CandidateProfileMutationParams) => void;
 }
+
+const params: CandidateProfileMutationParams = {
+  candidateId: '11111111-1111-4111-8111-111111111111',
+  orgId: '22222222-2222-4222-8222-222222222222',
+  profile: PROFILE,
+  expectedProfileRevision: 7,
+  vaultPublicKey: { v: 1, xwing: 'public-key' },
+  vaultKeyVersion: 3,
+  vaultAccess: { ek: 'wrapped-vault-key' },
+};
 
 describe('candidate profile update', () => {
   beforeEach(() => {
@@ -90,15 +103,7 @@ describe('candidate profile update', () => {
       throw new Error('Expected candidate profile mutation options');
     }
 
-    await mocks.mutationOptions.mutationFn({
-      candidateId: '11111111-1111-4111-8111-111111111111',
-      orgId: '22222222-2222-4222-8222-222222222222',
-      profile: PROFILE,
-      expectedProfileRevision: 7,
-      vaultPublicKey: { v: 1, xwing: 'public-key' },
-      vaultKeyVersion: 3,
-      vaultAccess: { ek: 'wrapped-vault-key' },
-    });
+    await mocks.mutationOptions.mutationFn(params);
 
     expect(mocks.ensureUnlocked).toHaveBeenCalledOnce();
     expect(mocks.updateCandidateProfile).toHaveBeenCalledWith(
@@ -107,5 +112,19 @@ describe('candidate profile update', () => {
       SEARCH_PROJECTION,
       7,
     );
+  });
+
+  it('refreshes directory results after an explicit profile edit', () => {
+    useUpdateCandidateProfile();
+
+    if (!mocks.mutationOptions) {
+      throw new Error('Expected candidate profile mutation options');
+    }
+
+    mocks.mutationOptions.onSuccess(undefined, params);
+
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: qk.candidate.directoryOrgRoot(params.orgId),
+    });
   });
 });

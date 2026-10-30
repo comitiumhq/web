@@ -1,4 +1,5 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
+import { STALE_TIME_SHORT } from '@comitium/schemas/api-query-policy';
 import type { CandidateSearchDefinition } from '@comitium/schemas/candidate-search';
 import { type QueryFunctionContext, type QueryKey, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
@@ -43,9 +44,9 @@ export function useQueryCandidateDirectory(orgId: string, definition: CandidateS
     enabled,
     retry: false,
     gcTime: 0,
-    staleTime: Number.POSITIVE_INFINITY,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    staleTime: compiled.privateFilter ? Number.POSITIVE_INFINITY : STALE_TIME_SHORT,
+    refetchOnWindowFocus: !compiled.privateFilter,
+    refetchOnReconnect: !compiled.privateFilter,
     queryFn: async (
       context: QueryFunctionContext<QueryKey, CandidateDirectoryCursor>,
     ): Promise<CandidateDirectoryPage> => {

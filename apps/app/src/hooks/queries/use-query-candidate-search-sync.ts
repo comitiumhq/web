@@ -68,7 +68,7 @@ export function useQueryCandidateSearchSync(orgId: string) {
        * Each pass already bounds its work. Yield through a timer between passes;
        * keep polling disabled during the request and slow it down once ready.
        */
-      return state.state.data?.phase === 'ready' ? 15_000 : 1;
+      return state.state.data?.phase === 'ready' ? 60_000 : 1;
     },
     refetchIntervalInBackground: false,
   });
@@ -84,13 +84,13 @@ export function useQueryCandidateSearchSync(orgId: string) {
 
     const head = `${session}:${status.head}`;
 
-    if (previousHead.current) {
-      const changed = previousHead.current !== head;
+    const changed = previousHead.current !== null && previousHead.current !== head;
 
+    if (changed) {
       void queryClient.invalidateQueries(
         {
-          queryKey: qk.candidate.directoryRoot(orgId),
-          predicate: (query) => changed || query.meta?.privateCandidateSearch === false,
+          queryKey: qk.candidate.directoryOrgRoot(orgId),
+          predicate: (query) => query.meta?.privateCandidateSearch === false,
         },
         { cancelRefetch: false },
       );

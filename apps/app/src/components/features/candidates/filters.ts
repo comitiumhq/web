@@ -56,14 +56,9 @@ export function removeCandidateFilter(filters: CandidateFilter[], field: FilterF
   return filters.filter((filter) => filter.field !== field && !(field === 'job' && filter.field === 'stage'));
 }
 
-export function candidateDefinition(
-  filters: CandidateFilter[],
-  name: string,
-  semanticQuery = '',
-): CandidateSearchDefinition {
+export function candidateDefinition(filters: CandidateFilter[], name: string): CandidateSearchDefinition {
   const candidateAll: CandidateSearchDefinition['candidateAll'] = [];
   const all: ApplicationSearchPredicate[] = [];
-  const retrieval = semanticQuery.trim() ? { kind: 'semantic' as const, query: semanticQuery.trim() } : undefined;
 
   if (name.trim()) {
     candidateAll.push({ field: 'candidate.profileText', op: 'allTerms', value: name });
@@ -111,7 +106,6 @@ export function candidateDefinition(
     version: 1,
     candidateAll,
     ...(all.length ? { applicationAny: { all } } : {}),
-    ...(retrieval ? { retrieval } : {}),
-    sort: retrieval ? 'semantic_distance' : 'first_seen_desc',
+    sort: 'first_seen_desc',
   };
 }

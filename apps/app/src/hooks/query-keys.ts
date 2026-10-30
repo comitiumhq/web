@@ -69,7 +69,8 @@ export const qk = {
     candidateNotes: (candidateId: string | null) => ['candidate-notes', candidateId] as const,
   },
   candidate: {
-    directoryRoot: (orgId: string) => ['candidate-directory', orgId] as const,
+    directoryRoot: () => ['candidate-directory'] as const,
+    directoryOrgRoot: (orgId: string) => ['candidate-directory', orgId] as const,
     filterOptions: (orgId: string, filters: CandidateFilterOptionsInput) =>
       ['candidate-filter-options', orgId, filters] as const,
     directory: (orgId: string, requestId: string) => ['candidate-directory', orgId, requestId] as const,

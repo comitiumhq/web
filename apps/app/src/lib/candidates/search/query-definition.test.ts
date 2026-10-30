@@ -1,4 +1,8 @@
-import { candidateSearchDefinitionSchema, serverCandidateQuerySchema } from '@comitium/schemas/candidate-search';
+import {
+  type CandidateSearchDefinition,
+  candidateSearchDefinitionSchema,
+  serverCandidateQuerySchema,
+} from '@comitium/schemas/candidate-search';
 import { describe, expect, it } from 'vitest';
 import {
   applyCandidateFilter,
@@ -30,15 +34,18 @@ describe('Candidate query privacy boundary', () => {
   });
 
   it('keeps name/contact and location values outside the wire while combining Resume and same-Application predicates', () => {
-    const definition = candidateDefinition(
-      [
-        { field: 'job', choices: [{ id: jobId, label: 'Engineer' }] },
-        { field: 'skills', choices: [{ id: skillId, label: 'TypeScript' }] },
-        { field: 'location', cityId: 123, label: 'Private place' },
-      ],
-      'private.person@example.test',
-      'backend in payments',
-    );
+    const definition: CandidateSearchDefinition = {
+      ...candidateDefinition(
+        [
+          { field: 'job', choices: [{ id: jobId, label: 'Engineer' }] },
+          { field: 'skills', choices: [{ id: skillId, label: 'TypeScript' }] },
+          { field: 'location', cityId: 123, label: 'Private place' },
+        ],
+        'private.person@example.test',
+      ),
+      retrieval: { kind: 'semantic', query: 'backend in payments' },
+      sort: 'semantic_distance',
+    };
 
     const { server, privateFilter } = compileCandidateSearch(definition);
     const wire = JSON.stringify(server);
@@ -70,16 +77,17 @@ describe('Candidate query privacy boundary', () => {
     ).toBe(false);
   });
 
-  it('changing Job removes the old stage and preserves independent name/Resume inputs', () => {
+  it('changing Job removes the old stage and preserves the name filter', () => {
     const filters = applyCandidateFilter([{ field: 'stage', choices: [{ id: skillId, label: 'Interview' }] }], {
       field: 'job',
       choices: [{ id: jobId, label: 'Engineer' }],
     });
 
-    const definition = candidateDefinition(filters, 'Ada', 'payments');
+    const definition = candidateDefinition(filters, 'Ada');
 
     expect(definition.applicationAny?.all.map((predicate) => predicate.field)).toEqual(['application.jobId']);
-    expect(definition.retrieval?.query).toBe('payments');
+    expect(definition.retrieval).toBeUndefined();
+    expect(definition.sort).toBe('first_seen_desc');
     expect(definition.candidateAll[0]).toEqual({ field: 'candidate.profileText', op: 'allTerms', value: 'Ada' });
   });
 });

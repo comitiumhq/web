@@ -41,6 +41,10 @@ type ApplicationTerminalActionParams =
   | ArchiveApplicationWithNotice
   | ReopenApplicationParams;
 
+interface ApplicationTerminalActionOptions {
+  onCompleted: () => void;
+}
+
 function getApplicationTerminalSuccessMessage(action: ApplicationTerminalActionParams['action']): string {
   if (action === 'reopen') {
     return 'Application reopened';
@@ -74,7 +78,7 @@ async function prepareArchiveNotice(params: ArchiveApplicationWithNotice) {
   });
 }
 
-export function useApplicationTerminalAction({ onCompleted }: { onCompleted: () => void }) {
+export function useApplicationTerminalAction({ onCompleted }: ApplicationTerminalActionOptions) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -160,6 +164,7 @@ async function invalidateApplicationOutcomeQueries(
     qk.application.interviewProgress(params.applicationId),
     qk.candidate.activityRoot(),
     qk.pipeline.root(),
+    qk.candidate.directoryOrgRoot(params.orgId),
     qk.jobs.summary(params.jobId),
   ];
 

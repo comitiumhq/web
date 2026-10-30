@@ -26,4 +26,5 @@ function invalidatePipelineCollections(queryClient: QueryClient, jobId: string |
   }
 
   queryClient.invalidateQueries({ queryKey: qk.pipeline.root() });
+  queryClient.invalidateQueries({ queryKey: qk.candidate.directoryRoot() });
 }

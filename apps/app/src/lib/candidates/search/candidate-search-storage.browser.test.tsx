@@ -93,7 +93,8 @@ describe('Native encrypted Candidate disk index', () => {
       fixture.search.evaluateCandidateSearchReferences(index, filter, references),
     );
 
-    const hook = await renderHook(() => useCandidateDirectoryProfiles(fixture.access.orgId, rows));
+    const refreshSources = vi.fn();
+    const hook = await renderHook(() => useCandidateDirectoryProfiles(fixture.access.orgId, rows, refreshSources));
 
     await vi.waitFor(() =>
       expect(hook.result.current.profiles?.get(document.candidateId)).toMatchObject({
@@ -136,7 +137,8 @@ describe('Native encrypted Candidate disk index', () => {
     const decrypt = vi.spyOn(CryptoProxy, 'decryptApplication').mockResolvedValue(profile);
     let rows = values.slice(0, 2);
 
-    const hook = await renderHook(() => useCandidateDirectoryProfiles(fixture.access.orgId, rows));
+    const refreshSources = vi.fn();
+    const hook = await renderHook(() => useCandidateDirectoryProfiles(fixture.access.orgId, rows, refreshSources));
     await vi.waitFor(() => expect(hook.result.current.profiles?.size).toBe(2));
     const retained = hook.result.current.profiles?.get(values[1].candidateId);
     const next = Promise.withResolvers<Record<string, unknown>>();

@@ -9,13 +9,14 @@ import type {
   CandidateSearchListRow,
   ServerCandidateQuery,
 } from '@comitium/schemas/candidate-search';
-import { QueryClient, QueryClientProvider, QueryObserver } from '@tanstack/react-query';
+import { focusManager, QueryClient, QueryClientProvider, QueryObserver } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, renderHook } from 'vitest-browser-react';
 import { CandidatesPage } from '@/components/features/candidates';
 import { candidateDefinition } from '@/components/features/candidates/filters';
 import { CandidateSearchStateProvider } from '@/components/features/candidates/search-state';
+import { invalidateApplicationPipelineStatus } from '@/hooks/mutations/invalidate-application-pipeline-status';
 import { qk } from '@/hooks/query-keys';
 import type { CandidateSearchSyncStatus } from '@/lib/candidates/search/profile-corpus';
 import { useQueryCandidateDirectory } from './use-query-candidate-directory';
@@ -109,6 +110,7 @@ function harness() {
 
 afterEach(() => {
   vi.useRealTimers();
+  focusManager.setFocused(undefined);
   vi.resetAllMocks();
   pageSync.runtime = false;
   pageSync.ready = false;
@@ -158,23 +160,39 @@ describe('Candidate search preparation scheduling', () => {
     client.clear();
   });
 
-  it('ignores unrelated mutations and refreshes the directory only when the journal advances', async () => {
+  it('refreshes only the ordinary list when the journal advances and leaves private scans intact', async () => {
     mocks.sync.mockResolvedValue(ready);
     const { client, wrapper } = harness();
     const load = vi.fn(async () => 'updated');
+    const scan = vi.fn(async () => 'private');
 
     const observer = new QueryObserver(client, {
       queryKey: qk.candidate.directory('org-1', 'request-1'),
       queryFn: load,
       initialData: 'cached',
       staleTime: Number.POSITIVE_INFINITY,
+      meta: { privateCandidateSearch: false },
     });
 
     const unsubscribe = observer.subscribe(() => {});
 
+    const privateObserver = new QueryObserver(client, {
+      queryKey: qk.candidate.directory('org-1', 'private-1'),
+      queryFn: scan,
+      initialData: 'cached',
+      staleTime: Number.POSITIVE_INFINITY,
+      meta: { privateCandidateSearch: true },
+    });
+
+    const unsubscribePrivate = privateObserver.subscribe(() => {});
+
     const hook = await renderHook(() => useQueryCandidateSearchSync('org-1'), { wrapper });
 
     await vi.waitFor(() => expect(hook.result.current.status?.phase).toBe('ready'));
+
+    expect(load).not.toHaveBeenCalled();
+
+    await hook.result.current.refresh();
 
     expect(load).not.toHaveBeenCalled();
 
@@ -183,7 +201,7 @@ describe('Candidate search preparation scheduling', () => {
       .build(client, { mutationFn: async () => null })
       .execute(undefined);
 
-    expect(mocks.sync).toHaveBeenCalledOnce();
+    expect(mocks.sync).toHaveBeenCalledTimes(2);
 
     mocks.sync.mockResolvedValue({ ...ready, head: '1' });
     await hook.result.current.refresh();
@@ -191,8 +209,10 @@ describe('Candidate search preparation scheduling', () => {
     await hook.result.current.refresh();
 
     expect(load).toHaveBeenCalledOnce();
+    expect(scan).not.toHaveBeenCalled();
 
     unsubscribe();
+    unsubscribePrivate();
     await hook.unmount();
     client.clear();
   });
@@ -212,7 +232,7 @@ describe('Candidate search preparation scheduling', () => {
 
     expect(mocks.sync).toHaveBeenCalledTimes(3);
 
-    await vi.advanceTimersByTimeAsync(14_000);
+    await vi.advanceTimersByTimeAsync(59_000);
 
     expect(mocks.sync).toHaveBeenCalledTimes(3);
 
@@ -284,6 +304,67 @@ function scanResponse(rows: CandidateSearchListRow[], nextCursor: string | null)
 }
 
 describe('Candidate directory infinite loading', () => {
+  it('refreshes server metadata on focus and after an application mutation without a profile journal event', async () => {
+    const rows = directoryRows(1);
+    mocks.query.mockResolvedValue(listResponse(rows, null));
+    const { client, wrapper } = harness();
+    const definition = candidateDefinition([], '');
+
+    const hook = await renderHook(() => useQueryCandidateDirectory('org-1', definition, 'metadata'), { wrapper });
+
+    await vi.waitFor(() => expect(hook.result.current.rows).toEqual(rows));
+
+    const updated = [{ ...rows[0], tagIds: ['tag-1'] }];
+    mocks.query.mockResolvedValue(listResponse(updated, null));
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 31_000);
+
+    try {
+      focusManager.setFocused(false);
+      focusManager.setFocused(true);
+
+      await vi.waitFor(() => expect(hook.result.current.rows).toEqual(updated));
+
+      mocks.query.mockResolvedValue(listResponse(rows, null));
+      invalidateApplicationPipelineStatus(client, 'application-1', 'job-1');
+
+      await vi.waitFor(() => expect(hook.result.current.rows).toEqual(rows));
+
+      expect(mocks.query).toHaveBeenCalledTimes(3);
+    } finally {
+      clock.mockRestore();
+      await hook.unmount();
+      client.clear();
+    }
+  });
+
+  it('keeps a private continuation intact when focus returns', async () => {
+    pageSync.runtime = true;
+    pageSync.ready = true;
+    const rows = directoryRows(1);
+
+    mocks.evaluate.mockImplementation(
+      async (_index: CandidateSearchHandle, _filter: CandidateSearchFilter, references: CandidateSearchReference[]) =>
+        references.map((row) => ({ candidateId: row.candidateId, outcome: 'match' })),
+    );
+
+    mocks.query.mockResolvedValue(scanResponse(rows, null));
+    const { client, wrapper } = harness();
+    const definition = candidateDefinition([], 'Private Name');
+
+    const hook = await renderHook(() => useQueryCandidateDirectory('org-1', definition, 'private-focus'), { wrapper });
+
+    await vi.waitFor(() => expect(hook.result.current.rows).toHaveLength(1));
+
+    focusManager.setFocused(false);
+    focusManager.setFocused(true);
+    await hook.rerender();
+
+    expect(mocks.query).toHaveBeenCalledOnce();
+
+    await hook.unmount();
+    client.clear();
+  });
+
   it('appends server pages once and preserves loaded rows when the next page fails', async () => {
     const rows = directoryRows(70);
     mocks.query.mockResolvedValueOnce(listResponse(rows.slice(0, 50), '50'));

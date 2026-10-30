@@ -214,6 +214,9 @@ describe('application terminal action completion', () => {
     expect(mocks.invalidateQueries).toHaveBeenCalledWith({
       queryKey: qk.application.interviews(params.applicationId),
     });
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: qk.candidate.directoryOrgRoot(params.orgId),
+    });
     expect(mocks.invalidateQueries.mock.invocationCallOrder.at(-1)).toBeLessThan(
       mocks.toastSuccess.mock.invocationCallOrder[0],
     );

@@ -91,6 +91,22 @@ describe('organization projection lifecycle', () => {
     let criteria = '1/6';
     const load = vi.fn(async () => criteria);
 
+    const [directory, privateSearch] = [false, true].map((privateCandidateSearch) => {
+      const read = vi.fn(async () => criteria);
+
+      const observer = new QueryObserver(client, {
+        queryKey: qk.candidate.directory('org-1', privateCandidateSearch ? 'private' : 'list'),
+        queryFn: read,
+        initialData: 'cached',
+        staleTime: Number.POSITIVE_INFINITY,
+        meta: { privateCandidateSearch },
+      });
+
+      onTestFinished(observer.subscribe(() => {}));
+
+      return { read, observer };
+    });
+
     const list = new QueryObserver(client, {
       queryKey: qk.jobs.kanban('job-1', {}),
       queryFn: load,
@@ -105,6 +121,10 @@ describe('organization projection lifecycle', () => {
     await render(view('org-1'));
 
     await vi.waitFor(() => expect(list.getCurrentResult().data).toBe('1/6'));
+
+    expect(directory.observer.getCurrentResult().data).toBe('1/6');
+    expect(privateSearch.read).not.toHaveBeenCalled();
+
     const queryKey = qk.org.detail('org-1');
 
     criteria = '3/6';
@@ -121,6 +141,8 @@ describe('organization projection lifecycle', () => {
     await client.refetchQueries({ queryKey });
 
     expect(list.getCurrentResult().data).toBe('3/6');
+    expect(directory.observer.getCurrentResult().data).toBe('3/6');
+    expect(privateSearch.read).not.toHaveBeenCalled();
 
     criteria = '4/6';
 

@@ -8,8 +8,8 @@ import { useCandidateTags } from '@/hooks/use-candidate-tags';
 import type { CandidateDirectoryRow } from '@/lib/candidates/search/candidate-query';
 import { formatRelativeTime } from '@/lib/utils';
 
-export function useCandidateColumns(orgId: string, rows: CandidateDirectoryRow[]) {
-  const display = useCandidateDirectoryProfiles(orgId, rows);
+export function useCandidateColumns(orgId: string, rows: CandidateDirectoryRow[], onSourcesChanged: () => void) {
+  const display = useCandidateDirectoryProfiles(orgId, rows, onSourcesChanged);
   const { tagMap } = useCandidateTags(orgId);
 
   return useMemo<ColumnDef<CandidateDirectoryRow>[]>(

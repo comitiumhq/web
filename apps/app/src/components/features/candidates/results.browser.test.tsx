@@ -17,7 +17,11 @@ import { CandidateSearchStateProvider } from './search-state';
 
 vi.mock('@/components/features/candidate-sheet', () => ({ CandidateSheetMount: () => null }));
 
-const mocks = vi.hoisted(() => ({ query: vi.fn(), evaluate: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  query: vi.fn(),
+  evaluate: vi.fn(),
+  display: vi.fn<(rows: CandidateDirectoryRow[], onSourcesChanged: () => void) => void>(),
+}));
 vi.mock('@comitium/auth/use-is-crypto-active', () => ({ useIsCryptoActive: () => true }));
 vi.mock('@comitium/auth/use-session', () => ({ useSession: () => ({ user: { id: 'user-1' } }) }));
 
@@ -36,10 +40,16 @@ vi.mock('@/components/auth/candidate-search-coordinator', () => ({
 }));
 
 vi.mock('@/hooks/use-candidate-directory-profiles', () => ({
-  useCandidateDirectoryProfiles: (_orgId: string, rows: CandidateDirectoryRow[]) => ({
-    profiles: new Map(rows.map((row) => [row.candidateId, { name: row.candidateId, subtitle: null, location: null }])),
-    failed: new Set<string>(),
-  }),
+  useCandidateDirectoryProfiles: (_orgId: string, rows: CandidateDirectoryRow[], onSourcesChanged: () => void) => {
+    mocks.display(rows, onSourcesChanged);
+
+    return {
+      profiles: new Map(
+        rows.map((row) => [row.candidateId, { name: row.candidateId, subtitle: null, location: null }]),
+      ),
+      failed: new Set<string>(),
+    };
+  },
 }));
 
 vi.mock('@/hooks/use-candidate-tags', () => ({
@@ -72,6 +82,59 @@ function scanResponse(candidateId: string): Extract<CandidateQueryResponse, { mo
 }
 
 describe('Candidate results infinite scroll', () => {
+  it('coalesces stale-display refreshes into one refetch of the current private query', async () => {
+    mocks.query.mockResolvedValueOnce(scanResponse('Current Candidate'));
+
+    mocks.evaluate.mockImplementation(
+      async (_index: CandidateSearchHandle, _filter: CandidateSearchFilter, references: CandidateSearchReference[]) =>
+        references.map(({ candidateId }) => ({ candidateId, outcome: 'match' })),
+    );
+
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    const page = await render(
+      <QueryClientProvider client={client}>
+        <div style={{ height: 400, display: 'flex', flexDirection: 'column' }}>
+          <CandidateResults
+            orgId="org-1"
+            definition={candidateDefinition([], 'Private Name')}
+            requestId="source-refresh"
+            restart={vi.fn()}
+            clearPrivate={vi.fn()}
+            onSelect={vi.fn()}
+          />
+        </div>
+      </QueryClientProvider>,
+    );
+
+    await expect.element(page.getByText('Current Candidate', { exact: true })).toBeVisible();
+
+    const pending = Promise.withResolvers<CandidateQueryResponse>();
+    mocks.query.mockReturnValueOnce(pending.promise);
+    const refresh = mocks.display.mock.lastCall?.[1];
+
+    if (!refresh) {
+      throw new Error('Expected a source refresh callback');
+    }
+
+    refresh();
+    refresh();
+
+    await vi.waitFor(() => expect(mocks.query).toHaveBeenCalledTimes(2));
+
+    const updated = scanResponse('Current Candidate');
+    updated.data[0].profileRevision = 2;
+    pending.resolve(updated);
+
+    await vi.waitFor(() => expect(mocks.display.mock.lastCall?.[0][0]?.profileRevision).toBe(2));
+
+    expect(mocks.query).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(mocks.query.mock.calls)).not.toContain('Private Name');
+
+    await page.unmount();
+    client.clear();
+  });
+
   it('keeps the real table shell while the first page is pending', async () => {
     mocks.query.mockImplementation(() => new Promise(() => {}));
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });

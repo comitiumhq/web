@@ -19,7 +19,11 @@ export interface CandidateDirectoryProfile {
 
 type CandidateDirectoryProfileCache = Map<string, CandidateDirectoryProfile | null>;
 
-export function useCandidateDirectoryProfiles(orgId: string, rows: CandidateDirectoryRow[]) {
+export function useCandidateDirectoryProfiles(
+  orgId: string,
+  rows: CandidateDirectoryRow[],
+  onSourcesChanged: () => void,
+) {
   const unlocked = useIsCryptoActive();
   const { data: access } = useQueryOrgVaultAccess(orgId);
   const index = rows.find((row) => row.searchIndex)?.searchIndex;
@@ -53,7 +57,7 @@ export function useCandidateDirectoryProfiles(orgId: string, rows: CandidateDire
 
     const missing = rows.filter((row) => !cache.has(profileCacheKey(row)));
 
-    void (async () => {
+    async function loadProfiles(vaultAccess: VaultKeyAccess): Promise<void> {
       const localRows = missing.filter((row) => row.searchIndex);
       const index = localRows[0]?.searchIndex;
 
@@ -74,9 +78,17 @@ export function useCandidateDirectoryProfiles(orgId: string, rows: CandidateDire
           }
 
           for (const [offset, evaluation] of evaluations.entries()) {
+            if (evaluation.outcome === 'hydrate') {
+              continue;
+            }
+
             const profile = evaluation.outcome === 'match' ? formatProfile(evaluation.displayProfile) : null;
 
             cacheProfile(cache, localRows[offset], profile);
+          }
+
+          if (evaluations.some((evaluation) => evaluation.outcome === 'hydrate')) {
+            onSourcesChanged();
           }
         } catch {
           if (cancelled) {
@@ -92,7 +104,7 @@ export function useCandidateDirectoryProfiles(orgId: string, rows: CandidateDire
       }
 
       const canonicalRows = missing.filter((row) => !row.searchIndex);
-      const profiles = await Promise.all(canonicalRows.map((row) => readCanonicalProfile(orgId, row, access)));
+      const profiles = await Promise.all(canonicalRows.map((row) => readCanonicalProfile(orgId, row, vaultAccess)));
 
       if (cancelled) {
         return;
@@ -105,12 +117,14 @@ export function useCandidateDirectoryProfiles(orgId: string, rows: CandidateDire
       if (profiles.length) {
         setRevision((value) => value + 1);
       }
-    })();
+    }
+
+    void loadProfiles(access);
 
     return () => {
       cancelled = true;
     };
-  }, [orgId, rows, access, unlocked, cache]);
+  }, [orgId, rows, access, unlocked, cache, onSourcesChanged]);
 
   return useMemo(() => {
     if (!unlocked || !access) {

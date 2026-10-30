@@ -44,7 +44,7 @@ export function useQueryCandidateProjections(orgId: string) {
         return 1_000;
       }
 
-      return sync.error ? 15_000 : false;
+      return sync.error ? 60_000 : false;
     },
     refetchIntervalInBackground: false,
     queryFn: async ({ signal }) => {
@@ -76,7 +76,11 @@ export function useQueryCandidateProjections(orgId: string) {
 
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: qk.pipeline.candidatesRoot(), refetchType }),
-          queryClient.invalidateQueries({ queryKey: qk.candidate.directoryRoot(orgId), refetchType }),
+          queryClient.invalidateQueries({
+            queryKey: qk.candidate.directoryOrgRoot(orgId),
+            predicate: (query) => query.meta?.privateCandidateSearch === false,
+            refetchType,
+          }),
           queryClient.invalidateQueries({ queryKey: qk.candidate.activityRoot(), refetchType }),
           queryClient.invalidateQueries({ predicate: (query) => qk.jobs.isKanban(query.queryKey), refetchType }),
         ]);

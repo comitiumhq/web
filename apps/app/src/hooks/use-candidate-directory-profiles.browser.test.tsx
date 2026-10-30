@@ -18,6 +18,7 @@ interface DisplayProps {
 const mocks = vi.hoisted(() => ({
   unlocked: true,
   access: { version: 1 },
+  refresh: vi.fn<() => void>(),
   evaluate:
     vi.fn<
       (
@@ -64,7 +65,7 @@ function renderProfiles(values: CandidateDirectoryRow[]) {
         throw new Error('Display props are required');
       }
 
-      return useCandidateDirectoryProfiles(props.orgId, props.rows);
+      return useCandidateDirectoryProfiles(props.orgId, props.rows, mocks.refresh);
     },
     { initialProps: { rows: values, orgId: 'org-1' } },
   );
@@ -150,6 +151,64 @@ describe('Candidate directory display window', () => {
     await hook.unmount();
   });
 
+  it('refreshes stale offscreen references once instead of marking a valid profile unavailable', async () => {
+    const values = rows(151);
+    const changedId = values[120].candidateId;
+    const hook = await renderProfiles(values.slice(0, 50));
+
+    await vi.waitFor(() => expect(hook.result.current.profiles?.size).toBe(50));
+
+    mocks.evaluate.mockImplementation(async (_index, _filter, references) =>
+      references.map((reference) => {
+        if (reference.candidateId === changedId && reference.profileRevision === 1) {
+          return { candidateId: changedId, outcome: 'hydrate' };
+        }
+
+        return match(reference, 'Updated');
+      }),
+    );
+
+    const window = values.slice(100, 150);
+    await hook.rerender({ orgId: 'org-1', rows: window });
+
+    await vi.waitFor(() => expect(hook.result.current.profiles?.size).toBe(49));
+
+    expect(hook.result.current.failed?.has(changedId)).toBe(false);
+    expect(mocks.refresh).toHaveBeenCalledOnce();
+
+    await hook.rerender({ orgId: 'org-1', rows: window });
+
+    expect(mocks.refresh).toHaveBeenCalledOnce();
+
+    const refreshed = window.map((row) => {
+      if (row.candidateId === changedId) {
+        return { ...row, profileRevision: 2, profileFingerprint: 'a'.repeat(64) };
+      }
+
+      return row;
+    });
+
+    await hook.rerender({ orgId: 'org-1', rows: refreshed });
+    await vi.waitFor(() => expect(hook.result.current.profiles?.get(changedId)?.name).toBe('Updated'));
+
+    expect(hook.result.current.failed?.size).toBe(0);
+    expect(mocks.refresh).toHaveBeenCalledOnce();
+
+    await hook.unmount();
+  });
+
+  it('keeps unreadable profiles as failures without refreshing the search', async () => {
+    const [value] = rows(1);
+    mocks.evaluate.mockResolvedValueOnce([{ candidateId: value.candidateId, outcome: 'unreadable' }]);
+    const hook = await renderProfiles([value]);
+
+    await vi.waitFor(() => expect(hook.result.current.failed?.has(value.candidateId)).toBe(true));
+
+    expect(mocks.refresh).not.toHaveBeenCalled();
+
+    await hook.unmount();
+  });
+
   it('clears retained profiles when the authorized scope changes', async () => {
     const [value] = rows(1);
 
@@ -163,7 +222,7 @@ describe('Candidate directory display window', () => {
     await hook.unmount();
   });
 
-  it('clears on lock and rejects late work from the old unlocked session', async () => {
+  it.each(['match', 'hydrate'] as const)('ignores late %s after lock', async (outcome) => {
     const [value] = rows(1);
     const old = Promise.withResolvers<CandidateSearchEvaluation[]>();
     mocks.evaluate.mockReturnValueOnce(old.promise);
@@ -178,12 +237,15 @@ describe('Candidate directory display window', () => {
     mocks.evaluate.mockReturnValueOnce(current.promise);
     mocks.unlocked = true;
     await hook.rerender({ orgId: 'org-1', rows: [value] });
-    old.resolve([match(value, 'Stale')]);
+    old.resolve([outcome === 'match' ? match(value, 'Stale') : { candidateId: value.candidateId, outcome }]);
 
     expect(hook.result.current.profiles?.has(value.candidateId)).toBe(false);
 
     current.resolve([match(value, 'Current')]);
     await vi.waitFor(() => expect(hook.result.current.profiles?.get(value.candidateId)?.name).toBe('Current'));
+
+    expect(mocks.refresh).not.toHaveBeenCalled();
+
     await hook.unmount();
   });
 
