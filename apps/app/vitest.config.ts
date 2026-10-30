@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite';
 import { playwright } from '@vitest/browser-playwright';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
@@ -6,12 +7,14 @@ import { coverageConfig } from '../../tooling/vitest/coverage';
 import { vitestEnv } from '../../tooling/vitest/env';
 
 export default defineConfig({
-	plugins: [react(), tsconfigPaths()],
+	plugins: [tailwindcss(), react(), tsconfigPaths()],
 	resolve: {
 		dedupe: ['react', 'react-dom'],
 	},
 	optimizeDeps: {
 		include: [
+			'@ilamy/calendar',
+			'dayjs/plugin/timezone',
 			'@noble/hashes/argon2.js',
 			'@noble/hashes/hmac.js',
 			'@dnd-kit/react',

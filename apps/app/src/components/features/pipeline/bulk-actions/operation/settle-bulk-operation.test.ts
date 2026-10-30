@@ -69,7 +69,6 @@ function createOperation(status: BulkOperation['status']): BulkOperation {
       excluded: 0,
       pending: 0,
       processing: 0,
-      waiting: 0,
       succeeded: status === 'completed' ? 2 : 1,
       skipped: status === 'completed_with_errors' ? 1 : 0,
       failed: 0,

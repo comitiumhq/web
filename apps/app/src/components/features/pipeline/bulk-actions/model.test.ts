@@ -15,7 +15,6 @@ describe('getTargetLabel', () => {
         jobId: '33333333-3333-4333-8333-333333333333',
         jobTitle: 'Protocol Engineer',
         requiresEmail: false,
-        childOperationId: null,
         recipientPublicKey: null,
         recipientKeyVersion: null,
         deliveryGrant: null,

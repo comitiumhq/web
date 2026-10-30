@@ -99,18 +99,24 @@ describe('email-encryption', () => {
       ).rejects.toThrow();
     });
 
-    it('returns processor overlay keys without storing them in the email envelope', async () => {
+    it.each([true, false])('keeps processor access temporary with applicant keys = %s', async (hasApplicantKeys) => {
       const keys = setupKeys();
       const processor = generateVaultKeyPair();
       const data = { text: 'Process this email once' };
       const encrypted = await encryptEmailContentWithOverlays(
         data,
         emailContext,
-        [orgVaultRecipient(keys.vaultPublicKey, 1), applicantRecipient(keys.applicantPublicKey, 1)],
+        [
+          orgVaultRecipient(keys.vaultPublicKey, 1),
+          ...(hasApplicantKeys ? [applicantRecipient(keys.applicantPublicKey, 1)] : []),
+        ],
         [processorRecipient('grant-1', processor.publicKey)],
       );
 
-      expect(encrypted.envelope.keys.map((key) => key.recipient)).toEqual(['org_vault', 'applicant']);
+      expect(encrypted.envelope.keys.map((key) => key.recipient)).toEqual([
+        'org_vault',
+        ...(hasApplicantKeys ? ['applicant'] : []),
+      ]);
       expect(encrypted.overlayKeys.map((key) => key.recipient)).toEqual(['processor:grant-1']);
 
       const processorEnvelope: EncryptedEnvelope = {
@@ -125,9 +131,11 @@ describe('email-encryption', () => {
       expect(await decryptEmailContentWithVaultKey(encrypted.envelope, keys.vaultPrivateKey, emailContext)).toEqual(
         data,
       );
-      expect(await decryptEmailContentWithUserKey(encrypted.envelope, keys.applicantPrivateKey, emailContext)).toEqual(
-        data,
-      );
+      if (hasApplicantKeys) {
+        expect(
+          await decryptEmailContentWithUserKey(encrypted.envelope, keys.applicantPrivateKey, emailContext),
+        ).toEqual(data);
+      }
       expect(processorDecrypted).toEqual(data);
     });
   });
