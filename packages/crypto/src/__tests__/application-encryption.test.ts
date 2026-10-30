@@ -5,6 +5,7 @@ import {
   encryptApplicationWithVaultKey,
 } from '../application-encryption';
 import type { CryptoContextInput } from '../context';
+import { SHA256_FINGERPRINT_REGEX } from '../patterns';
 import type { EnvelopeKey } from '../schemas';
 import { generateVaultKeyPair } from '../vault-key';
 import { BASE64_RE } from './constants';
@@ -23,7 +24,7 @@ describe('application-encryption (envelope encryption)', () => {
     subjectId: 'application-2',
   };
 
-  it('round-trips application form data', async () => {
+  it('round-trips application form data and authenticates its CryptoContext AAD', async () => {
     const vault = generateVaultKeyPair();
     const data = sampleFormData();
 
@@ -31,26 +32,7 @@ describe('application-encryption (envelope encryption)', () => {
     const decrypted = await decryptApplicationWithVaultKey(encrypted, vault.privateKey, applicationContext);
 
     expect(decrypted).toEqual(data);
-  });
 
-  it('round-trips simple object', async () => {
-    const vault = generateVaultKeyPair();
-    const data = { hello: 'world' };
-
-    const encrypted = await encryptApplicationWithVaultKey(vault.publicKey, 1, data, applicationContext);
-    const decrypted = await decryptApplicationWithVaultKey(encrypted, vault.privateKey, applicationContext);
-
-    expect(decrypted).toEqual(data);
-  });
-
-  it('binds application envelope to CryptoContext AAD', async () => {
-    const vault = generateVaultKeyPair();
-    const data = sampleFormData();
-
-    const encrypted = await encryptApplicationWithVaultKey(vault.publicKey, 1, data, applicationContext);
-    const decrypted = await decryptApplicationWithVaultKey(encrypted, vault.privateKey, applicationContext);
-
-    expect(decrypted).toEqual(data);
     await expect(
       decryptApplicationWithVaultKey(encrypted, vault.privateKey, wrongApplicationContext),
     ).rejects.toThrow();
@@ -58,8 +40,9 @@ describe('application-encryption (envelope encryption)', () => {
 
   it('round-trips unicode data', async () => {
     const vault = generateVaultKeyPair();
+
     const data = {
-      name: 'Привет мир',
+      name: 'Renée Müller',
       emoji: '👋🔐',
       chinese: '你好世界',
     };
@@ -72,20 +55,22 @@ describe('application-encryption (envelope encryption)', () => {
 
   it('returns correct EncryptedEnvelope structure', async () => {
     const vault = generateVaultKeyPair();
+
     const encrypted = await encryptApplicationWithVaultKey(vault.publicKey, 1, { x: 1 }, applicationContext);
+
     const key = keyFor(encrypted, 'org_vault');
 
     expect(encrypted.v).toBe(1);
     expect(encrypted.purpose).toBe('application_answers');
     expect(encrypted.ct).toMatch(BASE64_RE);
     expect(encrypted.iv).toMatch(BASE64_RE);
-    expect(encrypted.iv).toHaveLength(16); // 12 bytes base64
+    expect(encrypted.iv).toHaveLength(16);
     expect(encrypted.keys).toHaveLength(1);
     expect(key.ek).toMatch(BASE64_RE);
-    expect(key.epk).toMatch(/^[0-9a-f]{64}$/);
+    expect(key.epk).toMatch(SHA256_FINGERPRINT_REGEX);
     expect(key.kemCt).toMatch(BASE64_RE);
     expect(key.iv).toMatch(BASE64_RE);
-    expect(key.iv).toHaveLength(16); // 12 bytes base64
+    expect(key.iv).toHaveLength(16);
   });
 
   it('produces unique ciphertext each time (fresh DEK)', async () => {
@@ -113,6 +98,7 @@ describe('application-encryption (envelope encryption)', () => {
 
   it('fails to decrypt with tampered ciphertext', async () => {
     const vault = generateVaultKeyPair();
+
     const encrypted = await encryptApplicationWithVaultKey(vault.publicKey, 1, { secret: true }, applicationContext);
 
     const tampered: EncryptedEnvelope = {
@@ -125,6 +111,7 @@ describe('application-encryption (envelope encryption)', () => {
 
   it('fails to decrypt with tampered wrapped key', async () => {
     const vault = generateVaultKeyPair();
+
     const encrypted = await encryptApplicationWithVaultKey(vault.publicKey, 1, { secret: true }, applicationContext);
 
     const tampered: EncryptedEnvelope = {
@@ -137,6 +124,7 @@ describe('application-encryption (envelope encryption)', () => {
 
   it('fails to decrypt when the wrapped-key kemCt (ML-KEM half) is tampered', async () => {
     const vault = generateVaultKeyPair();
+
     const encrypted = await encryptApplicationWithVaultKey(vault.publicKey, 1, { secret: true }, applicationContext);
 
     const tampered: EncryptedEnvelope = {
@@ -151,6 +139,7 @@ describe('application-encryption (envelope encryption)', () => {
 
   it('fails to decrypt when the wrapped-key epk (X25519 half) is tampered', async () => {
     const vault = generateVaultKeyPair();
+
     const encrypted = await encryptApplicationWithVaultKey(vault.publicKey, 1, { secret: true }, applicationContext);
 
     const tampered: EncryptedEnvelope = {

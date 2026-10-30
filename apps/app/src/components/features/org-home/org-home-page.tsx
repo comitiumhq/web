@@ -164,7 +164,7 @@ export function OrgHomePage({ org }: OrgHomePageProps) {
         </aside>
       </PageContainer>
       <CandidateSheetMount
-        selectedApp={selectedApplication}
+        selected={selectedApplication}
         orgId={org.id}
         onClose={handleSheetClose}
         onNavigate={handleSheetNavigate}

@@ -5,6 +5,8 @@ import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { AuthenticatedAppShell } from '@/components/auth/authenticated-app-shell';
 import { CandidateProjectionCoordinator } from '@/components/auth/candidate-projection-coordinator';
+import { CandidateSearchCoordinator } from '@/components/auth/candidate-search-coordinator';
+import { CandidateSearchStateProvider } from '@/components/features/candidates/search-state';
 
 export const Route = createFileRoute('/org/$orgId')({
   ssr: false,
@@ -37,12 +39,16 @@ function OrgLayout() {
 
   return (
     <AuthenticatedAppShell>
-      <CandidateProjectionCoordinator orgId={orgId} />
-      <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-background">
-        <div className="min-h-0 flex-1">
-          <Outlet />
-        </div>
-      </div>
+      <CandidateSearchCoordinator orgId={orgId}>
+        <CandidateProjectionCoordinator orgId={orgId} />
+        <CandidateSearchStateProvider orgId={orgId}>
+          <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-background">
+            <div className="min-h-0 flex-1">
+              <Outlet />
+            </div>
+          </div>
+        </CandidateSearchStateProvider>
+      </CandidateSearchCoordinator>
     </AuthenticatedAppShell>
   );
 }

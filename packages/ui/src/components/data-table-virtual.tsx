@@ -34,7 +34,9 @@ import { createDataTableSelectionColumn, limitDataTableRowSelection } from './da
 import { Skeleton } from './skeleton';
 
 declare module '@tanstack/react-table' {
-  // biome-ignore lint/correctness/noUnusedVariables: TanStack module augmentation must match upstream generic names.
+  /**
+   * biome-ignore lint/correctness/noUnusedVariables: TanStack requires the upstream generic parameter names.
+   */
   interface ColumnMeta<TData extends RowData, TValue> {
     cellClassName?: string;
     gridSize?: string;
@@ -70,6 +72,10 @@ export interface DataTableVirtualProps<TData extends RowData> extends Omit<Compo
   maxHeightClassName?: string;
   onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
   onLoadMore?: () => void;
+  /**
+   * Reports rendered rows, including overscan, for work scoped to the virtual window.
+   */
+  onVisibleRowsChange?: (rows: TData[]) => void;
   onRowClick?: (row: Row<TData>) => void;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
   onSortingChange?: OnChangeFn<SortingState>;
@@ -101,6 +107,7 @@ export function DataTableVirtual<TData extends RowData>({
   maxHeightClassName = 'max-h-[calc(100vh-14rem)]',
   onColumnVisibilityChange,
   onLoadMore,
+  onVisibleRowsChange,
   onRowClick,
   onRowSelectionChange,
   onSortingChange,
@@ -188,6 +195,12 @@ export function DataTableVirtual<TData extends RowData>({
 
   const virtualItems = virtualizer.getVirtualItems();
   const totalSize = virtualizer.getTotalSize();
+  const firstVisibleIndex = virtualItems[0]?.index ?? 0;
+  const lastVisibleIndex = virtualItems.at(-1)?.index ?? -1;
+
+  useEffect(() => {
+    onVisibleRowsChange?.(rows.slice(firstVisibleIndex, lastVisibleIndex + 1).map((row) => row.original));
+  }, [rows, firstVisibleIndex, lastVisibleIndex, onVisibleRowsChange]);
 
   const innerStyle = useMemo<CSSProperties | undefined>(
     () => (gridMinWidth ? { minWidth: gridMinWidth } : undefined),

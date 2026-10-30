@@ -11,3 +11,7 @@ export const URL_SCHEME_REGEX = /^[a-z][a-z\d+.-]*:/i;
 export const HTTPS_URL_PROTOCOL_REGEX = /^https$/;
 export const HTTPS_URL_HOSTNAME_REGEX =
   /^(?!localhost$)(?!.*\.localhost$)(?!127(?:\.\d{1,3}){3}$)(?!0\.0\.0\.0$)(?!\[::1\]$).+$/i;
+
+export const UNSIGNED_BIGINT_DECIMAL_REGEX = /^(0|[1-9][0-9]{0,18})$/;
+export const SEARCH_WORD_REGEX = /[\p{L}\p{M}\p{N}]+/gu;
+export const SEARCH_WHITESPACE_REGEX = /\s+/u;

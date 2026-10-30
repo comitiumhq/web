@@ -1,5 +1,5 @@
 import type { OtherApplicationSummary } from '@comitium/schemas/applications';
-import { useCallback, useRef } from 'react';
+import { type ComponentProps, useCallback, useRef } from 'react';
 import type { InterviewStage } from '@/lib/schemas/pipeline';
 
 import { CandidateSheet } from './candidate-sheet';
@@ -8,11 +8,17 @@ export interface CandidateSheetSelection {
   id: string;
   jobId: string;
   jobTitle: string | null;
-  stages: InterviewStage[];
+  stages?: InterviewStage[];
 }
 
+interface CandidateRecordSelection {
+  candidateId: string;
+}
+
+export type CandidateSheetEntry = CandidateSheetSelection | CandidateRecordSelection;
+
 interface CandidateSheetMountProps {
-  selectedApp: CandidateSheetSelection | null;
+  selected: CandidateSheetEntry | null;
   orgId: string;
   onClose: () => void;
   onNavigate?: (applicationId: string) => void;
@@ -21,14 +27,15 @@ interface CandidateSheetMountProps {
 }
 
 export function CandidateSheetMount({
-  selectedApp,
+  selected,
   orgId,
   onClose,
   onNavigate,
   onApplicationSwitch,
   candidateIds,
 }: CandidateSheetMountProps) {
-  const lastAppRef = useRef<CandidateSheetSelection | null>(null);
+  const lastEntryRef = useRef<CandidateSheetEntry | null>(null);
+
   const handleOpenChange = useCallback(
     (open: boolean) => {
       if (!open) {
@@ -38,28 +45,31 @@ export function CandidateSheetMount({
     [onClose],
   );
 
-  if (selectedApp) {
-    lastAppRef.current = selectedApp;
+  if (selected) {
+    lastEntryRef.current = selected;
   }
 
-  const displayApp = selectedApp ?? lastAppRef.current;
+  const display = selected ?? lastEntryRef.current;
 
-  if (!displayApp) {
+  if (!display) {
     return null;
   }
 
-  return (
-    <CandidateSheet
-      applicationId={selectedApp?.id ?? null}
-      orgId={orgId}
-      jobId={displayApp.jobId}
-      stages={displayApp.stages}
-      jobTitle={displayApp.jobTitle}
-      open={!!selectedApp}
-      onOpenChange={handleOpenChange}
-      onNavigate={onNavigate}
-      onApplicationSwitch={onApplicationSwitch}
-      candidateIds={candidateIds}
-    />
-  );
+  const common = { orgId, open: Boolean(selected), onOpenChange: handleOpenChange };
+
+  const props: ComponentProps<typeof CandidateSheet> =
+    'candidateId' in display
+      ? { ...common, applicationId: null, candidateId: display.candidateId }
+      : {
+          ...common,
+          applicationId: selected && 'id' in selected ? selected.id : null,
+          jobId: display.jobId,
+          stages: display.stages,
+          jobTitle: display.jobTitle,
+          onNavigate,
+          onApplicationSwitch,
+          candidateIds,
+        };
+
+  return <CandidateSheet {...props} />;
 }

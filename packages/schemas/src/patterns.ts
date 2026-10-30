@@ -10,3 +10,5 @@ export const DATE_YYYY_MM_DD_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 export const PHONE_NUMBER_REGEX = /^\+?[0-9\s().-]+$/;
 export const NON_DIGIT_REGEX = /\D/g;
 export const THOUSANDS_SEPARATOR_POSITION_REGEX = /\B(?=(\d{3})+(?!\d))/g;
+export const EXCESS_TIMESTAMP_PRECISION_REGEX = /\.\d{7}/;
+export const COUNTRY_CODE_REGEX = /^[a-z]{2}$/i;

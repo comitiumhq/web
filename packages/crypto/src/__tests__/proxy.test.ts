@@ -9,9 +9,19 @@ const remote = vi.hoisted(() => ({
   tryUnlockWithRememberedDevice: vi.fn(),
   decryptEmailContentForApplicant: vi.fn(),
   clear: vi.fn(),
+  clearCandidateSearch: vi.fn(),
 }));
+
 const dispose = vi.hoisted(() => vi.fn());
+const created = vi.hoisted(() => vi.fn());
 const deviceStore = vi.hoisted(() => ({ load: vi.fn(), forgetAll: vi.fn() }));
+const purgeSearchCache = vi.hoisted(() => vi.fn());
+
+vi.mock('../candidate-search-cache', () => ({
+  CandidateSearchCache: class {
+    purgeAccount = purgeSearchCache;
+  },
+}));
 
 vi.mock('../remembered-device-store', () => ({
   RememberedDeviceStore: class {
@@ -22,6 +32,9 @@ vi.mock('../remembered-device-store', () => ({
 
 vi.mock('../worker/crypto-worker-client', () => ({
   CryptoWorkerClient: class {
+    constructor() {
+      created();
+    }
     run<T>(operation: (api: typeof remote) => Promise<T>): Promise<T> {
       return Promise.resolve().then(() => operation(remote));
     }
@@ -51,6 +64,37 @@ afterEach(async () => {
 });
 
 describe('crypto facade lifecycle', () => {
+  it('clears search only on an active Worker and does not recreate it after reset', async () => {
+    expect(created).toHaveBeenCalledOnce();
+
+    await proxy.clearCandidateSearch();
+
+    expect(remote.clearCandidateSearch).not.toHaveBeenCalled();
+
+    await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
+    await proxy.clearCandidateSearch();
+
+    expect(remote.clearCandidateSearch).toHaveBeenCalledOnce();
+    expect(proxy.isActive()).toBe(true);
+
+    proxy.reset();
+    await proxy.clearCandidateSearch();
+
+    expect(created).toHaveBeenCalledOnce();
+    expect(remote.clearCandidateSearch).toHaveBeenCalledOnce();
+  });
+
+  it('purges the account search cache even when server sign out fails', async () => {
+    vi.stubGlobal('indexedDB', {});
+    await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ error: { message: 'Unavailable' } }, { status: 503 }));
+
+    await expect(proxy.logout(true)).rejects.toThrow('(503)');
+    expect(purgeSearchCache).toHaveBeenCalledWith(USER_ID);
+    expect(proxy.isActive()).toBe(false);
+    expect(deviceStore.forgetAll).toHaveBeenCalledOnce();
+  });
+
   it('does not close an active session when password verification fails', async () => {
     await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
     remote.verifyPassword.mockRejectedValue(new DOMException('Invalid password', 'OperationError'));
@@ -74,6 +118,7 @@ describe('crypto facade lifecycle', () => {
         body: JSON.stringify({ deviceId: '0199a000-0000-7000-8000-000000000004' }),
       }),
     );
+
     expect(deviceStore.forgetAll).toHaveBeenCalledOnce();
     expect(proxy.isActive()).toBe(false);
   });
@@ -84,12 +129,14 @@ describe('crypto facade lifecycle', () => {
     await expect(proxy.logout(false, { wrapped: bundle, userId: USER_ID, publicKey })).rejects.toThrow(
       'Storage blocked',
     );
+
     expect(fetch).toHaveBeenCalledWith('https://api.comitium.test/v1/auth/logout', expect.any(Object));
     expect(deviceStore.forgetAll).toHaveBeenCalledOnce();
   });
 
   it('does not clear active keys when reset sign-in confirmation is cancelled', async () => {
     await proxy.unlockWithRecoveryCode(bundle, USER_ID, publicKey, 'code', false);
+
     const cancel = async () => {
       throw new DOMException('Cancelled', 'AbortError');
     };
@@ -97,6 +144,7 @@ describe('crypto facade lifecycle', () => {
     await expect(
       proxy.resetUserKey(USER_ID, bundle, 'new password', false, async () => {}, cancel),
     ).rejects.toMatchObject({ name: 'AbortError' });
+
     expect(proxy.isActiveFor(bundle, USER_ID)).toBe(true);
     expect(remote.clear).not.toHaveBeenCalled();
   });
@@ -118,6 +166,7 @@ describe('crypto facade lifecycle', () => {
     await expect(proxy.unlockWithPassword(bundle, USER_ID, publicKey, 'corrected password', false)).rejects.toThrow(
       'already in progress',
     );
+
     await vi.waitFor(() => expect(remote.unlockWithPassword).toHaveBeenCalledOnce());
 
     complete();
@@ -140,17 +189,20 @@ describe('crypto facade lifecycle', () => {
 
   it('does not publish an unlock completed after clear/reset', async () => {
     let complete!: () => void;
+
     remote.unlockWithPassword.mockImplementation(
       () =>
         new Promise<void>((resolve) => {
           complete = resolve;
         }),
     );
+
     const pending = proxy.unlockWithPassword(bundle, USER_ID, publicKey, 'password', false);
 
     await vi.waitFor(() => {
       expect(remote.unlockWithPassword).toHaveBeenCalled();
     });
+
     await proxy.clear();
 
     complete();
@@ -179,6 +231,7 @@ describe('crypto facade lifecycle', () => {
     );
 
     const context = { purpose: 'email_content' as const, orgId: USER_ID, subjectId: OTHER_USER_ID, fieldId: 'body' };
+
     const pending = proxy.decryptEmailContentForApplicant(
       { v: 1, purpose: 'email_content', zip: 'none', ct: 'AQIDBA==', iv: 'AAAAAAAAAAAAAAAA', keys: [] },
       context,
@@ -187,6 +240,7 @@ describe('crypto facade lifecycle', () => {
     await vi.waitFor(() => {
       expect(remote.decryptEmailContentForApplicant).toHaveBeenCalled();
     });
+
     await proxy[operation]();
 
     complete({ body: 'Sensitive message' });

@@ -1,9 +1,10 @@
 import { randomBytes } from '@noble/hashes/utils.js';
 import { base64 } from '@scure/base';
-import { clear, createStore, del, get, keys, update } from 'idb-keyval';
+import { type DBSchema, type IDBPDatabase, openDB } from 'idb';
 
 import { aesGcmParams, decryptBinaryData, encryptBinaryData } from './data-encryption';
 import { keyContextBytes } from './key-context';
+import { isString } from './runtime-guards';
 import {
   type DeviceBinding,
   type RememberedDeviceContext,
@@ -14,7 +15,22 @@ import {
 import { type CryptoSessionIdentity, formatCryptoSessionIdentity, isSameCryptoSession } from './session';
 import { isSamePublicEncryptionKey } from './xwing';
 
-const rememberedDeviceStore = createStore('comitium_crypto', 'comitium_crypto_device_unlocks');
+interface RememberedDeviceDatabase extends DBSchema {
+  comitium_crypto_device_unlocks: { key: string; value: RememberedDeviceRecord };
+}
+
+const STORE = 'comitium_crypto_device_unlocks';
+let database: Promise<IDBPDatabase<RememberedDeviceDatabase>> | undefined;
+
+function openRememberedDeviceDatabase() {
+  database ??= openDB<RememberedDeviceDatabase>('comitium_crypto', 1, {
+    upgrade(db) {
+      db.createObjectStore(STORE);
+    },
+  });
+
+  return database;
+}
 
 export class RememberedDeviceStore {
   private generation = 0;
@@ -29,7 +45,8 @@ export class RememberedDeviceStore {
     }
 
     const key = formatCryptoSessionIdentity(params.identity);
-    const value = await get<unknown>(key, rememberedDeviceStore);
+    const db = await openRememberedDeviceDatabase();
+    const value = await db.get(STORE, key);
 
     if (value === undefined) {
       return null;
@@ -46,7 +63,7 @@ export class RememberedDeviceStore {
       }
     }
 
-    await del(key, rememberedDeviceStore);
+    await db.delete(STORE, key);
 
     return null;
   }
@@ -96,28 +113,38 @@ export class RememberedDeviceStore {
         ct: base64.encode(new Uint8Array(encrypted)),
       });
 
-      const allKeys = await keys(rememberedDeviceStore);
+      const db = await openRememberedDeviceDatabase();
+      const transaction = db.transaction(STORE, 'readwrite');
+      void transaction.done.catch(() => {});
 
-      for (const key of allKeys) {
-        if (typeof key === 'string' && key.startsWith(`${params.identity.userId}:`)) {
-          assertCurrent();
+      try {
+        const allKeys = await transaction.store.getAllKeys();
 
-          await del(key, rememberedDeviceStore);
+        for (const key of allKeys) {
+          if (isString(key) && key.startsWith(`${params.identity.userId}:`)) {
+            assertCurrent();
+
+            await transaction.store.delete(key);
+          }
         }
+
+        /**
+         * Check after the queued read, inside the write transaction: logout cannot resurrect this slot.
+         */
+        assertCurrent();
+
+        await transaction.store.put(record, formatCryptoSessionIdentity(params.identity));
+        await transaction.done;
+      } catch (error) {
+        try {
+          transaction.abort();
+        } catch {
+          /* Already completed or aborted. */
+        }
+
+        await transaction.done.catch(() => {});
+        throw error;
       }
-
-      await update(
-        formatCryptoSessionIdentity(params.identity),
-        () => {
-          /**
-           * This runs synchronously inside the IDB write transaction, after any pending logout/clear.
-           */
-          assertCurrent();
-
-          return record;
-        },
-        rememberedDeviceStore,
-      );
     } finally {
       inner.ct.fill(0);
       plaintext.fill(0);
@@ -144,7 +171,9 @@ export class RememberedDeviceStore {
 
   async delete(identity: CryptoSessionIdentity): Promise<void> {
     if (globalThis.indexedDB) {
-      await del(formatCryptoSessionIdentity(identity), rememberedDeviceStore);
+      const db = await openRememberedDeviceDatabase();
+
+      await db.delete(STORE, formatCryptoSessionIdentity(identity));
     }
   }
 
@@ -152,7 +181,9 @@ export class RememberedDeviceStore {
     this.generation += 1;
 
     if (globalThis.indexedDB) {
-      await clear(rememberedDeviceStore);
+      const db = await openRememberedDeviceDatabase();
+
+      await db.clear(STORE);
     }
   }
 }

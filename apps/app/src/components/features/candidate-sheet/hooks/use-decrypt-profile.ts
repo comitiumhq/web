@@ -1,26 +1,39 @@
 import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
-import type { VaultKeyAccess } from '@comitium/crypto';
+import type { EncryptedEnvelope, VaultKeyAccess } from '@comitium/crypto';
 import { CryptoProxy } from '@comitium/crypto';
 import { candidateProfileContext } from '@comitium/crypto/context';
 import type { CandidateProfile } from '@comitium/schemas/candidates';
 import { useCallback, useEffect, useState } from 'react';
 import { useQueryCandidate } from '@/hooks/queries/use-query-candidate';
+import { getErrorStatus } from '@/lib/api/client';
 import { parseDecryptedCandidateProfile } from '@/lib/crypto/decrypted-payloads';
 
-type ProfileDecryptionState =
+type ProfileDecryptionState = { orgId: string; access: VaultKeyAccess; envelope: EncryptedEnvelope } & (
   | { candidateId: string; status: 'decrypting'; profile: null }
   | { candidateId: string; revision: number; status: 'success'; profile: CandidateProfile }
-  | { candidateId: string; status: 'error'; profile: null };
+  | { candidateId: string; status: 'error'; profile: null }
+);
 
 export function useDecryptProfile(candidateId: string | null | undefined, orgId: string, vaultAccess?: VaultKeyAccess) {
-  const { data: candidateData, isLoading, isError, refetch } = useQueryCandidate(candidateId ?? null);
+  const { data: candidateData, isLoading, isError, error, refetch } = useQueryCandidate(candidateId ?? null);
   const isCryptoActive = useIsCryptoActive();
   const [decryptionState, setDecryptionState] = useState<ProfileDecryptionState | null>(null);
   const retryQuery = useCallback(() => refetch(), [refetch]);
-  const hasCurrentCandidateData = candidateData?.id === candidateId;
+  const denied = getErrorStatus(error) === 403 || getErrorStatus(error) === 404;
+  const hasCurrentCandidateData = !denied && candidateData?.id === candidateId;
   const hasCurrentEncryptedProfile = Boolean(hasCurrentCandidateData && candidateData?.profile);
+
   const currentDecryptionState =
-    hasCurrentEncryptedProfile && decryptionState?.candidateId === candidateId ? decryptionState : null;
+    isCryptoActive &&
+    hasCurrentEncryptedProfile &&
+    decryptionState !== null &&
+    decryptionState.candidateId === candidateId &&
+    decryptionState.orgId === orgId &&
+    decryptionState.access === vaultAccess &&
+    decryptionState.envelope === candidateData?.profile
+      ? decryptionState
+      : null;
+
   const canDecrypt = hasCurrentEncryptedProfile && Boolean(vaultAccess) && isCryptoActive;
   const isAwaitingDecryption =
     canDecrypt && currentDecryptionState?.status !== 'success' && currentDecryptionState?.status !== 'error';
@@ -28,11 +41,13 @@ export function useDecryptProfile(candidateId: string | null | undefined, orgId:
   useEffect(() => {
     let cancelled = false;
 
-    if (!candidateData?.profile || candidateData.id !== candidateId || !vaultAccess || !isCryptoActive) {
+    if (denied || !candidateData?.profile || candidateData.id !== candidateId || !vaultAccess || !isCryptoActive) {
+      setDecryptionState(null);
       return;
     }
 
-    setDecryptionState({ candidateId: candidateData.id, status: 'decrypting', profile: null });
+    const source = { orgId, access: vaultAccess, envelope: candidateData.profile };
+    setDecryptionState({ ...source, candidateId: candidateData.id, status: 'decrypting', profile: null });
 
     CryptoProxy.decryptApplication(
       candidateData.profile,
@@ -48,12 +63,13 @@ export function useDecryptProfile(candidateId: string | null | undefined, orgId:
         }
 
         if (!profile) {
-          setDecryptionState({ candidateId: candidateData.id, status: 'error', profile: null });
+          setDecryptionState({ ...source, candidateId: candidateData.id, status: 'error', profile: null });
 
           return;
         }
 
         setDecryptionState({
+          ...source,
           candidateId: candidateData.id,
           revision: candidateData.profileRevision,
           status: 'success',
@@ -62,14 +78,14 @@ export function useDecryptProfile(candidateId: string | null | undefined, orgId:
       })
       .catch(() => {
         if (!cancelled) {
-          setDecryptionState({ candidateId: candidateData.id, status: 'error', profile: null });
+          setDecryptionState({ ...source, candidateId: candidateData.id, status: 'error', profile: null });
         }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [candidateData, candidateId, vaultAccess, orgId, isCryptoActive]);
+  }, [candidateData, candidateId, vaultAccess, orgId, isCryptoActive, denied]);
 
   let profileRevision =
     hasCurrentCandidateData && !candidateData?.profile ? (candidateData?.profileRevision ?? null) : null;

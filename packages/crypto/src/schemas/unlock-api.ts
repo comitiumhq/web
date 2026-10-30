@@ -50,5 +50,10 @@ export type FreshAuthenticationHandler = (force?: boolean) => Promise<void>;
 export type RememberedDeviceStatus = 'not_requested' | 'remembered' | 'unavailable' | 'cleanup_failed';
 export type UnlockResult = { rememberedDevice: RememberedDeviceStatus };
 export type RewrapOptions = { password?: string; rotateRecoveryCode: boolean; repairShare: boolean };
+
+export interface RememberedDeviceRewrapOptions extends RewrapOptions {
+  password: string;
+}
+
 export type UserKeyIdentity = { wrapped: WrappedUserKey; userId: string; publicKey: KeyBundleResponse['publicKey'] };
 export type UnlockApiErrorCode = z.infer<typeof unlockApiErrorCodeSchema>;

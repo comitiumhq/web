@@ -1,9 +1,15 @@
 import type { ColumnDef, Row, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
 import { DataTableVirtual } from './data-table-virtual';
+
+const viewport = vi.hoisted(() => ({ start: 0, count: 12 }));
+
+afterEach(() => {
+  viewport.start = 0;
+});
 
 vi.mock('@tanstack/react-virtual', async () => {
   const { useEffect } = await import('react');
@@ -13,7 +19,14 @@ vi.mock('@tanstack/react-virtual', async () => {
       count: number;
       onChange?: (instance: { getVirtualItems: () => { index: number; key: number; start: number }[] }) => void;
     }) => {
-      const items = Array.from({ length: options.count }, (_, index) => ({ index, key: index, start: index * 64 }));
+      const count = Math.min(viewport.count, options.count - viewport.start);
+
+      const items = Array.from({ length: count }, (_, offset) => {
+        const index = viewport.start + offset;
+
+        return { index, key: index, start: index * 64 };
+      });
+
       const instance = {
         getVirtualItems: () => items,
         getTotalSize: () => options.count * 64,
@@ -113,6 +126,7 @@ describe('DataTableVirtual', () => {
 
   it('activates clickable rows from both keyboard activation keys', async () => {
     const onRowClick = vi.fn();
+
     const screen = await render(
       <DataTableVirtual
         ariaLabel="People"
@@ -122,6 +136,7 @@ describe('DataTableVirtual', () => {
         onRowClick={onRowClick}
       />,
     );
+
     const bobRow = screen.getByRole('row', { name: 'Bob' });
 
     bobRow.element().focus();
@@ -155,11 +170,33 @@ describe('DataTableVirtual', () => {
     );
 
     await vi.waitFor(() => expect(onLoadMore).toHaveBeenCalledTimes(1));
+
     expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports only the current virtual window when rows are scrolled', async () => {
+    const onVisibleRowsChange = vi.fn();
+    const data = Array.from({ length: 100 }, (_, index) => ({ id: `person-${index}`, name: `Person ${index}` }));
+
+    const table = () => (
+      <DataTableVirtual ariaLabel="People" columns={columns} data={data} onVisibleRowsChange={onVisibleRowsChange} />
+    );
+
+    const screen = await render(table());
+
+    expect(onVisibleRowsChange).toHaveBeenLastCalledWith(data.slice(0, 12));
+
+    viewport.start = 20;
+    await screen.rerender(table());
+
+    expect(onVisibleRowsChange).toHaveBeenLastCalledWith(data.slice(20, 32));
+
+    await screen.unmount();
   });
 
   it('selects a row without activating its row click and exposes the selected state', async () => {
     const onRowClick = vi.fn();
+
     const screen = await render(<SelectableTable onRowClick={onRowClick} />);
 
     await screen.getByRole('checkbox', { name: 'Select row 1' }).click();
@@ -171,9 +208,11 @@ describe('DataTableVirtual', () => {
 
   it('selects only loaded rows and leaves rows loaded later unselected', async () => {
     const screen = await render(<SelectableTable />);
+
     const selectAll = screen.getByRole('checkbox', { name: 'Select all loaded rows' });
 
     await selectAll.click();
+
     await expect.element(screen.getByLabelText('Selected row count')).toHaveTextContent('2');
 
     await screen.getByRole('button', { name: 'Add person' }).click();
@@ -185,6 +224,7 @@ describe('DataTableVirtual', () => {
 
   it('caps both header and individual selection at the configured maximum', async () => {
     const screen = await render(<SelectableTable maxSelectedRows={1} />);
+
     const selectUpToLimit = screen.getByRole('checkbox', { name: 'Select up to 1 loaded rows' });
 
     await selectUpToLimit.click();

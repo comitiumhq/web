@@ -8,6 +8,7 @@ import type {
   KeyBundleWrite,
   KeyShareResponse,
   RecoveryCodeHandler,
+  RememberedDeviceRewrapOptions,
   RememberedDeviceStatus,
   RewrapOptions,
   UnlockResult,
@@ -30,6 +31,11 @@ import { KeyStore } from './key-store';
 import { UnlockApi } from './unlock-api';
 import { isUnlockApiClientError, UnlockApiError } from './unlock-api-error';
 
+interface UserKeyResetContext {
+  previous: WrappedUserKey;
+  confirmFreshAuth: FreshAuthenticationHandler;
+}
+
 /**
  * Owns user unlock, recovery and device lifecycle inside the Worker.
  */
@@ -40,6 +46,8 @@ export class UserKeySession {
   private userPublicKey: PublicEncryptionKey | null = null;
   private unlockApi: UnlockApi | null = null;
   private requests = new AbortController();
+
+  constructor(private readonly clearDerivedState: () => void) {}
 
   configure(apiBaseUrl: string): void {
     if (this.unlockApi) {
@@ -87,10 +95,10 @@ export class UserKeySession {
   ): Promise<void> {
     const identity = this.requireIdentity();
 
-    if (
-      !isSameCryptoSession(identity, createCryptoSessionIdentity(wrapped, userId)) ||
-      !this.matchesPublicKey(publicKey)
-    ) {
+    const sameIdentity =
+      isSameCryptoSession(identity, createCryptoSessionIdentity(wrapped, userId)) && this.matchesPublicKey(publicKey);
+
+    if (!sameIdentity) {
       throw new Error('User key bundle does not match the unlocked identity');
     }
 
@@ -324,7 +332,7 @@ export class UserKeySession {
     wrapped: WrappedUserKey,
     userId: string,
     publicKey: PublicEncryptionKey,
-    options: RewrapOptions & { password: string },
+    options: RememberedDeviceRewrapOptions,
     onRecoveryCode: RecoveryCodeHandler,
     confirmFreshAuth: FreshAuthenticationHandler,
   ) {
@@ -359,6 +367,7 @@ export class UserKeySession {
   }
 
   clear(): void {
+    this.clearDerivedState();
     this.requests.abort();
     this.requests = new AbortController();
     this.activeSession = null;
@@ -372,6 +381,16 @@ export class UserKeySession {
     }
 
     return this.activeSession;
+  }
+
+  requirePublicKey(): PublicEncryptionKey {
+    this.requireIdentity();
+
+    if (!this.userPublicKey) {
+      throw new Error('Crypto session not unlocked');
+    }
+
+    return this.userPublicKey;
   }
 
   /**
@@ -612,7 +631,7 @@ export class UserKeySession {
     generation: number,
     rememberDevice: boolean,
     onRecoveryCode?: RecoveryCodeHandler,
-    reset?: { previous: WrappedUserKey; confirmFreshAuth: FreshAuthenticationHandler },
+    reset?: UserKeyResetContext,
   ) {
     const { privateKey, publicKey } = generateUserKeyPair();
     const unlockKey = randomBytes(32);

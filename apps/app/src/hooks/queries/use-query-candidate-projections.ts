@@ -2,6 +2,7 @@ import { useIsCryptoActive } from '@comitium/auth/use-is-crypto-active';
 import { useSession } from '@comitium/auth/use-session';
 import { onlineManager, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
+import { useCandidateSearchSync } from '@/components/auth/candidate-search-coordinator';
 import { useQueryOrgVaultAccess } from '@/hooks/queries/use-query-org-vault-access';
 import { qk } from '@/hooks/query-keys';
 import { getErrorStatus } from '@/lib/api/client';
@@ -14,6 +15,7 @@ export function useQueryCandidateProjections(orgId: string) {
   const isCryptoActive = useIsCryptoActive();
   const vault = useQueryOrgVaultAccess(orgId);
   const queryClient = useQueryClient();
+  const sync = useCandidateSearchSync();
   const userId = user?.id ?? null;
   const enabled = Boolean(userId && isCryptoActive && vault.isSuccess);
   const access = vault.data;
@@ -30,11 +32,21 @@ export function useQueryCandidateProjections(orgId: string) {
 
   const query = useQuery<{ hasMore: boolean }>({
     queryKey,
-    enabled,
+    enabled: (state) =>
+      enabled && Boolean(state.state.data?.hasMore || sync.status?.projectionWorkAvailable || sync.error),
     retry: false,
     gcTime: 0,
-    refetchInterval: (state) => (state.state.data?.hasMore ? 1_000 : 15_000),
-    refetchIntervalInBackground: true,
+    staleTime: Number.POSITIVE_INFINITY,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: (state) => {
+      if (state.state.data?.hasMore) {
+        return 1_000;
+      }
+
+      return sync.error ? 15_000 : false;
+    },
+    refetchIntervalInBackground: false,
     queryFn: async ({ signal }) => {
       if (!access) {
         throw new Error('Vault access is unavailable');
@@ -58,12 +70,13 @@ export function useQueryCandidateProjections(orgId: string) {
 
       signal.throwIfAborted();
 
-      if (listRefresh.pending || !result.hasMore) {
+      if (listRefresh.pending) {
         const refreshNow = !result.hasMore || Date.now() - listRefresh.lastRefreshAt >= LIST_REFRESH_INTERVAL_MS;
         const refetchType = refreshNow ? 'active' : 'none';
 
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: qk.pipeline.candidatesRoot(), refetchType }),
+          queryClient.invalidateQueries({ queryKey: qk.candidate.directoryRoot(orgId), refetchType }),
           queryClient.invalidateQueries({ queryKey: qk.candidate.activityRoot(), refetchType }),
           queryClient.invalidateQueries({ predicate: (query) => qk.jobs.isKanban(query.queryKey), refetchType }),
         ]);
@@ -95,18 +108,17 @@ export function useQueryCandidateProjections(orgId: string) {
       }
     });
 
-    const unsubscribeMutations = queryClient.getMutationCache().subscribe((event) => {
-      if (event.type === 'updated' && event.action.type === 'success') {
-        void queryClient.invalidateQueries({ queryKey });
-      }
-    });
-
     return () => {
       unsubscribeOnline();
-      unsubscribeMutations();
       void queryClient.cancelQueries({ queryKey });
     };
   }, [queryClient, queryKey]);
+
+  useEffect(() => {
+    if (sync.status?.projectionWorkAvailable) {
+      void queryClient.invalidateQueries({ queryKey }, { cancelRefetch: false });
+    }
+  }, [queryClient, queryKey, sync.updatedAt, sync.status?.projectionWorkAvailable]);
 
   useEffect(() => {
     if (getErrorStatus(query.error) === 403) {

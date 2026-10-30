@@ -7,7 +7,7 @@ import { applicationAnswerBucketContext, candidateProfileContext, candidateProfi
 import { hashCustomFieldValue } from '../custom-field-hash';
 import { hashCategoricalFormFieldValue } from '../form-field-search-hash';
 import type { VaultKeyAccess } from '../schemas/vault-key';
-import { processCandidateProjection } from '../worker/candidate-projection';
+import { type CandidateProjectionCrypto, processCandidateProjection } from '../worker/candidate-projection';
 import { TEST_KEYS } from './crypto-helpers';
 
 const orgId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -17,34 +17,16 @@ const questionId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const access = { orgId, vaultPublicKey: TEST_KEYS.alice.publicKey, vaultKeyVersion: 1 } as VaultKeyAccess;
 const searchKey = new Uint8Array(32).fill(7);
 
-const api = {
+const api: CandidateProjectionCrypto = {
   encryptApplication: encryptApplicationWithVaultKey,
-  decryptApplication: async (
-    envelope: Parameters<typeof decryptApplicationWithVaultKey>[0],
-    _orgId: string,
-    _access: VaultKeyAccess,
-    context: Parameters<typeof decryptApplicationWithVaultKey>[2],
-  ) => decryptApplicationWithVaultKey<Record<string, unknown>>(envelope, TEST_KEYS.alice.privateKey, context),
-  hashCandidateProfileSearchValue: async (
-    _org: string,
-    _access: VaultKeyAccess,
-    field: Parameters<typeof hashCandidateProfileSearchValue>[2],
-    value: string | number,
-  ) => hashCandidateProfileSearchValue(searchKey, orgId, field, value),
-  hashCategoricalFormFieldValue: async (
-    _org: string,
-    _access: VaultKeyAccess,
-    field: string,
-    kind: Parameters<typeof hashCategoricalFormFieldValue>[3],
-    value: boolean | string,
-  ) => hashCategoricalFormFieldValue(searchKey, orgId, field, kind, value),
-  hashCustomFieldValue: async (
-    _org: string,
-    _access: VaultKeyAccess,
-    field: string,
-    type: Parameters<typeof hashCustomFieldValue>[3],
-    value: unknown,
-  ) => hashCustomFieldValue(searchKey, orgId, field, type, value),
+  decryptApplication: (envelope, _orgId, _access, context) =>
+    decryptApplicationWithVaultKey<Record<string, unknown>>(envelope, TEST_KEYS.alice.privateKey, context),
+  hashCandidateProfileSearchValue: async (_org, _access, field, value) =>
+    hashCandidateProfileSearchValue(searchKey, orgId, field, value),
+  hashCategoricalFormFieldValue: async (_org, _access, field, kind, value) =>
+    hashCategoricalFormFieldValue(searchKey, orgId, field, kind, value),
+  hashCustomFieldValue: async (_org, _access, field, type, value) =>
+    hashCustomFieldValue(searchKey, orgId, field, type, value),
 };
 
 const base = () =>
@@ -131,6 +113,37 @@ async function formItem(profile = base()): Promise<Extract<CandidateProjectionIt
 }
 
 describe('Candidate projection inside Crypto Worker', () => {
+  it('rejects legacy seed locations and accepts canonical city identities', async () => {
+    const item = await formItem();
+
+    const question = item.inputs.snapshot.sections[0].questions[0];
+    question.questionType = 'candidate_location';
+    question.config = null;
+
+    for (const [location, expected] of [
+      [{ city: 'Berlin', region: 'California', country: 'US' }, 'retryable_error'],
+      [{ cityId: 2950159, city: 'Berlin', country: 'DE' }, 'profile_merge'],
+    ] as const) {
+      item.inputs.answers = {
+        envelope: await api.encryptApplication(
+          access.vaultPublicKey,
+          1,
+          { [questionId]: location },
+          applicationAnswerBucketContext(orgId, formId, 'standard'),
+        ),
+        context: applicationAnswerBucketContext(orgId, formId, 'standard'),
+      };
+
+      const result = await processCandidateProjection(api, orgId, access, item);
+
+      expect(result.result.kind).toBe(expected);
+
+      if (result.result.kind === 'retryable_error') {
+        expect(result.result.code).toBe('INPUT_UNREADABLE');
+      }
+    }
+  });
+
   it('validates the claim contract and returns only encrypted merge plus the existing search hashes', async () => {
     const item = (
       await candidateProjectionClaimResponseSchema.parseAsync({
@@ -139,6 +152,7 @@ describe('Candidate projection inside Crypto Worker', () => {
         retryAfterMs: 15000,
       })
     ).items[0];
+
     const output = await processCandidateProjection(api, orgId, access, item);
 
     expect(output.result.kind).toBe('profile_merge');
@@ -155,27 +169,35 @@ describe('Candidate projection inside Crypto Worker', () => {
     );
 
     expect(profile).toMatchObject({ firstName: 'Ada', phone: '+12345', manuallyClearedFields: [] });
+
     expect(output.result.searchProjection.contactEmailDigest).toBe(
       hashCandidateProfileSearchValue(searchKey, orgId, 'email', 'ada@example.com'),
     );
+
     expect(JSON.stringify(output)).not.toContain('+12345');
     expect(JSON.stringify(output)).not.toContain('ada@example.com');
   });
+
   it('retains encrypted manual clears and does not rewrite a nonempty value', async () => {
     const profile = base();
 
     profile.manuallyClearedFields = ['phone'];
+
     expect((await processCandidateProjection(api, orgId, access, await formItem(profile))).result).toEqual({
       kind: 'no_change',
     });
+
     profile.manuallyClearedFields = [];
     profile.phone = '+999';
+
     expect((await processCandidateProjection(api, orgId, access, await formItem(profile))).result).toEqual({
       kind: 'no_change',
     });
   });
+
   it('keeps mapped form values before resume fill and does not copy private enrichment', async () => {
     const enrichmentContext = candidateProfileEnrichmentContext(orgId, questionId);
+
     const enrichment = {
       context: enrichmentContext,
       envelope: await api.encryptApplication(
@@ -185,11 +207,13 @@ describe('Candidate projection inside Crypto Worker', () => {
         enrichmentContext,
       ),
     };
+
     const item: Extract<CandidateProjectionItem, { kind: 'resume_profile' }> = {
       ...header,
       kind: 'resume_profile',
       inputs: { profile: await encryptProfile({ ...base(), phone: '+12345' }), enrichment, visibility: 'standard' },
     };
+
     const output = await processCandidateProjection(api, orgId, access, item);
 
     if (output.result.kind !== 'profile_merge') {
@@ -210,11 +234,15 @@ describe('Candidate projection inside Crypto Worker', () => {
         })
       ).result,
     ).toEqual({ kind: 'policy_skipped' });
+
     expect(decrypt).not.toHaveBeenCalled();
+
     decrypt.mockRestore();
   });
+
   it('rejects an old profile format and emits only safe input failure codes', async () => {
     const item = await formItem();
+
     const { manuallyClearedFields: _, ...old } = base();
 
     item.inputs.profile = await encryptProfile(old as CandidateProfile);
@@ -224,10 +252,12 @@ describe('Candidate projection inside Crypto Worker', () => {
     expect(output.result).toEqual({ kind: 'retryable_error', code: 'INPUT_UNREADABLE' });
     expect(JSON.stringify(output)).not.toContain('Ada');
   });
+
   it.each(['LinkedIn profile', 'https://', 'javascript:alert(1)'])(
     'ignores one invalid resume URL (%s) while applying other extracted values',
     async (linkedIn) => {
       const context = candidateProfileEnrichmentContext(orgId, questionId);
+
       const item: Extract<CandidateProjectionItem, { kind: 'resume_profile' }> = {
         ...header,
         kind: 'resume_profile',
@@ -252,6 +282,7 @@ describe('Candidate projection inside Crypto Worker', () => {
           },
         },
       };
+
       const output = await processCandidateProjection(api, orgId, access, item);
 
       expect(output.result.kind).toBe('profile_merge');
@@ -271,8 +302,10 @@ describe('Candidate projection inside Crypto Worker', () => {
       });
     },
   );
+
   it('projects reporting with the existing namespace and custom values with their field AAD', async () => {
     const form = await formItem();
+
     const snapshot = structuredClone(form.inputs.snapshot);
 
     snapshot.sections[0].questions[0] = {
@@ -295,6 +328,7 @@ describe('Candidate projection inside Crypto Worker', () => {
         form.inputs.answers.context,
       ),
     };
+
     const reporting = await processCandidateProjection(api, orgId, access, {
       ...header,
       kind: 'form_reporting',
@@ -338,6 +372,7 @@ describe('Candidate projection inside Crypto Worker', () => {
       hasMore: false,
       retryAfterMs: 15000,
     });
+
     const custom = await processCandidateProjection(api, orgId, access, customClaim.items[0]);
 
     expect(custom.expectedTargetFingerprint).toBe('a'.repeat(64));
@@ -347,6 +382,7 @@ describe('Candidate projection inside Crypto Worker', () => {
     }
 
     expect(custom.result.valueHash).toBe(hashCustomFieldValue(searchKey, orgId, questionId, 'multiple_choice', 'yes'));
+
     expect(
       await decryptApplicationWithVaultKey(custom.result.encryptedValue, TEST_KEYS.alice.privateKey, {
         purpose: 'custom_field_value',

@@ -13,6 +13,7 @@ import { createCryptoSessionIdentity } from '../session';
 import { hashTagLabel } from '../tag-hash';
 import { userKeyWrapsFingerprint, wrapUserKey } from '../user-key';
 import { CryptoWorkerApi } from '../worker/crypto-api';
+import { RECOVERY_CODE_REGEX } from './constants';
 import { TEST_KEYS } from './crypto-helpers';
 import {
   DEVICE_ID,
@@ -39,21 +40,33 @@ vi.mock('@noble/hashes/argon2.js', async () => {
   };
 });
 
-vi.mock('idb-keyval', () => ({
-  createStore: () => 'worker-test-store',
-  get: async (key: string) => storage.get(key),
-  update: async (key: string, updater: (value: unknown) => unknown) => {
-    await storageHooks.beforeWrite?.();
+vi.mock('idb', () => ({
+  openDB: async () => ({
+    get: async (_store: string, key: string) => storage.get(key),
+    delete: async (_store: string, key: string) => {
+      storage.delete(key);
+    },
+    clear: async () => {
+      storage.clear();
+    },
+    transaction: () => ({
+      done: Promise.resolve(),
+      abort() {},
+      store: {
+        getAllKeys: async () => {
+          await storageHooks.beforeWrite?.();
 
-    storage.set(key, updater(storage.get(key)));
-  },
-  del: async (key: string) => {
-    storage.delete(key);
-  },
-  keys: async () => [...storage.keys()],
-  clear: async () => {
-    storage.clear();
-  },
+          return [...storage.keys()];
+        },
+        delete: async (key: string) => {
+          storage.delete(key);
+        },
+        put: async (value: unknown, key: string) => {
+          storage.set(key, value);
+        },
+      },
+    }),
+  }),
 }));
 
 const confirmFreshAuth = vi.fn(async (_force?: boolean) => {});
@@ -104,6 +117,7 @@ beforeEach(() => {
   readBackStatus = 200;
   staleWrites = 0;
   requests = [];
+
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string, options: RequestInit) => {
@@ -115,6 +129,7 @@ beforeEach(() => {
 
       if ((path.endsWith('/wraps') || path.endsWith('/encryption-key-bundle/reset')) && staleWrites > 0) {
         staleWrites -= 1;
+
         return Response.json({ error: { code: 'FRESH_AUTHENTICATION_REQUIRED' } }, { status: 403 });
       }
 
@@ -185,6 +200,7 @@ beforeEach(() => {
       return Response.json({ success: true });
     }),
   );
+
   api = new CryptoWorkerApi();
 
   api.configure('https://api.comitium.test/v1');
@@ -222,6 +238,7 @@ describe('Worker unlock and recovery flows', () => {
     await expect(api.verifyRecoveryCode(bundle, USER_ID, fixture.publicKey, 'bad code')).rejects.toThrow(
       'Recovery code is invalid',
     );
+
     await expect(
       api.verifyRecoveryCode(bundle, OTHER_USER_ID, fixture.publicKey, fixture.recoveryCode),
     ).rejects.toThrow();
@@ -260,6 +277,7 @@ describe('Worker unlock and recovery flows', () => {
       await recoveryUnlock();
       staleWrites = 1;
       const onRecoveryCode = vi.fn(async (_code: string) => {});
+
       const result =
         operation === 'reset'
           ? await api.resetUserKey(USER_ID, bundle, PASSWORD, false, onRecoveryCode, confirmFreshAuth)
@@ -269,6 +287,7 @@ describe('Worker unlock and recovery flows', () => {
               onRecoveryCode,
               confirmFreshAuth,
             );
+
       const writes = requests.filter((request) => request.path.endsWith(operation === 'reset' ? '/reset' : '/wraps'));
 
       expect(onRecoveryCode).toHaveBeenCalledOnce();
@@ -278,6 +297,7 @@ describe('Worker unlock and recovery flows', () => {
       expect(result.recoveryCode).toBe(onRecoveryCode.mock.calls[0][0]);
 
       api.clear();
+
       await api.unlockWithRecoveryCode(
         result.encryptedUserKey,
         USER_ID,
@@ -285,6 +305,7 @@ describe('Worker unlock and recovery flows', () => {
         onRecoveryCode.mock.calls[0][0],
         false,
       );
+
       expect(api.isActive()).toBe(true);
     },
     15000,
@@ -293,6 +314,7 @@ describe('Worker unlock and recovery flows', () => {
   it('confirms sign-in before generating a replacement recovery code', async () => {
     await recoveryUnlock();
     const onRecoveryCode = vi.fn(async () => {});
+
     const cancel = vi.fn(async () => {
       throw new DOMException('Cancelled', 'AbortError');
     });
@@ -300,6 +322,7 @@ describe('Worker unlock and recovery flows', () => {
     await expect(
       api.rewrapUserKey(bundle, { rotateRecoveryCode: true, repairShare: false }, onRecoveryCode, cancel),
     ).rejects.toMatchObject({ name: 'AbortError' });
+
     expect(onRecoveryCode).not.toHaveBeenCalled();
     expect(api.isActive()).toBe(true);
     expect(requests.some((request) => request.path.endsWith('/wraps'))).toBe(false);
@@ -310,9 +333,11 @@ describe('Worker unlock and recovery flows', () => {
     async (operation) => {
       let shownCode = '';
       let confirm!: () => void;
+
       const confirmation = new Promise<void>((resolve) => {
         confirm = resolve;
       });
+
       const onRecoveryCode = vi.fn(async (code: string) => {
         shownCode = code;
 
@@ -354,6 +379,7 @@ describe('Worker unlock and recovery flows', () => {
       await rejected;
 
       expect(requests.filter((request) => request.path.includes('/encryption-key-bundle'))).toHaveLength(1);
+
       await api.unlockWithRecoveryCode(bundle, USER_ID, currentPublicKey, shownCode, false);
 
       expect(api.isActive()).toBe(true);
@@ -443,6 +469,7 @@ describe('Worker unlock and recovery flows', () => {
     await expect(
       api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true),
     ).rejects.toThrow('(401)');
+
     expect(api.isActive()).toBe(false);
   });
 
@@ -454,6 +481,7 @@ describe('Worker unlock and recovery flows', () => {
     await expect(
       api.unlockWithRecoveryCode(bundle, USER_ID, fixture.publicKey, fixture.recoveryCode, true),
     ).rejects.toThrow(`(${status})`);
+
     expect(api.isActive()).toBe(false);
   });
 
@@ -485,6 +513,7 @@ describe('Worker unlock and recovery flows', () => {
     expose(api, channel.port1);
 
     const remote = wrap<{ ready(): true }>(channel.port2);
+
     const probe = remote as unknown as {
       userSession: { keys: { getUnlockKey(): Promise<Uint8Array> } };
       orgVault: { session: { keys: { getUnlockKey(): Promise<Uint8Array> } } };
@@ -512,20 +541,26 @@ describe('Worker unlock and recovery flows', () => {
     await recoveryUnlock();
 
     const access = await vaultFixture();
+
     const fieldId = OTHER_USER_ID;
 
     expect(await api.hashTagLabel(ORG_ID, access, '  Senior  ')).toBe(hashTagLabel(SEARCH_KEY, '  Senior  '));
     expect(await api.hashTagLabel(ORG_ID, access, 'Senior')).not.toBe(hashTagLabel(TEST_KEYS.bob.privateKey, 'Senior'));
+
     expect(await api.hashCustomFieldValue(ORG_ID, access, fieldId, 'yes_no', true)).toBe(
       hashCustomFieldValue(SEARCH_KEY, ORG_ID, fieldId, 'yes_no', true),
     );
+
     expect(await api.hashCandidateProfileSearchValue(ORG_ID, access, 'email', 'A@EXAMPLE.COM')).toBe(
       hashCandidateProfileSearchValue(SEARCH_KEY, ORG_ID, 'email', 'A@EXAMPLE.COM'),
     );
+
     expect(await api.hashCategoricalFormFieldValue(ORG_ID, access, fieldId, 'boolean', true)).toBe(
       hashCategoricalFormFieldValue(SEARCH_KEY, ORG_ID, fieldId, 'boolean', true),
     );
+
     await expect(api.hashTagLabel(ORG_ID, { ...access, recipientKeyVersion: 2 }, 'Senior')).rejects.toThrow('identity');
+
     await expect(
       api.hashTagLabel(ORG_ID, { ...access, vaultPublicKey: TEST_KEYS.charlie.publicKey }, 'Senior'),
     ).rejects.toThrow('does not match');
@@ -542,6 +577,7 @@ describe('Worker unlock and recovery flows', () => {
     await expect(api.decryptEmailContentForApplicant(email, emailContext)).rejects.toThrow('generation is unavailable');
 
     const access = await vaultFixture();
+
     const changed = {
       ...email,
       keys: email.keys.map((key) => (key.recipient === 'org_vault' ? { ...key, rkv: 2 } : key)),
@@ -599,9 +635,10 @@ describe('Worker unlock and recovery flows', () => {
     const result = await api.initializeUserKey(USER_ID, PASSWORD, true, async () => {});
 
     expect(api.isActive()).toBe(true);
-    expect(result.recoveryCode).toMatch(/^[A-Z0-9-]+$/);
+    expect(result.recoveryCode).toMatch(RECOVERY_CODE_REGEX);
     expect(result).not.toHaveProperty('unlockKey');
     expect(result).not.toHaveProperty('keyAuthSecret');
+
     expect(requests.map((request) => request.path)).toEqual([
       '/v1/users/key-share',
       '/v1/users/encryption-key-bundle',
@@ -609,12 +646,14 @@ describe('Worker unlock and recovery flows', () => {
       '/v1/users/key-share',
       '/v1/users/devices',
     ]);
+
     expect(Object.keys(requests[1].body ?? {}).sort()).toEqual([
       'encryptedUserKey',
       'keyAuthSecret',
       'publicKey',
       'userId',
     ]);
+
     expect(requests[1].body?.userId).toBe(USER_ID);
     expect(storage.size).toBe(1);
   }, 15000);
@@ -628,6 +667,7 @@ describe('Worker unlock and recovery flows', () => {
     expect(api.isActive()).toBe(true);
 
     const confirmRecovery = vi.fn(async () => {});
+
     const updated = await api.rewrapUserKey(
       initial.encryptedUserKey,
       { rotateRecoveryCode: true, repairShare: false },
@@ -638,7 +678,9 @@ describe('Worker unlock and recovery flows', () => {
     expect(confirmRecovery).toHaveBeenCalledOnce();
     expect(updated.encryptedUserKey.pk).toEqual(initial.encryptedUserKey.pk);
     expect(updated.encryptedUserKey.wraps.map((wrap) => wrap.method)).toEqual(['password', 'recovery_code']);
+
     api.clear();
+
     await api.unlockWithRecoveryCode(
       updated.encryptedUserKey,
       USER_ID,
@@ -646,6 +688,7 @@ describe('Worker unlock and recovery flows', () => {
       updated.recoveryCode ?? '',
       false,
     );
+
     expect(api.isActive()).toBe(true);
   }, 15000);
 
@@ -657,6 +700,7 @@ describe('Worker unlock and recovery flows', () => {
     await expect(api.initializeUserKey(USER_ID, PASSWORD, false, confirmRecovery)).rejects.toMatchObject({
       status: 409,
     });
+
     expect(confirmRecovery).not.toHaveBeenCalled();
     expect(requests.map((request) => request.path)).toEqual(['/v1/users/key-share']);
     expect(api.isActive()).toBe(false);
@@ -680,6 +724,7 @@ describe('Worker unlock and recovery flows', () => {
     await expect(api.initializeUserKey(USER_ID, PASSWORD, true, async () => {})).rejects.toThrow(
       'Saved user key bundle',
     );
+
     expect(api.isActive()).toBe(false);
     expect(requests.some((request) => request.path.endsWith('/devices'))).toBe(false);
     expect(storage.size).toBe(0);
@@ -689,6 +734,7 @@ describe('Worker unlock and recovery flows', () => {
     await rememberFixture();
 
     const newPassword = 'satellite apricot harbor glacier 91';
+
     const result = await api.rewrapWithRememberedDevice(
       bundle,
       USER_ID,
@@ -697,6 +743,7 @@ describe('Worker unlock and recovery flows', () => {
       async () => {},
       confirmFreshAuth,
     );
+
     const mutation = requests.find((request) => request.path.endsWith('/wraps'));
 
     expect(result.encryptedUserKey.pk).toEqual(fixture.bundle.pk);
@@ -727,6 +774,7 @@ describe('Worker unlock and recovery flows', () => {
   it('cannot persist an in-flight enrollment after remembered access is forgotten', async () => {
     let releaseWrite!: () => void;
     let reachedWrite = false;
+
     const writeGate = new Promise<void>((resolve) => {
       releaseWrite = resolve;
     });
@@ -743,6 +791,7 @@ describe('Worker unlock and recovery flows', () => {
     await vi.waitFor(() => {
       expect(reachedWrite).toBe(true);
     });
+
     await api.forgetRememberedDevice(bundle, USER_ID, fixture.publicKey);
 
     releaseWrite();

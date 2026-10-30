@@ -5,6 +5,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { cryptoWorkerConfig } from '../../tooling/vite/crypto-worker-config';
 import { cryptoWorkerHeaders } from '../../tooling/vite/crypto-worker-headers';
 import { ssrExclude } from '../../tooling/vite/ssr-exclude';
 
@@ -17,6 +18,7 @@ export default defineConfig({
     emptyOutDir: true,
     outDir: fileURLToPath(new URL('../../dist/app', import.meta.url)),
   },
+  worker: cryptoWorkerConfig,
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -35,13 +37,7 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: [
-      '@radix-ui/react-focus-scope',
-      '@radix-ui/react-compose-refs',
-      '@radix-ui/react-slot',
-      'idb-keyval',
-      'pdf-lib',
-    ],
+    include: ['@radix-ui/react-focus-scope', '@radix-ui/react-compose-refs', '@radix-ui/react-slot', 'idb', 'pdf-lib'],
   },
   plugins: [
     cryptoWorkerHeaders(),

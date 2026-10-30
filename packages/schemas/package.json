@@ -11,6 +11,7 @@
     "./archive-reason-type": "./src/archive-reason-type.ts",
     "./auth": "./src/auth.ts",
     "./candidates": "./src/candidates.ts",
+    "./candidate-search": "./src/candidate-search.ts",
     "./cities": "./src/cities.ts",
     "./common": "./src/common.ts",
     "./forms": "./src/forms/field-types/index.ts",
