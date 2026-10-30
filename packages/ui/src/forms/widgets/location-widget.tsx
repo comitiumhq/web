@@ -51,8 +51,9 @@ export function LocationWidget({ field, input: LocationInput }: LocationWidgetPr
       };
 
       onChange(next);
+      onBlur();
     },
-    [onChange],
+    [onChange, onBlur],
   );
 
   return (

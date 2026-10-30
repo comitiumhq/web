@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { candidateLocationValueSchema } from './field-types/candidate-location';
-import type { NestedForm } from './form-definitions';
+import type { FormSnapshotQuestion, NestedForm } from './form-definitions';
 
 import { readNonEmptyText } from './text-value';
 
@@ -30,14 +30,14 @@ export const APPLICATION_REQUIRED_FIELDS = [
 
 type CandidateProfileField = 'first_name' | 'last_name';
 
-type ApplicationRequiredQuestion = Pick<NestedForm['sections'][number]['questions'][number], 'questionType' | 'config'>;
+type ApplicationRequiredQuestion = Pick<FormSnapshotQuestion, 'questionType' | 'config' | 'isLocked'>;
 
 function matchesApplicationRequiredField(
   question: ApplicationRequiredQuestion,
   definition: (typeof APPLICATION_REQUIRED_FIELDS)[number],
 ): boolean {
   if (definition.key === 'email') {
-    return question.questionType === definition.questionType;
+    return question.questionType === definition.questionType && question.isLocked === true;
   }
 
   return question.config?.candidateProfileField === definition.key;
