@@ -1,4 +1,5 @@
 import { CATEGORIES, EMPLOYMENT_TYPES } from '@comitium/schemas/job-enums';
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { Combobox } from '@comitium/ui/combobox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@comitium/ui/form';
 import { Input } from '@comitium/ui/input';
@@ -11,6 +12,7 @@ import { RequiredMarker } from './required-marker';
 interface JobBasicInformationFieldsProps {
   orgId: string;
   form: UseFormReturn<JobSettingsFormData>;
+  structureLabels?: Pick<JobEditor, 'departmentName' | 'locationName'>;
   showPublishRequiredMarkers?: boolean;
   readOnly?: boolean;
 }
@@ -18,12 +20,14 @@ interface JobBasicInformationFieldsProps {
 export function JobBasicInformationFields({
   orgId,
   form,
+  structureLabels,
   showPublishRequiredMarkers = true,
   readOnly = false,
 }: JobBasicInformationFieldsProps) {
   const { control, setValue } = form;
-  const { data: departmentsData } = useQueryOrgDepartments(orgId);
-  const { data: locationsData } = useQueryOrgLocations(orgId);
+  const optionsOrgId = readOnly && structureLabels ? null : orgId;
+  const { data: departmentsData } = useQueryOrgDepartments(optionsOrgId);
+  const { data: locationsData } = useQueryOrgLocations(optionsOrgId);
   const departments = departmentsData?.data ?? [];
   const locations = locationsData?.data ?? [];
 
@@ -102,6 +106,7 @@ export function JobBasicInformationFields({
                   <Combobox
                     ariaLabel="Team"
                     options={departmentOptions}
+                    unknownValueLabel={structureLabels?.departmentName ?? undefined}
                     value={field.value ?? null}
                     clearable={false}
                     onValueChange={handleDepartmentChange}
@@ -128,6 +133,7 @@ export function JobBasicInformationFields({
                   <Combobox
                     ariaLabel="Location"
                     options={locationOptions}
+                    unknownValueLabel={structureLabels?.locationName ?? undefined}
                     value={field.value ?? null}
                     clearable={false}
                     onValueChange={handleLocationChange}

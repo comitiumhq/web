@@ -1,3 +1,4 @@
+import type { JobEditor } from '@comitium/schemas/jobs';
 import { Card, CardContent } from '@comitium/ui/card';
 import type { UseFormReturn } from 'react-hook-form';
 import type { JobSettingsFormData } from '@/lib/schemas/job-settings-form';
@@ -7,6 +8,7 @@ import { JobCompensationFields } from './job-compensation-fields';
 interface JobBasicSettingsCardProps {
   orgId: string;
   form: UseFormReturn<JobSettingsFormData>;
+  structureLabels?: Pick<JobEditor, 'departmentName' | 'locationName'>;
   showPublishRequiredMarkers?: boolean;
   showCompensationDisclosure?: boolean;
   readOnly?: boolean;
@@ -15,6 +17,7 @@ interface JobBasicSettingsCardProps {
 export function JobBasicSettingsCard({
   orgId,
   form,
+  structureLabels,
   showPublishRequiredMarkers = true,
   showCompensationDisclosure = true,
   readOnly = false,
@@ -25,6 +28,7 @@ export function JobBasicSettingsCard({
         <JobBasicInformationFields
           orgId={orgId}
           form={form}
+          structureLabels={structureLabels}
           showPublishRequiredMarkers={showPublishRequiredMarkers}
           readOnly={readOnly}
         />
