@@ -16,3 +16,5 @@ export const INTERVIEW_STATUS_DISPLAY: Record<InterviewStatusValue, InterviewSta
   [InterviewStatus.CANCELLED]: { label: 'Cancelled', variant: 'secondary' },
   [InterviewStatus.NO_SHOW]: { label: 'No-show', variant: 'destructive' },
 };
+
+export const BOOKING_PENDING_DISPLAY: InterviewStatusDisplay = { label: 'Booking…', variant: 'secondary' };

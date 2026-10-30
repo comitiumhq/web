@@ -99,6 +99,7 @@ const interviewEventSchema = z.object({
   location: z.string().nullable(),
   status: interviewStatusEnum,
   confirmedAt: z.string().nullable(),
+  bookingPending: z.boolean(),
   completedAt: z.string().nullable(),
   noShowAt: z.string().nullable(),
   interviewers: z.array(interviewerSchema),

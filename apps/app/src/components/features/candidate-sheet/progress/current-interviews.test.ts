@@ -18,6 +18,7 @@ function event(status: InterviewEvent['status'], scheduledAt: string | null): In
     location: null,
     status,
     confirmedAt: null,
+    bookingPending: false,
     completedAt: null,
     noShowAt: null,
     interviewers: [],

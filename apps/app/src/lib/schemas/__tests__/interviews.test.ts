@@ -39,6 +39,7 @@ describe('candidate sheet interview contracts', () => {
               location: null,
               status: 'completed',
               confirmedAt: null,
+              bookingPending: false,
               completedAt: '2026-07-02T09:45:00.000Z',
               noShowAt: null,
               interviewers: [{ userId: USER_ID, role: 'lead', isRequired: true }],

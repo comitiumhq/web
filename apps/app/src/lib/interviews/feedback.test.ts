@@ -26,6 +26,7 @@ function completedSchedule(): InterviewSchedule {
         location: null,
         status: 'completed',
         confirmedAt: '2026-07-21T10:30:00.000Z',
+        bookingPending: false,
         completedAt: '2026-07-21T11:45:00.000Z',
         noShowAt: null,
         interviewers: [

@@ -42,7 +42,7 @@ import {
 } from '@/lib/schemas/interviews';
 import { cn } from '@/lib/utils';
 import { CancelInterviewDialog } from './cancel-interview-dialog';
-import { INTERVIEW_STATUS_DISPLAY } from './interview-status-display';
+import { BOOKING_PENDING_DISPLAY, INTERVIEW_STATUS_DISPLAY } from './interview-status-display';
 import { MarkNoShowDialog } from './mark-no-show-dialog';
 import { RescheduleInterviewDialog } from './reschedule-dialog';
 import { useInterviewClock } from './use-interview-clock';
@@ -151,13 +151,12 @@ export const InterviewCard = memo(function InterviewCard({
     return { total, accepted };
   }, [interview.interviewers, rsvpByUserId]);
 
-  const hasAcceptedSchedule = interview.status === InterviewStatus.NEEDS_SCHEDULING && Boolean(interview.scheduledAt);
-
-  const display = hasAcceptedSchedule
-    ? INTERVIEW_STATUS_DISPLAY[InterviewStatus.SCHEDULED]
-    : INTERVIEW_STATUS_DISPLAY[interview.status];
-
-  const StatusIcon = hasAcceptedSchedule ? CalendarIcon : (STATUS_ICONS[interview.status] ?? ClockIcon);
+  const display = interview.bookingPending ? BOOKING_PENDING_DISPLAY : INTERVIEW_STATUS_DISPLAY[interview.status];
+  const StatusIcon = STATUS_ICONS[interview.status] ?? ClockIcon;
+  const isBookingFailed =
+    interview.status === InterviewStatus.NEEDS_SCHEDULING &&
+    Boolean(interview.scheduledAt) &&
+    !interview.bookingPending;
 
   const canCancel =
     interview.status === InterviewStatus.NEEDS_SCHEDULING ||
@@ -248,6 +247,12 @@ export const InterviewCard = memo(function InterviewCard({
 
           {isSchedulingLink && (
             <p className="mt-0.5 text-copy-12 text-meta-foreground">Created {formatRelativeTime(scheduleCreatedAt)}</p>
+          )}
+
+          {isBookingFailed && (
+            <p className="mt-0.5 text-copy-12 text-destructive">
+              Calendar booking failed.{canManage && ' Cancel this interview to schedule a new time.'}
+            </p>
           )}
 
           {rsvpAggregate.total > 0 &&

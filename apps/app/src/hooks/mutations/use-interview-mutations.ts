@@ -1,7 +1,7 @@
 import { API_ERROR_CODES } from '@comitium/schemas/api-errors';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { invalidateApplicationPipelineStatus } from '@/hooks/mutations/invalidate-application-pipeline-status';
+import { invalidateInterviewProjections } from '@/hooks/mutations/invalidate-interview-projections';
 import { qk } from '@/hooks/query-keys';
 import { hasApiErrorCode } from '@/lib/api/client';
 import {
@@ -21,11 +21,9 @@ import type {
   SendDirectBookingLinkBody,
 } from '@/lib/schemas/interviews';
 
-function invalidateInterviewCaches(queryClient: ReturnType<typeof useQueryClient>, applicationId: string) {
-  invalidateApplicationPipelineStatus(queryClient, applicationId, null);
+function invalidateInterviewCaches(queryClient: QueryClient, applicationId: string) {
   queryClient.invalidateQueries({ queryKey: qk.application.interviews(applicationId) });
-  queryClient.invalidateQueries({ queryKey: qk.application.interviewProgress(applicationId) });
-  queryClient.invalidateQueries({ queryKey: qk.candidate.activityRoot() });
+  invalidateInterviewProjections(queryClient, applicationId);
 }
 
 // --- Schedule ---
